@@ -1,6 +1,5 @@
 #!/bin/bash -x
 
-#! /usr/bin/env bash -x
 #
 #/**
 # * Licensed to the Apache Software Foundation (ASF) under one
@@ -139,9 +138,9 @@ add_maven_deps_to_classpath() {
 
 
 #Add the development env class path stuff
-if $in_dev_env; then
-  add_maven_deps_to_classpath
-fi
+#if $in_dev_env; then
+  #add_maven_deps_to_classpath
+#fi
 
 # Add libs to CLASSPATH
 for f in $PVGDPR_HOME/lib/*.jar; do
