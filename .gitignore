@@ -6,6 +6,7 @@ nbactions.xml
 nb-configuration.xml
 .DS_Store
 .metadata
+dependency-reduced-pom.xml
 .recommenders
 
 # Intellij
