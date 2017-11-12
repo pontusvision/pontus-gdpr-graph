@@ -5,12 +5,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
-import org.janusgraph.core.EdgeLabel;
 //import org.json.JSONArray;
 //import org.json.JSONObject;
 
@@ -168,13 +165,13 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   @POST @Path("country_data_count") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
 
-  public CountryData countryDataCount(String req)
+  public CountryDataReply countryDataCount(CountryDataRequest req)
   {
     if (req != null)
     {
 
 
-      String searchStr = req;
+      String searchStr = req.searchStr;
 
       //      GraphTraversal g =
       try
@@ -182,7 +179,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person");
           //        Boolean searchExact = req.search.getSearchExact();
 
-          CountryData data = new CountryData();
+          CountryDataReply data = new CountryDataReply();
 
           List<Map<String, Long>> res =
               StringUtils.isNotEmpty(searchStr)?
@@ -230,7 +227,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
     }
 
-    return new CountryData();
+    return new CountryDataReply();
 
 
   }
