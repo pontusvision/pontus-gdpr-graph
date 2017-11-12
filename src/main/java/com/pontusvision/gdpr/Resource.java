@@ -143,14 +143,14 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
   }
 
   @POST @Path("graph") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
-  public GraphReply graph (String graphId)
+  public GraphReply graph (GraphRequest greq)
   {
 
-    Set<Vertex> outNodes = App.g.V(Long.parseLong(graphId)).to(Direction.OUT).toSet();
-    Set<Vertex> inNodes = App.g.V(Long.parseLong(graphId)).to(Direction.IN).toSet();
+    Set<Vertex> outNodes = App.g.V(Long.parseLong(greq.graphId)).to(Direction.OUT).toSet();
+    Set<Vertex> inNodes = App.g.V(Long.parseLong(greq.graphId)).to(Direction.IN).toSet();
 
-    Set<Edge> outEdges = App.g.V(Long.parseLong(graphId)).toE(Direction.OUT).toSet();
-    Set<Edge> inEdges = App.g.V(Long.parseLong(graphId)).toE(Direction.IN).toSet();
+    Set<Edge> outEdges = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.OUT).toSet();
+    Set<Edge> inEdges = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.IN).toSet();
 
     GraphReply retVal = new GraphReply(inNodes, outNodes, inEdges, outEdges);
 
