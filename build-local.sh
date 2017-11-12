@@ -1,5 +1,5 @@
 #!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 VERSION=1.0.0-SNAPSHOT
 echo DIR is $DIR
 export DISTDIR="$DIR/../pontus-dist/opt/pontus/pontus-graph/pv-gdpr-$VERSION";
