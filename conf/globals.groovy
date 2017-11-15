@@ -141,7 +141,7 @@ def dumpData(ArrayList<Map<String, String>> listOfMaps) {
     return strBuilder.toString()
 }
 
-def addRandomUserDataBulk(graph, g, ArrayList<Map<String, String>> listOfMaps) {
+def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
