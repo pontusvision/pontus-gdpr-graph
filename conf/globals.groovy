@@ -216,11 +216,11 @@ def  addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMa
 
 
             def probabilities = [
-                    (Pair<String, Double>)Pair.of("Link Sent", (Double)25.0),
-                    (Pair<String, Double>)Pair.of("Reminder Sent", (Double)30.0),
-                    (Pair<String, Double>)Pair.of("Failed", (Double)3.0),
-                    (Pair<String, Double>)Pair.of("Passed", (Double)60.0),
-                    (Pair<String, Double>)Pair.of("Second  Reminder", (Double)45.0)]
+                    new Pair<String, Double>("Link Sent", (Double)25.0),
+                    new Pair<String, Double>("Reminder Sent", (Double)30.0),
+                    new Pair<String, Double>("Failed", (Double)3.0),
+                    new Pair<String, Double>("Passed", (Double)60.0),
+                    new Pair<String, Double>("Second  Reminder", (Double)45.0)]
             def distribution = new EnumeratedDistribution<String>(probabilities.asList())
 
 
