@@ -1,3 +1,5 @@
+import org.apache.commons.lang3.tuple.Pair
+import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.janusgraph.core.*
 import org.janusgraph.core.schema.*
 import static org.janusgraph.core.attribute.Text.*
@@ -140,7 +142,141 @@ def dumpData(ArrayList<Map<String, String>> listOfMaps) {
     return strBuilder.toString()
 }
 
-def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
+
+
+def addCampainAwarenessBulk(graph, g,  ArrayList<Map<String, String>> listOfMaps){
+
+    def metadataCreateDate = new Date()
+    def metadataUpdateDate = new Date()
+    def  trans = graph.tx()
+    try {
+        trans.open()
+
+
+        awarenessCampaign = g.V().has("Metadata.Type","Object.AwarenessCampaign")
+
+        if (awarenessCampaign.hasNext()){
+            awarenessCampaign = awarenessCampaign.next()
+        }
+        else{
+            awarenessCampaign =  g.addV("Object.Awareness_Campaign").
+                    property("Metadata.Controller", "Controller").
+                    property("Metadata.Processor", "Processor").
+                    property("Metadata.Lineage","https://trainingcourses.com").
+                    property("Metadata.Redaction", "/data/protection/officer" ).
+                    property("Metadata.Version", 1).
+                    property("Metadata.CreateDate", metadataCreateDate).
+                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Status", "new" ).
+                    property("Metadata.GDPRStatus", "n/a" ).
+                    property("Metadata.LineageServerTag", "AWS_AAA").
+                    property("Metadata.LineageLocationTag", "GB").
+                    property("Metadata.Type", "Object.AwarenessCampaign").
+                    property("Object.Awareness_Campaign.Description", "GDPR Training Course Winter 2017").
+                    property("Object.Awareness_Campaign.Campaign_URL", "https://trainingcourses.com").
+                    property("Object.Awareness_Campaign.Campaign_Start_Date", metadataCreateDate).
+                    property("Object.Awareness_Campaign.Campaign_Stop_Date", metadataUpdateDate).
+                    next()
+        }
+
+
+
+
+        for (Map<String, String> item in listOfMaps) {
+
+
+            try {
+                dob = new  java.text.SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
+            } catch (Throwable t) {
+                dob = new Date("01/01/1666")
+            }
+
+
+
+
+            person = g.addV("Person.Employee").
+                    property("Metadata.Controller", item.get("pg_metadataController")).
+                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
+                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
+                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
+                    property("Metadata.Version", item.get("pg_metadataVersion")).
+                    property("Metadata.CreateDate", metadataCreateDate).
+                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Status", item.get("pg_metadataStatus")).
+                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.Type", "Person.Employee").
+                    property("Person.Employee.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
+                    property("Person.Employee.Last_Name", item.get("pg_name_last")).
+                    property("Person.Employee.Gender", item.get("pg_gender")).
+                    property("Person.Employee.Nationality", item.get("pg_nat")).
+                    property("Person.Employee.Date_Of_Birth", dob).
+                    property("Person.Employee.Title", item.get("pg_name_title")).next()
+
+
+            def probabilities = [
+                    (Pair<String, Double>)Pair.of("Link Sent", 25),
+                    (Pair<String, Double>)Pair.of("Reminder Sent", 30),
+                    (Pair<String, Double>)Pair.of("Failed", 3),
+                    (Pair<String, Double>)Pair.of("Passed", 60),
+                    (Pair<String, Double>)Pair.of("Second  Reminder", 45)]
+            def distribution = new EnumeratedDistribution<String>(probabilities)
+
+
+
+            trainingEvent = g.addV("Event.Training_event").
+                    property("Metadata.Controller", item.get("pg_metadataController")).
+                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
+                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
+                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
+                    property("Metadata.Version", item.get("pg_metadataVersion")).
+                    property("Metadata.CreateDate", metadataCreateDate).
+                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Status", item.get("pg_metadataStatus")).
+                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.Type", "Event.Training_event").
+                    property("Event.Training_event.Status",distribution.sample() ).next()
+
+
+            g.addE("Event.Training_event.awarenessCampaign")
+                    .from(trainingEvent)
+                    .to(awarenessCampaign)
+                    .property("Metadata.Type","Event.Training_event.awarenessCampaign")
+                    .property("Metadata.CreateDate",metadataCreateDate)
+                    .next()
+
+            g.addE("Event.Training_event.person")
+                    .from(trainingEvent)
+                    .to(person)
+                    .property("Metadata.Type","Event.Training_event.awarenessCampaign")
+                    .property("Metadata.CreateDate",metadataCreateDate)
+                    .next()
+
+
+
+
+        }
+
+
+
+        trans.commit()
+    } catch (Throwable t) {
+        trans.rollback()
+        throw t
+    }finally{
+        trans.close()
+    }
+
+
+}
+
+
+
+
+def addRandomUserDataBulk(graph, g, ArrayList<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
@@ -269,6 +405,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
         trans.close()
     }
 }
+
 
 
 
