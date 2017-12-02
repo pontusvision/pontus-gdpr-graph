@@ -8,6 +8,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.janusgraph.core.schema.JanusGraphManagement;
 //import org.json.JSONArray;
 //import org.json.JSONObject;
 
@@ -34,15 +35,11 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   GsonBuilder gsonBuilder = new GsonBuilder();
 
+
+
   @POST @Path("records") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
   public RecordReply records( RecordRequest req)
   {
-
-    //              (src   , src-offset  , dest , offset, count)
-    //     System.arraycopy(source, 0           , part1, 0     , part1.length);
-
-    //    RecordReply reply = new RecordReply(req.from, req.to, records.length,
-    //        Arrays.copyOfRange(records, req.from, req.to));
 
     if (req.search != null && req.search.cols != null)
     {
@@ -55,13 +52,13 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
         vals[i] = req.search.cols[i].id;
 
       }
-      //      GraphTraversal g =
+
       try
       {
 
         GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person");
         String searchStr = req.search.getSearchStr();
-//        Boolean searchExact = req.search.getSearchExact();
+
 
         if (StringUtils.isNotEmpty(searchStr))
         {
@@ -135,7 +132,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
     }
     String[] recs = new String[0];
 
-    return new RecordReply(req.from, req.to, 0L, recs);
+    return new RecordReply(req.from, req.to, 0L, null);
 
   }
 
@@ -159,7 +156,12 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   public VertexLabelsReply vertexLabels(String str)
   {
-    VertexLabelsReply reply = new VertexLabelsReply(App.graphMgmt.getVertexLabels());
+    JanusGraphManagement mgt = App.graph.openManagement();
+
+
+    VertexLabelsReply reply = new VertexLabelsReply(mgt.getVertexLabels());
+
+    mgt.commit();
     return reply;
   }
 
@@ -190,32 +192,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           {
             data.countryData.putAll(res.get(0));
           }
-          //        String[] recs = new String[res.size()];
-          //        ObjectMapper objMapper = new ObjectMapper();
-          //
-          //        for (int i = 0, ilen = res.size(); i < ilen; i++)
-          //        {
-          //          Map<String, Object> map = res.get(i);
-          //
-          //          Map<String, String> rec = new HashMap<>();
-          //          for (Map.Entry<String, Object> entry : map.entrySet())
-          //          {
-          //            Object val = entry.getValue();
-          //            if (val instanceof ArrayList)
-          //            {
-          //              ArrayList<VertexProperty<Object>> arrayList = (ArrayList) val;
-          //
-          //              VertexProperty<Object> val2 = arrayList.get(0);
-          //
-          //              rec.put(entry.getKey(), val2.value().toString());
-          //
-          //            }
-          //
-          //          }
-          //
-          //          recs[i] = objMapper.writeValueAsString(rec);
-          //        }
-          //
+
 
           return data;
 
@@ -287,11 +264,5 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
     return "Hello, " + name + " AUTHORIZATION" + auth;
   }
 
-  //    @GET
-  //    @Path("jwt")
-  //    @JWTTokenNeeded
-  //    public Response echoWithJWTToken(@QueryParam("message") String message) {
-  //        return Response.ok().entity(message == null ? "no message" : message).build();
-  //    }
 
 }

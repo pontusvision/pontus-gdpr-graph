@@ -47,7 +47,7 @@ public class App {
 
     private static final Logger logger = LoggerFactory.getLogger(App.class);
     public static JanusGraph graph;
-    public static JanusGraphManagement graphMgmt;
+//    public static JanusGraphManagement graphMgmt;
     public static GraphTraversalSource g;
     public static Graph initGraph(String confFile) {
 //        String confFile = args.length == 0? "conf/janusgraph-hbase-es.properties" : args[0];
@@ -235,7 +235,7 @@ public class App {
             for (String graphName : graphNames) {
                 logger.debug("Found Graph: " + graphName);
                 graph = (JanusGraph) graphMgr.getGraph(graphName);
-                graphMgmt = graph.openManagement();
+//                graphMgmt = graph.openManagement();
                 g = graph.traversal();
             }
 

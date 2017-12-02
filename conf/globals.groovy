@@ -43,8 +43,7 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
                 property("Person.Nationality", pg_nat).
                 property("Person.DateOfBirth", dob).
                 property("Person.Title", pg_name_title).next()
-
-
+Long.parseLong()
         email = g.addV("Object.EmailAddress").
                 property("Metadata.Controller", pg_metadataController).
                 property("Metadata.Processor", pg_metadataProcessor).
