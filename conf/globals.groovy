@@ -131,7 +131,7 @@ def static addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadat
     }
 }
 
-def static dumpData(ArrayList<Map<String, String>> listOfMaps) {
+def static dumpData(LinkedList<Map<String, String>> listOfMaps) {
 
     StringBuilder strBuilder = new StringBuilder()
     for (Map<String, String> item in listOfMaps) {
@@ -144,7 +144,7 @@ def static dumpData(ArrayList<Map<String, String>> listOfMaps) {
 
 
 
-def static addCampaignAwarenessBulk(graph, g, ArrayList<Map<String, String>> listOfMaps){
+def static addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMaps){
 
     def metadataCreateDate = new Date()
     def metadataUpdateDate = new Date()
