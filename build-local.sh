@@ -24,6 +24,7 @@ cp $DIR/target/*.jar $DISTDIR/lib
 
 cd ..
 
+unlink current
 ln -s pv-gdpr-$VERSION current
 
 cd $CURDIR
