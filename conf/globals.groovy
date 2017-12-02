@@ -45,7 +45,7 @@ def static addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadat
                 property("Person.Nationality", pg_nat).
                 property("Person.DateOfBirth", dob).
                 property("Person.Title", pg_name_title).next()
-
+ 
          email = g.addV("Object.EmailAddress").
                 property("Metadata.Controller", pg_metadataController).
                 property("Metadata.Processor", pg_metadataProcessor).
@@ -152,13 +152,16 @@ def static addCampaignAwarenessBulk(graph, g, ArrayList<Map<String, String>> lis
     try {
         trans.open()
 
+        System.out.println("in addCampaignAwarenessBulk() ");
 
         awarenessCampaign = g.V().has("Metadata.Type","Object.AwarenessCampaign")
 
         if (awarenessCampaign.hasNext()){
+            System.out.println("in addCampaignAwarenessBulk() - found awarenessCampaign");
             awarenessCampaign = awarenessCampaign.next()
         }
         else{
+            System.out.println("in addCampaignAwarenessBulk() - not found awarenessCampaign");
             awarenessCampaign =  g.addV("Object.Awareness_Campaign").
                     property("Metadata.Controller", "Controller").
                     property("Metadata.Processor", "Processor").
@@ -177,6 +180,7 @@ def static addCampaignAwarenessBulk(graph, g, ArrayList<Map<String, String>> lis
                     property("Object.Awareness_Campaign.Campaign_Start_Date", metadataCreateDate).
                     property("Object.Awareness_Campaign.Campaign_Stop_Date", metadataUpdateDate).
                     next()
+            System.out.println("in addCampaignAwarenessBulk() - created new awarenessCampaign");
         }
 
 
@@ -223,7 +227,9 @@ def static addCampaignAwarenessBulk(graph, g, ArrayList<Map<String, String>> lis
                     (Pair<String, Double>)Pair.of("Second  Reminder", (Double)45.0)]
             def distribution = new EnumeratedDistribution<String>(probabilities.asList())
 
+            def trainingStatusStr = distribution.sample();
 
+            System.out.println("sample distribution:"+ distribution.sample());
 
             trainingEvent = g.addV("Event.Training_event").
                     property("Metadata.Controller", item.get("pg_metadataController")).
@@ -264,6 +270,8 @@ def static addCampaignAwarenessBulk(graph, g, ArrayList<Map<String, String>> lis
 
         trans.commit()
     } catch (Throwable t) {
+        System.out.println("Got an error: ")
+        t.printStackTrace();
         trans.rollback()
         throw t
     }finally{
@@ -405,6 +413,7 @@ def static addRandomUserDataBulk(graph, g, ArrayList<Map<String, String>> listOf
         trans.close()
     }
 }
+
 
 
 
