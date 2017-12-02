@@ -1,4 +1,4 @@
-import org.apache.commons.lang3.tuple.Pair
+import org.apache.commons.math3.util.Pair
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.janusgraph.core.*
 import org.janusgraph.core.schema.*
@@ -11,12 +11,12 @@ def globals = [:]
 globals << [g: graph.traversal()]
 globals << [mgmt: graph.openManagement()]
 
-def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProcessor, pg_metadataLineage, pg_metadataRedaction, pg_metadataVersion, pg_metadataStatus, pg_metadataGDPRStatus, pg_metadataLineageServerTag, pg_metadataLineageLocationTag, pg_login_username, pg_login_sha256, pg_id_name, pg_id_value, pg_name_first, pg_name_last, pg_gender, pg_nat, pg_name_title, pg_email, pg_location_street, pg_location_city, pg_location_state, pg_location_postcode) {
+def static addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProcessor, pg_metadataLineage, pg_metadataRedaction, pg_metadataVersion, pg_metadataStatus, pg_metadataGDPRStatus, pg_metadataLineageServerTag, pg_metadataLineageLocationTag, pg_login_username, pg_login_sha256, pg_id_name, pg_id_value, pg_name_first, pg_name_last, pg_gender, pg_nat, pg_name_title, pg_email, pg_location_street, pg_location_city, pg_location_state, pg_location_postcode) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
     try {
-        dob = new java.text.SimpleDateFormat("yyyy-MM-dd").parse((String) pg_dob)
+        dob = new  SimpleDateFormat("yyyy-MM-dd").parse((String) pg_dob)
     } catch (Throwable t) {
         dob = new Date("01/01/1666")
     }
@@ -45,8 +45,8 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
                 property("Person.Nationality", pg_nat).
                 property("Person.DateOfBirth", dob).
                 property("Person.Title", pg_name_title).next()
-Long.parseLong()
-        email = g.addV("Object.EmailAddress").
+
+         email = g.addV("Object.EmailAddress").
                 property("Metadata.Controller", pg_metadataController).
                 property("Metadata.Processor", pg_metadataProcessor).
                 property("Metadata.Lineage", pg_metadataLineage).
@@ -131,7 +131,7 @@ Long.parseLong()
     }
 }
 
-def dumpData(ArrayList<Map<String, String>> listOfMaps) {
+def static dumpData(ArrayList<Map<String, String>> listOfMaps) {
 
     StringBuilder strBuilder = new StringBuilder()
     for (Map<String, String> item in listOfMaps) {
@@ -144,7 +144,7 @@ def dumpData(ArrayList<Map<String, String>> listOfMaps) {
 
 
 
-def addCampainAwarenessBulk(graph, g,  ArrayList<Map<String, String>> listOfMaps){
+def static addCampaignAwarenessBulk(graph, g, ArrayList<Map<String, String>> listOfMaps){
 
     def metadataCreateDate = new Date()
     def metadataUpdateDate = new Date()
@@ -216,12 +216,12 @@ def addCampainAwarenessBulk(graph, g,  ArrayList<Map<String, String>> listOfMaps
 
 
             def probabilities = [
-                    (Pair<String, Double>)Pair.of("Link Sent", 25),
-                    (Pair<String, Double>)Pair.of("Reminder Sent", 30),
-                    (Pair<String, Double>)Pair.of("Failed", 3),
-                    (Pair<String, Double>)Pair.of("Passed", 60),
-                    (Pair<String, Double>)Pair.of("Second  Reminder", 45)]
-            def distribution = new EnumeratedDistribution<String>(probabilities)
+                    (Pair<String, Double>)Pair.of("Link Sent", (Double)25.0),
+                    (Pair<String, Double>)Pair.of("Reminder Sent", (Double)30.0),
+                    (Pair<String, Double>)Pair.of("Failed", (Double)3.0),
+                    (Pair<String, Double>)Pair.of("Passed", (Double)60.0),
+                    (Pair<String, Double>)Pair.of("Second  Reminder", (Double)45.0)]
+            def distribution = new EnumeratedDistribution<String>(probabilities.asList())
 
 
 
@@ -276,7 +276,7 @@ def addCampainAwarenessBulk(graph, g,  ArrayList<Map<String, String>> listOfMaps
 
 
 
-def addRandomUserDataBulk(graph, g, ArrayList<Map<String, String>> listOfMaps) {
+def static addRandomUserDataBulk(graph, g, ArrayList<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
