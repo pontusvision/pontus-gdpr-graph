@@ -11,7 +11,7 @@ def globals = [:]
 globals << [g: graph.traversal()]
 globals << [mgmt: graph.openManagement()]
 
-def static addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProcessor, pg_metadataLineage, pg_metadataRedaction, pg_metadataVersion, pg_metadataStatus, pg_metadataGDPRStatus, pg_metadataLineageServerTag, pg_metadataLineageLocationTag, pg_login_username, pg_login_sha256, pg_id_name, pg_id_value, pg_name_first, pg_name_last, pg_gender, pg_nat, pg_name_title, pg_email, pg_location_street, pg_location_city, pg_location_state, pg_location_postcode) {
+def  addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProcessor, pg_metadataLineage, pg_metadataRedaction, pg_metadataVersion, pg_metadataStatus, pg_metadataGDPRStatus, pg_metadataLineageServerTag, pg_metadataLineageLocationTag, pg_login_username, pg_login_sha256, pg_id_name, pg_id_value, pg_name_first, pg_name_last, pg_gender, pg_nat, pg_name_title, pg_email, pg_location_street, pg_location_city, pg_location_state, pg_location_postcode) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
@@ -131,7 +131,7 @@ def static addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadat
     }
 }
 
-def static dumpData(LinkedList<Map<String, String>> listOfMaps) {
+def  dumpData(LinkedList<Map<String, String>> listOfMaps) {
 
     StringBuilder strBuilder = new StringBuilder()
     for (Map<String, String> item in listOfMaps) {
@@ -144,7 +144,7 @@ def static dumpData(LinkedList<Map<String, String>> listOfMaps) {
 
 
 
-def static addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMaps){
+def  addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMaps){
 
     def metadataCreateDate = new Date()
     def metadataUpdateDate = new Date()
@@ -186,7 +186,7 @@ def static addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> li
 
 
             try {
-                dob = new  java.text.SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
+                dob = new  SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
             } catch (Throwable t) {
                 dob = new Date("01/01/1666")
             }
@@ -276,7 +276,7 @@ def static addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> li
 
 
 
-def static addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
+def addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
