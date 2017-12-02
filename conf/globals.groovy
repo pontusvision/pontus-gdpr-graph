@@ -276,7 +276,7 @@ def static addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> li
 
 
 
-def static addRandomUserDataBulk(graph, g, ArrayList<Map<String, String>> listOfMaps) {
+def static addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
@@ -405,7 +405,6 @@ def static addRandomUserDataBulk(graph, g, ArrayList<Map<String, String>> listOf
         trans.close()
     }
 }
-
 
 
 
