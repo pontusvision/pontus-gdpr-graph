@@ -210,8 +210,6 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
   }
 
 
-
-
   @POST @Path("node_property_names") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
 
   public NodePropertyNamesReply nodeProperties(VertexLabelsReply req)
