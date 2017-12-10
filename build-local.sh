@@ -1,4 +1,5 @@
 #!/bin/bash
+git pull
 DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 VERSION=1.0.0-SNAPSHOT
 echo DIR is $DIR
