@@ -33,34 +33,34 @@ def  addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProce
                 property("Metadata.Lineage", pg_metadataLineage).
                 property("Metadata.Redaction", pg_metadataRedaction).
                 property("Metadata.Version", pg_metadataVersion).
-                property("Metadata.CreateDate", metadataCreateDate).
-                property("Metadata.UpdateDate", metadataUpdateDate).
+                property("Metadata.Create_Date", metadataCreateDate).
+                property("Metadata.Update_Date", metadataUpdateDate).
                 property("Metadata.Status", pg_metadataStatus).
-                property("Metadata.GDPRStatus", pg_metadataGDPRStatus).
-                property("Metadata.LineageServerTag", pg_metadataLineageServerTag).
-                property("Metadata.LineageLocationTag", pg_metadataLineageLocationTag).
+                property("Metadata.GDPR_Status", pg_metadataGDPRStatus).
+                property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
+                property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
                 property("Metadata.Type", "Person").
-                property("Person.FullName", pg_name_first + " " + pg_name_last).
-                property("Person.LastName", pg_name_last).
+                property("Person.Full_Name", pg_name_first + " " + pg_name_last).
+                property("Person.Last_Name", pg_name_last).
                 property("Person.Gender", pg_gender).
                 property("Person.Nationality", pg_nat).
-                property("Person.DateOfBirth", dob).
+                property("Person.Date_Of_Birth", dob).
                 property("Person.Title", pg_name_title).next()
 
-         email = g.addV("Object.EmailAddress").
+         email = g.addV("Object.Email_Address").
                 property("Metadata.Controller", pg_metadataController).
                 property("Metadata.Processor", pg_metadataProcessor).
                 property("Metadata.Lineage", pg_metadataLineage).
                 property("Metadata.Redaction", pg_metadataRedaction).
                 property("Metadata.Version", pg_metadataVersion).
-                property("Metadata.CreateDate", metadataCreateDate).
-                property("Metadata.UpdateDate", metadataUpdateDate).
+                property("Metadata.Create_Date", metadataCreateDate).
+                property("Metadata.Update_Date", metadataUpdateDate).
                 property("Metadata.Status", pg_metadataStatus).
-                property("Metadata.GDPRStatus", pg_metadataGDPRStatus).
-                property("Metadata.LineageServerTag", pg_metadataLineageServerTag).
-                property("Metadata.LineageLocationTag", pg_metadataLineageLocationTag).
-                property("Metadata.Type", "Object.EmailAddress").
-                property("Object.EmailAddress.Email", pg_email).next()
+                property("Metadata.GDPR_Status", pg_metadataGDPRStatus).
+                property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
+                property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
+                property("Metadata.Type", "Object.Email_Address").
+                property("Object.Email_Address.Email", pg_email).next()
 
 
         credential = g.addV("Object.Credential").
@@ -69,31 +69,31 @@ def  addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProce
                 property("Metadata.Lineage", pg_metadataLineage).
                 property("Metadata.Redaction", pg_metadataRedaction).
                 property("Metadata.Version", pg_metadataVersion).
-                property("Metadata.CreateDate", metadataCreateDate).
-                property("Metadata.UpdateDate", metadataUpdateDate).
+                property("Metadata.Create_Date", metadataCreateDate).
+                property("Metadata.Update_Date", metadataUpdateDate).
                 property("Metadata.Status", pg_metadataStatus).
-                property("Metadata.GDPRStatus", pg_metadataGDPRStatus).
-                property("Metadata.LineageServerTag", pg_metadataLineageServerTag).
-                property("Metadata.LineageLocationTag", pg_metadataLineageLocationTag).
+                property("Metadata.GDPR_Status", pg_metadataGDPRStatus).
+                property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
+                property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
                 property("Metadata.Type", "Object.Credential").
                 property("Object.Credential.userId", pg_login_username).
                 property("Object.Credential.login.sha256", pg_login_sha256).next()
 
-        idCard = g.addV("Object.IdentityCard").
+        idCard = g.addV("Object.Identity_Card").
                 property("Metadata.Controller", pg_metadataController).
                 property("Metadata.Processor", pg_metadataProcessor).
                 property("Metadata.Lineage", pg_metadataLineage).
                 property("Metadata.Redaction", pg_metadataRedaction).
                 property("Metadata.Version", pg_metadataVersion).
-                property("Metadata.CreateDate", metadataCreateDate).
-                property("Metadata.UpdateDate", metadataUpdateDate).
+                property("Metadata.Create_Date", metadataCreateDate).
+                property("Metadata.Update_Date", metadataUpdateDate).
                 property("Metadata.Status", pg_metadataStatus).
-                property("Metadata.GDPRStatus", pg_metadataGDPRStatus).
-                property("Metadata.LineageServerTag", pg_metadataLineageServerTag).
-                property("Metadata.LineageLocationTag", pg_metadataLineageLocationTag).
-                property("Metadata.Type", "Object.IdentityCard").
-                property("Object.IdentityCard.id_name", pg_id_name).
-                property("Object.IdentityCard.id_value", pg_id_value).next()
+                property("Metadata.GDPR_Status", pg_metadataGDPRStatus).
+                property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
+                property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
+                property("Metadata.Type", "Object.Identity_Card").
+                property("Object.Identity_Card.id_name", pg_id_name).
+                property("Object.Identity_Card.id_value", pg_id_value).next()
 
 
         location = g.addV("Location.Address").
@@ -102,17 +102,17 @@ def  addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProce
                 property("Metadata.Lineage", pg_metadataLineage).
                 property("Metadata.Redaction", pg_metadataRedaction).
                 property("Metadata.Version", pg_metadataVersion).
-                property("Metadata.CreateDate", metadataCreateDate).
-                property("Metadata.UpdateDate", metadataUpdateDate).
+                property("Metadata.Create_Date", metadataCreateDate).
+                property("Metadata.Update_Date", metadataUpdateDate).
                 property("Metadata.Status", pg_metadataStatus).
-                property("Metadata.GDPRStatus", pg_metadataGDPRStatus).
-                property("Metadata.LineageServerTag", pg_metadataLineageServerTag).
-                property("Metadata.LineageLocationTag", pg_metadataLineageLocationTag).
+                property("Metadata.GDPR_Status", pg_metadataGDPRStatus).
+                property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
+                property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
                 property("Metadata.Type", "Location.Address").
                 property("Location.Address.Street", pg_location_street).
                 property("Location.Address.City", pg_location_city).
                 property("Location.Address.State", pg_location_state).
-                property("Location.Address.PostCode", pg_location_postcode).next()
+                property("Location.Address.Post_Code", pg_location_postcode).next()
 
 
 
@@ -154,7 +154,7 @@ def  addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMa
         trans.open()
 
 
-        awarenessCampaign = g.V().has("Metadata.Type","Object.AwarenessCampaign")
+        awarenessCampaign = g.V().has("Metadata.Type","Object.Awareness_Campaign")
 
         if (awarenessCampaign.hasNext()){
             awarenessCampaign = awarenessCampaign.next()
@@ -166,13 +166,13 @@ def  addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMa
                     property("Metadata.Lineage","https://trainingcourses.com").
                     property("Metadata.Redaction", "/data/protection/officer" ).
                     property("Metadata.Version", 1).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", "new" ).
-                    property("Metadata.GDPRStatus", "n/a" ).
-                    property("Metadata.LineageServerTag", "AWS_AAA").
-                    property("Metadata.LineageLocationTag", "GB").
-                    property("Metadata.Type", "Object.AwarenessCampaign").
+                    property("Metadata.GDPR_Status", "n/a" ).
+                    property("Metadata.Lineage_Server_Tag", "AWS_AAA").
+                    property("Metadata.Lineage_Location_Tag", "GB").
+                    property("Metadata.Type", "Object.Awareness_Campaign").
                     property("Object.Awareness_Campaign.Description", "GDPR Training Course Winter 2017").
                     property("Object.Awareness_Campaign.Campaign_URL", "https://trainingcourses.com").
                     property("Object.Awareness_Campaign.Campaign_Start_Date", metadataCreateDate).
@@ -201,12 +201,12 @@ def  addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMa
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Person.Employee").
                     property("Person.Employee.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
                     property("Person.Employee.Last_Name", item.get("pg_name_last")).
@@ -232,12 +232,12 @@ def  addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMa
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Event.Training_event").
                     property("Event.Training_event.Status",distribution.sample() ).next()
 
@@ -246,14 +246,14 @@ def  addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMa
                     .from(trainingEvent)
                     .to(awarenessCampaign)
                     .property("Metadata.Type","Event.Training_event.awarenessCampaign")
-                    .property("Metadata.CreateDate",metadataCreateDate)
+                    .property("Metadata.Create_Date",metadataCreateDate)
                     .next()
 
             g.addE("Event.Training_event.person")
                     .from(trainingEvent)
                     .to(person)
                     .property("Metadata.Type","Event.Training_event.awarenessCampaign")
-                    .property("Metadata.CreateDate",metadataCreateDate)
+                    .property("Metadata.Create_Date",metadataCreateDate)
                     .next()
 
 
@@ -304,35 +304,35 @@ def addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) 
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Person").
-                    property("Person.FullName", item.get("pg_name_first") + " " + item.get("pg_name_last")).
-                    property("Person.LastName", item.get("pg_name_last")).
+                    property("Person.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
+                    property("Person.Last_Name", item.get("pg_name_last")).
                     property("Person.Gender", item.get("pg_gender")).
                     property("Person.Nationality", item.get("pg_nat")).
-                    property("Person.DateOfBirth", dob).
+                    property("Person.Date_Of_Birth", dob).
                     property("Person.Title", item.get("pg_name_title")).next()
 
 
-            email = g.addV("Object.EmailAddress").
+            email = g.addV("Object.Email_Address").
                     property("Metadata.Controller", item.get("pg_metadataController")).
                     property("Metadata.Processor", item.get("pg_metadataProcessor")).
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Object.EmailAddress").
-                    property("Object.EmailAddress.Email", item.get("pg_email")).next()
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.Type", "Object.Email_Address").
+                    property("Object.Email_Address.Email", item.get("pg_email")).next()
 
 
             credential = g.addV("Object.Credential").
@@ -341,31 +341,31 @@ def addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) 
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Object.Credential").
                     property("Object.Credential.userId", item.get("pg_login_username")).
                     property("Object.Credential.login.sha256", item.get("pg_login_sha256")).next()
 
-            idCard = g.addV("Object.IdentityCard").
+            idCard = g.addV("Object.Identity_Card").
                     property("Metadata.Controller", item.get("pg_metadataController")).
                     property("Metadata.Processor", item.get("pg_metadataProcessor")).
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Object.IdentityCard").
-                    property("Object.IdentityCard.id_name", item.get("pg_id_name")).
-                    property("Object.IdentityCard.id_value", item.get("pg_id_value")).next()
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.Type", "Object.Identity_Card").
+                    property("Object.Identity_Card.id_name", item.get("pg_id_name")).
+                    property("Object.Identity_Card.id_value", item.get("pg_id_value")).next()
 
 
             location = g.addV("Location.Address").
@@ -374,17 +374,17 @@ def addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) 
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Location.Address").
                     property("Location.Address.Street", item.get("pg_location_street")).
                     property("Location.Address.City", item.get("pg_location_city")).
                     property("Location.Address.State", item.get("pg_location_state")).
-                    property("Location.Address.PostCode", item.get("pg_location_postcode")).next()
+                    property("Location.Address.Post_Code", item.get("pg_location_postcode")).next()
 
 
 
@@ -446,35 +446,35 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Person").
-                    property("Person.FullName", item.get("pg_name_first") + " " + item.get("pg_name_last")).
-                    property("Person.LastName", item.get("pg_name_last")).
+                    property("Person.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
+                    property("Person.Last_Name", item.get("pg_name_last")).
                     property("Person.Gender", item.get("pg_gender")).
                     property("Person.Nationality", item.get("pg_nat")).
-                    property("Person.DateOfBirth", dob).
+                    property("Person.Date_Of_Birth", dob).
                     property("Person.Title", item.get("pg_name_title")).next()
 
 
-            email = g.addV("Object.EmailAddress").
+            email = g.addV("Object.Email_Address").
                     property("Metadata.Controller", item.get("pg_metadataController")).
                     property("Metadata.Processor", item.get("pg_metadataProcessor")).
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Object.EmailAddress").
-                    property("Object.EmailAddress.Email", item.get("pg_email")).next()
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.Type", "Object.Email_Address").
+                    property("Object.Email_Address.Email", item.get("pg_email")).next()
 
 
             credential = g.addV("Object.Credential").
@@ -483,31 +483,31 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Object.Credential").
                     property("Object.Credential.userId", item.get("pg_login_username")).
                     property("Object.Credential.login.sha256", item.get("pg_login_sha256")).next()
 
-            idCard = g.addV("Object.IdentityCard").
+            idCard = g.addV("Object.Identity_Card").
                     property("Metadata.Controller", item.get("pg_metadataController")).
                     property("Metadata.Processor", item.get("pg_metadataProcessor")).
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Object.IdentityCard").
-                    property("Object.IdentityCard.id_name", item.get("pg_id_name")).
-                    property("Object.IdentityCard.id_value", item.get("pg_id_value")).next()
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.Type", "Object.Identity_Card").
+                    property("Object.Identity_Card.id_name", item.get("pg_id_name")).
+                    property("Object.Identity_Card.id_value", item.get("pg_id_value")).next()
 
 
             location = g.addV("Location.Address").
@@ -516,17 +516,17 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
                     property("Metadata.Redaction", item.get("pg_metadataRedaction")).
                     property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.CreateDate", metadataCreateDate).
-                    property("Metadata.UpdateDate", metadataUpdateDate).
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPRStatus", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.LineageServerTag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.LineageLocationTag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Location.Address").
                     property("Location.Address.Street", item.get("pg_location_street")).
                     property("Location.Address.City", item.get("pg_location_city")).
                     property("Location.Address.State", item.get("pg_location_state")).
-                    property("Location.Address.PostCode", item.get("pg_location_postcode")).next()
+                    property("Location.Address.Post_Code", item.get("pg_location_postcode")).next()
 
 
 
@@ -602,12 +602,12 @@ def __addPrivacyImpactAssessment(graph, g, Vertex privNoticeVertex){
                 property("Metadata.Lineage", "oracle://jdbc://oracledb.com").
                 property("Metadata.Redaction", "/data/protection/officer").
                 property("Metadata.Version", "1").
-                property("Metadata.CreateDate", metadataCreateDate).
-                property("Metadata.UpdateDate", metadataUpdateDate).
+                property("Metadata.Create_Date", metadataCreateDate).
+                property("Metadata.Update_Date", metadataUpdateDate).
                 property("Metadata.Status", "New").
-                property("Metadata.GDPRStatus", "n/a").
-                property("Metadata.LineageServerTag", "AWS_EUR_HOST3").
-                property("Metadata.LineageLocationTag", "GB").
+                property("Metadata.GDPR_Status", "n/a").
+                property("Metadata.Lineage_Server_Tag", "AWS_EUR_HOST3").
+                property("Metadata.Lineage_Location_Tag", "GB").
                 property("Metadata.Type", "Object.Privacy_Impact_Assessment").
                 property("Object.Privacy_Impact_Assessment.Description", "PIA for project xyz.").
                 property("Object.Privacy_Impact_Assessment.Start_Date", new Date()).
@@ -804,12 +804,12 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
                         property("Metadata.Lineage","https://gdpr-info.eu/art-6-gdpr/").
                         property("Metadata.Redaction", "/data/protection/officer" ).
                         property("Metadata.Version", 1).
-                        property("Metadata.CreateDate", metadataCreateDate).
-                        property("Metadata.UpdateDate", metadataUpdateDate).
+                        property("Metadata.Create_Date", metadataCreateDate).
+                        property("Metadata.Update_Date", metadataUpdateDate).
                         property("Metadata.Status", "new" ).
-                        property("Metadata.GDPRStatus", "n/a" ).
-                        property("Metadata.LineageServerTag", "AWS_AAA").
-                        property("Metadata.LineageLocationTag", "GB").
+                        property("Metadata.GDPR_Status", "n/a" ).
+                        property("Metadata.Lineage_Server_Tag", "AWS_AAA").
+                        property("Metadata.Lineage_Location_Tag", "GB").
                         property("Metadata.Type", "Object.Lawful_Basis").
                         property("Object.Lawful_Basis.Id", i).
                         property("Object.Lawful_Basis.Description", definitions[i]).
@@ -861,15 +861,18 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
                         property("Metadata.Lineage","https://gdpr-info.eu/art-6-gdpr/").
                         property("Metadata.Redaction", "/data/protection/officer" ).
                         property("Metadata.Version", 1).
-                        property("Metadata.CreateDate", metadataCreateDate).
-                        property("Metadata.UpdateDate", metadataUpdateDate).
+                        property("Metadata.Create_Date", metadataCreateDate).
+                        property("Metadata.Update_Date", metadataUpdateDate).
                         property("Metadata.Status", "new" ).
-                        property("Metadata.GDPRStatus", "n/a" ).
-                        property("Metadata.LineageServerTag", "AWS_AAA").
-                        property("Metadata.LineageLocationTag", "GB").
+                        property("Metadata.GDPR_Status", "n/a" ).
+                        property("Metadata.Lineage_Server_Tag", "AWS_AAA").
+                        property("Metadata.Lineage_Location_Tag", "GB").
                         property("Metadata.Type", "Object.Privacy_Notice").
                         property("Object.Privacy_Notice.Id", i).
+                        property("Object.Privacy_Notice.Description", privacyNoticeText[i]).
                         property("Object.Privacy_Notice.Text", privacyNoticeText[i]).
+                        property("Object.Privacy_Notice.Delivery_Date", metadataCreateDate).
+                        property("Object.Privacy_Notice.Expiry_Date", metadataUpdateDate).
                         property("Object.Privacy_Notice.URL", "http://www.pontusvision.com").
                         property("Object.Privacy_Notice.Info_Collected", "[name,e-mail,phone]").
                         property("Object.Privacy_Notice.Who_Is_Collecting", "ABC inc").
