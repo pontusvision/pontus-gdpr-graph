@@ -8,10 +8,11 @@ nb-configuration.xml
 .metadata
 dependency-reduced-pom.xml
 .recommenders
-
 # Intellij
 .idea/
 *.iml
 *.iws
 *~
 
+node_modules/
+package-lock.json
