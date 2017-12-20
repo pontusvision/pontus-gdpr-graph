@@ -118,10 +118,10 @@ def  addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProce
 
 
 
-        g.addE("usesEmail").from(person).to(email).next()
-        g.addE("hasCredential").from(person).to(credential).next()
-        g.addE("hasIdCard").from(person).to(idCard).next()
-        g.addE("lives").from(person).to(location).next()
+        g.addE("Uses_Email").from(person).to(email).next()
+        g.addE("Has_Credential").from(person).to(credential).next()
+        g.addE("Has_Id_Card").from(person).to(idCard).next()
+        g.addE("Lives").from(person).to(location).next()
         trans.commit()
 
     } catch (Throwable t) {
@@ -591,9 +591,9 @@ def __addPrivacyImpactAssessment(graph, g, Vertex privNoticeVertex){
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
 
-    trans = graph.tx()
-    try {
-        trans.open()
+//    trans = graph.tx()
+//    try {
+//        trans.open()
 
 
         pia = g.addV("Object.Privacy_Impact_Assessment").
@@ -632,20 +632,20 @@ and other relevant legislation.
 
          */
 
-        g.has("Metadata.Type","Person.Employee").range(0,10).as("employees").addE("ApprovedComplianceCheck").from("employees").to(pia).next()
+        g.V().has("Metadata.Type","Person.Employee").range(0,10).as("employees").addE("Approved_Compliance_Check").from("employees").to(pia).next()
 
 
 
         g.addE("Has_Privacy_Notice").from(pia).to(privNoticeVertex).next()
 
-        trans.commit()
+//        trans.commit()
 
-    } catch (Throwable t) {
-        trans.rollback()
-        throw t
-    } finally{
-        trans.close()
-    }
+//    } catch (Throwable t) {
+//        trans.rollback()
+//        throw t
+//    } finally{
+//        trans.close()
+//    }
 }
 
     /*
@@ -887,11 +887,11 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
         }
 
 
-        g.addE("HasLawfulBasisOn").from(privacyNoticeVertices[0]).to(lawfulBasisVertices[0])
-        g.addE("HasLawfulBasisOn").from(privacyNoticeVertices[0]).to(lawfulBasisVertices[1])
+        g.addE("Has_Lawful_Basis_On").from(privacyNoticeVertices[0]).to(lawfulBasisVertices[0])
+        g.addE("Has_Lawful_Basis_On").from(privacyNoticeVertices[0]).to(lawfulBasisVertices[1])
 
-        g.addE("HasLawfulBasisOn").from(privacyNoticeVertices[1]).to(lawfulBasisVertices[2])
-        g.addE("HasLawfulBasisOn").from(privacyNoticeVertices[1]).to(lawfulBasisVertices[3])
+        g.addE("Has_Lawful_Basis_On").from(privacyNoticeVertices[1]).to(lawfulBasisVertices[2])
+        g.addE("Has_Lawful_Basis_On").from(privacyNoticeVertices[1]).to(lawfulBasisVertices[3])
 
 
         __addConsentForPrivacyNotice(graph,g, privacyNoticeVertices[0])
@@ -926,6 +926,7 @@ def  createProp(mgmt, keyName,classType, org.janusgraph.core.Cardinality card ){
         return mgmt.getPropertyKey(keyName);
     }
 }
+
 
 def createCompIdx (mgmt, idxName, prop) {
     if (!mgmt.containsGraphIndex(idxName)){
@@ -1121,10 +1122,13 @@ def createIndicesPropsAndLabels(mgmt) {
     personEmployee = createVertexLabel(mgmt, "Person.Employee")
 
     edgeLabel = createEdgeLabel(mgmt, "Uses_Email")
+    edgeLabel = createEdgeLabel(mgmt, "Approved_Compliance_Check")
     edgeLabel = createEdgeLabel(mgmt, "Has_Credential")
     edgeLabel = createEdgeLabel(mgmt, "Has_Id_Card")
     edgeLabel = createEdgeLabel(mgmt, "Lives")
+    edgeLabel = createEdgeLabel(mgmt, "Has_Lawful_Basis_On")
     edgeLabel = createEdgeLabel(mgmt, "Event.Training.Awareness_Campaign")
+    edgeLabel = createEdgeLabel(mgmt, "Event.Training.Person")
 
     if (!mgmt.containsGraphIndex("eventTrainingAwareness_CampaignIdx")) {
         mgmt.buildEdgeIndex(edgeLabel, "eventTrainingAwareness_CampaignIdx", Direction.BOTH, metadataType, metadataCreateDate);
@@ -1153,6 +1157,7 @@ def createIndicesPropsAndLabels(mgmt) {
     mgmt.commit()
 
 }
+
 
 
 
