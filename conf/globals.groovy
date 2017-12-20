@@ -1131,13 +1131,17 @@ def createIndicesPropsAndLabels(mgmt) {
     edgeLabel = createEdgeLabel(mgmt, "Event.Training.Person")
 
     if (!mgmt.containsGraphIndex("eventTrainingAwareness_CampaignIdx")) {
+        try {
         mgmt.buildEdgeIndex(edgeLabel, "eventTrainingAwareness_CampaignIdx", Direction.BOTH, metadataType, metadataCreateDate);
+        } catch(e){}
     }
 
     edgeLabel = createEdgeLabel(mgmt, "Event.Training.Person")
 
     if (!mgmt.containsGraphIndex("eventTrainingPersonIdx")) {
+        try {
         mgmt.buildEdgeIndex(edgeLabel, "eventTrainingPersonIdx", Direction.BOTH, metadataType, metadataCreateDate);
+        } catch(e){}
     }
     edgeLabel = createEdgeLabel(mgmt, "Consent")
     edgeLabel = createEdgeLabel(mgmt, "Has_Privacy_Notice")
