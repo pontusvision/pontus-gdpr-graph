@@ -577,7 +577,7 @@ def addDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
 
 def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex){
 
-    g.has("Metadata.Type","Person").as("people")
+    g.V().has("Metadata.Type","Person").as("people")
             .addE("Consent").property("Consent.Date",new Date())
             .from("people").to(privNoticeVertex).next()
 
