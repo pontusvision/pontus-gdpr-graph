@@ -1149,6 +1149,7 @@ def createIndicesPropsAndLabels(mgmt) {
     createMixedIdx(mgmt, "orgNameMixedIdx", orgName)
     createCompIdx(mgmt, "orgRegNumberIdx", orgRegNumber)
 
+    createProp (mgmt,"Consent.Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     mgmt.commit()
 
 }
