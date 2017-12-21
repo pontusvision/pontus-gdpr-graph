@@ -1073,7 +1073,7 @@ def createIndicesPropsAndLabels(mgmt) {
     objectAwarenessCampaignDescription = createProp(mgmt, "Object.Awareness_Campaign.Description", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignURL = createProp(mgmt, "Object.Awareness_Campaign.URL", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignStart_Date = createProp(mgmt, "Object.Awareness_Campaign.Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectAwarenessCampaignStop_Date = createProp(mgmt, "Object.Awareness_Campaign.Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectAwarenessCampaignStop_Date = createProp(mgmt, "Object.Awareness_Campaign.Stop_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     createMixedIdx(mgmt, "objectAwarenessCampaignDescriptionIdx", objectAwarenessCampaignDescription)
     createMixedIdx(mgmt, "objectAwarenessCampaignURLIdx", objectAwarenessCampaignURL)
     createMixedIdx(mgmt, "objectAwarenessCampaignStart_DateIdx", objectAwarenessCampaignStart_Date)
