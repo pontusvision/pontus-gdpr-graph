@@ -21,7 +21,8 @@ rm -rf *
 cp -r $DIR/bin $DIR/conf $DISTDIR
 mkdir -p $DISTDIR/lib
 
-cp $DIR/target/*.jar $DISTDIR/lib
+cp $DIR/target/pontus*.jar $DISTDIR/lib
+cp $DIR/log4j.properties $DISTDIR/lib
 
 cd ..
 
