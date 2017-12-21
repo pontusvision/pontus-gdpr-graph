@@ -118,10 +118,10 @@ def  addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProce
 
 
 
-        g.addE("usesEmail").from(person).to(email).next()
-        g.addE("hasCredential").from(person).to(credential).next()
-        g.addE("hasIdCard").from(person).to(idCard).next()
-        g.addE("lives").from(person).to(location).next()
+        g.addE("Uses_Email").from(person).to(email).next()
+        g.addE("Has_Credential").from(person).to(credential).next()
+        g.addE("Has_Id_Card").from(person).to(idCard).next()
+        g.addE("Lives").from(person).to(location).next()
         trans.commit()
 
     } catch (Throwable t) {
@@ -632,7 +632,7 @@ and other relevant legislation.
 
          */
 
-        g.has("Metadata.Type","Person.Employee").range(0,10).as("employees").addE("ApprovedComplianceCheck").from("employees").to(pia).next()
+        g.V().has("Metadata.Type","Person.Employee").range(0,10).as("employees").addE("Approved_Compliance_Check").from("employees").to(pia).next()
 
 
 
@@ -887,11 +887,11 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
         }
 
 
-        g.addE("HasLawfulBasisOn").from(privacyNoticeVertices[0]).to(lawfulBasisVertices[0])
-        g.addE("HasLawfulBasisOn").from(privacyNoticeVertices[0]).to(lawfulBasisVertices[1])
+        g.addE("Has_Lawful_Basis_On").from(privacyNoticeVertices[0]).to(lawfulBasisVertices[0])
+        g.addE("Has_Lawful_Basis_On").from(privacyNoticeVertices[0]).to(lawfulBasisVertices[1])
 
-        g.addE("HasLawfulBasisOn").from(privacyNoticeVertices[1]).to(lawfulBasisVertices[2])
-        g.addE("HasLawfulBasisOn").from(privacyNoticeVertices[1]).to(lawfulBasisVertices[3])
+        g.addE("Has_Lawful_Basis_On").from(privacyNoticeVertices[1]).to(lawfulBasisVertices[2])
+        g.addE("Has_Lawful_Basis_On").from(privacyNoticeVertices[1]).to(lawfulBasisVertices[3])
 
 
         __addConsentForPrivacyNotice(graph,g, privacyNoticeVertices[0])
@@ -1073,7 +1073,7 @@ def createIndicesPropsAndLabels(mgmt) {
     objectAwarenessCampaignDescription = createProp(mgmt, "Object.Awareness_Campaign.Description", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignURL = createProp(mgmt, "Object.Awareness_Campaign.URL", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignStart_Date = createProp(mgmt, "Object.Awareness_Campaign.Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectAwarenessCampaignStop_Date = createProp(mgmt, "Object.Awareness_Campaign.Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectAwarenessCampaignStop_Date = createProp(mgmt, "Object.Awareness_Campaign.Stop_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     createMixedIdx(mgmt, "objectAwarenessCampaignDescriptionIdx", objectAwarenessCampaignDescription)
     createMixedIdx(mgmt, "objectAwarenessCampaignURLIdx", objectAwarenessCampaignURL)
     createMixedIdx(mgmt, "objectAwarenessCampaignStart_DateIdx", objectAwarenessCampaignStart_Date)
@@ -1122,19 +1122,26 @@ def createIndicesPropsAndLabels(mgmt) {
     personEmployee = createVertexLabel(mgmt, "Person.Employee")
 
     edgeLabel = createEdgeLabel(mgmt, "Uses_Email")
+    edgeLabel = createEdgeLabel(mgmt, "Approved_Compliance_Check")
     edgeLabel = createEdgeLabel(mgmt, "Has_Credential")
     edgeLabel = createEdgeLabel(mgmt, "Has_Id_Card")
     edgeLabel = createEdgeLabel(mgmt, "Lives")
+    edgeLabel = createEdgeLabel(mgmt, "Has_Lawful_Basis_On")
     edgeLabel = createEdgeLabel(mgmt, "Event.Training.Awareness_Campaign")
+    edgeLabel = createEdgeLabel(mgmt, "Event.Training.Person")
 
     if (!mgmt.containsGraphIndex("eventTrainingAwareness_CampaignIdx")) {
+        try {
         mgmt.buildEdgeIndex(edgeLabel, "eventTrainingAwareness_CampaignIdx", Direction.BOTH, metadataType, metadataCreateDate);
+        } catch(e){}
     }
 
     edgeLabel = createEdgeLabel(mgmt, "Event.Training.Person")
 
     if (!mgmt.containsGraphIndex("eventTrainingPersonIdx")) {
+        try {
         mgmt.buildEdgeIndex(edgeLabel, "eventTrainingPersonIdx", Direction.BOTH, metadataType, metadataCreateDate);
+        } catch(e){}
     }
     edgeLabel = createEdgeLabel(mgmt, "Consent")
     edgeLabel = createEdgeLabel(mgmt, "Has_Privacy_Notice")
@@ -1155,6 +1162,7 @@ def createIndicesPropsAndLabels(mgmt) {
 
 }
 
-
+mgmt = graph.openManagement()
+createIndicesPropsAndLabels(mgmt)
 
 
