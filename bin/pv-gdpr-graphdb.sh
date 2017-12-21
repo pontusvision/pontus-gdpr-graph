@@ -243,5 +243,5 @@ cd ${PVGDPR_HOME}
 if [ "${PVGDPR_NOEXEC}" != "" ]; then
   "$JAVA" -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
 else
-  exec "$JAVA" -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
+  exec "$JAVA" -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
 fi
