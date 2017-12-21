@@ -243,5 +243,5 @@ cd ${PVGDPR_HOME}
 if [ "${PVGDPR_NOEXEC}" != "" ]; then
   "$JAVA" -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
 else
-  exec "$JAVA" -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
+  exec "$JAVA" -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Dorg.eclipse.jetty.LEVEL=INFO -Dlog4j.debug -Dlog4j.configuration=${PVGDPR_HOME}/lib/log4j.properties -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
 fi
