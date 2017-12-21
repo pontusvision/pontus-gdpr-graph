@@ -591,9 +591,9 @@ def __addPrivacyImpactAssessment(graph, g, Vertex privNoticeVertex){
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
 
-    trans = graph.tx()
-    try {
-        trans.open()
+//    trans = graph.tx()
+//    try {
+//        trans.open()
 
 
         pia = g.addV("Object.Privacy_Impact_Assessment").
@@ -638,14 +638,14 @@ and other relevant legislation.
 
         g.addE("Has_Privacy_Notice").from(pia).to(privNoticeVertex).next()
 
-        trans.commit()
+//        trans.commit()
 
-    } catch (Throwable t) {
-        trans.rollback()
-        throw t
-    } finally{
-        trans.close()
-    }
+//    } catch (Throwable t) {
+//        trans.rollback()
+//        throw t
+//    } finally{
+//        trans.close()
+//    }
 }
 
     /*
@@ -927,6 +927,7 @@ def  createProp(mgmt, keyName,classType, org.janusgraph.core.Cardinality card ){
     }
 }
 
+
 def createCompIdx (mgmt, idxName, prop) {
     if (!mgmt.containsGraphIndex(idxName)){
         return mgmt.buildIndex(idxName,Vertex.class).addKey(prop).buildCompositeIndex();
@@ -1149,6 +1150,7 @@ def createIndicesPropsAndLabels(mgmt) {
     createMixedIdx(mgmt, "orgNameMixedIdx", orgName)
     createCompIdx(mgmt, "orgRegNumberIdx", orgRegNumber)
 
+    createProp (mgmt,"Consent.Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     mgmt.commit()
 
 }
