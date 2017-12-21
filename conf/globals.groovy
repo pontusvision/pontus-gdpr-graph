@@ -1162,7 +1162,7 @@ def createIndicesPropsAndLabels(mgmt) {
 
 }
 
-
-
+mgmt = graph.openManagement()
+createIndicesPropsAndLabels(mgmt)
 
 
