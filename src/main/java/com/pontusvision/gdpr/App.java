@@ -60,9 +60,6 @@ public class App {
 
 
 
-            mgmt.getOrCreatePropertyKey()
-
-
 
             PropertyKey metadataOwner = mgmt.makePropertyKey("Metadata.Owner").dataType(String.class).cardinality(Cardinality.SINGLE).make();
             PropertyKey metadataLineage = mgmt.makePropertyKey("Metadata.Lineage").dataType(String.class).cardinality(Cardinality.SET).make();
