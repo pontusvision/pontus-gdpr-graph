@@ -1162,7 +1162,11 @@ def createIndicesPropsAndLabels(mgmt) {
 
 }
 
-mgmt = graph.openManagement()
-createIndicesPropsAndLabels(mgmt)
+//mgmt = graph.openManagement()
+//try {
+  //createIndicesPropsAndLabels(graph.openManagement())
+//} catch (e){
+  //e.printStackTrace()
+//}
 
 
