@@ -1,8 +1,10 @@
 package com.pontusvision.gdpr;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
+import java.net.URISyntaxException;
 import java.util.Iterator;
 
 public class GraphNode
@@ -10,15 +12,14 @@ public class GraphNode
   static final String METADATA = "Metadata.";
 
   Long id;
-  String label;
+  String label = "";
   String shape;
   String title;
-
-
+  String image;
 
   public GraphNode()
   {
-    this.shape = "box";
+    this.shape = "image";
 
   }
 
@@ -30,34 +31,63 @@ public class GraphNode
 
     int vLabelSize = vLabel.length() + 1; // +1 for the dot.
 
-//    this.label = vLabel;
-    StringBuilder sb = new StringBuilder(vLabel).append("\n");
+    //    this.label = vLabel;
+    //    "data:image/svg+xml;charset=utf-8,"+
+
+    //    StringBuilder sb = new StringBuilder(vLabel).append("\n");
+    StringBuilder sb = new StringBuilder();
 
     this.title = "<h1> title </h1>";
     Iterator<VertexProperty<Object>> properties = v.properties();
     while (properties.hasNext())
     {
       VertexProperty<Object> prop = properties.next();
-      String label = prop.label().toString();
+      String label = prop.label();
+
+      sb.append("<tr><td class=\"tg-yw4l\">");
+
       if (label.startsWith(vLabel))
       {
-        sb.append(label.substring(vLabelSize)).append("\t:");
+        sb.append(label.substring(vLabelSize));
 
       }
       else if (label.startsWith(METADATA))
       {
-        sb.append(label.substring(METADATA.length())).append(":");
+        sb.append(label.substring(METADATA.length()));
 
       }
       else
       {
-        sb.append(label).append(":");
+        sb.append(label);
       }
+      sb.append("</td><td class=\"tg-yw4l\">");
 
-      sb.append(prop.value().toString()).append("\n");
+      sb.append(prop.value().toString()).append("</td></tr>");
 
     }
-    this.label = sb.toString();
+
+    StringBuilder svgSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"390\" height=\"400\">")
+        .append(
+            "<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" fill=\"#7890A7\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
+        .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">")
+        .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px\">")
+        .append("<style type=\"text/css\">\n" + ".tg  {border-collapse:collapse;border-spacing:0;}").append(
+            ".tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}")
+        .append(
+            ".tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}")
+        .append(".tg .tg-ygl1{font-weight:bold;background-color:#9b9b9b}")
+        .append(".tg .tg-x9s4{font-weight:bold;background-color:#9b9b9b;vertical-align:top}")
+        .append(".tg .tg-yw4l{vertical-align:top}").append(
+            "@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;}}</style>")
+        .append("<div class=\"tg-wrap\"><table class=\"tg\" style=\"undefined;table-layout: fixed; width: 194px\">")
+        .append("<colgroup> <col style=\"width: 98px\"><col style=\"width: 96px\"></colgroup>")
+        .append("<tr><th class=\"tg-ygl1\">Property</th><th class=\"tg-x9s4\">Value</th></tr>").append(sb)
+        .append("</table></div>").append("</div></foreignObject></svg>");
+
+    StringBuilder imageSb = new StringBuilder("data:image/svg+xml;charset=utf-8,");
+    imageSb.append(buildSafeURL(svgSb.toString()));
+
+    this.image = imageSb.toString();
   }
 
   public String getTitle()
@@ -69,7 +99,6 @@ public class GraphNode
   {
     this.title = title;
   }
-
 
   public String getShape()
   {
@@ -101,6 +130,16 @@ public class GraphNode
     this.label = label;
   }
 
+  public String getImage()
+  {
+    return image;
+  }
+
+  public void setImage(String image)
+  {
+    this.image = image;
+  }
+
   @Override public boolean equals(Object o)
   {
     if (this == o)
@@ -117,4 +156,23 @@ public class GraphNode
   {
     return id.hashCode();
   }
+
+  public static String buildSafeURL(String stringToEncode)
+  {
+    String encodedString = null;
+    try
+    {
+      encodedString = new URIBuilder().setParameter("i", stringToEncode).build()
+          .getRawQuery() // output: i=encodedString
+          .substring(2);
+    }
+    catch (URISyntaxException e)
+    {
+      e.printStackTrace();
+    }
+
+    return encodedString;
+
+  }
+
 }
