@@ -87,7 +87,7 @@ public class GraphNode
         .append(".tg .tg-x9s4{font-weight:bold;background-color:#9b9b9b;vertical-align:top}")
         .append(".tg .tg-yw4l{vertical-align:top}")
         .append("</style>")
-        .append("<div class=\"tg-wrap\">")
+        .append("<div style=\"flex-direction: column; justify-content: center\">")
         .append("<h3>").append(vLabel).append("</h3>")
 
         .append("<table class=\"tg\" style=\" overflow: visible; background: #595959; height: calc(100%); width: 600px\">")
