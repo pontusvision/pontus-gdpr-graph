@@ -73,7 +73,7 @@ public class GraphNode
 
     }
 
-    StringBuilder svgHeadSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" >")
+    StringBuilder svgHeadSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"100%\">")
         .append(
             "<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" fill=\"#797979\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
         .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">");
