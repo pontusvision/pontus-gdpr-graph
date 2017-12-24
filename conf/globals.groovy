@@ -419,131 +419,47 @@ def addSAR(graph, g){
     eventSARRequestDate = createProp(mgmt, "Event.Subject_Access_Request.Request_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     eventSARRequestDateIdx = createCompIdx(mgmt, "eventSARRequestDateIdx", eventSARRequestDate)
 
-    eventSARCompletionDate = createProp(mgmt, "Event.Subject_Access_Request.Completion_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    eventSARCompletionDate = createProp(mgmt, "Event.Subject_Access_Request.Last_Update", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     eventSARCompletionDateIdx = createCompIdx(mgmt, "eventSARCompletionDateIdx", eventSARCompletionDate)
 
-    trans = graph.tx()
+    def trans = graph.tx()
     try {
         trans.open()
 
-        randVal = new Random()
+        def randVal = new Random()
 
-        def oneYearInMs = 3600000*24*365
-        def eighteenYearsInMs = oneYearInMs * 18
-
-
+        def oneWeekInMs = 3600000*24*7
+        def eighteenWeeks = oneWeekInMs * 18
 
 
-        for (Map<String, String> item in listOfMaps) {
+        def probabilities = [
+                new Pair<String, Double>("New", (Double)25.0),
+                new Pair<String, Double>("Acknowledged", (Double)30.0),
+                new Pair<String, Double>("Reviewed ", (Double)3.0),
+                new Pair<String, Double>("Denied", (Double)60.0),
+                new Pair<String, Double>("Completed", (Double)45.0)]
+        def distribution = new EnumeratedDistribution<String>(probabilities.asList())
 
-
-            try {
-
-                dob = new  Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenYearsInMs))
-            } catch (Throwable t) {
-                dob = new Date("01/01/1666")
-            }
-
-
-
-
-            person = g.addV("Person").
-                    property("Metadata.Controller", item.get("pg_metadataController")).
-                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-                    property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
-                    property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Person").
-                    property("Person.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
-                    property("Person.Last_Name", item.get("pg_name_last")).
-                    property("Person.Gender", item.get("pg_gender")).
-                    property("Person.Nationality", item.get("pg_nat")).
-                    property("Person.Date_Of_Birth", dob).
-                    property("Person.Title", item.get("pg_name_title")).next()
-
-
-            email = g.addV("Object.Email_Address").
-                    property("Metadata.Controller", item.get("pg_metadataController")).
-                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-                    property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
-                    property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Object.Email_Address").
-                    property("Object.Email_Address.Email", item.get("pg_email")).next()
-
-
-            credential = g.addV("Object.Credential").
-                    property("Metadata.Controller", item.get("pg_metadataController")).
-                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-                    property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
-                    property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Object.Credential").
-                    property("Object.Credential.User_Id", item.get("pg_login_username")).
-                    property("Object.Credential.Login_SHA256", item.get("pg_login_sha256")).next()
-
-            idCard = g.addV("Object.Identity_Card").
-                    property("Metadata.Controller", item.get("pg_metadataController")).
-                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-                    property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
-                    property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Object.Identity_Card").
-                    property("Object.Identity_Card.Id_Name", item.get("pg_id_name")).
-                    property("Object.Identity_Card.Id_Value", item.get("pg_id_value")).next()
-
-
-            location = g.addV("Location.Address").
-                    property("Metadata.Controller", item.get("pg_metadataController")).
-                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-                    property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
-                    property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Location.Address").
-                    property("Location.Address.Street", item.get("pg_location_street")).
-                    property("Location.Address.City", item.get("pg_location_city")).
-                    property("Location.Address.State", item.get("pg_location_state")).
-                    property("Location.Address.Post_Code", item.get("pg_location_postcode")).next()
+        def randVal1 = randVal.nextInt(3000);
+        def randVal2 = randVal.nextInt(1000);
 
 
 
 
+        def customers = g.V().has('Metadata.Type','Person').range(randVal1,randVal1+randVal2)
 
-            g.addE("Uses_Email").from(person).to(email).next()
-            g.addE("Has_Credential").from(person).to(credential).next()
-            g.addE("Has_Id_Card").from(person).to(idCard).next()
-            g.addE("Lives").from(person).to(location).next()
-        }
+
+        randVal1 = randVal.nextInt(500);
+        randVal2 = randVal.nextInt(20);
+
+        def employees = g.V().has('Metadata.Type','Person.Employee').range(randVal1,randVal1+randVal2);
+
+
+        
+
+                g.V().has("Metadata.Type","Person").as("people")
+                .addE("Consent").property("Consent.Date",new Date())
+                .from("people").to(privNoticeVertex).next()
 
 
 
@@ -1162,8 +1078,8 @@ def createIndicesPropsAndLabels(mgmt) {
     eventSARRequestDate = createProp(mgmt, "Event.Subject_Access_Request.Request_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     eventSARRequestDateIdx = createCompIdx(mgmt, "eventSARRequestDateIdx", eventSARRequestDate)
 
-    eventSARCompletionDate = createProp(mgmt, "Event.Subject_Access_Request.Completion_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    eventSARCompletionDateIdx = createCompIdx(mgmt, "eventSARCompletionDateIdx", eventSARCompletionDate)
+    eventSARLastUpdate = createProp(mgmt, "Event.Subject_Access_Request.Last_Update", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    eventSARLastUpdateIdx = createCompIdx(mgmt, "eventSARLastUpdateIdx", eventSARLastUpdate)
 
 
 
