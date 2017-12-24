@@ -23,7 +23,7 @@ public class GraphNode
 
   public GraphNode()
   {
-    this.shape = "box";
+    this.shape = "image";
 
   }
 
@@ -32,6 +32,8 @@ public class GraphNode
     this();
     this.id = (Long) v.id();
     String vLabel = v.label();
+
+    this.label = vLabel;
 
     int vLabelSize = vLabel.length() + 1; // +1 for the dot.
 
@@ -107,7 +109,7 @@ public class GraphNode
     imageSb.append(percentEscaper.escape(svgSb.toString()).replaceAll("&nbsp;","&#160;"));
 
 
-    this.label = svgSb.toString(); //percentEscaper.escape(tableBodySb.toString()).replaceAll("&nbsp;","&#160;");
+    this.image = imageSb.toString(); //percentEscaper.escape(tableBodySb.toString()).replaceAll("&nbsp;","&#160;");
   }
 
   public String getTitle()
