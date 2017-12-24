@@ -1,5 +1,7 @@
 package com.pontusvision.gdpr;
 
+import com.google.common.escape.Escaper;
+import com.google.common.net.PercentEscaper;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
@@ -10,6 +12,8 @@ import java.util.Iterator;
 public class GraphNode
 {
   static final String METADATA = "Metadata.";
+  static final Escaper percentEscaper = new PercentEscaper("-_.*", false);
+
 
   Long id;
   String label = "";
@@ -85,7 +89,7 @@ public class GraphNode
         .append("</table></div>").append("</div></foreignObject></svg>");
 
     StringBuilder imageSb = new StringBuilder("data:image/svg+xml;charset=utf-8,");
-    imageSb.append(buildSafeURL(svgSb.toString()));
+    imageSb.append(percentEscaper.escape(svgSb.toString()));
 
     this.image = imageSb.toString();
   }
@@ -157,22 +161,5 @@ public class GraphNode
     return id.hashCode();
   }
 
-  public static String buildSafeURL(String stringToEncode)
-  {
-    String encodedString = null;
-    try
-    {
-      encodedString = new URIBuilder().setParameter("i", stringToEncode).build()
-          .getRawQuery() // output: i=encodedString
-          .substring(2);
-    }
-    catch (URISyntaxException e)
-    {
-      e.printStackTrace();
-    }
-
-    return encodedString;
-
-  }
-
+\
 }
