@@ -87,8 +87,9 @@ public class GraphNode
         .append(".tg .tg-x9s4{font-weight:bold;background-color:#9b9b9b;vertical-align:top}")
         .append(".tg .tg-yw4l{vertical-align:top}")
         .append("</style>")
-        .append("<div style=\"flex-direction: column; justify-content: center\">")
-        .append("<h3>").append(vLabel).append("</h3>")
+        .append("<div style=\"flex-direction: column; justify-content: center; align-content:center;\">")
+
+        .append("<h3 style=\"color: white; font-color: white;\">").append(vLabel.replaceAll("[_.]"," ")).append("</h3>")
 
         .append("<table class=\"tg\" style=\" overflow: visible; background: #595959; height: calc(100%); width: 600px\">")
         .append("<colgroup> <col style=\"width: 30%\"/><col style=\"width: 70%\"/></colgroup>")
