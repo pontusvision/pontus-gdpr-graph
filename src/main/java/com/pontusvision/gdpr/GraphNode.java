@@ -19,11 +19,11 @@ public class GraphNode
   String label = "";
   String shape;
   String title;
-  String image;
+  String image = "";
 
   public GraphNode()
   {
-    this.shape = "image";
+    this.shape = "box";
 
   }
 
@@ -70,10 +70,12 @@ public class GraphNode
 
     }
 
-    StringBuilder svgSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\">")
+    StringBuilder svgHeadSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\">")
         .append(
             "<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" fill=\"#7890A7\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
-        .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">")
+        .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">");
+
+    StringBuilder tableBodySb = new StringBuilder()
         .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px; height=100%; width=100%; \">")
         .append("<style type=\"text/css\">\n")
         .append( "p {margin:0 0 1em}\n" + "table p {margin :0}\n" + ".wrap {\n" + "\tmargin:50px 0 0 2%;\n"
@@ -90,12 +92,22 @@ public class GraphNode
         .append("<div class=\"wrap\"><div class=\"inner\"><table>")
         .append("<thead>")
         .append("<tr><th>Property</th><th>Value</th></tr></thead><tbody>").append(sb)
-        .append("</tbody></table></div>").append("</div></div></foreignObject></svg>");
+        .append("</tbody></table></div>").append("</div></div>");
+
+
+    StringBuilder svgFootSb = new StringBuilder("/foreignObject></svg>");
 
     StringBuilder imageSb = new StringBuilder("data:image/svg+xml;charset=utf-8,");
+
+    StringBuilder svgSb = new StringBuilder()
+        .append(svgHeadSb)
+        .append(tableBodySb)
+        .append(svgFootSb);
+
     imageSb.append(percentEscaper.escape(svgSb.toString()).replaceAll("&nbsp;","&#160;"));
 
-    this.image = imageSb.toString();
+
+    this.label = tableBodySb.toString();
   }
 
   public String getTitle()
