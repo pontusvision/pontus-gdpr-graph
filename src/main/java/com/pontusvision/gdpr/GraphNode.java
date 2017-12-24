@@ -73,8 +73,8 @@ public class GraphNode
     }
 
     StringBuilder svgHeadSb = new StringBuilder(
-        "<svg xmlns=\"http://www.w3.org/2000/svg\" preserveAspectRatio=\"xMidYMid\" height=\"4200\" width=\"1000\" viewPort=\"0 0 4200 1000\" >")
-        .append("<foreignObject width=\"100%\"  fill=\"#797979\" stroke-width=\"20\" stroke=\"#ffffff\"  >");
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" preserveAspectRatio=\"xMidYMid meet\" height=\"3200\" width=\"600\" viewPort=\"0 0 3200 600\" >")
+        .append("<foreignObject height=\"100%\" width=\"100%\"  fill=\"#797979\" stroke-width=\"20\" stroke=\"#ffffff\"  >");
 
     StringBuilder tableBodySb = new StringBuilder()
         .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px; font-color: #FFFFFF;   height:100%; width:100%; \">")
