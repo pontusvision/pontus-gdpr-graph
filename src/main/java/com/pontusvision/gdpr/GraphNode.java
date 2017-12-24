@@ -91,7 +91,7 @@ public class GraphNode
         .append("<tr><th>Property</th><th>Value</th></tr></thead><tbody>").append(sb)
         .append("</tbody></table></div>").append("</div></div></foreignObject></svg>");
 
-    StringBuilder imageSb = new StringBuilder("data:image/svg+hxml;charset=utf-8,");
+    StringBuilder imageSb = new StringBuilder("data:image/svg+xml;charset=utf-8,");
     imageSb.append(percentEscaper.escape(svgSb.toString()));
 
     this.image = imageSb.toString();
