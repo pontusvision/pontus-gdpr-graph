@@ -74,7 +74,7 @@ public class GraphNode
 
     StringBuilder svgHeadSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\">")
         .append(
-            "<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" fill=\"#7890A7\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
+            "<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" fill=\"#797979\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
         .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">");
 
     StringBuilder tableBodySb = new StringBuilder()
@@ -97,7 +97,7 @@ public class GraphNode
         .append("</tbody></table></div>").append("</div></div>");
 
 
-    StringBuilder svgFootSb = new StringBuilder("/foreignObject></svg>");
+    StringBuilder svgFootSb = new StringBuilder("</foreignObject></svg>");
 
     StringBuilder imageSb = new StringBuilder("data:image/svg+xml;charset=utf-8,");
 
