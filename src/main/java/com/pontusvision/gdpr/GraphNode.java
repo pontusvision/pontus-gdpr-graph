@@ -15,7 +15,6 @@ public class GraphNode
   static final String METADATA = "Metadata.";
   static final Escaper percentEscaper = new PercentEscaper("-_.*", false);
 
-
   Long id;
   String label = "";
   String shape;
@@ -73,44 +72,39 @@ public class GraphNode
 
     }
 
-    StringBuilder svgHeadSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\"  \n"
-        + "   style=\"width: 600px; height: auto; overflow: visible\">")
-        .append(
-            "<rect x=\"0\" y=\"0\"  fill=\"#797979\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
+    StringBuilder svgHeadSb = new StringBuilder(
+        "<svg xmlns=\"http://www.w3.org/2000/svg\"  \n" + "   style=\"width: 600px; height: auto; overflow: visible\">")
+        .append("<rect x=\"0\" y=\"0\"  fill=\"#797979\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
         .append("<foreignObject >");
 
     StringBuilder tableBodySb = new StringBuilder()
         .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px; height:100%; width:100%; \">")
-
+        .append("<style>")
         .append(
             ".tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}")
         .append(
             ".tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}")
         .append(".tg .tg-ygl1{font-weight:bold;background-color:#9b9b9b}")
         .append(".tg .tg-x9s4{font-weight:bold;background-color:#9b9b9b;vertical-align:top}")
-        .append(".tg .tg-yw4l{vertical-align:top}").append(
+        .append(".tg .tg-yw4l{vertical-align:top}")
+        .append(
             ".tg {width: auto !important;}.tg col {width: auto !important;}.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;}</style>")
         .append("<div class=\"tg-wrap\"><table class=\"tg\" style=\"undefined;table-layout: fixed; width: 100%\">")
         .append("<colgroup> <col style=\"width: 30%\"/><col style=\"width: 70%\"/></colgroup>")
         .append("<tr><th class=\"tg-ygl1\">Property</th><th class=\"tg-x9s4\">Value</th></tr>")
         .append(sb)
-        .append("</table>")
-        .append("</div></div>");
-
+        .append("</table>").append("</div></div>");
 
     StringBuilder svgFootSb = new StringBuilder("</foreignObject></svg>");
 
     StringBuilder imageSb = new StringBuilder("data:image/svg+xml;charset=utf-8,");
 
-    StringBuilder svgSb = new StringBuilder()
-        .append(svgHeadSb)
-        .append(tableBodySb)
-        .append(svgFootSb);
+    StringBuilder svgSb = new StringBuilder().append(svgHeadSb).append(tableBodySb).append(svgFootSb);
 
     imageSb.append(percentEscaper.escape(svgSb.toString()));
 
-
-    this.image = imageSb.toString().replaceAll(Pattern.quote("&nbsp;"),"&#160;"); //percentEscaper.escape(tableBodySb.toString()).replaceAll("&nbsp;","&#160;");
+    this.image = imageSb.toString().replaceAll(Pattern.quote("&nbsp;"),
+        "&#160;"); //percentEscaper.escape(tableBodySb.toString()).replaceAll("&nbsp;","&#160;");
   }
 
   public String getTitle()
@@ -179,6 +173,5 @@ public class GraphNode
   {
     return id.hashCode();
   }
-
 
 }
