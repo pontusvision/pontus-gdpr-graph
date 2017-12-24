@@ -83,8 +83,8 @@ public class GraphNode
 //        .append(".tg .tg-x9s4{font-weight:bold;background-color:#9b9b9b;vertical-align:top}")
 //        .append(".tg .tg-yw4l{vertical-align:top}").append(
 //            "@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;}}</style>")
-        .append("<div class=\"tg-wrap\"><table class=\"tg\" style=\"undefined;table-layout: fixed; width: 194px\">")
-        .append("<colgroup> <col style=\"width: 98px\"><col style=\"width: 96px\"></colgroup>")
+        .append("<div class=\"tg-wrap\"><table class=\"tg\" style=\"undefined;table-layout: fixed; width: 100%\">")
+        .append("<colgroup> <col style=\"width: 30%\"/><col style=\"width: 70%\"/></colgroup>")
         .append("<tr><th class=\"tg-ygl1\">Property</th><th class=\"tg-x9s4\">Value</th></tr>").append(sb)
         .append("</table></div>").append("</div></foreignObject></svg>");
 
