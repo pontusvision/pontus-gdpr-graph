@@ -8,6 +8,7 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 public class GraphNode
 {
@@ -72,7 +73,7 @@ public class GraphNode
 
     }
 
-    StringBuilder svgHeadSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\">")
+    StringBuilder svgHeadSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" >")
         .append(
             "<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" fill=\"#797979\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
         .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">");
@@ -83,7 +84,7 @@ public class GraphNode
         .append( "p {margin:0 0 1em}\n" + "table p {margin :0}\n" + ".wrap {\n" + "\tmargin:50px 0 0 2%;\n"
             + "\twidth:95%;\n" + "\tfloat:left;\n" + "\tposition:relative;\n" + "\theight:100%;\n"
             + "\toverflow:hidden;\n" + "\tpadding:25px 0 0;\n" + "\tbackground:rgb(69,69,69);\n" + "\tborder:1px solid #000;\n"
-            + "}\n" + ".inner {\n" + "\tpadding:0 18px 0 0; \n" + "\theight:100%;\n" + "\toverflow:auto;\n" + "}\n"
+            + "}\n" + ".inner {\n" + "\tpadding:0 18px 0 0; \n" + "\theight:100%;\n" + "\toverflow:show;\n" + "}\n"
             + "table {\n" + "\twidth:100%;\n" + "\tmargin:0 0 0 -1px;\n" + "\tborder-collapse:collapse;\n" + "}\n"
             + "td {\n" + "\tpadding:5px;\n" + "\tborder:1px solid #000;\n" + "\ttext-align:center;\n"
             + "\tbackground:rgb(69,69,69);\n" + "}\n" + "tfoot th, thead th {\n" + "\tfont-weight:bold;\n"
@@ -106,7 +107,7 @@ public class GraphNode
         .append(tableBodySb)
         .append(svgFootSb);
 
-    imageSb.append(percentEscaper.escape(svgSb.toString()).replaceAll("&nbsp;","&#160;"));
+    imageSb.append(percentEscaper.escape(svgSb.toString()).replaceAll(Pattern.quote("&nbsp;"),"&#160;"));
 
 
     this.image = imageSb.toString(); //percentEscaper.escape(tableBodySb.toString()).replaceAll("&nbsp;","&#160;");
