@@ -75,14 +75,15 @@ public class GraphNode
             "<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" fill=\"#7890A7\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
         .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">")
         .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px\">")
-        .append("<style type=\"text/css\">\n" + ".tg  {border-collapse:collapse;border-spacing:0;}").append(
+        .append("<style type=\"text/css\">\n" + ".tg  {border-collapse:collapse;border-spacing:0;}")
+        .append(
             ".tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}")
         .append(
             ".tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}")
         .append(".tg .tg-ygl1{font-weight:bold;background-color:#9b9b9b}")
         .append(".tg .tg-x9s4{font-weight:bold;background-color:#9b9b9b;vertical-align:top}")
         .append(".tg .tg-yw4l{vertical-align:top}").append(
-            "@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;}}</style>")
+            ".tg {width: auto !important;}.tg col {width: auto !important;}.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;}</style>")
         .append("<div class=\"tg-wrap\"><table class=\"tg\" style=\"undefined;table-layout: fixed; width: 100%\">")
         .append("<colgroup> <col style=\"width: 30%\"/><col style=\"width: 70%\"/></colgroup>")
         .append("<tr><th class=\"tg-ygl1\">Property</th><th class=\"tg-x9s4\">Value</th></tr>").append(sb)
