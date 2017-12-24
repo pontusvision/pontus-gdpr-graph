@@ -73,7 +73,7 @@ public class GraphNode
     }
 
     StringBuilder svgHeadSb = new StringBuilder(
-        "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"100%\" width=\"600\" style=\"overflow: visible\">")
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"100%\" width=\"600\" style=\"overflow: visible; background: #595959\">")
         .append("<foreignObject height=\"100%\" width=\"100%\"  fill=\"#797979\" stroke-width=\"20\" stroke=\"#ffffff\"  >");
 
     StringBuilder tableBodySb = new StringBuilder()
@@ -86,9 +86,7 @@ public class GraphNode
         .append(".tg .tg-ygl1{font-weight:bold;background-color:#9b9b9b}")
         .append(".tg .tg-x9s4{font-weight:bold;background-color:#9b9b9b;vertical-align:top}")
         .append(".tg .tg-yw4l{vertical-align:top}")
-        .append(
-            ".tg {width: auto !important;}.tg col {width: auto !important;}</style>")
-        .append("<div class=\"tg-wrap\"><table class=\"tg\" style=\"undefined;table-layout: fixed; width: 98%; height: 100%\">")
+        .append("<div class=\"tg-wrap\"><table class=\"tg\" style=\"height: calc(100%); width: 600px\">")
         .append("<colgroup> <col style=\"width: 30%\"/><col style=\"width: 70%\"/></colgroup>")
         .append("<tr><th class=\"tg-ygl1\">Property</th><th class=\"tg-x9s4\">Value</th></tr>")
         .append(sb)
