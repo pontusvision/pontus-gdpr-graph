@@ -87,7 +87,7 @@ public class GraphNode
             + "\tbackground:green;\n" + "\tcolor:#fff;\n" + "}\n" + "thead th {border:none;}\n" + "thead tr p {\n"
             + "\tposition:absolute;\n" + "\ttop:0;\n" + "}\n" + ".last {\n" + "\tpadding-right:15px!important;\n" + "}")
         .append("</style>")
-        .append("<div class=\"wrap\"<div class=\"inner\"><table>")
+        .append("<div class=\"wrap\"><div class=\"inner\"><table>")
         .append("<thead>")
         .append("<tr><th>Property</th><th>Value</th></tr></thead><tbody>").append(sb)
         .append("</tbody></table></div>").append("</div></div></foreignObject></svg>");
