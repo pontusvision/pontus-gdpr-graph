@@ -78,11 +78,11 @@ public class GraphNode
         .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">");
 
     StringBuilder tableBodySb = new StringBuilder()
-        .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px; height=100%; width=100%; \">")
+        .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px; height:100%; width:100%; \">")
         .append("<style type=\"text/css\">\n")
         .append( "p {margin:0 0 1em}\n" + "table p {margin :0}\n" + ".wrap {\n" + "\tmargin:50px 0 0 2%;\n"
             + "\twidth:95%;\n" + "\tfloat:left;\n" + "\tposition:relative;\n" + "\theight:100%;\n"
-            + "\toverflow:hidden;\n" + "\tpadding:25px 0 0;\n" + "\tbackground:green;\n" + "\tborder:1px solid #000;\n"
+            + "\toverflow:hidden;\n" + "\tpadding:25px 0 0;\n" + "\tbackground:rgb(69,69,69);\n" + "\tborder:1px solid #000;\n"
             + "}\n" + ".inner {\n" + "\tpadding:0 18px 0 0; \n" + "\theight:100%;\n" + "\toverflow:auto;\n" + "}\n"
             + "table {\n" + "\twidth:100%;\n" + "\tmargin:0 0 0 -1px;\n" + "\tborder-collapse:collapse;\n" + "}\n"
             + "td {\n" + "\tpadding:5px;\n" + "\tborder:1px solid #000;\n" + "\ttext-align:center;\n"
