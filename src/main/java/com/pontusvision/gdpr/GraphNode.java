@@ -107,7 +107,7 @@ public class GraphNode
     imageSb.append(percentEscaper.escape(svgSb.toString()).replaceAll("&nbsp;","&#160;"));
 
 
-    this.label = imageSb.toString(); //percentEscaper.escape(tableBodySb.toString()).replaceAll("&nbsp;","&#160;");
+    this.label = svgSb.toString(); //percentEscaper.escape(tableBodySb.toString()).replaceAll("&nbsp;","&#160;");
   }
 
   public String getTitle()
