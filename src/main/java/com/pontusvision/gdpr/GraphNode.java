@@ -70,21 +70,21 @@ public class GraphNode
 
     }
 
-    StringBuilder svgSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"700\">")
+    StringBuilder svgSb = new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\">")
         .append(
             "<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" fill=\"#7890A7\" stroke-width=\"20\" stroke=\"#ffffff\" ></rect>")
         .append("<foreignObject x=\"15\" y=\"10\" width=\"100%\" height=\"100%\">")
-        .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px\">")
+        .append("<div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font-size:40px; height=100%; width=100%; \">")
         .append("<style type=\"text/css\">\n")
         .append( "p {margin:0 0 1em}\n" + "table p {margin :0}\n" + ".wrap {\n" + "\tmargin:50px 0 0 2%;\n"
-            + "\twidth:95%;\n" + "\tfloat:left;\n" + "\tposition:relative;\n" + "\theight:200px;\n"
+            + "\twidth:95%;\n" + "\tfloat:left;\n" + "\tposition:relative;\n" + "\theight:100%;\n"
             + "\toverflow:hidden;\n" + "\tpadding:25px 0 0;\n" + "\tbackground:green;\n" + "\tborder:1px solid #000;\n"
-            + "}\n" + ".inner {\n" + "\tpadding:0 18px 0 0; \n" + "\theight:200px;\n" + "\toverflow:auto;\n" + "}\n"
+            + "}\n" + ".inner {\n" + "\tpadding:0 18px 0 0; \n" + "\theight:100%;\n" + "\toverflow:auto;\n" + "}\n"
             + "table {\n" + "\twidth:100%;\n" + "\tmargin:0 0 0 -1px;\n" + "\tborder-collapse:collapse;\n" + "}\n"
             + "td {\n" + "\tpadding:5px;\n" + "\tborder:1px solid #000;\n" + "\ttext-align:center;\n"
-            + "\tbackground:yellow;\n" + "}\n" + "tfoot th, thead th {\n" + "\tfont-weight:bold;\n"
+            + "\tbackground:rgb(69,69,69);\n" + "}\n" + "tfoot th, thead th {\n" + "\tfont-weight:bold;\n"
             + "\ttext-align:center;\n" + "\tborder:1px solid #000;\n" + "\tpadding:0 3px 0 5px;\n"
-            + "\tbackground:green;\n" + "\tcolor:#fff;\n" + "}\n" + "thead th {border:none;}\n" + "thead tr p {\n"
+            + "\tbackground:rgb(49,49,49);\n" + "\tcolor:#fff;\n" + "}\n" + "thead th {border:none;}\n" + "thead tr p {\n"
             + "\tposition:absolute;\n" + "\ttop:0;\n" + "}\n" + ".last {\n" + "\tpadding-right:15px!important;\n" + "}")
         .append("</style>")
         .append("<div class=\"wrap\"><div class=\"inner\"><table>")
@@ -93,7 +93,7 @@ public class GraphNode
         .append("</tbody></table></div>").append("</div></div></foreignObject></svg>");
 
     StringBuilder imageSb = new StringBuilder("data:image/svg+xml;charset=utf-8,");
-    imageSb.append(percentEscaper.escape(svgSb.toString()));
+    imageSb.append(percentEscaper.escape(svgSb.toString()).replaceAll("&nbsp;","&#160;"));
 
     this.image = imageSb.toString();
   }
