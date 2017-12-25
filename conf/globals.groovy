@@ -432,18 +432,19 @@ def addRandomSARs(graph, g) {
 
         for (def i = 0; i < randVal1; i++){
 
+            def stat = distributionStatus.sample();
             def sar = g.addV("Event.Subject_Access_Request").
-                    property("Metadata.Controller", item.get("pg_metadataController")).
-                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-                    property("Metadata.Version", item.get("pg_metadataVersion")).
+                    property("Metadata.Controller", "ABC INC").
+                    property("Metadata.Processor", "ABC INC").
+                    property("Metadata.Lineage", "Random generator").
+                    property("Metadata.Redaction", "/dataprotectionofficer/aaa").
+                    property("Metadata.Version", "1").
                     property("Metadata.Create_Date", metadataCreateDate).
                     property("Metadata.Update_Date", metadataUpdateDate).
-                    property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
+                    property("Metadata.Status", stat).
+                    property("Metadata.GDPR_Status", "SAR").
+                    property("Metadata.Lineage_Server_Tag", "AWS EUR1").
+                    property("Metadata.Lineage_Location_Tag", "GB").
                     property("Metadata.Type", "Object.Credential").
                     property("Event.Subject_Access_Request.Status", distributionStatus.sample()).
                     property("Event.Subject_Access_Request.Request_Type", distributionRequestType.sample()).
@@ -456,7 +457,7 @@ def addRandomSARs(graph, g) {
 
 
             g.addE("Made_SAR_Request").from(person).to(sar).next()
-            g.addE("Assigned_SAR_Request").from(person).to(sar).next()
+            g.addE("Assigned_SAR_Request").from(employee).to(sar).next()
 
 
         }
