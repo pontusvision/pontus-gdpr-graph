@@ -142,11 +142,12 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
     Set<Vertex> outNodes = App.g.V(Long.parseLong(greq.graphId)).to(Direction.OUT).toSet();
     Set<Vertex> inNodes = App.g.V(Long.parseLong(greq.graphId)).to(Direction.IN).toSet();
+    Vertex v = App.g.V(Long.parseLong(greq.graphId)).next();
 
     Set<Edge> outEdges = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.OUT).toSet();
     Set<Edge> inEdges = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.IN).toSet();
 
-    GraphReply retVal = new GraphReply(inNodes, outNodes, inEdges, outEdges);
+    GraphReply retVal = new GraphReply(v, inNodes, outNodes, inEdges, outEdges);
 
     return retVal;
   }
