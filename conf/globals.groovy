@@ -447,7 +447,7 @@ def addRandomSARs(graph, g) {
                     property("Metadata.GDPR_Status", "SAR").
                     property("Metadata.Lineage_Server_Tag", "AWS EUR1").
                     property("Metadata.Lineage_Location_Tag", "GB").
-                    property("Metadata.Type", "Object.Credential").
+                    property("Metadata.Type", "Event.Subject_Access_Request").
                     property("Event.Subject_Access_Request.Status", distributionStatus.sample()).
                     property("Event.Subject_Access_Request.Request_Type", distributionRequestType.sample()).
                     next()
