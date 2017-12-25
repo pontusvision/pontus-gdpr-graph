@@ -408,7 +408,7 @@ def addRandomSARs(graph, g) {
         trans.open()
 
         def randVal = new Random()
-        def randVal1 = randVal.nextInt(3000);
+        def randVal1 = randVal.nextInt(3000)
 
         def oneWeekInMs = 3600000 * 24 * 7
         def eighteenWeeks = oneWeekInMs * 18
@@ -429,6 +429,8 @@ def addRandomSARs(graph, g) {
         def distributionRequestType = new EnumeratedDistribution<String>(probabilitiesRequestType.asList())
 
 
+        metadataCreateDate = new Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks))
+        metadataUpdateDate = new Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * oneWeekInMs))
 
         for (def i = 0; i < randVal1; i++){
 
