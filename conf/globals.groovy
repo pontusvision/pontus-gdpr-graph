@@ -431,8 +431,11 @@ def addRandomSARs(graph, g) {
 
 
         for (def i = 0; i < randVal1; i++){
-            def metadataCreateDate = new Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks))
-            def metadataUpdateDate = new Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * oneWeekInMs))
+
+            def createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
+            def updateMillis =  createMillis + (randVal.nextDouble() * oneWeekInMs)
+            def metadataCreateDate = new Date(createMillis)
+            def metadataUpdateDate = new Date(updateMillis )
 
             def stat = distributionStatus.sample()
             def sar = g.addV("Event.Subject_Access_Request").
