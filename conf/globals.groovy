@@ -433,9 +433,9 @@ def addRandomSARs(graph, g) {
         for (def i = 0; i < randVal1; i++){
 
             def createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
-            def updateMillis =  createMillis + (randVal.nextDouble() * oneWeekInMs)
-            def metadataCreateDate = new Date(createMillis)
-            def metadataUpdateDate = new Date(updateMillis )
+            def updateMillis =  createMillis +  (long) (randVal.nextDouble() * eighteenWeeks)
+            def metadataCreateDate = new Date((long)createMillis)
+            def metadataUpdateDate = new Date((long)updateMillis )
 
             def stat = distributionStatus.sample()
             def sar = g.addV("Event.Subject_Access_Request").
@@ -456,9 +456,9 @@ def addRandomSARs(graph, g) {
                     next()
 
 
-            def employee = g.V().has('Metadata.Type','Person.Employee').coin(0.3).range(0,1).next()
+            def employee = g.V().has('Metadata.Type','Person.Employee').order().by(shuffle).range(0,1).next()
 
-            def person = g.V().has('Metadata.Type','Person').coin(0.3).range(0,1).next()
+            def person = g.V().has('Metadata.Type','Person').order().by(shuffle).range(0,1).next()
 
 
             g.addE("Made_SAR_Request").from(person).to(sar).next()
@@ -1046,6 +1046,10 @@ def createIndicesPropsAndLabels(mgmt) {
     metadataLineageServerTagIdx = createCompIdx(mgmt, "metadataLineageServerTagIdx", metadataLineageServerTag)
     metadataLineageServerTagIdx = createCompIdx(mgmt, "metadataTypeIdx", metadataType)
     metadataLineageLocationTagIdx = createCompIdx(mgmt, "metadataLineageLocationTagIdx", metadataLineageLocationTag)
+    metadataCreateDateIdx = createCompIdx(mgmt, "metadataCreateDateIdx", metadataCreateDate)
+    metadataUpdateDateIdx = createCompIdx(mgmt, "metadataUpdateDateIdx", metadataUpdateDate)
+
+
     metadataGDPRStatusIdx = createCompIdx(mgmt, "metadataGDPRStatusIdx", metadataGDPRStatus)
 
 
