@@ -429,12 +429,12 @@ def addRandomSARs(graph, g) {
         def distributionRequestType = new EnumeratedDistribution<String>(probabilitiesRequestType.asList())
 
 
-        metadataCreateDate = new Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks))
-        metadataUpdateDate = new Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * oneWeekInMs))
 
         for (def i = 0; i < randVal1; i++){
+            def metadataCreateDate = new Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks))
+            def metadataUpdateDate = new Date(System.currentTimeMillis() - (long) (randVal.nextDouble() * oneWeekInMs))
 
-            def stat = distributionStatus.sample();
+            def stat = distributionStatus.sample()
             def sar = g.addV("Event.Subject_Access_Request").
                     property("Metadata.Controller", "ABC INC").
                     property("Metadata.Processor", "ABC INC").
@@ -448,7 +448,7 @@ def addRandomSARs(graph, g) {
                     property("Metadata.Lineage_Server_Tag", "AWS EUR1").
                     property("Metadata.Lineage_Location_Tag", "GB").
                     property("Metadata.Type", "Event.Subject_Access_Request").
-                    property("Event.Subject_Access_Request.Status", distributionStatus.sample()).
+                    property("Event.Subject_Access_Request.Status", stat).
                     property("Event.Subject_Access_Request.Request_Type", distributionRequestType.sample()).
                     next()
 
