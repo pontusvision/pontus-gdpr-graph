@@ -17,7 +17,7 @@
 
         <jetty-version>9.4.3.v20170317</jetty-version>
         <jersey-version>2.26</jersey-version>
-        <tinkerpop-version>3.3.0</tinkerpop-version>
+        <tinkerpop-version>3.3.1</tinkerpop-version>
         <janusgraph.version>100.2.0-SNAPSHOT</janusgraph.version>
         <slf4j.version>1.7.21</slf4j.version>
         <jackson2.version>2.8.6</jackson2.version>
@@ -491,7 +491,7 @@
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-server</artifactId>
-            <version>3.3.0</version>
+            <version>3.3.1</version>
         </dependency>
 
         <dependency>
