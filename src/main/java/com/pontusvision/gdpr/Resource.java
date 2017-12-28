@@ -182,12 +182,14 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person");
           //        Boolean searchExact = req.search.getSearchExact();
 
+
           CountryDataReply data = new CountryDataReply();
 
           List<Map<String, Long>> res =
               StringUtils.isNotEmpty(searchStr)?
               resSet.has("Person.FullName", textContainsFuzzy(searchStr)).values("Person.Nationality").groupCount().toList():
               resSet.has("Person.Nationality").values("Person.Nationality").groupCount().toList();
+
 
           if (res.size() == 1)
           {
