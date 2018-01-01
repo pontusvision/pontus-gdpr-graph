@@ -157,13 +157,20 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   public VertexLabelsReply vertexLabels(String str)
   {
-    JanusGraphManagement mgt = App.graph.openManagement();
+    try
+    {
+      JanusGraphManagement mgt = App.graph.openManagement();
 
+      VertexLabelsReply reply = new VertexLabelsReply(mgt.getVertexLabels());
 
-    VertexLabelsReply reply = new VertexLabelsReply(mgt.getVertexLabels());
+      mgt.commit();
+      return reply;
+    }
+    catch (Exception e){
 
-    mgt.commit();
-    return reply;
+    }
+    return new VertexLabelsReply();
+    
   }
 
   @POST @Path("country_data_count") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
