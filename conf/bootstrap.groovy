@@ -1,6 +1,5 @@
 try {
-  mgmt = graph.openManagement()
-  createIndicesPropsAndLabels(mgmt)
+  createIndicesPropsAndLabels();
 } catch (e){
   e.printStackTrace()
 }

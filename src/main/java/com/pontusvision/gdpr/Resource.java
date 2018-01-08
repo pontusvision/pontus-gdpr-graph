@@ -170,7 +170,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
     }
     return new VertexLabelsReply();
-    
+
   }
 
   @POST @Path("country_data_count") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
