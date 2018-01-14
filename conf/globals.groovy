@@ -930,7 +930,7 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
             parentOrGuardian = g.V()
                 .has('Metadata.Type','Person')
                 .where(__.values('Person.Date_Of_Birth').is(lt(dateThreshold)))
-                .sort().by(shuffle).range(0,1).next();
+                .order().by(shuffle).range(0,1).next();
 
 
 
@@ -940,7 +940,7 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
             g.addE("Has_Id_Card").from(person).to(idCard).next()
             g.addE("Lives").from(person).to(location).next()
 
-            g.addE("Has_Parent_Or_Guardian").from(person).to(parentOrGuardian)
+            g.addE("Has_Parent_Or_Guardian").from(person).to(parentOrGuardian).next();
         }
 
 
