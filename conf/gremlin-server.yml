@@ -2,6 +2,8 @@
 host: 0.0.0.0
 port: 8182
 scriptEvaluationTimeout: 0
+threadPoolWorker: 3
+
 channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
 graphs: {
   graph: conf/janusgraph-hbase-es.properties

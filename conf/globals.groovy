@@ -151,22 +151,37 @@ def dumpData(LinkedList<Map<String, String>> listOfMaps) {
     return strBuilder.toString()
 }
 
+/*
+ *
+def listOfMaps = new LinkedList<HashMap<String,String>>()
 
+def map1 = [pg_metadataProcessor: '',pg_metadataLineage:'', pg_metadataRedaction:'', pg_metadataVersion: 1, pg_metadataStatus:'' , pg_metadataGDPRStatus:'', pg_metadataLineageServerTag:'', pg_metadataLineageLocationTag:'',pg_metadataController:'controller123', "pg_gender":"male","pg_name_title":"mr","pg_name_first":"quoc","pg_name_last":"bastiaansen","pg_location_street":"7247 lucasbolwerk","pg_location_city":"epe","pg_location_state":"flevoland","pg_location_postcode":"92775","pg_email":"quoc.bastiaansen@example.com","pg_login_username":"heavybear983","pg_login_password":"writer","pg_login_salt":"avKgfb4e","pg_login_md5":"d918e55da9d17937c718b9f7688821cb","pg_login_sha1":"2cb2bba91deef25c64f15a6ac96d84c21c1189e3","pg_login_sha256":"2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df","pg_dob":"1955-12-01 16:58:49","pg_registered":"2012-07-15 09:50:59","pg_phone":"(668)-056-6802","pg_cell":"(859)-113-0976","pg_id_name":"BSN","pg_id_value":"94173707","pg_picture_large":"https://randomuser.me/api/portraits/men/63.jpg","pg_picture_medium":"https://randomuser.me/api/portraits/med/men/63.jpg","pg_picture_thumbnail":"https://randomuser.me/api/portraits/thumb/men/63.jpg","pg_nat":"NL"]
+def map2 = [pg_metadataProcessor: '',pg_metadataLineage:'', pg_metadataRedaction:'', pg_metadataVersion: 1, pg_metadataStatus:'' , pg_metadataGDPRStatus:'', pg_metadataLineageServerTag:'', pg_metadataLineageLocationTag:'',pg_metadataController:'controller123', "pg_gender":"male","pg_name_title":"mr","pg_name_first":"quo333c","pg_name_last":"bastiaan3333sen","pg_location_street":"7247 lucasbo333lwerk","pg_location_city":"epe","pg_location_state":"flevoland","pg_location_postcode":"92775","pg_email":"quoc.bastiaansen@example.com","pg_login_username":"heavybear983","pg_login_password":"writer","pg_login_salt":"avKgfb4e","pg_login_md5":"d918e55da9d17937c718b9f7688821cb","pg_login_sha1":"2cb2bba91deef25c64f15a6ac96d84c21c1189e3","pg_login_sha256":"2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df","pg_dob":"1955-12-01 16:58:49","pg_registered":"2012-07-15 09:50:59","pg_phone":"(668)-056-6802","pg_cell":"(859)-113-0976","pg_id_name":"BSN","pg_id_value":"94173707","pg_picture_large":"https://randomuser.me/api/portraits/men/63.jpg","pg_picture_medium":"https://randomuser.me/api/portraits/med/men/63.jpg","pg_picture_thumbnail":"https://randomuser.me/api/portraits/thumb/men/63.jpg","pg_nat":"NL"]
+
+listOfMaps.add(map1);
+listOfMaps.add(map2);
+
+addCampaignAwarenessBulk(graph,g, listOfMaps) */
 def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
 
     def metadataCreateDate = new Date()
     def metadataUpdateDate = new Date()
     def trans = graph.tx()
+    long counter = 0;
+
+    def awarenessCampaignId = -1L;
     try {
-        trans.open()
+        if (!trans.isOpen()) {
+            trans.open()
+        }
 
 
         awarenessCampaign = g.V().has("Metadata.Type", "Object.Awareness_Campaign")
 
         if (awarenessCampaign.hasNext()) {
-            awarenessCampaign = awarenessCampaign.next()
+            awarenessCampaignId = awarenessCampaign.next().id();
         } else {
-            awarenessCampaign = g.addV("Object.Awareness_Campaign").
+            awarenessCampaignId = g.addV("Object.Awareness_Campaign").
                     property("Metadata.Controller", "Controller").
                     property("Metadata.Processor", "Processor").
                     property("Metadata.Lineage", "https://trainingcourses.com").
@@ -183,17 +198,65 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
                     property("Object.Awareness_Campaign.URL", "https://trainingcourses.com").
                     property("Object.Awareness_Campaign.Start_Date", metadataCreateDate).
                     property("Object.Awareness_Campaign.Stop_Date", metadataUpdateDate).
-                    next()
+                    next().id();
         }
 
+        trans.commit()
+    } catch (Throwable t) {
+        trans.rollback()
+        throw t
+    } finally {
+        trans.close()
+    }
+
+
+    def probabilities = [
+            new org.apache.commons.math3.util.Pair<String, Double>("Link Sent", (Double) 25.0),
+            new org.apache.commons.math3.util.Pair<String, Double>("Reminder Sent", (Double) 30.0),
+            new org.apache.commons.math3.util.Pair<String, Double>("Failed", (Double) 3.0),
+            new org.apache.commons.math3.util.Pair<String, Double>("Passed", (Double) 60.0),
+            new org.apache.commons.math3.util.Pair<String, Double>("Second  Reminder", (Double) 45.0)]
+    def distribution = new org.apache.commons.math3.distribution.EnumeratedDistribution<String>(probabilities.asList())
+
+
+//        def roleTypesProbabilities = [
+//                new Pair<String, Double>("Operations Manager", (Double) 10.0),
+//                new Pair<String, Double>("Operations Engineer", (Double) 100.0),
+//                new Pair<String, Double>("Operations Director", (Double) 1.0)]
+//
+//        def roleTypesDistribution = new EnumeratedDistribution<String>(roleTypesProbabilities.asList())
 
 
 
-        for (Map<String, String> item in listOfMaps) {
+    for (Map<String, String> item in listOfMaps) {
+
+        counter ++;
+        role = 'Operations Engineer';
+        reportsTo = 'Operations Manager';
+
+        if (counter == 1){
+            role = 'Data Protection Officer' ;
+            reportsTo = 'CEO';
+
+        }
+        else if (counter <= 10){
+            role = 'Operations Director';
+            reportsTo = 'Data Protection Officer';
+
+        }
+        else if (counter <= 50 ){
+            role = 'Operations Manager';
+            reportsTo = 'Operations Director';
+
+        }
+        try {
+            if (!trans.isOpen()) {
+                trans.open()
+            }
 
 
             try {
-                dob = new SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
+                dob = new java.text.SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
             } catch (Throwable t) {
                 dob = new Date("01/01/1666")
             }
@@ -201,7 +264,7 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
 
 
 
-            person = g.addV("Person.Employee").
+            def person = g.addV("Person.Employee").
                     property("Metadata.Controller", item.get("pg_metadataController")).
                     property("Metadata.Processor", item.get("pg_metadataProcessor")).
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
@@ -219,16 +282,14 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
                     property("Person.Gender", item.get("pg_gender")).
                     property("Person.Nationality", item.get("pg_nat")).
                     property("Person.Date_Of_Birth", dob).
-                    property("Person.Title", item.get("pg_name_title")).next()
+                    property("Person.Employee.Role", role ).
+                    property("Person.Title", item.get("pg_name_title"))
+                    .next();
 
 
-            def probabilities = [
-                    new Pair<String, Double>("Link Sent", (Double) 25.0),
-                    new Pair<String, Double>("Reminder Sent", (Double) 30.0),
-                    new Pair<String, Double>("Failed", (Double) 3.0),
-                    new Pair<String, Double>("Passed", (Double) 60.0),
-                    new Pair<String, Double>("Second  Reminder", (Double) 45.0)]
-            def distribution = new EnumeratedDistribution<String>(probabilities.asList())
+            personId = person.id();
+
+
 
 
 
@@ -244,16 +305,19 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
                     property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Event.Training_Event").
+                    property("Metadata.Type", "Event.Training").
                     property("Event.Training.Status", distribution.sample()).next()
 
 
             g.addE("Event.Training.Awareness_Campaign")
                     .from(trainingEvent)
-                    .to(awarenessCampaign)
+                    .to(g.V(awarenessCampaignId).next())
                     .property("Metadata.Type", "Event.Training.Awareness_Campaign")
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
+
+
+            person = g.V(personId).next();
 
             g.addE("Event.Training.Person")
                     .from(trainingEvent)
@@ -262,21 +326,37 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
 
+            if (counter > 1){
+                person = g.V(personId).next();
 
+                boss = g.V().has('Person.Employee.Role',reportsTo).order().by(shuffle).range(0,1).next();
+
+                g.addE("Reports_To").from (person).to(boss).next();
+            }
+
+
+
+            trans.commit()
+        } catch (Throwable t) {
+            trans.rollback()
+            throw t
+        } finally {
+            trans.close()
         }
 
 
-
-        trans.commit()
-    } catch (Throwable t) {
-        trans.rollback()
-        throw t
-    } finally {
-        trans.close()
     }
 
 
+    return counter;
+
+
+
+
+
+
 }
+
 
 
 def addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
@@ -732,14 +812,17 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
     metadataUpdateDate = new Date();
     trans = graph.tx()
     try {
-        trans.open()
+
+        if (!trans.isOpen())
+          trans.open()
 
         randVal = new Random()
 
         long oneYearInMs = 3600000L * 24L * 365L
         long eighteenYearsInMs = oneYearInMs * 18L
 
-
+        long ageThresholdMs = (long)(System.currentTimeMillis() - (3600000L * 24L *365L  * 18L));
+        def dateThreshold = new java.util.Date (ageThresholdMs);
 
 
         for (Map<String, String> item in listOfMaps) {
@@ -841,8 +924,13 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
                     property("Location.Address.Street", item.get("pg_location_street")).
                     property("Location.Address.City", item.get("pg_location_city")).
                     property("Location.Address.State", item.get("pg_location_state")).
-                    property("Location.Address.Post_Code", item.get("pg_location_postcode")).next()
+                    property("Location.Address.Post_Code", item.get("pg_location_postcode")).next();
 
+
+            parentOrGuardian = g.V()
+                .has('Metadata.Type','Person')
+                .where(__.values('Person.Date_Of_Birth').is(lt(dateThreshold)))
+                .sort().by(shuffle).range(0,1).next();
 
 
 
@@ -851,6 +939,8 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
             g.addE("Has_Credential").from(person).to(credential).next()
             g.addE("Has_Id_Card").from(person).to(idCard).next()
             g.addE("Lives").from(person).to(location).next()
+
+            g.addE("Has_Parent_Or_Guardian").from(person).to(parentOrGuardian)
         }
 
 
@@ -1682,7 +1772,7 @@ def createIndicesPropsAndLabels() {
 
 
     edgeLabel = createEdgeLabel(mgmt, "Reports_To")
-    edgeLabel = createEdgeLabel(mgmt, "Has_Guardian")
+    edgeLabel = createEdgeLabel(mgmt, "Has_Parent_Or_Guardian")
 
 
     edgeLabel = createEdgeLabel(mgmt, "Uses_Email")
