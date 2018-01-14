@@ -519,7 +519,7 @@ def addRandomDataProcedures(graph, g) {
 }
 
 
-def addRandomDataBreachEvents (graph, g){
+def addRandomDataBreachEvents(graph, g) {
 
     def trans = graph.tx()
     try {
@@ -567,8 +567,6 @@ def addRandomDataBreachEvents (graph, g){
             def metadataCreateDate = new Date((long) createMillis)
             def metadataUpdateDate = new Date((long) updateMillis)
 
-
-
             /*
                 eventDataBreachLabel = createVertexLabel(mgmt, "Event.Data_Breach");
                 eventDataBreachProp00 = createProp(mgmt, "Event.Data_Breach.Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
@@ -581,7 +579,7 @@ def addRandomDataBreachEvents (graph, g){
              */
             trans = graph.tx();
 
-            if (!trans.isOpen()){
+            if (!trans.isOpen()) {
                 trans.open()
 
             }
@@ -600,8 +598,8 @@ def addRandomDataBreachEvents (graph, g){
                     property("Event.Data_Breach.Status", status).
                     property("Event.Data_Breach.Source", source).
                     property("Event.Data_Breach.Impact", impact).
-                    property("Event.Data_Breach.Id", 'DBE '+ source + i).
-                    property("Event.Data_Breach.Description", "Data Breach event reported from "+ source).
+                    property("Event.Data_Breach.Id", 'DBE ' + source + i).
+                    property("Event.Data_Breach.Description", "Data Breach event reported from " + source).
                     next().id();
 
             trans.commit();
@@ -609,14 +607,14 @@ def addRandomDataBreachEvents (graph, g){
             trans.close();
 
             trans = graph.tx();
-            if (!trans.isOpen()){
+            if (!trans.isOpen()) {
                 trans.open()
 
             }
 
             def numServersImpacted = randVal.nextInt(10);
-            for (def j = 0; j < numServersImpacted; j++ ){
-                def dataBreach  = g.V(dataBreachVid).next();
+            for (def j = 0; j < numServersImpacted; j++) {
+                def dataBreach = g.V(dataBreachVid).next();
 
                 def awsInstance = g.V().has('Metadata.Type', 'Object.AWS_Instance').order().by(shuffle).range(0, 1).next()
                 g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataBreach).next()
@@ -626,21 +624,14 @@ def addRandomDataBreachEvents (graph, g){
             trans.commit();
 
 
-
         }
-
-
-
-
-
-
 
 
     } catch (Throwable t) {
         trans.rollback()
         throw t
     } finally {
-        if (trans.isOpen()){
+        if (trans.isOpen()) {
             trans.close()
 
         }
@@ -737,16 +728,16 @@ def addRandomSARs(graph, g) {
 
 def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
 
-    metadataCreateDate = new Date()
-    metadataUpdateDate = new Date()
+    metadataCreateDate = new Date();
+    metadataUpdateDate = new Date();
     trans = graph.tx()
     try {
         trans.open()
 
         randVal = new Random()
 
-        def oneYearInMs = 3600000 * 24 * 365
-        def eighteenYearsInMs = oneYearInMs * 18
+        long oneYearInMs = 3600000L * 24L * 365L
+        long eighteenYearsInMs = oneYearInMs * 18L
 
 
 
@@ -1683,6 +1674,16 @@ def createIndicesPropsAndLabels() {
     createMixedIdx(mgmt, "objectPrivacyNotice13MixedIdx", objectPrivacyNotice13)
 
     personEmployee = createVertexLabel(mgmt, "Person.Employee")
+    personEmployee00 = createProp(mgmt, "Person.Employee.Role", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployee01 = createProp(mgmt, "Person.Employee.Is_GDPR_Role", String.class, org.janusgraph.core.Cardinality.SINGLE)
+
+    createMixedIdx(mgmt, "personEmployeeMixedIdx00", personEmployee00)
+    createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
+
+
+    edgeLabel = createEdgeLabel(mgmt, "Reports_To")
+    edgeLabel = createEdgeLabel(mgmt, "Has_Guardian")
+
 
     edgeLabel = createEdgeLabel(mgmt, "Uses_Email")
     edgeLabel = createEdgeLabel(mgmt, "Approved_Compliance_Check")
@@ -1708,6 +1709,8 @@ def createIndicesPropsAndLabels() {
         } catch (e) {
         }
     }
+
+    edgeLabel = createEdgeLabel(mgmt, "Has_Data_Procedures")
     edgeLabel = createEdgeLabel(mgmt, "Consent")
     edgeLabel = createEdgeLabel(mgmt, "Has_Privacy_Notice")
     edgeLabel = createEdgeLabel(mgmt, "Has_Server")
@@ -1720,16 +1723,26 @@ def createIndicesPropsAndLabels() {
 
 
 
-    orgLabel = createVertexLabel(mgmt, "Organisation")
-    orgRegNumber = createProp(mgmt, "Organisation.Registration_Number", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    orgType = createProp(mgmt, "Organisation.Type", String.class, org.janusgraph.core.Cardinality.SET)
-    orgName = createProp(mgmt, "Organisation.Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    orgShortName = createProp(mgmt, "Organisation.Short_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    orgTaxId = createProp(mgmt, "Organisation.Tax_Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    orgSector = createProp(mgmt, "Organisation.Sector", String.class, org.janusgraph.core.Cardinality.SET)
+    orgLabel = createVertexLabel(mgmt, "Person.Organisation")
+    orgRegNumber = createProp(mgmt, "Person.Organisation.Registration_Number", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    orgType = createProp(mgmt, "Person.Organisation.Type", String.class, org.janusgraph.core.Cardinality.SET)
+    orgName = createProp(mgmt, "Person.Organisation.Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    orgShortName = createProp(mgmt, "Person.Organisation.Short_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    orgTaxId = createProp(mgmt, "Person.Organisation.Tax_Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    orgSector = createProp(mgmt, "Person.Organisation.Sector", String.class, org.janusgraph.core.Cardinality.SET)
+    orgPhone = createProp(mgmt, "Person.Organisation.Phone", String.class, org.janusgraph.core.Cardinality.SET)
+    orgFax = createProp(mgmt, "Person.Organisation.Fax", String.class, org.janusgraph.core.Cardinality.SET)
+    orgEmail = createProp(mgmt, "Person.Organisation.Email", String.class, org.janusgraph.core.Cardinality.SET)
 
-    createMixedIdx(mgmt, "orgNameMixedMixedIdx", orgName)
-    createMixedIdx(mgmt, "orgRegNumberMixedIdx", orgRegNumber)
+
+    orgURL = createProp(mgmt, "Person.Organisation.URL", String.class, org.janusgraph.core.Cardinality.SET)
+
+    orgCountry = createProp(mgmt, "Person.Organisation.orgCountrySet", String.class, org.janusgraph.core.Cardinality.SET)
+    createMixedIdx(mgmt, "personOrgCountryMixedIdx", orgCountry)
+
+    createMixedIdx(mgmt, "personOrgNameMixedMixedIdx", orgName)
+    createMixedIdx(mgmt, "personOrgRegNumberMixedIdx", orgRegNumber)
+    createMixedIdx(mgmt, "personOrgURLMixedIdx", orgURL)
 
 
     orgLabel = createVertexLabel(mgmt, "Event.Consent")
@@ -1743,11 +1756,506 @@ def createIndicesPropsAndLabels() {
 }
 
 
+def createDataProtectionAuthorities() {
+
+    def authData = [
+            [
+                    orgCountrySet       : 'AU',
+                    orgName             : 'Österreichische Datenschutzbehörde',
+                    orgShortName        : 'DSB',
+                    locationAddrStreet  : 'Hohenstaufengasse 3',
+                    locationAddrPostCode: '1010',
+                    locationAddrCity    : 'Wien',
+                    orgPhone            : '+43 1 531 15 202525',
+                    orgFax              : '+43 1 531 15 202690',
+                    orgEmail            : 'dsb@dsb.gv.at',
+                    orgURL              : 'http://www.dsb.gv.at/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'BE',
+                    orgName             : 'Commission de la protection de la vie privée',
+                    orgShortName        : 'Privacy Commission',
+                    locationAddrStreet  : 'Rue de la Presse 35',
+                    locationAddrPostCode: '1000',
+                    locationAddrCity    : 'Bruxelles',
+                    orgPhone            : '+32 2 274 48 00',
+                    orgFax              : '+32 2 274 48 10',
+                    orgEmail            : 'commission@privacycommission.be',
+                    orgURL              : 'http://www.privacycommission.be'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'BG',
+                    orgName             : 'Commission for Personal Data Protection',
+                    orgShortName        : 'CPDP',
+                    locationAddrStreet  : '2, Prof. Tsvetan Lazarov blvd.',
+                    locationAddrPostCode: '1592',
+                    locationAddrCity    : 'Sofia',
+                    orgPhone            : '+359 2 915 3523',
+                    orgFax              : '+359 2 915 3525',
+                    orgEmail            : 'kzld@cpdp.bg',
+                    orgURL              : 'http://www.cpdp.bg/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'HR',
+                    orgName             : 'Croatian Personal Data Protection Agency',
+                    orgShortName        : 'AZOP',
+                    locationAddrStreet  : 'Martićeva 14',
+                    locationAddrPostCode: '10000',
+                    locationAddrCity    : 'Zagreb',
+                    orgPhone            : '+385 1 4609 000',
+                    orgFax              : '+385 1 4609 099',
+                    orgEmail            : 'azop@azop.hr',
+                    orgURL              : 'http://www.azop.hr/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'CY',
+                    orgName             : 'Commissioner for Personal Data Protection',
+                    orgShortName        : 'CPDP',
+                    locationAddrStreet  : '1 Iasonos Street, 1082 Nicosia, P.O. Box 23378',
+                    locationAddrPostCode: 'CY-1682',
+                    locationAddrCity    : 'Nicosia',
+                    orgPhone            : '+357 22 818 456',
+                    orgFax              : '+357 22 304 565',
+                    orgEmail            : 'commissioner@dataprotection.gov.cy',
+                    orgURL              : 'http://www.dataprotection.gov.cy/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'CZ',
+                    orgName             : 'Urad pro ochranu osobnich udaju (The Office for Personal Data Protection)',
+                    orgShortName        : 'UOOU',
+                    locationAddrStreet  : 'Pplk. Sochora 27',
+                    locationAddrPostCode: '170 00',
+                    locationAddrCity    : 'Prague 7',
+                    orgPhone            : '+420 234 665 111',
+                    orgFax              : '+420 234 665 444',
+                    orgEmail            : 'posta@uoou.cz',
+                    orgURL              : 'http://www.uoou.cz/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'DK',
+                    orgName             : 'Datatilsynet',
+                    orgShortName        : 'Datatilsynet',
+                    locationAddrStreet  : 'Borgergade 28, 5',
+                    locationAddrPostCode: '1300',
+                    locationAddrCity    : 'Copenhagen K',
+                    orgPhone            : '+45 33 1932 00',
+                    orgFax              : '+45 33 19 32 18',
+                    orgEmail            : 'dt@datatilsynet.dk',
+                    orgURL              : 'http://www.datatilsynet.dk'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'EE',
+                    orgName             : 'Estonian Data Protection Inspectorate (Andmekaitse Inspektsioon)',
+                    orgShortName        : 'AKI',
+                    locationAddrStreet  : 'Väike-Ameerika 19',
+                    locationAddrPostCode: '10129',
+                    locationAddrCity    : 'Tallinn',
+                    orgPhone            : '+372 6274 135',
+                    orgFax              : '+372 6274 137',
+                    orgEmail            : 'info@aki.ee',
+                    orgURL              : 'http://www.aki.ee/en'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'FI',
+                    orgName             : 'Office of the Data Protection Ombudsman',
+                    orgShortName        : 'OM',
+                    locationAddrStreet  : 'P.O. Box 315',
+                    locationAddrPostCode: 'FIN-00181',
+                    locationAddrCity    : 'Helsinki',
+                    orgPhone            : '+358 10 3666 700',
+                    orgFax              : '+358 10 3666 735',
+                    orgEmail            : 'tietosuoja@om.fi',
+                    orgURL              : 'http://www.tietosuoja.fi/en/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'FR',
+                    orgName             : 'Commission Nationale de l\'Informatique et des Libertés',
+                    orgShortName        : 'CNIL',
+                    locationAddrStreet  : '8 rue Vivienne, CS 30223',
+                    locationAddrPostCode: 'F-75002',
+                    locationAddrCity    : 'Paris, Cedex 02',
+                    orgPhone            : '+33 1 53 73 22 22',
+                    orgFax              : '+33 1 53 73 22 00',
+                    orgEmail            : '',
+                    orgURL              : 'http://www.cnil.fr/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'DE',
+                    orgName             : 'Die Bundesbeauftragte für den Datenschutz und die Informationsfreiheit',
+                    orgShortName        : 'BFDI',
+                    locationAddrStreet  : 'Husarenstraße 30',
+                    locationAddrPostCode: '53117',
+                    locationAddrCity    : 'Bonn',
+                    orgPhone            : '+49 228 997799 0',
+                    orgFax              : '+49 228 997799 550',
+                    orgEmail            : 'poststelle@bfdi.bund.de',
+                    orgURL              : 'http://www.bfdi.bund.de/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'GR',
+                    orgName             : 'Hellenic Data Protection Authority',
+                    orgShortName        : 'DPA',
+                    locationAddrStreet  : 'Kifisias Av. 1-3',
+                    locationAddrPostCode: 'PC 11523',
+                    locationAddrCity    : 'Ampelokipi Athens',
+                    orgPhone            : '+49 228 997799 0',
+                    orgFax              : '+49 228 997799 550',
+                    orgEmail            : 'contact@dpa.gr',
+                    orgURL              : 'http://www.dpa.gr/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'HU',
+                    orgName             : 'Data Protection Commissioner of Hungary',
+                    orgShortName        : 'DPA',
+                    locationAddrStreet  : 'Szilágyi Erzsébet fasor 22/C',
+                    locationAddrPostCode: 'H-1125',
+                    locationAddrCity    : 'Budapest',
+                    orgPhone            : '+36 1 3911 400',
+                    orgFax              : '',
+                    orgEmail            : 'peterfalvi.attila@naih.hu',
+                    orgURL              : 'http://www.naih.hu/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'IE',
+                    orgName             : 'Data Protection Commissioner',
+                    orgShortName        : 'DPC',
+                    locationAddrStreet  : 'Canal House, Station Road',
+                    locationAddrPostCode: 'Co. Laois',
+                    locationAddrCity    : 'Portarlington',
+                    orgPhone            : '+353 57 868 4800',
+                    orgFax              : '+353 57 868 4757',
+                    orgEmail            : 'info@dataprotection.ie',
+                    orgURL              : 'http://www.dataprotection.ie/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'IT',
+                    orgName             : 'Garante per la protezione dei dati personali',
+                    orgShortName        : 'Garante Privacy',
+                    locationAddrStreet  : 'Piazza di Monte Citorio, 121',
+                    locationAddrPostCode: '00186',
+                    locationAddrCity    : 'Roma',
+                    orgPhone            : '+39 06 69677 1',
+                    orgFax              : '+39 06 69677 785',
+                    orgEmail            : 'garante@garanteprivacy.it',
+                    orgURL              : 'http://www.garanteprivacy.it/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'LV',
+                    orgName             : 'Data State Inspectorate',
+                    orgShortName        : 'DVI',
+                    locationAddrStreet  : 'Blaumana str. 11/13-15',
+                    locationAddrPostCode: '1011',
+                    locationAddrCity    : 'Riga',
+                    orgPhone            : '+371 6722 3131',
+                    orgFax              : '+371 6722 3556',
+                    orgEmail            : 'info@dvi.gov.lv',
+                    orgURL              : 'http://www.dvi.gov.lv/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'LT',
+                    orgName             : 'State Data Protection',
+                    orgShortName        : 'ADA',
+                    locationAddrStreet  : 'Žygimantų str. 11-6a',
+                    locationAddrPostCode: '011042',
+                    locationAddrCity    : 'Vilnius',
+                    orgPhone            : '+ 370 5 279 14 45',
+                    orgFax              : '+370 5 261 94 94',
+                    orgEmail            : 'ada@ada.lt',
+                    orgURL              : 'http://www.ada.lt/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'LU',
+                    orgName             : 'Commission Nationale pour la Protection des Données',
+                    orgShortName        : 'CNDP',
+                    locationAddrStreet  : '1, avenue du Rock’n’Roll',
+                    locationAddrPostCode: 'L-4361',
+                    locationAddrCity    : 'Esch-sur-Alzette',
+                    orgPhone            : '+352 2610 60 1',
+                    orgFax              : '+352 2610 60 29',
+                    orgEmail            : 'info@cnpd.lu',
+                    orgURL              : 'http://www.cnpd.lu/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'MT',
+                    orgName             : 'Office of the Data Protection Commissioner',
+                    orgShortName        : 'DPC',
+                    locationAddrStreet  : '2, Airways House, High Street',
+                    locationAddrPostCode: 'SLM 1549',
+                    locationAddrCity    : 'Sliema',
+                    orgPhone            : '+356 2328 7100',
+                    orgFax              : '+356 2328 7198',
+                    orgEmail            : 'commissioner.dataprotection@gov.mt',
+                    orgURL              : 'http://www.dataprotection.gov.mt/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'NL',
+                    orgName             : 'Autoriteit Persoonsgegevens',
+                    orgShortName        : 'APG',
+                    locationAddrStreet  : 'Prins Clauslaan 60, P.O. Box 93374',
+                    locationAddrPostCode: '2509 AJ',
+                    locationAddrCity    : 'Den Haag/The Hague',
+                    orgPhone            : '+31 70 888 8500',
+                    orgFax              : '+31 70 888 8501',
+                    orgEmail            : 'info@autoriteitpersoonsgegevens.nl',
+                    orgURL              : 'https://autoriteitpersoonsgegevens.nl/nl'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'PL',
+                    orgName             : 'The Bureau of the Inspector General for the Protection of Personal Data',
+                    orgShortName        : 'GIODO',
+                    locationAddrStreet  : 'ul. Stawki 2',
+                    locationAddrPostCode: '00-193',
+                    locationAddrCity    : 'Warsaw',
+                    orgPhone            : '+48 22 53 10 440',
+                    orgFax              : '+48 22 53 10 441',
+                    orgEmail            : 'kancelaria@giodo.gov.pl',
+                    orgURL              : 'http://www.giodo.gov.pl'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'PT',
+                    orgName             : 'Comissão Nacional de Protecção de Dados',
+                    orgShortName        : 'CNPD',
+                    locationAddrStreet  : 'R. de São. Bento, 148-3°',
+                    locationAddrPostCode: '1200-821',
+                    locationAddrCity    : 'Lisboa',
+                    orgPhone            : '+351 21 392 84 00',
+                    orgFax              : '+351 21 397 68 32',
+                    orgEmail            : 'geral@cnpd.pt',
+                    orgURL              : 'http://www.cnpd.pt/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'RO',
+                    orgName             : 'The National Supervisory Authority for Personal Data Processing',
+                    orgShortName        : 'NSAPDP',
+                    locationAddrStreet  : 'B-dul Magheru 28-30',
+                    locationAddrPostCode: 'Sector 1',
+                    locationAddrCity    : 'BUCUREŞTI',
+                    orgPhone            : '+40 21 252 5599',
+                    orgFax              : '+40 21 252 5757',
+                    orgEmail            : 'anspdcp@dataprotection.ro',
+                    orgURL              : 'http://www.dataprotection.ro/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'SK',
+                    orgName             : 'Office for Personal Data Protection of the Slovak Republic',
+                    orgShortName        : 'OPDP',
+                    locationAddrStreet  : 'Hraničná 12',
+                    locationAddrPostCode: '820 07',
+                    locationAddrCity    : 'Bratislava 27',
+                    orgPhone            : '+ 421 2 32 31 32 14',
+                    orgFax              : '+ 421 2 32 31 32 34',
+                    orgEmail            : 'statny.dozor@pdp.gov.sk',
+                    orgURL              : 'http://www.dataprotection.gov.sk/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'SI',
+                    orgName             : 'Information Commissioner',
+                    orgShortName        : 'IP-RS',
+                    locationAddrStreet  : 'Zaloška 59',
+                    locationAddrPostCode: '1000',
+                    locationAddrCity    : 'Ljubljana',
+                    orgPhone            : '+386 1 230 9730',
+                    orgFax              : '+386 1 230 9778',
+                    orgEmail            : 'gp.ip@ip-rs.si',
+                    orgURL              : 'https://www.ip-rs.si/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'ES',
+                    orgName             : 'Agencia de Protección de Datos',
+                    orgShortName        : 'AGPD',
+                    locationAddrStreet  : 'C/Jorge Juan, 6',
+                    locationAddrPostCode: '28001',
+                    locationAddrCity    : 'Madrid',
+                    orgPhone            : '+34 91399 6200',
+                    orgFax              : '+34 91455 5699',
+                    orgEmail            : 'internacional@agpd.es',
+                    orgURL              : 'https://www.agpd.es/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'SE',
+                    orgName             : 'Datainspektionen',
+                    orgShortName        : '',
+                    locationAddrStreet  : 'Drottninggatan 29, 5th Floor, Box 8114',
+                    locationAddrPostCode: '104 20',
+                    locationAddrCity    : 'Stockholm',
+                    orgPhone            : '+46 8 657 6100',
+                    orgFax              : '+46 8 652 8652',
+                    orgEmail            : 'datainspektionen@datainspektionen.se',
+                    orgURL              : 'http://www.datainspektionen.se/'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'GB',
+                    orgName             : 'The Information Commissioner’s Office',
+                    orgShortName        : 'ICO',
+                    locationAddrStreet  : 'Water Lane, Wycliffe House',
+                    locationAddrPostCode: 'SK9 5AF',
+                    locationAddrCity    : 'Wilmslow, Cheshire',
+                    orgPhone            : '+44 1625 545 745',
+                    orgFax              : '',
+                    orgEmail            : 'international.team@ico.org.uk',
+                    orgURL              : 'https://ico.org.uk'
+            ]
+            ,
+            [
+                    orgCountrySet       : 'EU',
+                    orgName             : 'European Data Protection Supervisor',
+                    orgShortName        : 'EDPS',
+                    locationAddrStreet  : 'Rue Montoyer 63, 6th floor',
+                    locationAddrPostCode: '1047',
+                    locationAddrCity    : 'Bruxelles/Brussel',
+                    orgPhone            : '+32 2 283 19 00',
+                    orgFax              : '+32 2 283 19 50',
+                    orgEmail            : 'edps@edps.europa.eu',
+                    orgURL              : 'http://www.edps.europa.eu/EDPSWEB'
+            ]
+
+
+    ];
+
+
+    def trans = graph.tx()
+    try {
+        trans.open();
+
+        def randVal = new Random();
+        def randValK = randVal.nextInt(5);
+
+        def oneWeekInMs = 3600000 * 24 * 7;
+        def eighteenWeeks = oneWeekInMs * 18;
+
+
+        def types = new String[6];
+
+        types[0] = "Person";
+        types[1] = "Object.Email_Address";
+        types[2] = "Object.Credential";
+        types[3] = "Object.Identity_Card";
+        types[4] = "Event.Consent";
+        types[5] = "Event.Subject_Access_Request";
+
+
+        for (def i = 0; i < authData.length; i++) {
+            def authDataObj = authData[i];
+
+
+//            orgCountrySet       : 'EU',
+//            orgName             : 'European Data Protection Supervisor',
+//            orgShortName        : 'EDPS',
+//            locationAddrStreet  : 'Rue Montoyer 63, 6th floor',
+//            locationAddrPostCode: '1047',
+//            locationAddrCity    : 'Bruxelles/Brussel',
+//            orgPhone            : '+32 2 283 19 00',
+//            orgFax              : '+32 2 283 19 50',
+//            orgEmail            : 'edps@edps.europa.eu',
+//            orgURL              : 'http://www.edps.europa.eu/EDPSWEB'
+
+
+            def createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
+            def updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks)
+            def metadataCreateDate = new Date((long) createMillis)
+            def metadataUpdateDate = new Date((long) updateMillis)
+
+
+
+            def location = g.addV("Location.Address").
+                property("Metadata.Lineage", "http://ec.europa.eu/justice/data-protection/article-29/structure/data-protection-authorities/index_en.htm").
+
+                property("Metadata.Redaction", "/dataprotectionofficer/aaa").
+                property("Metadata.Version", "1").
+                property("Metadata.Create_Date", metadataCreateDate).
+                property("Metadata.Update_Date", metadataUpdateDate).
+                property("Metadata.Lineage_Server_Tag", "AWS EUR1").
+                property("Metadata.Lineage_Location_Tag", "GB").
+                property("Metadata.Type", "Location.Address").
+                property("Location.Address.Street", authDataObj.locationAddrStreet).
+                property("Location.Address.City", authDataObj.locationAddrCity).
+                property("Location.Address.Post_Code", authDataObj.locationAddrCity).next()
+
+
+
+            long orgId = g.addV("Person.Organisation").
+                property("Metadata.Lineage", "http://ec.europa.eu/justice/data-protection/article-29/structure/data-protection-authorities/index_en.htm").
+                property("Metadata.Redaction", "/dataprotectionofficer/aaa").
+                property("Metadata.Version", "1").
+                property("Metadata.Create_Date", metadataCreateDate).
+                property("Metadata.Update_Date", metadataUpdateDate).
+                property("Metadata.Lineage_Server_Tag", "AWS EUR1").
+                property("Metadata.Lineage_Location_Tag", "GB").
+                property("Metadata.Type", "Person.Organisation").
+                property("Person.Organisation.Short_Name", authDataObj.orgShortName).
+                property("Person.Organisation.Name", authDataObj.orgName).
+                property("Person.Organisation.URL", authDataObj.orgURL).
+                property("Person.Organisation.orgCountrySet", authDataObj.orgCountrySet).
+                property("Person.Organisation.Phone", authDataObj.orgPhone).
+                property("Person.Organisation.Email", authDataObj.orgEmail).
+                property("Person.Organisation.Fax", authDataObj.orgFax).
+                next().id();
+
+
+            for (def k = 0; k < randValK; k++) {
+                def org = g.V(orgId);
+
+                def pia = g.V().has('Metadata.Type', 'Object.Privacy_Impact_Assessment')
+                        .order().by(shuffle).range(0, 1).next()
+
+                g.addE("Has_Data_Procedures").from(pia).to(org).next()
+            }
+            def org = g.V(location);
+
+
+        }
+
+
+
+
+
+
+
+
+        trans.commit()
+    } catch (Throwable t) {
+        trans.rollback()
+        throw t
+    } finally {
+        trans.close()
+    }
+
+
+}
+
+
 def getPropsNonMetadataAsHTMLTableRows(g, Long vid, String origLabel) {
     StringBuilder sb = new StringBuilder();
 
 
-    g.V(vid).valueMap().next().forEach {   origKey, origVal ->
+    g.V(vid).valueMap().next().forEach { origKey, origVal ->
         String val = origVal.get(0)
         String key = origKey.replaceAll('[_.]', ' ')
         if (!key.startsWith('Metadata')) {
@@ -1781,7 +2289,7 @@ def __addVPCEdgesFromUserIdGroupPairs(
         String origGroupIdStr,
         boolean isEgress) {
 
-    def StringBuilder sb =  new StringBuilder();
+    def StringBuilder sb = new StringBuilder();
 
 
     userIdGroupPairs.each { uidPair ->
@@ -1823,7 +2331,7 @@ def __addVPCEdgesFromUserIdGroupPairs(
 }
 
 def __addSecGroupEdgesFromUserIdGroupPairs(graph, g, Long origSecGroupVid, userIdGroupPairs, String origGroupIdStr, boolean isEgress) {
-    def StringBuilder sb =  new StringBuilder();
+    def StringBuilder sb = new StringBuilder();
 
     userIdGroupPairs.each { uidPair ->
 
@@ -1866,7 +2374,7 @@ def __addSecGroupEdgesFromUserIdGroupPairs(graph, g, Long origSecGroupVid, userI
 
 def __addSecGroupEdges(graph, g, aws_sec_groups) {
 
-    def StringBuilder sb =  new StringBuilder();
+    def StringBuilder sb = new StringBuilder();
 
     def secGroups = com.jayway.jsonpath.JsonPath.parse(aws_sec_groups).read('$.SecurityGroups.[*]').toSet()
 
@@ -1892,7 +2400,7 @@ def __addSecGroupEdges(graph, g, aws_sec_groups) {
                     sb.append('in __addSecGroupEdges -')
                             .append('egressIpPerm.UserIdGroupPairs = ').append(egressIpPerm.UserIdGroupPairs.toString()).append('\n')
 
-                    retVal =  __addVPCEdgesFromUserIdGroupPairs(graph, g, vpcVid, egressIpPerm.UserIdGroupPairs, (String) sg.GroupId, true);
+                    retVal = __addVPCEdgesFromUserIdGroupPairs(graph, g, vpcVid, egressIpPerm.UserIdGroupPairs, (String) sg.GroupId, true);
                     sb.append(retVal);
                 }
             }
@@ -1943,7 +2451,6 @@ def __addSecGroupEdges(graph, g, aws_sec_groups) {
 
     return sb.toString();
 }
-
 
 
 def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
@@ -2007,8 +2514,8 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
     def randVal = new Random()
     def randVal1 = randVal.nextInt(3000)
 
-    def oneWeekInMs = 3600000 * 24 * 7
-    def eighteenWeeks = oneWeekInMs * 18
+    long oneWeekInMs = 3600000L * 24L * 7L
+    long eighteenWeeks = oneWeekInMs * 18L
 
 
 
@@ -2025,8 +2532,8 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
             sb.append("VPC error - ").append(t.toString()).append('\n');
         }
         if (vpcId == null) {
-            createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
-            updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks)
+            long createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks) * 2;
+            long updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks);
             metadataCreateDate = new Date((long) createMillis)
             metadataUpdateDate = new Date((long) updateMillis)
 
@@ -2082,8 +2589,8 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
             }
 
             if (awsiId == null) {
-                createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
-                updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks)
+                long createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks);
+                long updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks) * 2;
                 metadataCreateDate = new Date((long) createMillis)
                 metadataUpdateDate = new Date((long) updateMillis)
 
@@ -2162,8 +2669,8 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
                             trans.open();
 
 
-                        createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
-                        updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks)
+                        long createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
+                        long updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks) * 2
                         metadataCreateDate = new Date((long) createMillis)
                         metadataUpdateDate = new Date((long) updateMillis)
 
@@ -2233,7 +2740,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
     }
 
 
-    __addSecGroupEdges(graph,g,aws_sec_groups == null? aws_instances: aws_sec_groups)
+    __addSecGroupEdges(graph, g, aws_sec_groups == null ? aws_instances : aws_sec_groups)
 
 
 }
