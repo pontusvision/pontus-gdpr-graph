@@ -707,6 +707,8 @@ def addRandomDataBreachEvents(graph, g) {
         }
 
 
+
+
     } catch (Throwable t) {
         trans.rollback()
         throw t
@@ -716,6 +718,18 @@ def addRandomDataBreachEvents(graph, g) {
 
         }
     }
+
+    def event = g.V().has('Metadata.Type', 'Event.Data_Breach').order().by(shuffle).range(0,1).next();
+    def tx = graph.tx();
+    if (!tx.isOpen()){
+        tx.open();
+    }
+
+    for (def i = 0 ; i < 10000; i++){
+        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type','Person').order().by(shuffle).range(0,1)).to(event).next();
+    }
+    tx.commit();
+    tx.close();
 
 
 }
@@ -804,6 +818,7 @@ def addRandomSARs(graph, g) {
 
 
 }
+
 
 
 def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
@@ -1809,6 +1824,7 @@ def createIndicesPropsAndLabels() {
     edgeLabel = createEdgeLabel(mgmt, "Has_Ingress_Peering")
     edgeLabel = createEdgeLabel(mgmt, "Has_Egress_Peering")
     edgeLabel = createEdgeLabel(mgmt, "Impacted_By_Data_Breach")
+    edgeLabel = createEdgeLabel(mgmt, "Data_Impacted_By_Data_Breach")
 
 
 
@@ -2251,7 +2267,7 @@ def createDataProtectionAuthorities() {
         types[5] = "Event.Subject_Access_Request";
 
 
-        for (def i = 0; i < authData.length; i++) {
+        for (def i = 0; i < authData.size(); i++) {
             def authDataObj = authData[i];
 
 
