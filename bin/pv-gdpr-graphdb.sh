@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash  -x
 
 #
 #/**
@@ -147,6 +147,10 @@ for f in $PVGDPR_HOME/lib/*.jar; do
   CLASSPATH=${CLASSPATH}:$f;
 done
 
+for f in $PVGDPR_HOME/lib/*.properties; do
+  CLASSPATH=${CLASSPATH}:$f;
+done
+
 # default log directory & file
 if [ "$PVGDPR_LOG_DIR" = "" ]; then
   PVGDPR_LOG_DIR="$PVGDPR_HOME/logs"
@@ -243,5 +247,15 @@ cd ${PVGDPR_HOME}
 if [ "${PVGDPR_NOEXEC}" != "" ]; then
   "$JAVA" -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
 else
-  exec "$JAVA" -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
+  exec "$JAVA" \
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 \
+    -Dcom.pontusvision.gdpr.log.class=org.eclipse.jetty.util.log.StrErrLog \
+    -Dorg.eclipse.jetty.LEVEL=INFO \
+    -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StrErrLog \
+    -Dorg.eclipse.jetty.websocket.LEVEL=INFO \
+    -Dlog4j.debug \
+    -Dlog4j.configuration=file://${PVGDPR_HOME}/lib/log4j.properties \
+    -Dproc_$COMMAND \
+    -XX:OnOutOfMemoryError="kill -9 %p" \
+    -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
 fi

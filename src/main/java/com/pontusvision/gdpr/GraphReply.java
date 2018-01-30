@@ -18,9 +18,13 @@ public class GraphReply
     edges = null;
   }
 
-  public GraphReply(Set<Vertex> inNodes, Set<Vertex> outNodes, Set<Edge> inEdges, Set<Edge> outEdges)
+  public GraphReply(Vertex vtx,Set<Vertex> inNodes, Set<Vertex> outNodes, Set<Edge> inEdges, Set<Edge> outEdges)
   {
     Set<GraphNode> nodes = new HashSet<>();
+
+    GraphNode vtxNode = new GraphNode(vtx);
+    nodes.add(vtxNode);
+
 
     for (Vertex v : inNodes)
     {

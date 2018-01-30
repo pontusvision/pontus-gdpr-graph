@@ -2,6 +2,8 @@
 host: 0.0.0.0
 port: 8182
 scriptEvaluationTimeout: 0
+threadPoolWorker: 3
+
 channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
 graphs: {
   graph: conf/janusgraph-hbase-es.properties
@@ -10,8 +12,8 @@ scriptEngines: {
   gremlin-groovy: {
     plugins: { org.apache.tinkerpop.gremlin.server.jsr223.GremlinServerGremlinPlugin: {},
                org.apache.tinkerpop.gremlin.tinkergraph.jsr223.TinkerGraphGremlinPlugin: {},
-               org.apache.tinkerpop.gremlin.jsr223.ImportGremlinPlugin: {classImports: [java.lang.Math], methodImports: [java.lang.Math#*]},
-               org.apache.tinkerpop.gremlin.jsr223.ScriptFileGremlinPlugin: {files: [conf/globals.groovy]}
+               org.apache.tinkerpop.gremlin.jsr223.ImportGremlinPlugin: {classImports: [java.lang.Math, com.pontusvision.gdpr.CIDRUtils], methodImports: [java.lang.Math#*]},
+               org.apache.tinkerpop.gremlin.jsr223.ScriptFileGremlinPlugin: {files: [conf/globals.groovy , conf/bootstrap.groovy]}
                }}}
 serializers:
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { ioRegistries: [org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerIoRegistryV1d0, org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry] ,  useMapperFromGraph: graph}}
@@ -22,7 +24,7 @@ serializers:
 processors:
   - { className: org.apache.tinkerpop.gremlin.server.op.standard.StandardOpProcessor, config: { maxParameters: 64 }}
   - { className: org.apache.tinkerpop.gremlin.server.op.session.SessionOpProcessor, config: { maxParameters: 64 , sessionTimeout: 28800000 }}
-  - { className: org.apache.tinkerpop.gremlin.server.op.traversal.TraversalOpProcessor, config: { maxParameters: 64 , cacheExpirationTime: 600000, cacheMaxSize: 1000 }}
+  - { className: org.apache.tinkerpop.gremlin.server.op.traversal.TraversalOpProcessor, config: { maxParameters: 64 , cacheExpirationTime: 600000, cacheMaxSize: 10000 }}
 metrics: {
   consoleReporter: {enabled: false, interval: 180000},
   csvReporter: {enabled: false, interval: 180000, fileName: /tmp/gremlin-server-metrics.csv},
