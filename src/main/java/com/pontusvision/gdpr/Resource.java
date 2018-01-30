@@ -142,11 +142,12 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
     Set<Vertex> outNodes = App.g.V(Long.parseLong(greq.graphId)).to(Direction.OUT).toSet();
     Set<Vertex> inNodes = App.g.V(Long.parseLong(greq.graphId)).to(Direction.IN).toSet();
+    Vertex v = App.g.V(Long.parseLong(greq.graphId)).next();
 
     Set<Edge> outEdges = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.OUT).toSet();
     Set<Edge> inEdges = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.IN).toSet();
 
-    GraphReply retVal = new GraphReply(inNodes, outNodes, inEdges, outEdges);
+    GraphReply retVal = new GraphReply(v, inNodes, outNodes, inEdges, outEdges);
 
     return retVal;
   }
@@ -156,13 +157,20 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   public VertexLabelsReply vertexLabels(String str)
   {
-    JanusGraphManagement mgt = App.graph.openManagement();
+    try
+    {
+      JanusGraphManagement mgt = App.graph.openManagement();
 
+      VertexLabelsReply reply = new VertexLabelsReply(mgt.getVertexLabels());
 
-    VertexLabelsReply reply = new VertexLabelsReply(mgt.getVertexLabels());
+      mgt.commit();
+      return reply;
+    }
+    catch (Exception e){
 
-    mgt.commit();
-    return reply;
+    }
+    return new VertexLabelsReply();
+
   }
 
   @POST @Path("country_data_count") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
