@@ -162,6 +162,7 @@ listOfMaps.add(map1);
 listOfMaps.add(map2);
 
 addCampaignAwarenessBulk(graph,g, listOfMaps) */
+
 def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
 
     def metadataCreateDate = new Date()
@@ -218,7 +219,6 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
             new org.apache.commons.math3.util.Pair<String, Double>("Second  Reminder", (Double) 45.0)]
     def distribution = new org.apache.commons.math3.distribution.EnumeratedDistribution<String>(probabilities.asList())
 
-
 //        def roleTypesProbabilities = [
 //                new Pair<String, Double>("Operations Manager", (Double) 10.0),
 //                new Pair<String, Double>("Operations Engineer", (Double) 100.0),
@@ -227,24 +227,21 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
 //        def roleTypesDistribution = new EnumeratedDistribution<String>(roleTypesProbabilities.asList())
 
 
-
     for (Map<String, String> item in listOfMaps) {
 
-        counter ++;
+        counter++;
         role = 'Operations Engineer';
         reportsTo = 'Operations Manager';
 
-        if (counter == 1){
-            role = 'Data Protection Officer' ;
+        if (counter == 1) {
+            role = 'Data Protection Officer';
             reportsTo = 'CEO';
 
-        }
-        else if (counter <= 10){
+        } else if (counter <= 10) {
             role = 'Operations Director';
             reportsTo = 'Data Protection Officer';
 
-        }
-        else if (counter <= 50 ){
+        } else if (counter <= 50) {
             role = 'Operations Manager';
             reportsTo = 'Operations Director';
 
@@ -282,7 +279,7 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
                     property("Person.Gender", item.get("pg_gender")).
                     property("Person.Nationality", item.get("pg_nat")).
                     property("Person.Date_Of_Birth", dob).
-                    property("Person.Employee.Role", role ).
+                    property("Person.Employee.Role", role).
                     property("Person.Title", item.get("pg_name_title"))
                     .next();
 
@@ -326,12 +323,12 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
 
-            if (counter > 1){
+            if (counter > 1) {
                 person = g.V(personId).next();
 
-                boss = g.V().has('Person.Employee.Role',reportsTo).order().by(shuffle).range(0,1).next();
+                boss = g.V().has('Person.Employee.Role', reportsTo).order().by(shuffle).range(0, 1).next();
 
-                g.addE("Reports_To").from (person).to(boss).next();
+                g.addE("Reports_To").from(person).to(boss).next();
             }
 
 
@@ -351,12 +348,7 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
     return counter;
 
 
-
-
-
-
 }
-
 
 
 def addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
@@ -707,8 +699,6 @@ def addRandomDataBreachEvents(graph, g) {
         }
 
 
-
-
     } catch (Throwable t) {
         trans.rollback()
         throw t
@@ -719,14 +709,14 @@ def addRandomDataBreachEvents(graph, g) {
         }
     }
 
-    def event = g.V().has('Metadata.Type', 'Event.Data_Breach').order().by(shuffle).range(0,1).next();
+    def event = g.V().has('Metadata.Type', 'Event.Data_Breach').order().by(shuffle).range(0, 1).next();
     def tx = graph.tx();
-    if (!tx.isOpen()){
+    if (!tx.isOpen()) {
         tx.open();
     }
 
-    for (def i = 0 ; i < 10000; i++){
-        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type','Person').order().by(shuffle).range(0,1)).to(event).next();
+    for (def i = 0; i < 10000; i++) {
+        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type', 'Person').order().by(shuffle).range(0, 1)).to(event).next();
     }
     tx.commit();
     tx.close();
@@ -820,7 +810,6 @@ def addRandomSARs(graph, g) {
 }
 
 
-
 def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date();
@@ -829,15 +818,15 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
     try {
 
         if (!trans.isOpen())
-          trans.open()
+            trans.open()
 
         randVal = new Random()
 
         long oneYearInMs = 3600000L * 24L * 365L
         long eighteenYearsInMs = oneYearInMs * 18L
 
-        long ageThresholdMs = (long)(System.currentTimeMillis() - (3600000L * 24L *365L  * 18L));
-        def dateThreshold = new java.util.Date (ageThresholdMs);
+        long ageThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 365L * 18L));
+        def dateThreshold = new java.util.Date(ageThresholdMs);
 
 
         for (Map<String, String> item in listOfMaps) {
@@ -943,9 +932,9 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
 
 
             parentOrGuardian = g.V()
-                .has('Metadata.Type','Person')
-                .where(__.values('Person.Date_Of_Birth').is(lt(dateThreshold)))
-                .order().by(shuffle).range(0,1).next();
+                    .has('Metadata.Type', 'Person')
+                    .where(__.values('Person.Date_Of_Birth').is(lt(dateThreshold)))
+                    .order().by(shuffle).range(0, 1).next();
 
 
 
@@ -1466,12 +1455,15 @@ def createIndicesPropsAndLabels() {
 
     objectAWSInstanceLabel = createVertexLabel(mgmt, "Object.Notification_Templates");
     objectNotificationTemplatesProp00 = createProp(mgmt, "Object.Notification_Templates.Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
-    objectNotificationTemplatesProp01 = createProp(mgmt, "Object.Notification_Templates.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectNotificationTemplatesProp01 = createProp(mgmt, "Object.Notification_Templates.Types", String.class, org.janusgraph.core.Cardinality.SET);
     objectNotificationTemplatesProp02 = createProp(mgmt, "Object.Notification_Templates.URL", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectNotificationTemplatesProp03 = createProp(mgmt, "Object.Notification_Templates.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectNotificationTemplatesProp04 = createProp(mgmt, "Object.Notification_Templates.Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
     objectNotificationTemplatesIdx00 = createCompIdx(mgmt, "objectNotificationTemplatesIdx00", objectNotificationTemplatesProp00);
     objectNotificationTemplatesIdx01 = createCompIdx(mgmt, "objectNotificationTemplatesIdx01", objectNotificationTemplatesProp01);
     objectNotificationTemplatesIdx02 = createCompIdx(mgmt, "objectNotificationTemplatesIdx02", objectNotificationTemplatesProp02);
+    objectNotificationTemplatesIdx03 = createCompIdx(mgmt, "objectNotificationTemplatesIdx03", objectNotificationTemplatesProp03);
 
 
     eventDataBreachLabel = createVertexLabel(mgmt, "Event.Data_Breach");
@@ -2270,7 +2262,6 @@ def createDataProtectionAuthorities() {
         for (def i = 0; i < authData.size(); i++) {
             def authDataObj = authData[i];
 
-
 //            orgCountrySet       : 'EU',
 //            orgName             : 'European Data Protection Supervisor',
 //            orgShortName        : 'EDPS',
@@ -2291,38 +2282,38 @@ def createDataProtectionAuthorities() {
 
 
             def location = g.addV("Location.Address").
-                property("Metadata.Lineage", "http://ec.europa.eu/justice/data-protection/article-29/structure/data-protection-authorities/index_en.htm").
+                    property("Metadata.Lineage", "http://ec.europa.eu/justice/data-protection/article-29/structure/data-protection-authorities/index_en.htm").
 
-                property("Metadata.Redaction", "/dataprotectionofficer/aaa").
-                property("Metadata.Version", "1").
-                property("Metadata.Create_Date", metadataCreateDate).
-                property("Metadata.Update_Date", metadataUpdateDate).
-                property("Metadata.Lineage_Server_Tag", "AWS EUR1").
-                property("Metadata.Lineage_Location_Tag", "GB").
-                property("Metadata.Type", "Location.Address").
-                property("Location.Address.Street", authDataObj.locationAddrStreet).
-                property("Location.Address.City", authDataObj.locationAddrCity).
-                property("Location.Address.Post_Code", authDataObj.locationAddrCity).next()
+                    property("Metadata.Redaction", "/dataprotectionofficer/aaa").
+                    property("Metadata.Version", "1").
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
+                    property("Metadata.Lineage_Server_Tag", "AWS EUR1").
+                    property("Metadata.Lineage_Location_Tag", "GB").
+                    property("Metadata.Type", "Location.Address").
+                    property("Location.Address.Street", authDataObj.locationAddrStreet).
+                    property("Location.Address.City", authDataObj.locationAddrCity).
+                    property("Location.Address.Post_Code", authDataObj.locationAddrCity).next()
 
 
 
             long orgId = g.addV("Person.Organisation").
-                property("Metadata.Lineage", "http://ec.europa.eu/justice/data-protection/article-29/structure/data-protection-authorities/index_en.htm").
-                property("Metadata.Redaction", "/dataprotectionofficer/aaa").
-                property("Metadata.Version", "1").
-                property("Metadata.Create_Date", metadataCreateDate).
-                property("Metadata.Update_Date", metadataUpdateDate).
-                property("Metadata.Lineage_Server_Tag", "AWS EUR1").
-                property("Metadata.Lineage_Location_Tag", "GB").
-                property("Metadata.Type", "Person.Organisation").
-                property("Person.Organisation.Short_Name", authDataObj.orgShortName).
-                property("Person.Organisation.Name", authDataObj.orgName).
-                property("Person.Organisation.URL", authDataObj.orgURL).
-                property("Person.Organisation.orgCountrySet", authDataObj.orgCountrySet).
-                property("Person.Organisation.Phone", authDataObj.orgPhone).
-                property("Person.Organisation.Email", authDataObj.orgEmail).
-                property("Person.Organisation.Fax", authDataObj.orgFax).
-                next().id();
+                    property("Metadata.Lineage", "http://ec.europa.eu/justice/data-protection/article-29/structure/data-protection-authorities/index_en.htm").
+                    property("Metadata.Redaction", "/dataprotectionofficer/aaa").
+                    property("Metadata.Version", "1").
+                    property("Metadata.Create_Date", metadataCreateDate).
+                    property("Metadata.Update_Date", metadataUpdateDate).
+                    property("Metadata.Lineage_Server_Tag", "AWS EUR1").
+                    property("Metadata.Lineage_Location_Tag", "GB").
+                    property("Metadata.Type", "Person.Organisation").
+                    property("Person.Organisation.Short_Name", authDataObj.orgShortName).
+                    property("Person.Organisation.Name", authDataObj.orgName).
+                    property("Person.Organisation.URL", authDataObj.orgURL).
+                    property("Person.Organisation.orgCountrySet", authDataObj.orgCountrySet).
+                    property("Person.Organisation.Phone", authDataObj.orgPhone).
+                    property("Person.Organisation.Email", authDataObj.orgEmail).
+                    property("Person.Organisation.Fax", authDataObj.orgFax).
+                    next().id();
 
 
             for (def k = 0; k < randValK; k++) {
@@ -2351,6 +2342,79 @@ def createDataProtectionAuthorities() {
         throw t
     } finally {
         trans.close()
+    }
+
+
+}
+
+def createNotificationTemplates() {
+    def trans = graph.tx()
+    try {
+        if (!trans.isOpen()) {
+            trans.open();
+        }
+        g.addV("Object.Notification_Templates")
+                .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Object.Notification_Templates.Id", "SAR READ TEMPLATE")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, Please find below a summary of the data we hold about you:")
+                .property("Object.Notification_Templates.Types", "Person")
+                .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
+                .property("Object.Notification_Templates.Label", "SAR Read")
+                .next();
+
+        g.addV("Object.Notification_Templates")
+                .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Object.Notification_Templates.Id", "SAR UPDATE TEMPLATE")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, The current status of your request to update your information is {{ Event.Subject_Access_Request.Status }}.")
+                .property("Object.Notification_Templates.Types", "Person")
+                .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_update")
+                .property("Object.Notification_Templates.Label", "SAR Update")
+                .next();
+
+        g.addV("Object.Notification_Templates")
+                .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Object.Notification_Templates.Id", "SAR DELETE TEMPLATE")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, The current status of your request to delete your information is {{ Event.Subject_Access_Request.Status }}.")
+                .property("Object.Notification_Templates.Types", "Person")
+                .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_delete")
+                .property("Object.Notification_Templates.Label", "SAR Delete")
+                .next();
+
+
+        g.addV("Object.Notification_Templates")
+                .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Object.Notification_Templates.Id", "DATA BREACH REGULATOR TEMPLATE")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Organisation.Short_Name }}, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .")
+                .property("Object.Notification_Templates.Types", "Event.Data_Breach")
+                .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_regulator_report")
+                .property("Object.Notification_Templates.Label", "Regulator")
+                .next();
+
+        g.addV("Object.Notification_Templates")
+                .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Object.Notification_Templates.Id", "DATA BREACH BOARD TEMPLATE")
+                .property("Object.Notification_Templates.Text", "Dear Board Members, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .")
+                .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_board_report")
+                .property("Object.Notification_Templates.Types", "Event.Data_Breach")
+                .property("Object.Notification_Templates.Label", "Board")
+                .next();
+
+        g.addV("Object.Notification_Templates")
+                .property("Object.Notification_Templates.Id", "DATA BREACH PERSON TEMPLATE")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, We regret to inform you that your data may have been stolen.")
+                .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
+                .property("Object.Notification_Templates.Types", "Event.Data_Breach")
+                .property("Object.Notification_Templates.Label", "Person")
+                .next();
+
+        trans.commit();
+
+    }
+    catch (t) {
+        trans.rollback();
+        throw t;
+    } finally {
+        trans.close();
     }
 
 
@@ -2849,4 +2913,14 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
     __addSecGroupEdges(graph, g, aws_sec_groups == null ? aws_instances : aws_sec_groups)
 
 
+}
+
+def addRandomDataInit(graph, g) {
+    addRandomSARs(graph, g);
+    addLawfulBasisAndPrivacyNotices(graph, g);
+    addRandomDataProcedures(graph, g);
+    createDataProtectionAuthorities();
+    addRandomAWSGraph(graph, g, null, null);
+    addRandomDataBreachEvents(graph, g);
+    createNotificationTemplates();
 }
