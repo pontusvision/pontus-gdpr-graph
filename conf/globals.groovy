@@ -14,6 +14,7 @@ import static org.janusgraph.core.attribute.Text.*
 import java.lang.*
 import java.util.*
 import java.text.*
+import com.hubspot.jinjava.Jinjava;
 
 def globals = [:]
 globals << [g: graph.traversal()]
@@ -2356,7 +2357,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR READ TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, Please find below a summary of the data we hold about you:")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person_Full_Name }}, Please find below a summary of the data we hold about you:".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
                 .property("Object.Notification_Templates.Label", "SAR Read")
@@ -2365,7 +2366,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR UPDATE TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, The current status of your request to update your information is {{ Event.Subject_Access_Request.Status }}.")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, The current status of your request to update your information is {{ Event.Subject_Access_Request.Status }}.".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_update")
                 .property("Object.Notification_Templates.Label", "SAR Update")
@@ -2374,7 +2375,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR DELETE TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, The current status of your request to delete your information is {{ Event.Subject_Access_Request.Status }}.")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, The current status of your request to delete your information is {{ Event.Subject_Access_Request.Status }}.".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_delete")
                 .property("Object.Notification_Templates.Label", "SAR Delete")
@@ -2384,7 +2385,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "DATA BREACH REGULATOR TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person.Organisation.Short_Name }}, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Organisation.Short_Name }}, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Event.Data_Breach")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_regulator_report")
                 .property("Object.Notification_Templates.Label", "Regulator")
@@ -2393,7 +2394,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "DATA BREACH BOARD TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear Board Members, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .")
+                .property("Object.Notification_Templates.Text", "Dear Board Members, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_board_report")
                 .property("Object.Notification_Templates.Types", "Event.Data_Breach")
                 .property("Object.Notification_Templates.Label", "Board")
@@ -2401,7 +2402,7 @@ def createNotificationTemplates() {
 
         g.addV("Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "DATA BREACH PERSON TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, We regret to inform you that your data may have been stolen.")
+                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, We regret to inform you that your data may have been stolen.".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
                 .property("Object.Notification_Templates.Types", "Event.Data_Breach")
                 .property("Object.Notification_Templates.Label", "Person")
@@ -2912,6 +2913,28 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 
     __addSecGroupEdges(graph, g, aws_sec_groups == null ? aws_instances : aws_sec_groups)
 
+
+}
+
+def renderReportInBase64(long pg_id,String pg_templateTextInBase64){
+
+    def context = g.V(pg_id).valueMap()[0].collectEntries{ key, val ->
+        [ key.replaceAll('[.]','_') , val.toString() - '[' - ']']
+    };
+
+    def neighbours = g.V(pg_id).both().valueMap().toList().collect{ item ->
+        item.collectEntries{ key, val ->
+            [ key.replaceAll('[.]','_') , val.toString()  - '[' - ']']
+        }
+    };
+
+    def allData = new HashMap<>();
+
+    allData.put ('context', context);
+    allData.put ('connected_data', neighbours);
+
+    com.hubspot.jinjava.Jinjava jinJava = new com.hubspot.jinjava.Jinjava();
+    return jinJava.render( new String(pg_templateTextInBase64.decodeBase64()),allData).bytes.encodeBase64().toString();
 
 }
 
