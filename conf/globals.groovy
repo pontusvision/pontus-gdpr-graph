@@ -2357,7 +2357,28 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR READ TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person_Full_Name }}, Please find below a summary of the data we hold about you:".bytes.encodeBase64().toString())
+                .property("<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
+                "\n" +
+                "  Please find below a summary of the data we HOLD about you:\n" +
+                "  \n" +
+                "  <p><br></p><p>\n" +
+                "  <h3>{{ context.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+                "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+                "  {% for key, value in context.items() %}\n" +
+                "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+                "  {% endfor %}\n" +
+                "  {{ \"</table>\" }}\n" +
+                "  {% endfor %}\n" +
+                "  \n" +
+                "  \n" +
+                "  {% for mainkey in connected_data %}\n" +
+                "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+                "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+                "  {% for key, value in mainkey.items() %}\n" +
+                "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+                "  {% endfor %}\n" +
+                "  {{ \"</table>\" }}\n" +
+                "  {% endfor %}".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
                 .property("Object.Notification_Templates.Label", "SAR Read")
@@ -2366,7 +2387,28 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR UPDATE TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, The current status of your request to update your information is {{ Event.Subject_Access_Request.Status }}.".bytes.encodeBase64().toString())
+                .property("Object.Notification_Templates.Text", "<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
+                "\n" +
+                "  Please find below a summary of your personal data that we can UPDATE:\n" +
+                "  \n" +
+                "  <p><br></p><p>\n" +
+                "  <h3>{{ context.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+                "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+                "  {% for key, value in context.items() %}\n" +
+                "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+                "  {% endfor %}\n" +
+                "  {{ \"</table>\" }}\n" +
+                "  {% endfor %}\n" +
+                "  \n" +
+                "  \n" +
+                "  {% for mainkey in connected_data %}\n" +
+                "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+                "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+                "  {% for key, value in mainkey.items() %}\n" +
+                "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+                "  {% endfor %}\n" +
+                "  {{ \"</table>\" }}\n" +
+                "  {% endfor %}".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_update")
                 .property("Object.Notification_Templates.Label", "SAR Update")
@@ -2375,7 +2417,28 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR DELETE TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, The current status of your request to delete your information is {{ Event.Subject_Access_Request.Status }}.".bytes.encodeBase64().toString())
+                .property("Object.Notification_Templates.Text", "<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
+                "\n" +
+                "  Please find below a summary of your personal data we can delete:\n" +
+                "  \n" +
+                "  <p><br></p><p>\n" +
+                "  <h3>{{ context.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+                "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+                "  {% for key, value in context.items() %}\n" +
+                "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+                "  {% endfor %}\n" +
+                "  {{ \"</table>\" }}\n" +
+                "  {% endfor %}\n" +
+                "  \n" +
+                "  \n" +
+                "  {% for mainkey in connected_data %}\n" +
+                "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+                "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+                "  {% for key, value in mainkey.items() %}\n" +
+                "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+                "  {% endfor %}\n" +
+                "  {{ \"</table>\" }}\n" +
+                "  {% endfor %}".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_delete")
                 .property("Object.Notification_Templates.Label", "SAR Delete")
@@ -2401,8 +2464,9 @@ def createNotificationTemplates() {
                 .next();
 
         g.addV("Object.Notification_Templates")
+                .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "DATA BREACH PERSON TEMPLATE")
-                .property("Object.Notification_Templates.Text", "Dear {{ Person.Name }}, We regret to inform you that your data may have been stolen.".bytes.encodeBase64().toString())
+                .property("Object.Notification_Templates.Text", "Dear {{ connected_data.Person_Name }}, We regret to inform you that your data may have been stolen.".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
                 .property("Object.Notification_Templates.Types", "Event.Data_Breach")
                 .property("Object.Notification_Templates.Label", "Person")
