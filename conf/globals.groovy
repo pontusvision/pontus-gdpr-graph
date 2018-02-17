@@ -2357,7 +2357,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR READ TEMPLATE")
-                .property("<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
+                .property("Object.Notification_Templates.Text","<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
                 "\n" +
                 "  Please find below a summary of the data we HOLD about you:\n" +
                 "  \n" +
