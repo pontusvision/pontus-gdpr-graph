@@ -6,7 +6,8 @@ threadPoolWorker: 3
 
 channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
 graphs: {
-  graph: conf/janusgraph-hbase-es.properties
+#  graph: conf/janusgraph-hbase-es.properties
+  graph: conf/janusgraph-berkleydb-es.properties
 }
 scriptEngines: {
   gremlin-groovy: {
