@@ -1777,6 +1777,8 @@ def createIndicesPropsAndLabels() {
 
     createMixedIdx(mgmt, "personEmployeeMixedIdx00", personEmployee00)
     createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
+    createCompIdx(mgmt, "personEmployeeCompositeIdx00", personEmployee00)
+    createCompIdx(mgmt, "personEmployeeCompositeIdx01", personEmployee01)
 
 
     edgeLabel = createEdgeLabel(mgmt, "Reports_To")
