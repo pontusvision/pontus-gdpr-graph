@@ -1,60 +1,59 @@
 package com.pontusvision.gdpr;
 
-public class RecordRequest {
-//    {
-//        searchStr: self.searchstr,
-//                from: from,
-//            to: to,
-//            sortBy: self.sortcol,
-//            sortDir: ((self.sortdir > 0) ? "+asc" : "+desc")
-//    }
+import javax.script.Bindings;
+import java.util.Map;
 
+public class GremlinRequest
+{
+  //    {
+  //        searchStr: self.searchstr,
+  //                from: from,
+  //            to: to,
+  //            sortBy: self.sortcol,
+  //            sortDir: ((self.sortdir > 0) ? "+asc" : "+desc")
+  //    }
 
+  @Override public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    if (!(o instanceof GremlinRequest))
+      return false;
 
-    public Long getFrom() {
-        return from;
-    }
+    GremlinRequest that = (GremlinRequest) o;
 
-    public void setFrom(Long from) {
-        this.from = from;
-    }
+    if (gremlin != null ? !gremlin.equals(that.gremlin) : that.gremlin != null)
+      return false;
+    return bindings != null ? bindings.equals(that.bindings) : that.bindings == null;
+  }
 
-    public Long getTo() {
-        return to;
-    }
+  @Override public int hashCode()
+  {
+    int result = gremlin != null ? gremlin.hashCode() : 0;
+    result = 31 * result + (bindings != null ? bindings.hashCode() : 0);
+    return result;
+  }
 
-    public void setTo(Long to) {
-        this.to = to;
-    }
+  public String getGremlin()
+  {
+    return gremlin;
+  }
 
-    public String getSortCol() {
-        return sortCol;
-    }
+  public void setGremlin(String gremlin)
+  {
+    this.gremlin = gremlin;
+  }
 
-    public void setSortCol(String sortCol) {
-        this.sortCol = sortCol;
-    }
+  public Bindings getBindings()
+  {
+    return bindings;
+  }
 
-    public String getSortDir() {
-        return sortDir;
-    }
+  public void setBindings(Bindings bindings)
+  {
+    this.bindings = bindings;
+  }
 
-    public void setSortDir(String sortDir) {
-        this.sortDir = sortDir;
-    }
-
-    public PVGridSearch getSearch() {
-        return search;
-    }
-
-    public void setSearch(PVGridSearch search) {
-        this.search = search;
-    }
-
-    PVGridSearch search;
-    Long from;
-    Long to;
-    String sortCol;
-    String sortDir;
-
+  String gremlin;
+  Bindings bindings;
 }
