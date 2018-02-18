@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -12,6 +13,8 @@ import org.janusgraph.core.schema.JanusGraphManagement;
 //import org.json.JSONArray;
 //import org.json.JSONObject;
 
+import javax.script.CompiledScript;
+import javax.script.ScriptException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
@@ -35,6 +38,25 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   GsonBuilder gsonBuilder = new GsonBuilder();
 
+
+  @POST @Path("gremlin") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
+  public RecordReply gremlin( GremlinRequest req)
+  {
+    ServerGremlinExecutor executor = App.gserver.getServerGremlinExecutor();
+    try
+    {
+      Optional<CompiledScript> script = executor.getGremlinExecutor().compile(req.gremlin);
+
+      script.get().eval(req.bindings);
+    }
+    catch (ScriptException e)
+    {
+      e.printStackTrace();
+    }
+
+    return null;
+
+  }
 
 
   @POST @Path("records") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)

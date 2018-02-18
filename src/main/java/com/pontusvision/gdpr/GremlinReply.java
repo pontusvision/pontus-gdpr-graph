@@ -1,6 +1,8 @@
 package com.pontusvision.gdpr;
 
-public class GremlinRequest
+import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONIo;
+
+public class GremlinReply
 {
 //    {
 //        searchStr: self.searchstr,
@@ -11,51 +13,5 @@ public class GremlinRequest
 //    }
 
 
-
-    public Long getFrom() {
-        return from;
-    }
-
-    public void setFrom(Long from) {
-        this.from = from;
-    }
-
-    public Long getTo() {
-        return to;
-    }
-
-    public void setTo(Long to) {
-        this.to = to;
-    }
-
-    public String getSortCol() {
-        return sortCol;
-    }
-
-    public void setSortCol(String sortCol) {
-        this.sortCol = sortCol;
-    }
-
-    public String getSortDir() {
-        return sortDir;
-    }
-
-    public void setSortDir(String sortDir) {
-        this.sortDir = sortDir;
-    }
-
-    public PVGridSearch getSearch() {
-        return search;
-    }
-
-    public void setSearch(PVGridSearch search) {
-        this.search = search;
-    }
-
-    PVGridSearch search;
-    Long from;
-    Long to;
-    String sortCol;
-    String sortDir;
 
 }
