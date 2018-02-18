@@ -1777,6 +1777,8 @@ def createIndicesPropsAndLabels() {
 
     createMixedIdx(mgmt, "personEmployeeMixedIdx00", personEmployee00)
     createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
+    createCompIdx(mgmt, "personEmployeeCompositeIdx00", personEmployee00)
+    createCompIdx(mgmt, "personEmployeeCompositeIdx01", personEmployee01)
 
 
     edgeLabel = createEdgeLabel(mgmt, "Reports_To")
@@ -2357,7 +2359,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR READ TEMPLATE")
-                .property("Object.Notification_Templates.Text","<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
+                .property("Object.Notification_Templates.Text",("<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
                 "\n" +
                 "  Please find below a summary of the data we HOLD about you:\n" +
                 "  \n" +
@@ -2378,7 +2380,7 @@ def createNotificationTemplates() {
                 "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
                 "  {% endfor %}\n" +
                 "  {{ \"</table>\" }}\n" +
-                "  {% endfor %}".bytes.encodeBase64().toString())
+                "  {% endfor %}").bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
                 .property("Object.Notification_Templates.Label", "SAR Read")
@@ -2387,7 +2389,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR UPDATE TEMPLATE")
-                .property("Object.Notification_Templates.Text", "<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
+                .property("Object.Notification_Templates.Text", ("<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
                 "\n" +
                 "  Please find below a summary of your personal data that we can UPDATE:\n" +
                 "  \n" +
@@ -2408,7 +2410,7 @@ def createNotificationTemplates() {
                 "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
                 "  {% endfor %}\n" +
                 "  {{ \"</table>\" }}\n" +
-                "  {% endfor %}".bytes.encodeBase64().toString())
+                "  {% endfor %}").bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_update")
                 .property("Object.Notification_Templates.Label", "SAR Update")
@@ -2417,7 +2419,7 @@ def createNotificationTemplates() {
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR DELETE TEMPLATE")
-                .property("Object.Notification_Templates.Text", "<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
+                .property("Object.Notification_Templates.Text", ("<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
                 "\n" +
                 "  Please find below a summary of your personal data we can delete:\n" +
                 "  \n" +
@@ -2438,7 +2440,7 @@ def createNotificationTemplates() {
                 "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
                 "  {% endfor %}\n" +
                 "  {{ \"</table>\" }}\n" +
-                "  {% endfor %}".bytes.encodeBase64().toString())
+                "  {% endfor %}").bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Person")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_delete")
                 .property("Object.Notification_Templates.Label", "SAR Delete")
