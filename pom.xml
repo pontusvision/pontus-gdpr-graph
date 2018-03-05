@@ -470,6 +470,15 @@
             <artifactId>janusgraph-berkeleyje</artifactId>
             <version>${janusgraph.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-hbase-10</artifactId>
+            <version>${janusgraph.version}</version>
+        </dependency>
+
+
+
         <!-- dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-shaded-client</artifactId>
