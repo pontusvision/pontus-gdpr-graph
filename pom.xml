@@ -25,6 +25,23 @@
 
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>5.7</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ow2.asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+
+            </exclusions>
+
+        </dependency>
 
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -612,6 +629,16 @@
             <!--</exclusion>-->
             <!--</exclusions>-->
         </dependency>
+        <dependency>
+            <groupId>pontus-redaction</groupId>
+            <artifactId>pontus-redaction-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.nifi</groupId>-->
+            <!--<artifactId>nifi-pontus-jwt-processor</artifactId>-->
+            <!--<version>1.0</version>-->
+        <!--</dependency>-->
 
         <!--<dependency>-->
         <!--<groupId>org.glassfish.jersey.inject</groupId>-->
