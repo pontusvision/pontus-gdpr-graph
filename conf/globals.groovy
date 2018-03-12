@@ -1380,48 +1380,85 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
 
 def createProp(mgmt, keyName, classType, org.janusgraph.core.Cardinality card) {
 
+  try
+  {
     if (!mgmt.containsPropertyKey(keyName)) {
         return mgmt.makePropertyKey(keyName).dataType(classType).cardinality(card).make();
     } else {
         return mgmt.getPropertyKey(keyName);
     }
+  } 
+  catch (Throwable t)
+  {
+    t.printStackTrace();
+  }
 }
 
 
 def createCompIdx(mgmt, idxName, prop) {
-    if (!mgmt.containsGraphIndex(idxName)) {
+  try
+  {
+    if (!mgmt.containsGraphIndex(idxName)) 
+    {
         return mgmt.buildIndex(idxName, Vertex.class).addKey(prop).buildCompositeIndex();
-    } else {
+    } 
+    else 
+    {
         return mgmt.getGraphIndex(idxName);
-
     }
+  } 
+  catch (Throwable t)
+  {
+    t.printStackTrace();
+  }
 }
 
 def createMixedIdx(mgmt, idxName, prop) {
+  try
+  {
     if (!mgmt.containsGraphIndex(idxName)) {
         return mgmt.buildIndex(idxName, Vertex.class).addKey(prop).buildMixedIndex("search");
     } else {
         return mgmt.getGraphIndex(idxName);
 
     }
+  } 
+  catch (Throwable t)
+  {
+    t.printStackTrace();
+  }
 
 
 }
 
 def createVertexLabel(mgmt, labelName) {
 
+  try
+  {
     if (!mgmt.containsVertexLabel(labelName)) {
         return mgmt.makeVertexLabel(labelName).make()
     }
     return mgmt.getVertexLabel(labelName)
+  } 
+  catch (Throwable t)
+  {
+    t.printStackTrace();
+  }
 }
 
 def createEdgeLabel(mgmt, labelName) {
 
+  try
+  {
     if (!mgmt.containsEdgeLabel(labelName)) {
         return mgmt.makeEdgeLabel(labelName).make()
     }
     return mgmt.getEdgeLabel(labelName)
+  } 
+  catch (Throwable t)
+  {
+    t.printStackTrace();
+  }
 }
 
 
