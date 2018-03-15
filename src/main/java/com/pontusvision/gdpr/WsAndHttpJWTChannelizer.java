@@ -22,13 +22,15 @@ public class WsAndHttpJWTChannelizer extends WsAndHttpChannelizer
   @Override
   public void init(final ServerGremlinExecutor serverGremlinExecutor) {
     super.init(serverGremlinExecutor);
-    handler = new WsAndHttpJWTChannelizerHandler();
-    handler.init(serverGremlinExecutor, new HttpGremlinEndpointHandler(serializers, gremlinExecutor, graphManager, settings));
     authenticator = new JWTToKerberosAuthenticator();
 
     if (authenticator != null)
       authenticationHandler = authenticator.getClass() == AllowAllAuthenticator.class ?
           null : instantiateAuthenticationHandler(settings.authentication);
+
+
+    handler = new WsAndHttpJWTChannelizerHandler(authenticationHandler);
+    handler.init(serverGremlinExecutor, new HttpGremlinEndpointHandler(serializers, gremlinExecutor, graphManager, settings));
 
   }
 
