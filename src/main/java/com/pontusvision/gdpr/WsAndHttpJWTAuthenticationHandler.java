@@ -36,6 +36,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.CredentialGraphTokens.PROPERTY_PASSWORD;
 import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.CredentialGraphTokens.PROPERTY_USERNAME;
+
 @ChannelHandler.Sharable
 
 public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHandler
@@ -290,16 +291,21 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
       }
 
       // strip off "Basic " from the Authorization header (RFC 2617)
-      final String basic = "JWT ";
+      String basic = "Bearer ";
+      final String jwt = "JWT ";
       final String authorizationHeader = request.headers().get("Authorization");
       if (!authorizationHeader.startsWith(basic))
       {
-        sendError(ctx, msg);
-        return;
+        if (!authorizationHeader.startsWith(jwt))
+        {
+          sendError(ctx, msg);
+          return;
+        }
+        basic = jwt;
       }
 
       final String jwtStr = authorizationHeader.substring(basic.length());
-      final String keyAlias = "jwtkey";
+      final String keyAlias = "localhost";
 
       //      JWSSigner signer = getSigner(keyAlgo,key);
 
@@ -324,7 +330,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
         }
 
-        JWTClaim sampleClaim = JWTClaim.fromJson(jwsObject.getParsedString());
+        JWTClaim sampleClaim = JWTClaim.fromJson(jwsObject.getPayload().toString());
 
         StringBuffer strBuf = new StringBuffer(JWT_ZK_PATH_DEFVAL).append("/").append(sampleClaim.getSub());
 
@@ -375,10 +381,10 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
   private static class SSLContextService
   {
-    String keyStoreFile;
-    String keyStoreType;
-    String keyStorePassword;
-    String keyPassword;
+    String keyStoreFile = "/etc/pki/java/keystore.jks";
+    String keyStoreType = "JKS";
+    String keyStorePassword = "pa55word";
+    String keyPassword = "pa55word";
 
     public String getKeyStoreFile()
     {
