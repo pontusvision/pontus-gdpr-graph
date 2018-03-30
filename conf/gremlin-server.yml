@@ -4,7 +4,8 @@ port: 8182
 scriptEvaluationTimeout: 0
 threadPoolWorker: 3
 
-channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
+#channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
+channelizer: com.pontusvision.gdpr.WsAndHttpJWTChannelizer
 graphs: {
   graph: conf/janusgraph-hbase-es.properties
 }
