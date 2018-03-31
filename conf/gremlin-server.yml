@@ -46,6 +46,8 @@ ssl: {
 
 authentication: {
   authenticator: com.pontusvision.gdpr.JWTToKerberosAuthenticator,
+  className: com.pontusvision.gdpr.JWTToKerberosAuthenticator,
+  authenticationHandler: com.pontusvision.gdpr.WsAndHttpJWTAuthenticationHandler,
   config: {
     zookeeperConnStr: pontus-sandbox.pontusvision.com,
     zookeeperPrincipal: hbase/pontus-sandbox.pontusvision.com@PONTUSVISION.COM,
