@@ -20,7 +20,7 @@ import static org.apache.tinkerpop.gremlin.server.AbstractChannelizer.PIPELINE_R
 public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 {
 
-  private final WebSocketChannelizer wsChannelizer = new WebSocketChannelizer();
+  private final WsAndHttpJWTChannelizer wsChannelizer = new WsAndHttpJWTChannelizer();
   private HttpGremlinEndpointHandler httpGremlinEndpointHandler;
   AbstractAuthenticationHandler authenticationHandler;
 
@@ -31,12 +31,12 @@ public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 
   public void init(final ServerGremlinExecutor serverGremlinExecutor, final HttpGremlinEndpointHandler httpGremlinEndpointHandler) {
     //WebSocketChannelizer has everything needed for the http endpoint to work
-//    wsChannelizer.init(serverGremlinExecutor);
+    wsChannelizer.init(serverGremlinExecutor);
     this.httpGremlinEndpointHandler = httpGremlinEndpointHandler;
   }
 
   public void configure(final ChannelPipeline pipeline) {
-//    wsChannelizer.configure(pipeline);
+    wsChannelizer.configure(pipeline);
     pipeline.addLast(PIPELINE_AUTHENTICATOR, authenticationHandler);
 
   }
