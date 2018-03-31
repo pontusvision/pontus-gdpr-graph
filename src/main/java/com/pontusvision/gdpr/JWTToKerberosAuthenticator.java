@@ -37,7 +37,7 @@ import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.Credenti
 public class JWTToKerberosAuthenticator implements Authenticator
 {
   private static final Logger logger = LoggerFactory
-      .getLogger(org.apache.tinkerpop.gremlin.server.auth.SimpleAuthenticator.class);
+      .getLogger(JWTToKerberosAuthenticator.class);
   private static final byte NUL = 0;
   private CredentialGraph credentialStore;
 
@@ -51,7 +51,7 @@ public class JWTToKerberosAuthenticator implements Authenticator
   @Override public void setup(final Map<String, Object> config)
   {
     logger.info("Initializing authentication with the {}",
-        org.apache.tinkerpop.gremlin.server.auth.SimpleAuthenticator.class.getName());
+        JWTToKerberosAuthenticator.class.getName());
 
     if (null == config)
     {
