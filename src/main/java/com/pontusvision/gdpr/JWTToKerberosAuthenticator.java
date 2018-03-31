@@ -41,6 +41,7 @@ public class JWTToKerberosAuthenticator implements Authenticator
   private static final byte NUL = 0;
   private CredentialGraph credentialStore;
 
+  private  Map<String, Object> config;
 
   @Override public boolean requireAuthentication()
   {
@@ -58,6 +59,8 @@ public class JWTToKerberosAuthenticator implements Authenticator
           .format("Could not configure a %s - provide a 'config' in the 'authentication' settings",
               org.apache.tinkerpop.gremlin.server.auth.SimpleAuthenticator.class.getName()));
     }
+    this.config = config;
+
   }
 
   @Override public SaslNegotiator newSaslNegotiator(final InetAddress remoteAddress)
@@ -107,7 +110,7 @@ public class JWTToKerberosAuthenticator implements Authenticator
     {
       throw(new AuthenticationException(e));
     }
-
+    
     return new AuthenticatedUser(username);
   }
 
