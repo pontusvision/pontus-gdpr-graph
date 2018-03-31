@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpMessage;
+import org.apache.tinkerpop.gremlin.server.channel.HttpChannelizer;
 import org.apache.tinkerpop.gremlin.server.channel.WebSocketChannelizer;
 import org.apache.tinkerpop.gremlin.server.handler.AbstractAuthenticationHandler;
 import org.apache.tinkerpop.gremlin.server.handler.HttpGremlinEndpointHandler;
@@ -20,7 +21,7 @@ import static org.apache.tinkerpop.gremlin.server.AbstractChannelizer.PIPELINE_R
 public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 {
 
-  private final WsAndHttpJWTChannelizer wsChannelizer = new WsAndHttpJWTChannelizer();
+  private final HttpChannelizer wsChannelizer = new HttpChannelizer();
   private HttpGremlinEndpointHandler httpGremlinEndpointHandler;
   AbstractAuthenticationHandler authenticationHandler;
 
@@ -31,7 +32,7 @@ public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 
   public void init(final ServerGremlinExecutor serverGremlinExecutor, final HttpGremlinEndpointHandler httpGremlinEndpointHandler) {
     //WebSocketChannelizer has everything needed for the http endpoint to work
-//    wsChannelizer.init(serverGremlinExecutor);
+    wsChannelizer.init(serverGremlinExecutor);
     this.httpGremlinEndpointHandler = httpGremlinEndpointHandler;
   }
 
