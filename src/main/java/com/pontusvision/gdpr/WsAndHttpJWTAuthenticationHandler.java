@@ -69,16 +69,17 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     super(authenticator);
     this.authenticationSettings = authenticationSettings;
 
-    this.zookeeperConnStr = (String)  this.authenticationSettings.config.get("zookeeperServer")+
-        ":"+
-        this.authenticationSettings.config.get("zookeeperPort");
+    if (this.authenticationSettings != null && this.authenticationSettings.config != null)
+    {
+      this.zookeeperConnStr =
+          (String) this.authenticationSettings.config.get("zookeeperServer") + ":" + this.authenticationSettings.config.get("zookeeperPort");
 
-    this.zookeeperPrincipal = (String) this.authenticationSettings.config.get("zookeeperPrincipal");
-    this.zookeeperKeytab = (String) this.authenticationSettings.config.get("zookeeperKeytab");
+      this.zookeeperPrincipal = (String) this.authenticationSettings.config.get("zookeeperPrincipal");
+      this.zookeeperKeytab = (String) this.authenticationSettings.config.get("zookeeperKeytab");
 
-    //zookeeperPrincipal
-    //zookeeperKeytab
-
+      //zookeeperPrincipal
+      //zookeeperKeytab
+    }
 
   }
 
@@ -224,7 +225,9 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   {
 
     final CountDownLatch connectedSignal = new CountDownLatch(1);
-    ZooKeeper zoo = new ZooKeeper(host, 5000, new Watcher()
+    ZooKeeper zoo = null;
+
+    zoo = new ZooKeeper(host, 5000, new Watcher()
     {
       public void process(WatchedEvent we)
       {
@@ -356,7 +359,11 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
         if (this.zoo == null)
         {
-          this.zoo = this.connect(zookeeperConnStr);
+          UserGroupInformation ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(zookeeperPrincipal,zookeeperKeytab);
+          ugi.checkTGTAndReloginFromKeytab();
+          PrivilegedExceptionAction<ZooKeeper> action = () -> connect(zookeeperConnStr);
+          this.zoo = ugi.doAs(action);
+
         }
 
         if (this.exists(strBuf.toString()) == null)
