@@ -38,7 +38,7 @@ public class WsAndHttpJWTChannelizer extends AbstractChannelizer
   @Override
   public void configure(final ChannelPipeline pipeline) {
     handler.configure(pipeline);
-    pipeline.addAfter(PIPELINE_HTTP_REQUEST_DECODER, "WsAndHttpChannelizerHandler", handler);
+    pipeline.addAfter(PIPELINE_HTTP_REQUEST_DECODER, "WsAndHttpJWTChannelizerHandler", handler);
   }
 
   private AbstractAuthenticationHandler instantiateAuthenticationHandler(final Settings.AuthenticationSettings authSettings) {
