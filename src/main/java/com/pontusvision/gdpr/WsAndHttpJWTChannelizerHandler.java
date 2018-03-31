@@ -38,6 +38,11 @@ public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 
   public void configure(final ChannelPipeline pipeline) {
     wsChannelizer.configure(pipeline);
+
+    if (null != pipeline.get(PIPELINE_AUTHENTICATOR))
+    {
+      pipeline.remove(PIPELINE_AUTHENTICATOR);
+    }
     pipeline.addLast(PIPELINE_AUTHENTICATOR, authenticationHandler);
 
   }
