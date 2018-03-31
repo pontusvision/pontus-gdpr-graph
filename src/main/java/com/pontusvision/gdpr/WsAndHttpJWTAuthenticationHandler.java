@@ -60,12 +60,26 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   public static final long JWT_SECURITY_CLAIM_CACHE_MAX_SIZE_DEFVAL = 50000000L;
 
   public String zookeeperConnStr = "localhost";
+  public String zookeeperPrincipal = "";
+  public String zookeeperKeytab = "";
 
   public WsAndHttpJWTAuthenticationHandler(final Authenticator authenticator,
                                            final Settings.AuthenticationSettings authenticationSettings)
   {
     super(authenticator);
     this.authenticationSettings = authenticationSettings;
+
+    this.zookeeperConnStr = (String)  this.authenticationSettings.config.get("zookeeperServer")+
+        ":"+
+        this.authenticationSettings.config.get("zookeeperPort");
+
+    this.zookeeperPrincipal = (String) this.authenticationSettings.config.get("zookeeperPrincipal");
+    this.zookeeperKeytab = (String) this.authenticationSettings.config.get("zookeeperKeytab");
+
+    //zookeeperPrincipal
+    //zookeeperKeytab
+
+
   }
 
   public static Key getPublicKey(SSLContextService sslService, String alias)
@@ -197,7 +211,6 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   }
 
   String zkPath = JWT_ZK_PATH_DEFVAL;
-  String zkConnection = "localhost";
   ZooKeeper zoo = null;
 
   // Method to disconnect from zookeeper server
@@ -331,10 +344,20 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         }
 
         JWTClaim sampleClaim = JWTClaim.fromJson(jwsObject.getPayload().toString());
+        final Map<String, String> credentials = new HashMap<>();
+        credentials.put(PROPERTY_USERNAME, sampleClaim.getSub());
+        credentials.put(PROPERTY_PASSWORD, jwtStr);
+
+        authenticator.authenticate(credentials);
+
+
 
         StringBuffer strBuf = new StringBuffer(JWT_ZK_PATH_DEFVAL).append("/").append(sampleClaim.getSub());
 
-        this.connect(zookeeperConnStr);
+        if (this.zoo == null)
+        {
+          this.zoo = this.connect(zookeeperConnStr);
+        }
 
         if (this.exists(strBuf.toString()) == null)
         {
@@ -347,11 +370,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
         this.close();
 
-        final Map<String, String> credentials = new HashMap<>();
-        credentials.put(PROPERTY_USERNAME, sampleClaim.getSub());
-        credentials.put(PROPERTY_PASSWORD, jwtStr);
 
-        authenticator.authenticate(credentials);
         ctx.fireChannelRead(request);
 
         // User name logged with the remote socket address and authenticator classname for audit logging
@@ -367,6 +386,8 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
       }
       catch (Exception ae)
       {
+        this.zoo = null;
+
         sendError(ctx, msg);
       }
     }
