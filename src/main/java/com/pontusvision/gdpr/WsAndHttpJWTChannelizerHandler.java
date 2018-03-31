@@ -31,12 +31,12 @@ public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 
   public void init(final ServerGremlinExecutor serverGremlinExecutor, final HttpGremlinEndpointHandler httpGremlinEndpointHandler) {
     //WebSocketChannelizer has everything needed for the http endpoint to work
-    wsChannelizer.init(serverGremlinExecutor);
+//    wsChannelizer.init(serverGremlinExecutor);
     this.httpGremlinEndpointHandler = httpGremlinEndpointHandler;
   }
 
   public void configure(final ChannelPipeline pipeline) {
-    wsChannelizer.configure(pipeline);
+//    wsChannelizer.configure(pipeline);
     pipeline.addLast(PIPELINE_AUTHENTICATOR, authenticationHandler);
 
   }
