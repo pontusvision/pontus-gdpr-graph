@@ -1,6 +1,7 @@
 package com.pontusvision.gdpr;
 
 import io.netty.channel.ChannelPipeline;
+import org.apache.tinkerpop.gremlin.server.AbstractChannelizer;
 import org.apache.tinkerpop.gremlin.server.Settings;
 import org.apache.tinkerpop.gremlin.server.auth.AllowAllAuthenticator;
 import org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer;
@@ -11,7 +12,7 @@ import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WsAndHttpJWTChannelizer extends WsAndHttpChannelizer
+public class WsAndHttpJWTChannelizer extends AbstractChannelizer
 {
 
   private static final Logger logger = LoggerFactory.getLogger(WsAndHttpJWTChannelizer.class);
