@@ -72,7 +72,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     if (this.authenticationSettings != null && this.authenticationSettings.config != null)
     {
       this.zookeeperConnStr =
-          (String) this.authenticationSettings.config.get("zookeeperServer") + ":" + this.authenticationSettings.config.get("zookeeperPort");
+          (String) this.authenticationSettings.config.get("zookeeperConnStr");
 
       this.zookeeperPrincipal = (String) this.authenticationSettings.config.get("zookeeperPrincipal");
       this.zookeeperKeytab = (String) this.authenticationSettings.config.get("zookeeperKeytab");
