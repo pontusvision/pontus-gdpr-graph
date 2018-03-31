@@ -44,6 +44,14 @@ ssl: {
   enabled: false
 }
 
+authentication: {
+  authenticator: com.pontusvision.gdpr.JWTToKerberosAuthenticator,
+  config: {
+    zookeeperConnStr: pontus-sandbox.pontusvision.com,
+    zookeeperPrincipal: hbase/pontus-sandbox.pontusvision.com@PONTUSVISION.COM,
+    zookeeperKeytab: /etc/security/keytabs/hbase.service.keytab}}
+
+
 #plugins:
 #  - janusgraph.imports
 #scriptEngines: {
