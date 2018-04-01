@@ -347,12 +347,6 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         }
 
         JWTClaim sampleClaim = JWTClaim.fromJson(jwsObject.getPayload().toString());
-        final Map<String, String> credentials = new HashMap<>();
-        credentials.put(PROPERTY_USERNAME, sampleClaim.getSub());
-        credentials.put(PROPERTY_PASSWORD, jwtStr);
-
-        authenticator.authenticate(credentials);
-
 
 
         StringBuffer strBuf = new StringBuffer(JWT_ZK_PATH_DEFVAL).append("/").append(sampleClaim.getSub());
@@ -365,6 +359,15 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
           this.zoo = ugi.doAs(action);
 
         }
+
+
+        final Map<String, String> credentials = new HashMap<>();
+        credentials.put(PROPERTY_USERNAME, sampleClaim.getSub());
+        credentials.put(PROPERTY_PASSWORD, sampleClaim.getSub());
+//        credentials.put(PROPERTY_PASSWORD, jwtStr);
+
+        authenticator.authenticate(credentials);
+
 
         if (this.exists(strBuf.toString()) == null)
         {
