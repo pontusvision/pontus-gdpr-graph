@@ -17,20 +17,20 @@ public class WsAndHttpJWTChannelizer extends AbstractChannelizer
 
   private static final Logger logger = LoggerFactory.getLogger(WsAndHttpJWTChannelizer.class);
 
-  private WsAndHttpJWTChannelizerHandler handler;
-  private AbstractAuthenticationHandler authenticationHandler;
+  private WsAndHttpChannelizerHandler handler;
+//  private AbstractAuthenticationHandler authenticationHandler;
 
   @Override
   public void init(final ServerGremlinExecutor serverGremlinExecutor) {
     super.init(serverGremlinExecutor);
 //    authenticator = new JWTToKerberosAuthenticator();
 
-    if (authenticator != null)
-      authenticationHandler = authenticator.getClass() == AllowAllAuthenticator.class ?
-          null : instantiateAuthenticationHandler(settings.authentication);
+//    if (authenticator != null)
+//      authenticationHandler = authenticator.getClass() == AllowAllAuthenticator.class ?
+//          null : instantiateAuthenticationHandler(settings.authentication);
 
 
-    handler = new WsAndHttpJWTChannelizerHandler(authenticationHandler);
+    handler = new WsAndHttpChannelizerHandler();
     handler.init(serverGremlinExecutor, new HttpGremlinEndpointHandler(serializers, gremlinExecutor, graphManager, settings));
 
   }
@@ -38,7 +38,7 @@ public class WsAndHttpJWTChannelizer extends AbstractChannelizer
   @Override
   public void configure(final ChannelPipeline pipeline) {
     handler.configure(pipeline);
-    pipeline.addAfter(PIPELINE_HTTP_REQUEST_DECODER, "WsAndHttpJWTChannelizerHandler", handler);
+    pipeline.addAfter(PIPELINE_HTTP_REQUEST_DECODER, "WsAndHttpChannelizerHandler", handler);
   }
 
   private AbstractAuthenticationHandler instantiateAuthenticationHandler(final Settings.AuthenticationSettings authSettings) {
