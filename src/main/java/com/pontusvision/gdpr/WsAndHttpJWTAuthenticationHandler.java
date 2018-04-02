@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.util.ReferenceCountUtil;
+import org.apache.hadoop.hbase.security.User;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.tinkerpop.gremlin.server.GremlinServer;
 import org.apache.tinkerpop.gremlin.server.Settings;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.homeoffice.pontus.JWTClaim;
 
 import javax.crypto.SecretKey;
+import javax.security.auth.login.LoginContext;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
@@ -366,9 +368,13 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         credentials.put(PROPERTY_PASSWORD, sampleClaim.getSub());
 //        credentials.put(PROPERTY_PASSWORD, jwtStr);
 
-        authenticator.authenticate(credentials);
+        String user = sampleClaim.getSub();
+        String pass = sampleClaim.getSub();
 
+        LoginContext lc = JWTToKerberosAuthenticator.kinit(user,pass);
+//        authenticator.authenticate(credentials);
 
+//        UserGroupInformation ugi = UserGroupInformation.
         if (this.exists(strBuf.toString()) == null)
         {
           this.create(strBuf.toString(), jwsObject.getPayload().toBytes());
@@ -378,10 +384,13 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
           this.update(strBuf.toString(), jwsObject.getPayload().toBytes());
         }
 
-        this.close();
+//        this.close();
 
+// TODO: add a doAs
+        UserGroupInformation ugi = UserGroupInformation.getUGIFromSubject(lc.getSubject());
+        PrivilegedExceptionAction pea = ()-> ctx.fireChannelRead(request);
 
-        ctx.fireChannelRead(request);
+        ugi.doAs(pea);
 
         // User name logged with the remote socket address and authenticator classname for audit logging
         if (authenticationSettings.enableAuditLog)
