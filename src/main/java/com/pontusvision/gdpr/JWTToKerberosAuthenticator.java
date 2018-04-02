@@ -99,17 +99,19 @@ public class JWTToKerberosAuthenticator implements Authenticator
     {
       LoginContext lc = kinit(username,password);
 //      UserGroupInformation ugi =    UserGroupInformation.createRemoteUser(username,KERBEROS);
-      UserGroupInformation.loginUserFromSubject(lc.getSubject());
+//      UserGroupInformation.loginUserFromSubject(lc.getSubject());
+
+//      AuthenticatedUser au = new AuthenticatedUser(username)
 
     }
     catch (LoginException e)
     {
       throw(new AuthenticationException(e));
     }
-    catch (IOException e)
-    {
-      throw(new AuthenticationException(e));
-    }
+//    catch (IOException e)
+//    {
+//      throw(new AuthenticationException(e));
+//    }
     
     return new AuthenticatedUser(username);
   }
