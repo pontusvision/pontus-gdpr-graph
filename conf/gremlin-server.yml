@@ -8,7 +8,7 @@ threadPoolWorker: 3
 channelizer: com.pontusvision.gdpr.WsAndHttpJWTChannelizer
 graphs: {
   graph: conf/janusgraph-hbase-es.properties
-               }}}
+}
 serializers:
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { ioRegistries: [org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerIoRegistryV1d0, org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry] ,  useMapperFromGraph: graph}}
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { serializeResultToString: true, useMapperFromGraph: graph }}
@@ -44,7 +44,9 @@ authentication: {
   config: {
     zookeeperConnStr: pontus-sandbox.pontusvision.com,
     zookeeperPrincipal: hbase/pontus-sandbox.pontusvision.com@PONTUSVISION.COM,
-    zookeeperKeytab: /etc/security/keytabs/hbase.service.keytab}}
+    zookeeperKeytab: /etc/security/keytabs/hbase.service.keytab
+  }
+}
 
 
 #plugins:
