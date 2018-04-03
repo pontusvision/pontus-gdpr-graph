@@ -20,6 +20,8 @@ public class WsAndHttpJWTChannelizer extends AbstractChannelizer
   private WsAndHttpChannelizerHandler handler;
 //  private AbstractAuthenticationHandler authenticationHandler;
 
+  private HttpGremlinEndpointHandler endpointHandler;
+
   @Override
   public void init(final ServerGremlinExecutor serverGremlinExecutor) {
     super.init(serverGremlinExecutor);
@@ -29,12 +31,20 @@ public class WsAndHttpJWTChannelizer extends AbstractChannelizer
 //      authenticationHandler = authenticator.getClass() == AllowAllAuthenticator.class ?
 //          null : instantiateAuthenticationHandler(settings.authentication);
 
+    endpointHandler = new HttpGremlinEndpointHandler(serializers, gremlinExecutor, graphManager, settings);
 
     handler = new WsAndHttpChannelizerHandler();
-    handler.init(serverGremlinExecutor, new HttpGremlinEndpointHandler(serializers, gremlinExecutor, graphManager, settings));
+    handler.init(serverGremlinExecutor,endpointHandler);
 
   }
 
+  public WsAndHttpChannelizerHandler getHandler(){
+    return handler;
+  }
+
+  public HttpGremlinEndpointHandler getEndpointHandler(){
+    return endpointHandler;
+  }
   @Override
   public void configure(final ChannelPipeline pipeline) {
     handler.configure(pipeline);
