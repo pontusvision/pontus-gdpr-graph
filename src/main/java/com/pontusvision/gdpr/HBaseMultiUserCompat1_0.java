@@ -31,15 +31,16 @@ public class HBaseMultiUserCompat1_0 extends HBaseCompat1_0
 
       Connection conn = ConnectionFactory.createConnection(conf, user);
 
-      return new HConnection1_0(ConnectionFactory.createConnection(conf));
+      return new HConnection1_0(conn);
     }
 
     catch (LoginException e)
     {
       e.printStackTrace();
+
     }
 
-    return null;
+    return new HConnection1_0(ConnectionFactory.createConnection(conf));
 
   }
 }
