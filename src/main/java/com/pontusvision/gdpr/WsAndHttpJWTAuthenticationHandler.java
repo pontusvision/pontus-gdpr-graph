@@ -1,29 +1,46 @@
 package com.pontusvision.gdpr;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.util.ReferenceCountUtil;
-import org.apache.hadoop.hbase.security.User;
+import org.apache.commons.collections.map.LRUMap;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.tinkerpop.gremlin.groovy.engine.GremlinExecutor;
 import org.apache.tinkerpop.gremlin.server.GremlinServer;
 import org.apache.tinkerpop.gremlin.server.Settings;
 import org.apache.tinkerpop.gremlin.server.auth.Authenticator;
 import org.apache.tinkerpop.gremlin.server.handler.AbstractAuthenticationHandler;
 import org.apache.tinkerpop.gremlin.server.handler.HttpBasicAuthenticationHandler;
+import org.apache.tinkerpop.gremlin.server.handler.HttpGremlinEndpointHandler;
+import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
+import org.apache.tinkerpop.gremlin.server.util.ThreadFactoryUtil;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
+import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.JanusGraphFactory;
+import org.janusgraph.diskstorage.configuration.ReadConfiguration;
+import org.janusgraph.diskstorage.configuration.backend.CommonsConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.homeoffice.pontus.JWTClaim;
 
 import javax.crypto.SecretKey;
 import javax.security.auth.login.LoginContext;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
@@ -33,11 +50,20 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.regex.Pattern;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static io.netty.handler.codec.http.HttpResponseStatus.SERVICE_UNAVAILABLE;
 import static io.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.CredentialGraphTokens.PROPERTY_PASSWORD;
 import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.CredentialGraphTokens.PROPERTY_USERNAME;
+import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.*;
+import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.INDEX_CONF_FILE;
+import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.INDEX_DIRECTORY;
+import static org.janusgraph.util.system.LoggerUtil.sanitizeAndLaunder;
 
 @ChannelHandler.Sharable
 
@@ -65,11 +91,17 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   public String zookeeperPrincipal = "";
   public String zookeeperKeytab = "";
 
+  public static Map<Object, Object> graphDbMap;
+
+  static {
+    graphDbMap = Collections.synchronizedMap (new LRUMap(20));
+  }
   public WsAndHttpJWTAuthenticationHandler(final Authenticator authenticator,
                                            final Settings.AuthenticationSettings authenticationSettings)
   {
     super(authenticator);
     this.authenticationSettings = authenticationSettings;
+
 
     if (this.authenticationSettings != null && this.authenticationSettings.config != null)
     {
@@ -297,6 +329,113 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     zoo.setData(path, data, zoo.exists(path, true).getVersion());
   }
 
+  private static String getAbsolutePath(final File configParent, final String file) {
+    final File storeDirectory = new File(file);
+    if (!storeDirectory.isAbsolute()) {
+      String newFile = configParent.getAbsolutePath() + File.separator + file;
+      return newFile;
+    } else {
+      return file;
+    }
+  }
+
+  private static CommonsConfiguration getLocalConfiguration(File file,String user, String pass) {
+    Preconditions.checkArgument(file != null && file.exists() && file.isFile() && file.canRead(),
+        "Need to specify a readable configuration file, but was given: %s", file.toString());
+
+    try {
+      PropertiesConfiguration configuration = new PropertiesConfiguration(file);
+
+      final File tmpParent = file.getParentFile();
+      final File configParent;
+
+      if (null == tmpParent) {
+        /*
+         * null usually means we were given a JanusGraph config file path
+         * string like "foo.properties" that refers to the current
+         * working directory of the process.
+         */
+        configParent = new File(System.getProperty("user.dir"));
+      } else {
+        configParent = tmpParent;
+      }
+
+      Preconditions.checkNotNull(configParent);
+      Preconditions.checkArgument(configParent.isDirectory());
+
+      // TODO this mangling logic is a relic from the hardcoded string days; it should be deleted and rewritten as a setting on ConfigOption
+      final Pattern p = Pattern.compile("(" +
+          Pattern.quote(STORAGE_NS.getName()) + "\\..*" +
+          "(" + Pattern.quote(STORAGE_DIRECTORY.getName()) + "|" +
+          Pattern.quote(STORAGE_CONF_FILE.getName()) + ")"
+          + "|" +
+          Pattern.quote(INDEX_NS.getName()) + "\\..*" +
+          "(" + Pattern.quote(INDEX_DIRECTORY.getName()) + "|" +
+          Pattern.quote(INDEX_CONF_FILE.getName()) +  ")"
+          + ")");
+
+      final Iterator<String> keysToMangle = Iterators
+          .filter(configuration.getKeys(), key -> null != key && p.matcher(key).matches());
+
+      while (keysToMangle.hasNext()) {
+        String k = keysToMangle.next();
+        Preconditions.checkNotNull(k);
+        final String s = configuration.getString(k);
+        Preconditions.checkArgument(StringUtils.isNotBlank(s),"Invalid Configuration: key %s has null empty value",k);
+        configuration.setProperty(k,getAbsolutePath(configParent,s));
+      }
+      return new CommonsConfiguration(configuration);
+    } catch (ConfigurationException e) {
+      throw new IllegalArgumentException("Could not load configuration at: " + file, e);
+    }
+  }
+
+  public static HttpGremlinEndpointHandler getGremlinEndpointHandler(Settings  settings, String userName, String password)
+      throws ConfigurationException
+  {
+    HttpGremlinEndpointHandler retVal = (HttpGremlinEndpointHandler)graphDbMap.get(userName);
+    if (retVal == null){
+
+      String gconfFileStr = (String) settings.graphs.getOrDefault("graph","conf/janusgraph-hbase-es.properties");
+
+      File gconfFile = new File(gconfFileStr);
+      CommonsConfiguration conf = getLocalConfiguration(gconfFile,userName,password);
+
+      conf.set("storage.hbase.proxy_user", userName);
+      conf.set("storage.hbase.proxy_pass", password);
+      JanusGraph graph = JanusGraphFactory.open(conf);
+
+
+      final ThreadFactory threadFactoryWorker = ThreadFactoryUtil.create("worker-%d");
+      boolean isEpollEnabled = settings.useEpollEventLoop && SystemUtils.IS_OS_LINUX;
+
+      ScheduledExecutorService workerGroup;
+      if(isEpollEnabled) {
+        workerGroup = new EpollEventLoopGroup(settings.threadPoolWorker, threadFactoryWorker);
+      }else {
+        workerGroup = new NioEventLoopGroup(settings.threadPoolWorker, threadFactoryWorker);
+      }
+
+      ServerGremlinExecutor serverGremlinExecutor = new ServerGremlinExecutor(settings, null, workerGroup);
+//      ServerGremlinExecutorService gremlinExecutorService = serverGremlinExecutor.getGremlinExecutorService();
+
+      GremlinExecutor exec = serverGremlinExecutor.getGremlinExecutor();
+
+      WsAndHttpJWTChannelizer channelizer = new WsAndHttpJWTChannelizer();
+
+
+      serverGremlinExecutor.getGraphManager().putGraph("graph",graph);
+      channelizer.init(serverGremlinExecutor);
+
+      retVal = channelizer.getEndpointHandler();
+
+
+      graphDbMap.put(userName,retVal);
+
+    }
+    return retVal;
+  }
+
   @Override public void channelRead(final ChannelHandlerContext ctx, final Object msg)
   {
     if (msg instanceof FullHttpMessage)
@@ -363,15 +502,20 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         }
 
 
-        final Map<String, String> credentials = new HashMap<>();
-        credentials.put(PROPERTY_USERNAME, sampleClaim.getSub());
-        credentials.put(PROPERTY_PASSWORD, sampleClaim.getSub());
+//        final Map<String, String> credentials = new HashMap<>();
+//        credentials.put(PROPERTY_USERNAME, sampleClaim.getSub());
+//        credentials.put(PROPERTY_PASSWORD, sampleClaim.getSub());
 //        credentials.put(PROPERTY_PASSWORD, jwtStr);
 
         String user = sampleClaim.getSub();
         String pass = sampleClaim.getSub();
 
-        LoginContext lc = JWTToKerberosAuthenticator.kinit(user,pass);
+//        LoginContext lc =
+
+        JWTToKerberosAuthenticator.kinit(user,pass);
+
+
+
 //        authenticator.authenticate(credentials);
 
 //        UserGroupInformation ugi = UserGroupInformation.
@@ -387,10 +531,15 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 //        this.close();
 
 // TODO: add a doAs
-        UserGroupInformation ugi = UserGroupInformation.getUGIFromSubject(lc.getSubject());
-        PrivilegedExceptionAction pea = ()-> ctx.fireChannelRead(request);
+//        UserGroupInformation ugi = UserGroupInformation.getUGIFromSubject(lc.getSubject());
+//        PrivilegedExceptionAction pea = ()-> ctx.fireChannelRead(request);
+//
+//        ugi.doAs(pea);
 
-        ugi.doAs(pea);
+
+//        exec.
+
+
 
         // User name logged with the remote socket address and authenticator classname for audit logging
         if (authenticationSettings.enableAuditLog)
@@ -399,8 +548,19 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
           if (address.startsWith("/") && address.length() > 1)
             address = address.substring(1);
           final String[] authClassParts = authenticator.getClass().toString().split("[.]");
-          auditLogger.info("User {} with address {} authenticated by {}", credentials.get(PROPERTY_USERNAME), address,
+          auditLogger.info("User {} with address {} authenticated by {}", user, address,
               authClassParts[authClassParts.length - 1]);
+        }
+
+
+        try
+        {
+          HttpGremlinEndpointHandler geh = getGremlinEndpointHandler(App.settings, user, pass);
+          geh.channelRead(ctx, msg);
+        }
+        catch (Throwable t)
+        {
+          sendServerError(ctx,msg);
         }
       }
       catch (Exception ae)
@@ -410,6 +570,14 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         sendError(ctx, msg);
       }
     }
+  }
+
+
+  private void sendServerError (final ChannelHandlerContext ctx, final Object msg)
+  {
+    // Close the connection as soon as the error message is sent.
+    ctx.writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)).addListener(ChannelFutureListener.CLOSE);
+    ReferenceCountUtil.release(msg);
   }
 
   private void sendError(final ChannelHandlerContext ctx, final Object msg)

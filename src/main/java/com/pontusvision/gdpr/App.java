@@ -36,6 +36,7 @@ public class App
   //    public static JanusGraphManagement graphMgmt;
   public static GremlinServer gserver;
   public static GraphTraversalSource g;
+  public static Settings settings;
 
   static
   {
@@ -228,7 +229,7 @@ public class App
       String file = args.length == 0 ? "conf/gremlin-server.yml" : args[0];
       String graphConfFile = args.length != 2 ? "conf/janusgraph-hbase-es.properties" : args[1];
 
-      final Settings settings;
+//      final Settings settings;
       try
       {
         settings = Settings.read(file);
