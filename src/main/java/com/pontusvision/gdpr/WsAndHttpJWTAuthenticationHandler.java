@@ -557,6 +557,9 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         {
           HttpGremlinEndpointHandler geh = getGremlinEndpointHandler(App.settings, user, pass);
           geh.channelRead(ctx, msg);
+
+          ctx.fireChannelRead(msg);
+
         }
         catch (Throwable t)
         {
