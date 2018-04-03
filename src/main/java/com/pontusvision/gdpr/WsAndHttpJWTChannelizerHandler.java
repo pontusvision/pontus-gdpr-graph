@@ -21,8 +21,8 @@ import static org.apache.tinkerpop.gremlin.server.AbstractChannelizer.PIPELINE_R
 public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 {
 
-  private final HttpChannelizer wsChannelizer = new HttpChannelizer();
-  private HttpGremlinEndpointHandler httpGremlinEndpointHandler;
+//  private final HttpChannelizer wsChannelizer = new HttpChannelizer();
+//  private HttpGremlinEndpointHandler httpGremlinEndpointHandler;
 //  AbstractAuthenticationHandler authenticationHandler;
 
   public WsAndHttpJWTChannelizerHandler()
@@ -30,14 +30,14 @@ public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 //    this.authenticationHandler =  authenticationHandler;
   }
 
-  public void init(final ServerGremlinExecutor serverGremlinExecutor, final HttpGremlinEndpointHandler httpGremlinEndpointHandler) {
+  public void init(final ServerGremlinExecutor serverGremlinExecutor) {
     //WebSocketChannelizer has everything needed for the http endpoint to work
-    wsChannelizer.init(serverGremlinExecutor);
-    this.httpGremlinEndpointHandler = httpGremlinEndpointHandler;
+//    wsChannelizer.init(serverGremlinExecutor);
+//    this.httpGremlinEndpointHandler = httpGremlinEndpointHandler;
   }
 
   public void configure(final ChannelPipeline pipeline) {
-    wsChannelizer.configure(pipeline);
+//    wsChannelizer.configure(pipeline);
 //
 //    if (null != pipeline.get(PIPELINE_AUTHENTICATOR))
 //    {
@@ -49,19 +49,19 @@ public class WsAndHttpJWTChannelizerHandler  extends WsAndHttpChannelizerHandler
 
   @Override
   public void channelRead(final ChannelHandlerContext ctx, final Object obj) {
-    final ChannelPipeline pipeline = ctx.pipeline();
-    if (obj instanceof HttpMessage && !isWebSocket((HttpMessage)obj)) {
-      if (null != pipeline.get(PIPELINE_AUTHENTICATOR)) {
-        pipeline.remove(PIPELINE_REQUEST_HANDLER);
-        final ChannelHandler authenticator = pipeline.get(PIPELINE_AUTHENTICATOR);
-        pipeline.remove(PIPELINE_AUTHENTICATOR);
-        pipeline.addAfter(PIPELINE_HTTP_RESPONSE_ENCODER, PIPELINE_AUTHENTICATOR, authenticator);
-        pipeline.addAfter(PIPELINE_AUTHENTICATOR, PIPELINE_REQUEST_HANDLER, this.httpGremlinEndpointHandler);
-      } else {
-        pipeline.remove(PIPELINE_REQUEST_HANDLER);
-        pipeline.addAfter(PIPELINE_HTTP_RESPONSE_ENCODER, PIPELINE_REQUEST_HANDLER, this.httpGremlinEndpointHandler);
-      }
-    }
+//    final ChannelPipeline pipeline = ctx.pipeline();
+//    if (obj instanceof HttpMessage && !isWebSocket((HttpMessage)obj)) {
+//      if (null != pipeline.get(PIPELINE_AUTHENTICATOR)) {
+//        pipeline.remove(PIPELINE_REQUEST_HANDLER);
+//        final ChannelHandler authenticator = pipeline.get(PIPELINE_AUTHENTICATOR);
+//        pipeline.remove(PIPELINE_AUTHENTICATOR);
+//        pipeline.addAfter(PIPELINE_HTTP_RESPONSE_ENCODER, PIPELINE_AUTHENTICATOR, authenticator);
+//        pipeline.addAfter(PIPELINE_AUTHENTICATOR, PIPELINE_REQUEST_HANDLER, this.httpGremlinEndpointHandler);
+//      } else {
+//        pipeline.remove(PIPELINE_REQUEST_HANDLER);
+//        pipeline.addAfter(PIPELINE_HTTP_RESPONSE_ENCODER, PIPELINE_REQUEST_HANDLER, this.httpGremlinEndpointHandler);
+//      }
+//    }
     ctx.fireChannelRead(obj);
   }
 

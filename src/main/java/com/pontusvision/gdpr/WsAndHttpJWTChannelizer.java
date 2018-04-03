@@ -15,9 +15,10 @@ import org.slf4j.LoggerFactory;
 public class WsAndHttpJWTChannelizer extends AbstractChannelizer
 {
 
-  private static final Logger logger = LoggerFactory.getLogger(WsAndHttpJWTChannelizer.class);
+//  private static final Logger logger = LoggerFactory.getLogger(WsAndHttpJWTChannelizer.class);
 
   private WsAndHttpChannelizerHandler handler;
+  private WsAndHttpJWTChannelizerHandler dummyHandler;
 //  private AbstractAuthenticationHandler authenticationHandler;
 
   private HttpGremlinEndpointHandler endpointHandler;
@@ -36,6 +37,9 @@ public class WsAndHttpJWTChannelizer extends AbstractChannelizer
     handler = new WsAndHttpChannelizerHandler();
     handler.init(serverGremlinExecutor,endpointHandler);
 
+    dummyHandler = new WsAndHttpJWTChannelizerHandler();
+
+
   }
 
   public WsAndHttpChannelizerHandler getHandler(){
@@ -48,17 +52,17 @@ public class WsAndHttpJWTChannelizer extends AbstractChannelizer
   @Override
   public void configure(final ChannelPipeline pipeline) {
     handler.configure(pipeline);
-    pipeline.addAfter(PIPELINE_HTTP_REQUEST_DECODER, "WsAndHttpChannelizerHandler", handler);
+    pipeline.addAfter(PIPELINE_HTTP_REQUEST_DECODER, "WsAndHttpJWTChannelizerHandler", dummyHandler);
   }
 
-  private AbstractAuthenticationHandler instantiateAuthenticationHandler(final Settings.AuthenticationSettings authSettings) {
-    final String authenticationHandler = authSettings.authenticationHandler;
-    if (authenticationHandler == null) {
-      //Keep things backwards compatible
-      return new WsAndHttpJWTAuthenticationHandler(authenticator, authSettings);
-    } else {
-      return createAuthenticationHandler(authSettings);
-    }
-  }
+//  private AbstractAuthenticationHandler instantiateAuthenticationHandler(final Settings.AuthenticationSettings authSettings) {
+//    final String authenticationHandler = authSettings.authenticationHandler;
+//    if (authenticationHandler == null) {
+//      //Keep things backwards compatible
+//      return new WsAndHttpJWTAuthenticationHandler(authenticator, authSettings);
+//    } else {
+//      return createAuthenticationHandler(authSettings);
+//    }
+//  }
 
 }
