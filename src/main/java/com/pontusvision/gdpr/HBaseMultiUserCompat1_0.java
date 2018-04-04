@@ -19,8 +19,8 @@ public class HBaseMultiUserCompat1_0 extends HBaseCompat1_0
   @Override
   public ConnectionMask createConnection(Configuration conf) throws IOException
   {
-    String proxyUser = conf.get("storage.hbase.proxy_user");
-    String proxyPass = conf.get("storage.hbase.proxy_pass");
+    String proxyUser = conf.get("hbase.proxy_user");
+    String proxyPass = conf.get("hbase.proxy_pass");
 
     try
     {

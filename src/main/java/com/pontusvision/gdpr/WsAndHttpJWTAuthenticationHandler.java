@@ -401,8 +401,8 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
       File gconfFile = new File(gconfFileStr);
       CommonsConfiguration conf = getLocalConfiguration(gconfFile,userName,password);
 
-      conf.set("storage.hbase.proxy_user", userName);
-      conf.set("storage.hbase.proxy_pass", password);
+      conf.set("storage.hbase.ext.hbase.proxy_user", userName);
+      conf.set("storage.hbase.ext.hbase.proxy_pass", password);
       JanusGraph graph = JanusGraphFactory.open(conf);
 
 
@@ -421,7 +421,9 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
       GremlinExecutor exec = serverGremlinExecutor.getGremlinExecutor();
 
+
       WsAndHttpJWTChannelizer channelizer = new WsAndHttpJWTChannelizer();
+      serverGremlinExecutor.getGraphManager().putTraversalSource("g",graph.traversal());
 
 
       serverGremlinExecutor.getGraphManager().putGraph("graph",graph);
