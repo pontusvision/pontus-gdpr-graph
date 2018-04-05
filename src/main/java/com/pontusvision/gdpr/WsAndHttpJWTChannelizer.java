@@ -32,7 +32,7 @@ public class WsAndHttpJWTChannelizer extends AbstractChannelizer
 //      authenticationHandler = authenticator.getClass() == AllowAllAuthenticator.class ?
 //          null : instantiateAuthenticationHandler(settings.authentication);
 
-    endpointHandler = new HttpGremlinEndpointHandler(serializers, gremlinExecutor, graphManager, settings);
+    endpointHandler = new HttpJWTGremlinEndpointHandler(serializers, gremlinExecutor, graphManager, settings);
 
     handler = new WsAndHttpChannelizerHandler();
     handler.init(serverGremlinExecutor,endpointHandler);
