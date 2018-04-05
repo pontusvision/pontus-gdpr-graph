@@ -27,11 +27,15 @@ public class HBaseMultiUserCompat1_0 extends HBaseCompat1_0
       LoginContext lc = JWTToKerberosAuthenticator.kinit(proxyUser, proxyPass);
       lc.login();
       UserProvider provider = UserProvider.instantiate(conf);
-      User user = provider.create(UserGroupInformation.getUGIFromSubject(lc.getSubject()));
+      UserGroupInformation ugi = UserGroupInformation.createProxyUser(proxyUser, UserGroupInformation.getLoginUser());
+
+      //      ugi = UserGroupInformation.getUGIFromSubject(lc.getSubject());
+
+      User user = provider.create(ugi);
 
       Connection conn = ConnectionFactory.createConnection(conf, user);
 
-      return new HConnection1_0(conn);
+      return new HBaseMultiUserConnection1_0(conn, ConnectionFactory.createConnection(conf));
     }
 
     catch (LoginException e)
