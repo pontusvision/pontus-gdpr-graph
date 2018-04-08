@@ -7,7 +7,7 @@ threadPoolWorker: 3
 #channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
 channelizer: com.pontusvision.gdpr.WsAndHttpJWTChannelizer
 graphs: {
-  graph: conf/janusgraph-hbase-es.properties
+  graph: /opt/pontus/pontus-graph/current/conf/janusgraph-hbase-es.properties
 }
 serializers:
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { ioRegistries: [org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerIoRegistryV1d0, org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry] ,  useMapperFromGraph: graph}}
