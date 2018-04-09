@@ -141,7 +141,7 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
     }
 }
 
-def dumpData(LinkedList<Map<String, String>> listOfMaps) {
+def dumpData(List<Map<String, String>> listOfMaps) {
 
     StringBuilder strBuilder = new StringBuilder()
     for (Map<String, String> item in listOfMaps) {
@@ -164,7 +164,7 @@ listOfMaps.add(map2);
 
 addCampaignAwarenessBulk(graph,g, listOfMaps) */
 
-def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
+def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
     def metadataCreateDate = new Date()
     def metadataUpdateDate = new Date()
@@ -352,7 +352,7 @@ def addCampaignAwarenessBulk(graph, g, LinkedList<Map<String, String>> listOfMap
 }
 
 
-def addRandomUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
+def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
@@ -811,7 +811,7 @@ def addRandomSARs(graph, g) {
 }
 
 
-def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
+def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date();
     metadataUpdateDate = new Date();
@@ -960,7 +960,7 @@ def addRandomChildUserDataBulk(graph, g, LinkedList<Map<String, String>> listOfM
 }
 
 
-def addDataBulk(graph, g, LinkedList<Map<String, String>> listOfMaps) {
+def addDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
