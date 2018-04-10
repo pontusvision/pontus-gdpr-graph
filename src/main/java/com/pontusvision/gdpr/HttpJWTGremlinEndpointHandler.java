@@ -9,7 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import io.netty.util.ReferenceCountUtil;
+//import io.netty.util.ReferenceCountUtil;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.Tokens;
@@ -112,7 +112,7 @@ public class HttpJWTGremlinEndpointHandler extends HttpGremlinEndpointHandler
 
       if ("/favicon.ico".equals(req.getUri())) {
         sendError(ctx, NOT_FOUND, "Gremlin Server doesn't have a favicon.ico");
-        ReferenceCountUtil.release(msg);
+//        ReferenceCountUtil.release(msg);
         return;
       }
 
@@ -122,7 +122,7 @@ public class HttpJWTGremlinEndpointHandler extends HttpGremlinEndpointHandler
 
       if (req.getMethod() != GET && req.getMethod() != POST) {
         sendError(ctx, METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED.toString());
-        ReferenceCountUtil.release(msg);
+//        ReferenceCountUtil.release(msg);
         return;
       }
 
@@ -131,7 +131,7 @@ public class HttpJWTGremlinEndpointHandler extends HttpGremlinEndpointHandler
         requestArguments = getRequestArguments(req);
       } catch (IllegalArgumentException iae) {
         sendError(ctx, BAD_REQUEST, iae.getMessage());
-        ReferenceCountUtil.release(msg);
+//        ReferenceCountUtil.release(msg);
         return;
       }
 
@@ -139,7 +139,7 @@ public class HttpJWTGremlinEndpointHandler extends HttpGremlinEndpointHandler
       final Pair<String, MessageTextSerializer> serializer = chooseSerializer(acceptString);
       if (null == serializer) {
         sendError(ctx, BAD_REQUEST, String.format("no serializer for requested Accept header: %s", acceptString));
-        ReferenceCountUtil.release(msg);
+//        ReferenceCountUtil.release(msg);
         return;
       }
 
@@ -147,7 +147,7 @@ public class HttpJWTGremlinEndpointHandler extends HttpGremlinEndpointHandler
       final boolean keepAlive = isKeepAlive(req);
 
       // not using the req any where below here - assume it is safe to release at this point.
-      ReferenceCountUtil.release(msg);
+//      ReferenceCountUtil.release(msg);
 
       try {
         logger.debug("Processing request containing script [{}] and bindings of [{}] on {}",
@@ -189,7 +189,7 @@ public class HttpJWTGremlinEndpointHandler extends HttpGremlinEndpointHandler
           bindings.putAll(this.graphManager.getAsBindings());
         } catch (IllegalStateException iae) {
           sendError(ctx, BAD_REQUEST, iae.getMessage());
-          ReferenceCountUtil.release(msg);
+//          ReferenceCountUtil.release(msg);
           return;
         }
 
