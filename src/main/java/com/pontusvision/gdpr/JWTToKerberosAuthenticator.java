@@ -76,7 +76,7 @@ public class JWTToKerberosAuthenticator implements Authenticator
         for(Callback c : callbacks){
           if(c instanceof NameCallback)
             ((NameCallback) c).setName(username);
-          if(c instanceof PasswordCallback)
+          if(c instanceof PasswordCallback && password != null)
             ((PasswordCallback) c).setPassword(password.toCharArray());
         }
       }});
