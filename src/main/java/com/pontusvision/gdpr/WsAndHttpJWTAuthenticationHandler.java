@@ -69,7 +69,7 @@ import static org.janusgraph.util.system.LoggerUtil.sanitizeAndLaunder;
 
 public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHandler
 {
-  private static final Logger logger = LoggerFactory.getLogger(HttpBasicAuthenticationHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(WsAndHttpJWTAuthenticationHandler.class);
   private static final Logger auditLogger = LoggerFactory.getLogger(GremlinServer.AUDIT_LOGGER_NAME);
   private final Settings.AuthenticationSettings authenticationSettings;
 
@@ -91,6 +91,11 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   public String zookeeperPrincipal = "";
   public String zookeeperKeytab = "";
 
+  String zkPath = JWT_ZK_PATH_DEFVAL;
+  ZooKeeper zoo = null;
+
+  public String keyAlias = "localhost";
+
   public static Map<Object, Object> graphDbMap;
 
   static {
@@ -110,6 +115,14 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
       this.zookeeperPrincipal = (String) this.authenticationSettings.config.get("zookeeperPrincipal");
       this.zookeeperKeytab = (String) this.authenticationSettings.config.get("zookeeperKeytab");
+
+
+      this.keyAlias = (String) this.authenticationSettings.config.getOrDefault("jwtKeyAlias", "jwt");
+      this.sslContextService.keyPassword = (String) this.authenticationSettings.config.getOrDefault("jwtKeyPassword", "pa55word");
+      this.sslContextService.keyStoreFile = (String) this.authenticationSettings.config.getOrDefault("jwtKeyStoreFile", "/etc/pki/java/jwt.jks");
+      this.sslContextService.keyStorePassword = (String) this.authenticationSettings.config.getOrDefault("jwtKeyStorePassword", "pa55word");
+      this.sslContextService.keyStoreType = (String) this.authenticationSettings.config.getOrDefault("jwtKeyStoreType", "jks");
+
 
       //zookeeperPrincipal
       //zookeeperKeytab
@@ -244,9 +257,6 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
     return null;
   }
-
-  String zkPath = JWT_ZK_PATH_DEFVAL;
-  ZooKeeper zoo = null;
 
   // Method to disconnect from zookeeper server
   public void close() throws InterruptedException
@@ -445,6 +455,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
       final FullHttpMessage request = (FullHttpMessage) msg;
       if (!request.headers().contains("Authorization"))
       {
+        logger.error("Missing Authorization Header");
         sendError(ctx, msg);
         return;
       }
@@ -457,6 +468,8 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
       {
         if (!authorizationHeader.startsWith(jwt))
         {
+          logger.error("Missing Bearer or JWT in authorization header");
+
           sendError(ctx, msg);
           return;
         }
@@ -464,7 +477,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
       }
 
       final String jwtStr = authorizationHeader.substring(basic.length());
-      final String keyAlias = "localhost";
+
 
       //      JWSSigner signer = getSigner(keyAlgo,key);
 
@@ -483,6 +496,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         if (!jwsObject.verify(verifier))
         {
           sendError(ctx, msg);
+          logger.error("Missing Bearer or JWT in authorization header");
 
           auditLogger.error("Failed to verify the JWT with the supplied key.");
           return;
@@ -550,6 +564,9 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
           if (address.startsWith("/") && address.length() > 1)
             address = address.substring(1);
           final String[] authClassParts = authenticator.getClass().toString().split("[.]");
+
+          logger.info("Successfully authenticated user {}" , user);
+
           auditLogger.info("User {} with address {} authenticated by {}", user, address,
               authClassParts[authClassParts.length - 1]);
         }
@@ -565,12 +582,15 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         }
         catch (Throwable t)
         {
+          logger.info("Got Exception" , t);
+
           sendServerError(ctx,msg);
         }
       }
       catch (Exception ae)
       {
         this.zoo = null;
+        logger.info("Got Exception creating zookeeper conn" , ae);
 
         sendError(ctx, msg);
       }
