@@ -213,7 +213,13 @@ public class App
   public static void main(String[] args)
   {
     new JHades().overlappingJarsReport();
-    Server server = new Server(3001);
+
+    String portStr = System.getenv("GRAPHDB_REST_PORT");
+    int port = 3001;
+    if (portStr != null){
+      port = Integer.parseInt(portStr);
+    }
+    Server server = new Server(port);
 
     try
     {
