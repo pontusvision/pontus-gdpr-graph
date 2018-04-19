@@ -10,6 +10,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 //import io.netty.util.ReferenceCountUtil;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.tinkerpop.gremlin.driver.MessageSerializer;
 import org.apache.tinkerpop.gremlin.driver.Tokens;
@@ -224,7 +225,11 @@ public class HttpJWTGremlinEndpointHandler extends HttpGremlinEndpointHandler
             }));
 
         evalFuture.exceptionally(t -> {
-          if (t.getMessage() != null)
+          if (t instanceof org.apache.hadoop.hbase.security.AccessDeniedException | t.getCause() instanceof org.apache.hadoop.hbase.security.AccessDeniedException )
+          {
+            sendError(ctx);
+          }
+          else if (t.getMessage() != null)
             sendError(ctx, INTERNAL_SERVER_ERROR, t.getMessage(), Optional.of(t));
           else
             sendError(ctx, INTERNAL_SERVER_ERROR, String.format("Error encountered evaluating script: %s", requestArguments.getValue0())
@@ -402,6 +407,12 @@ public class HttpJWTGremlinEndpointHandler extends HttpGremlinEndpointHandler
 
     // Close the connection as soon as the error message is sent.
     ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+  }
+  private void sendError(final ChannelHandlerContext ctx)
+  {
+    // Close the connection as soon as the error message is sent.
+    ctx.writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, UNAUTHORIZED)).addListener(ChannelFutureListener.CLOSE);
+//    ReferenceCountUtil.release(msg);
   }
 
   private static void attemptCommit(final Map<String, String> aliases, final GraphManager graphManager, final boolean strict) {
