@@ -496,7 +496,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         if (!jwsObject.verify(verifier))
         {
           sendError(ctx, msg);
-          logger.error("Missing Bearer or JWT in authorization header");
+          logger.error("Failed to verify the JWT with the supplied key");
 
           auditLogger.error("Failed to verify the JWT with the supplied key.");
           return;
