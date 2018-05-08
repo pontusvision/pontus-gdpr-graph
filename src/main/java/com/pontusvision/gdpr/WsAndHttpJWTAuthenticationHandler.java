@@ -506,17 +506,6 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         JWTClaim sampleClaim = JWTClaim.fromJson(jwsObject.getPayload().toString());
 
 
-        StringBuffer strBuf = new StringBuffer(JWT_ZK_PATH_DEFVAL).append("/").append(sampleClaim.getSub());
-
-        if (this.zoo == null)
-        {
-          UserGroupInformation ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(zookeeperPrincipal,zookeeperKeytab);
-          ugi.checkTGTAndReloginFromKeytab();
-          PrivilegedExceptionAction<ZooKeeper> action = () -> connect(zookeeperConnStr);
-          this.zoo = ugi.doAs(action);
-
-        }
-
 
 //        final Map<String, String> credentials = new HashMap<>();
 //        credentials.put(PROPERTY_USERNAME, sampleClaim.getSub());
@@ -533,17 +522,6 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
 
 //        authenticator.authenticate(credentials);
-
-//        UserGroupInformation ugi = UserGroupInformation.
-        if (this.exists(strBuf.toString()) == null)
-        {
-          this.create(strBuf.toString(), jwsObject.getPayload().toBytes());
-        }
-        else
-        {
-          this.update(strBuf.toString(), jwsObject.getPayload().toBytes());
-        }
-
 //        this.close();
 
 // TODO: add a doAs
@@ -555,7 +533,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
 //        exec.
 
-
+        handleZookeeper(jwsObject,sampleClaim);
 
         // User name logged with the remote socket address and authenticator classname for audit logging
         if (authenticationSettings.enableAuditLog)
@@ -597,6 +575,33 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     }
   }
 
+  protected void handleZookeeper (JWSObject jwsObject, JWTClaim sampleClaim )
+      throws KeeperException, InterruptedException, IOException
+  {
+    StringBuffer strBuf = new StringBuffer(JWT_ZK_PATH_DEFVAL).append("/").append(sampleClaim.getSub());
+
+    if (this.zoo == null)
+    {
+      UserGroupInformation ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(zookeeperPrincipal,zookeeperKeytab);
+      ugi.checkTGTAndReloginFromKeytab();
+      PrivilegedExceptionAction<ZooKeeper> action = () -> connect(zookeeperConnStr);
+      this.zoo = ugi.doAs(action);
+
+    }
+
+
+    //        UserGroupInformation ugi = UserGroupInformation.
+    if (this.exists(strBuf.toString()) == null)
+    {
+      this.create(strBuf.toString(), jwsObject.getPayload().toBytes());
+    }
+    else
+    {
+      this.update(strBuf.toString(), jwsObject.getPayload().toBytes());
+    }
+
+
+  }
 
   private void sendServerError (final ChannelHandlerContext ctx, final Object msg)
   {
