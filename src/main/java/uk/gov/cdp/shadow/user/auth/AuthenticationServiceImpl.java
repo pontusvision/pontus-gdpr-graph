@@ -22,6 +22,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private boolean createUser = property("ldap.create.user").equals("true");
 
   private boolean authenticateWithKerberos = property("kerberos.authentication").equals("true");
+  private boolean useCDPShadowSalt = property("shadow.user.salt.password.enable", "false").equals("true");
 
   @Override
   public void authenticate(String userName, String subject, String bizContext) {
@@ -31,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     try {
       Key key = CDPShadowUserSaltKey.instance().get();
       String keyAlgo = property(SHADOW_USER_KEY_ALGO);
-      String password = cdpShadowUserPasswordGenerator.generate(key, keyAlgo, subject);
+      String password = useCDPShadowSalt? cdpShadowUserPasswordGenerator.generate(key, keyAlgo, subject): subject;
       if (createUser && !ldapService.userExist(userName)) {
         ldapService.createUserAccount(userName, password);
       }
