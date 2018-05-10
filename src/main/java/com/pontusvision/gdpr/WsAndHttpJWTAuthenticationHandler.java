@@ -36,6 +36,9 @@ import org.janusgraph.diskstorage.configuration.ReadConfiguration;
 import org.janusgraph.diskstorage.configuration.backend.CommonsConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.cdp.shadow.user.auth.AuthenticationService;
+import uk.gov.cdp.shadow.user.auth.AuthenticationServiceImpl;
+import uk.gov.cdp.shadow.user.auth.CDPShadowUserPasswordGenerator;
 import uk.gov.homeoffice.pontus.JWTClaim;
 
 import javax.crypto.SecretKey;
@@ -87,6 +90,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   public static final float JWT_SECURITY_CLAIM_CACHE_LOAD_FACTOR_DEFVAL = 0.75F;
   public static final long JWT_SECURITY_CLAIM_CACHE_MAX_SIZE_DEFVAL = 50000000L;
 
+  protected AuthenticationService authenticationService = new AuthenticationServiceImpl();
   public String zookeeperConnStr = "localhost";
   public String zookeeperPrincipal = "";
   public String zookeeperKeytab = "";
@@ -513,11 +517,17 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 //        credentials.put(PROPERTY_PASSWORD, jwtStr);
 
         String user = sampleClaim.getSub();
+
+        authenticationService.authenticate(user,user,sampleClaim.getBizctx());
+
         String pass = sampleClaim.getSub();
+
+
+
 
 //        LoginContext lc =
 
-        JWTToKerberosAuthenticator.kinit(user,pass);
+//        JWTToKerberosAuthenticator.kinit(user,pass);
 
 
 
