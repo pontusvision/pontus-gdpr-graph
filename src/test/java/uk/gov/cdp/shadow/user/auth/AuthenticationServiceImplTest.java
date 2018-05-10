@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import javax.naming.NamingException;
 import org.hamcrest.core.IsInstanceOf;
 import org.jukito.JukitoRunner;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -32,6 +34,20 @@ public class AuthenticationServiceImplTest {
   private String subject = "UID-1234";
   private String userName = "Deepesh";
   private String bizContext = "/org/bu/role";
+
+  @BeforeClass
+  public static void setup() {
+      System.setProperty("ldap.create.user", "true");
+      System.setProperty("kerberos.authentication", "false");
+
+      System.setProperty("shadow.user.keystore.location", "keystore.ks");
+      System.setProperty("shadow.user.keystore.pwd", "**874");
+      System.setProperty("shadow.user.key.pwd", "874_###");
+      System.setProperty("shadow.user.key.alias", "Key_Alias");
+      System.setProperty("shadow.user.key.algo", "HmacSHA512");
+      System.setProperty("shadow.user.key.store.type", "JCEKS");
+      System.setProperty("shadow.user.salt.password.enable", "true");
+  }
 
   @Test
   public void userAuthenticatedWithGeneratedPassword_WhenUserExists(

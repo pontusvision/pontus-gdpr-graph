@@ -7,10 +7,23 @@ import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
 import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyStore;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class CDPShadowUserSaltKeyTest {
   private static final String KEYSTORE_TYPE = "JCEKS";
+
+    @BeforeClass
+    public static void setup() {
+
+        System.setProperty("shadow.user.keystore.location", "keystore.ks");
+        System.setProperty("shadow.user.keystore.pwd", "**874");
+        System.setProperty("shadow.user.key.pwd", "874_###");
+        System.setProperty("shadow.user.key.alias", "Key_Alias");
+        System.setProperty("shadow.user.key.algo", "HmacSHA512");
+        System.setProperty("shadow.user.key.store.type", "JCEKS");
+    }
 
   @Test
   public void secretSaltKeyIsSuccessfullyLoadedFromKeyStore() throws Exception {
