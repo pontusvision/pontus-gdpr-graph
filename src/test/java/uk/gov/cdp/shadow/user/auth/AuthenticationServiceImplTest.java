@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import javax.naming.NamingException;
 import org.hamcrest.core.IsInstanceOf;
 import org.jukito.JukitoRunner;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -65,7 +64,7 @@ public class AuthenticationServiceImplTest {
     authenticationService.authenticate(userName, subject, bizContext, groups);
 
     verify(ldapService).login(userName, password);
-    verify(ldapService, never()).createUserAccount(userName, password);
+    verify(ldapService, never()).createUserAccount(userName, password, groups);
   }
 
   @Test
@@ -81,7 +80,7 @@ public class AuthenticationServiceImplTest {
     authenticationService.authenticate(userName, subject, bizContext, groups);
 
     verify(ldapService).login(userName, password);
-    verify(ldapService).createUserAccount(userName, password);
+    verify(ldapService).createUserAccount(userName, password, groups);
   }
 
   @Test
@@ -106,7 +105,7 @@ public class AuthenticationServiceImplTest {
 
     doThrow(new LdapServiceException(new NamingException()))
         .when(ldapService)
-        .createUserAccount(userName, password);
+        .createUserAccount(userName, password, groups);
 
     when(ldapService.userExist(userName)).thenReturn(false);
 

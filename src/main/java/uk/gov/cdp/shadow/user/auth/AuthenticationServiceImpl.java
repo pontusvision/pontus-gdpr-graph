@@ -35,7 +35,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       String keyAlgo = property(SHADOW_USER_KEY_ALGO);
       String password = useCDPShadowSalt? cdpShadowUserPasswordGenerator.generate(key, keyAlgo, subject): subject;
       if (createUser && !ldapService.userExist(userName)) {
-        ldapService.createUserAccount(userName, password);
+        ldapService.createUserAccount(userName, password, groups);
       }
 
       if (authenticateWithKerberos) {
