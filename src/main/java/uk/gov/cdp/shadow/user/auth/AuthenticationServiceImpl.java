@@ -4,6 +4,7 @@ import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
 
 import com.pontusvision.gdpr.JWTToKerberosAuthenticator;
 import java.security.Key;
+import java.util.List;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private boolean useCDPShadowSalt = property("shadow.user.salt.password.enable", "false").equals("true");
 
   @Override
-  public void authenticate(String userName, String subject, String bizContext) {
+  public void authenticate(String userName, String subject, String bizContext, List<String> groups) {
 
     LOGGER.info(
         String.format("Authenticating user === %s for bizContext == %s", userName, bizContext));

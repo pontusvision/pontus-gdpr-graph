@@ -14,6 +14,8 @@ import org.junit.runner.RunWith;
 import uk.gov.cdp.shadow.user.auth.AuthenticationService;
 import uk.gov.cdp.shadow.user.auth.guice.TestApplicationModule;
 
+import java.util.Collections;
+
 @RunWith(JukitoRunner.class)
 public class AuthenticationServiceTest {
 
@@ -45,7 +47,7 @@ public class AuthenticationServiceTest {
   @Test
   public void whenUserDoesntExist_ItsCreated_AndAuthenticated(AuthenticationService underTest) {
 
-    underTest.authenticate("cdp_test_deepesh", "pa55w0rdDSR", "biz/org");
+    underTest.authenticate("cdp_test_deepesh", "pa55w0rdDSR", "biz/org", Collections.emptyList());
     //    verify(ldapService).createUserAccount(any(), any());
   }
 }
