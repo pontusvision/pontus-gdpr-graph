@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 import javax.inject.Inject;
 import javax.naming.NamingException;
 import org.hamcrest.core.IsInstanceOf;
@@ -34,6 +36,7 @@ public class AuthenticationServiceImplTest {
   private String subject = "UID-1234";
   private String userName = "Deepesh";
   private String bizContext = "/org/bu/role";
+  private List<String> groups = Collections.emptyList();
 
   @BeforeClass
   public static void setup() {
@@ -59,7 +62,7 @@ public class AuthenticationServiceImplTest {
 
     when(ldapService.userExist(userName)).thenReturn(true);
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
 
     verify(ldapService).login(userName, password);
     verify(ldapService, never()).createUserAccount(userName, password);
@@ -75,7 +78,7 @@ public class AuthenticationServiceImplTest {
 
     when(ldapService.userExist(userName)).thenReturn(false);
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
 
     verify(ldapService).login(userName, password);
     verify(ldapService).createUserAccount(userName, password);
@@ -90,7 +93,7 @@ public class AuthenticationServiceImplTest {
     expectedException.expect(AuthenticationFailureException.class);
     expectedException.expectCause(IsInstanceOf.instanceOf(PasswordGenerationFailedException.class));
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
   }
 
   @Test
@@ -110,7 +113,7 @@ public class AuthenticationServiceImplTest {
     expectedException.expect(AuthenticationFailureException.class);
     expectedException.expectCause(IsInstanceOf.instanceOf(LdapServiceException.class));
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
   }
 
   @Test
@@ -127,6 +130,6 @@ public class AuthenticationServiceImplTest {
     expectedException.expect(AuthenticationFailureException.class);
     expectedException.expectCause(IsInstanceOf.instanceOf(LdapServiceException.class));
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
   }
 }
