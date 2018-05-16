@@ -1,7 +1,8 @@
 import org.apache.commons.math3.util.Pair
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import com.jayway.jsonpath.JsonPath
-
+import org.apache.tinkerpop.gremlin.structure.Edge
+import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.janusgraph.core.*
 import org.janusgraph.core.schema.*
 import scala.xml.Atom
@@ -1413,22 +1414,52 @@ def createCompIdx(mgmt, idxName, prop) {
   }
 }
 
-def createMixedIdx(mgmt, idxName, prop) {
-  try
-  {
-    if (!mgmt.containsGraphIndex(idxName)) {
-        return mgmt.buildIndex(idxName, Vertex.class).addKey(prop).buildMixedIndex("search");
-    } else {
-        return mgmt.getGraphIndex(idxName);
+def createMixedIdx(mgmt, idxName, PropertyKey metadataType, Mapping mapping, PropertyKey ... props) {
+    try
+    {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName,Vertex.class )
+            ib.addKey(metadataType);
 
+            for (PropertyKey prop in props) {
+                ib.addKey(prop,mapping);
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
     }
-  } 
-  catch (Throwable t)
-  {
-    t.printStackTrace();
-  }
+    catch (Throwable t)
+    {
+        t.printStackTrace();
+    }
+}
 
+def createMixedIdx(mgmt, idxName, PropertyKey ... props) {
+    try
+    {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName,Vertex.class )
+            for (PropertyKey prop in props) {
+                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
 
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t)
+    {
+        t.printStackTrace();
+    }
 }
 
 def createVertexLabel(mgmt, labelName) {
@@ -1491,6 +1522,36 @@ def createIndicesPropsAndLabels() {
     mgmt = graph.openManagement();
 
 
+    metadataController = createProp(mgmt, "Metadata.Controller", String.class, org.janusgraph.core.Cardinality.SET)
+    metadataProcessor = createProp(mgmt, "Metadata.Processor", String.class, org.janusgraph.core.Cardinality.SET)
+    metadataLineage = createProp(mgmt, "Metadata.Lineage", String.class, org.janusgraph.core.Cardinality.SET)
+    metadataRedaction = createProp(mgmt, "Metadata.Redaction", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    metadataVersion = createProp(mgmt, "Metadata.Version", Integer.class, org.janusgraph.core.Cardinality.SINGLE)
+    metadataCreateDate = createProp(mgmt, "Metadata.Create_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    metadataUpdateDate = createProp(mgmt, "Metadata.Update_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    metadataStatus = createProp(mgmt, "Metadata.Status", String.class, org.janusgraph.core.Cardinality.SET)
+    metadataOrigId = createProp(mgmt, "Metadata.Orig_Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    metadataGDPRStatus = createProp(mgmt, "Metadata.GDPR_Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    metadataLineageServerTag = createProp(mgmt, "Metadata.Lineage_Server_Tag", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    metadataLineageLocationTag = createProp(mgmt, "Metadata.Lineage_Location_Tag", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    metadataType = createProp(mgmt, "Metadata.Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
+
+//    metadataLineageServerTagIdx = createMixedIdx(mgmt, "metadataLineageServerTagIdx", metadataLineageServerTag)
+    metadataTypeIdx = createMixedIdx(mgmt, "metadataTypeIdx", metadataType)
+    metadataLineageLocationTagIdx = createMixedIdx(mgmt, "metadataLineageLocationTagIdx", metadataLineageLocationTag)
+    metadataTypeCreateDateIdx = createMixedIdx(mgmt, 'metadataTypeCreateDateMixedIdx',metadataType,Mapping.DEFAULT.asParameter(),metadataCreateDate)
+
+//    metadataCreateDateIdx = createCompIdx(mgmt, "metadataCreateDateMixedIdx", metadataCreateDate)
+//    metadataUpdateDateIdx = createCompIdx(mgmt, "metadataUpdateDateMixedIdx", metadataUpdateDate)
+
+
+    metadataGDPRStatusIdx = createMixedIdx(mgmt, "metadataGDPRStatusMixedIdx", metadataGDPRStatus)
+
+
+
+
+
+
     objectAWSInstanceLabel = createVertexLabel(mgmt, "Object.Notification_Templates");
     objectNotificationTemplatesProp00 = createProp(mgmt, "Object.Notification_Templates.Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectNotificationTemplatesProp01 = createProp(mgmt, "Object.Notification_Templates.Types", String.class, org.janusgraph.core.Cardinality.SET);
@@ -1499,9 +1560,9 @@ def createIndicesPropsAndLabels() {
     objectNotificationTemplatesProp04 = createProp(mgmt, "Object.Notification_Templates.Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
     objectNotificationTemplatesIdx00 = createCompIdx(mgmt, "objectNotificationTemplatesIdx00", objectNotificationTemplatesProp00);
-    objectNotificationTemplatesIdx01 = createCompIdx(mgmt, "objectNotificationTemplatesIdx01", objectNotificationTemplatesProp01);
-    objectNotificationTemplatesIdx02 = createCompIdx(mgmt, "objectNotificationTemplatesIdx02", objectNotificationTemplatesProp02);
-    objectNotificationTemplatesIdx03 = createCompIdx(mgmt, "objectNotificationTemplatesIdx03", objectNotificationTemplatesProp03);
+    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectNotificationTemplatesIdx01", metadataType, objectNotificationTemplatesProp01);
+//    objectNotificationTemplatesIdx02 = createCompIdx(mgmt, "objectNotificationTemplatesIdx02", objectNotificationTemplatesProp02);
+//    objectNotificationTemplatesIdx03 = createCompIdx(mgmt, "objectNotificationTemplatesIdx03", objectNotificationTemplatesProp03);
 
 
     eventDataBreachLabel = createVertexLabel(mgmt, "Event.Data_Breach");
@@ -1511,11 +1572,12 @@ def createIndicesPropsAndLabels() {
     eventDataBreachProp03 = createProp(mgmt, "Event.Data_Breach.Source", String.class, org.janusgraph.core.Cardinality.SINGLE);
     eventDataBreachProp04 = createProp(mgmt, "Event.Data_Breach.Impact", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-    eventDataBreachIdx00 = createCompIdx(mgmt, "eventDataBreachIdx00", eventDataBreachProp00);
-    eventDataBreachIdx01 = createCompIdx(mgmt, "eventDataBreachIdx01", eventDataBreachProp01);
-    eventDataBreachIdx02 = createCompIdx(mgmt, "eventDataBreachIdx02", eventDataBreachProp02);
-    eventDataBreachIdx03 = createCompIdx(mgmt, "eventDataBreachIdx03", eventDataBreachProp03);
-    eventDataBreachIdx04 = createCompIdx(mgmt, "eventDataBreachIdx04", eventDataBreachProp04);
+    eventDataBreachIdx00 = createMixedIdx(mgmt, "eventDataBreachIdx00",metadataType,  eventDataBreachProp00);
+//    eventDataBreachIdx01 = createCompIdx(mgmt, "eventDataBreachIdx01", eventDataBreachProp01);
+    eventDataBreachIdx02 = createMixedIdx(mgmt, "eventDataBreachIdx02", metadataType, eventDataBreachProp02);
+    eventDataBreachIdx03 = createMixedIdx(mgmt, "eventDataBreachIdx03", metadataType, eventDataBreachProp03);
+    eventDataBreachIdx04 = createMixedIdx(mgmt, "eventDataBreachIdx04",  metadataType,eventDataBreachProp04);
+    eventDataBreachIdx05 = createMixedIdx(mgmt, "eventDataBreachIdx05",  eventDataBreachProp02,eventDataBreachProp04);
 
 
 
@@ -1539,21 +1601,21 @@ def createIndicesPropsAndLabels() {
     objectAWSProp09 = createProp(mgmt, "Object.AWS_Instance.KeyName", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAWSProp10 = createProp(mgmt, "Object.AWS_Instance.InstanceType", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAWSProp11 = createProp(mgmt, "Object.AWS_Instance.EnaSupport", Boolean.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectAWSProp12 = createProp(mgmt, "Object.AWS_Instance.Tags", Boolean.class, org.janusgraph.core.Cardinality.SET)
+    objectAWSProp12 = createProp(mgmt, "Object.AWS_Instance.Tags", String.class, org.janusgraph.core.Cardinality.SET)
 
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_InstanceIdx00", objectAWSProp00)
-    objectAWSIdx01 = createCompIdx(mgmt, "objectAWS_InstanceIdx01", objectAWSProp01)
-    objectAWSIdx02 = createCompIdx(mgmt, "objectAWS_InstanceIdx02", objectAWSProp02)
-    objectAWSIdx03 = createCompIdx(mgmt, "objectAWS_InstanceIdx03", objectAWSProp03)
-    objectAWSIdx04 = createCompIdx(mgmt, "objectAWS_InstanceIdx04", objectAWSProp04)
-    objectAWSIdx05 = createCompIdx(mgmt, "objectAWS_InstanceIdx05", objectAWSProp05)
-    objectAWSIdx06 = createCompIdx(mgmt, "objectAWS_InstanceIdx06", objectAWSProp06)
-    objectAWSIdx07 = createCompIdx(mgmt, "objectAWS_InstanceIdx07", objectAWSProp07)
-    objectAWSIdx08 = createCompIdx(mgmt, "objectAWS_InstanceIdx08", objectAWSProp08)
-    objectAWSIdx09 = createCompIdx(mgmt, "objectAWS_InstanceIdx09", objectAWSProp09)
-    objectAWSIdx10 = createCompIdx(mgmt, "objectAWS_InstanceIdx10", objectAWSProp10)
-    objectAWSIdx11 = createCompIdx(mgmt, "objectAWS_InstanceIdx11", objectAWSProp11)
-    objectAWSIdx12 = createCompIdx(mgmt, "objectAWS_InstanceIdx12", objectAWSProp12)
+    objectAWSIdx00 = createMixedIdx(mgmt, "objectAWS_InstanceIdx00", objectAWSProp00)
+//    objectAWSIdx01 = createMixedIdx(mgmt, "objectAWS_InstanceIdx01", objectAWSProp01)
+//    objectAWSIdx02 = createMixedIdx(mgmt, "objectAWS_InstanceIdx02", objectAWSProp02)
+//    objectAWSIdx03 = createMixedIdx(mgmt, "objectAWS_InstanceIdx03", objectAWSProp03)
+//    objectAWSIdx04 = createMixedIdx(mgmt, "objectAWS_InstanceIdx04", objectAWSProp04)
+//    objectAWSIdx05 = createMixedIdx(mgmt, "objectAWS_InstanceIdx05", objectAWSProp05)
+    objectAWSIdx06 = createMixedIdx(mgmt, "objectAWS_InstanceIdx06", objectAWSProp06)
+    objectAWSIdx07 = createMixedIdx(mgmt, "objectAWS_InstanceIdx07", objectAWSProp07)
+//    objectAWSIdx08 = createMixedIdx(mgmt, "objectAWS_InstanceIdx08", objectAWSProp08)
+//    objectAWSIdx09 = createMixedIdx(mgmt, "objectAWS_InstanceIdx09", objectAWSProp09)
+    objectAWSIdx10 = createMixedIdx(mgmt, "objectAWS_InstanceIdx10", objectAWSProp10)
+//    objectAWSIdx11 = createMixedIdx(mgmt, "objectAWS_InstanceIdx11", objectAWSProp11)
+    objectAWSIdx12 = createMixedIdx(mgmt, "objectAWS_InstanceIdx12", objectAWSProp12)
 
     objectAWSIdx06 = createMixedIdx(mgmt, "objectAWS_InstanceIdxMixedIdx06", objectAWSProp06)
 
@@ -1604,39 +1666,14 @@ def createIndicesPropsAndLabels() {
     objectAWSProp04 = createProp(mgmt, "Object.AWS_Network_Interface.PrivateDnsName", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAWSProp05 = createProp(mgmt, "Object.AWS_Network_Interface.AttachTime", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx00", objectAWSProp00)
-    objectAWSIdx01 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx01", objectAWSProp01)
-    objectAWSIdx02 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx02", objectAWSProp02)
-    objectAWSIdx03 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx03", objectAWSProp03)
-    objectAWSIdx04 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx04", objectAWSProp04)
-    objectAWSIdx05 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx05", objectAWSProp05)
+//    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx00", objectAWSProp00)
+//    objectAWSIdx01 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx01", objectAWSProp01)
+//    objectAWSIdx02 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx02", objectAWSProp02)
+//    objectAWSIdx03 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx03", objectAWSProp03)
+//    objectAWSIdx04 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx04", objectAWSProp04)
+//    objectAWSIdx05 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx05", objectAWSProp05)
 
 
-
-
-
-    metadataController = createProp(mgmt, "Metadata.Controller", String.class, org.janusgraph.core.Cardinality.SET)
-    metadataProcessor = createProp(mgmt, "Metadata.Processor", String.class, org.janusgraph.core.Cardinality.SET)
-    metadataLineage = createProp(mgmt, "Metadata.Lineage", String.class, org.janusgraph.core.Cardinality.SET)
-    metadataRedaction = createProp(mgmt, "Metadata.Redaction", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataVersion = createProp(mgmt, "Metadata.Version", Integer.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataCreateDate = createProp(mgmt, "Metadata.Create_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataUpdateDate = createProp(mgmt, "Metadata.Update_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataStatus = createProp(mgmt, "Metadata.Status", String.class, org.janusgraph.core.Cardinality.SET)
-    metadataOrigId = createProp(mgmt, "Metadata.Orig_Id", UUID.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataGDPRStatus = createProp(mgmt, "Metadata.GDPR_Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataLineageServerTag = createProp(mgmt, "Metadata.Lineage_Server_Tag", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataLineageLocationTag = createProp(mgmt, "Metadata.Lineage_Location_Tag", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataType = createProp(mgmt, "Metadata.Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
-
-    metadataLineageServerTagIdx = createCompIdx(mgmt, "metadataLineageServerTagIdx", metadataLineageServerTag)
-    metadataLineageServerTagIdx = createCompIdx(mgmt, "metadataTypeIdx", metadataType)
-    metadataLineageLocationTagIdx = createCompIdx(mgmt, "metadataLineageLocationTagIdx", metadataLineageLocationTag)
-    metadataCreateDateIdx = createMixedIdx(mgmt, "metadataCreateDateMixedIdx", metadataCreateDate)
-    metadataUpdateDateIdx = createMixedIdx(mgmt, "metadataUpdateDateMixedIdx", metadataUpdateDate)
-
-
-    metadataGDPRStatusIdx = createMixedIdx(mgmt, "metadataGDPRStatusMixedIdx", metadataGDPRStatus)
 
 
 
@@ -1651,8 +1688,8 @@ def createIndicesPropsAndLabels() {
 
     objectDataProceduresTypeIdx = createMixedIdx(mgmt, "objectDataProceduresTypeIdx", objectDataProceduresType)
     objectDataProceduresPropertyIdx = createMixedIdx(mgmt, "objectDataProceduresPropertyIdx", objectDataProceduresProperty)
-    objectDataProceduresDeleteURLIdx = createMixedIdx(mgmt, "objectDataProceduresDeleteURLIdx", objectDataProceduresDeleteURL)
-    objectDataProceduresUpdateURLIdx = createMixedIdx(mgmt, "objectDataProceduresUpdateURLIdx", objectDataProceduresUpdateURL)
+//    objectDataProceduresDeleteURLIdx = createMixedIdx(mgmt, "objectDataProceduresDeleteURLIdx", objectDataProceduresDeleteURL)
+//    objectDataProceduresUpdateURLIdx = createMixedIdx(mgmt, "objectDataProceduresUpdateURLIdx", objectDataProceduresUpdateURL)
     objectDataProceduresDeleteMechanismIdx = createMixedIdx(mgmt, "objectDataProceduresDeleteMechanismIdx", objectDataProceduresDeleteMechanism)
     objectDataProceduresUpdateMechanismIdx = createMixedIdx(mgmt, "objectDataProceduresUpdateMechanismIdx", objectDataProceduresUpdateMechanism)
 
@@ -1664,7 +1701,7 @@ def createIndicesPropsAndLabels() {
     eventTrainingLabel = createVertexLabel(mgmt, "Event.Training")
 
     eventTrainingStatus = createProp(mgmt, "Event.Training.Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    metadataGDPRStatusIdx = createCompIdx(mgmt, "eventTrainingStatusIdx", eventTrainingStatus)
+//    metadataGDPRStatusIdx = createCompIdx(mgmt, "eventTrainingStatusIdx", eventTrainingStatus)
     metadataGDPRStatusIdx = createMixedIdx(mgmt, "eventTrainingStatusMixedIdx", eventTrainingStatus)
 
 
@@ -1674,11 +1711,11 @@ def createIndicesPropsAndLabels() {
 
     eventSARStatus = createProp(mgmt, "Event.Subject_Access_Request.Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
     eventSARStatusIdx = createMixedIdx(mgmt, "eventSARStatusMixedIdx", eventSARStatus)
-    eventSARStatusIdx = createCompIdx(mgmt, "eventSARStatusIdx", eventSARStatus)
+//    eventSARStatusIdx = createCompIdx(mgmt, "eventSARStatusIdx", eventSARStatus)
 
     eventSARRequestType = createProp(mgmt, "Event.Subject_Access_Request.Request_Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
     eventSARRequestTypeIdx = createMixedIdx(mgmt, "eventSARRequestTypeMixedIdx", eventSARRequestType)
-    eventSARRequestTypeIdx = createCompIdx(mgmt, "eventSARRequestTypeIdx", eventSARRequestType)
+//    eventSARRequestTypeIdx = createCompIdx(mgmt, "eventSARRequestTypeIdx", eventSARRequestType)
 
     createEdgeLabel(mgmt, "Made_SAR_Request")
     createEdgeLabel(mgmt, "Assigned_SAR_Request")
@@ -1701,12 +1738,14 @@ def createIndicesPropsAndLabels() {
     personNameQualifier = createProp(mgmt, "Person.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personTitle = createProp(mgmt, "Person.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "personTitleMixedIdx", personTitle)
-    createMixedIdx(mgmt, "personFullNameMixedIdx", personFullName)
-    createMixedIdx(mgmt, "personLastNameMixedIdx", personLastName)
-    createMixedIdx(mgmt, "personGenderMixedIdx", personGender)
-    createMixedIdx(mgmt, "personNationalityMixedIdx", personNationality)
-    createMixedIdx(mgmt, "personDateOfBirthMixedIdx", personDateOfBirth)
+    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",metadataType,Mapping.DEFAULT.asParameter(),personDateOfBirth);
+//    createCompIdx(mgmt, "personDateOfBirth", personDateOfBirth)
+    createMixedIdx(mgmt, "personTitleMixedIdx", metadataType, personTitle)
+    createMixedIdx(mgmt, "personFullNameMixedIdx",metadataType, personFullName)
+    createMixedIdx(mgmt, "personLastNameMixedIdx", metadataType, personLastName)
+    createMixedIdx(mgmt, "personGenderMixedIdx",metadataType,  personGender)
+    createMixedIdx(mgmt, "personNationalityMixedIdx",metadataType,  personNationality)
+//    createMixedIdx(mgmt, "personDateOfBirthMixedIdx", personDateOfBirth)
 
 
     objectEmailAddressLabel = createVertexLabel(mgmt, "Object.Email_Address")
@@ -1724,7 +1763,7 @@ def createIndicesPropsAndLabels() {
     objectIdentityCardIdName = createProp(mgmt, "Object.Identity_Card.Id_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectIdentityCardIdValue = createProp(mgmt, "Object.Identity_Card.Id_Value", String.class, org.janusgraph.core.Cardinality.SINGLE)
     createMixedIdx(mgmt, "objectIdentityCardIdNameMixedIdx", objectIdentityCardIdName)
-    createMixedIdx(mgmt, "objectIdentityCardIdNameMixedIdx", objectIdentityCardIdName)
+//    createMixedIdx(mgmt, "objectIdentityCardIdNameMixedIdx", objectIdentityCardIdName)
 
     locationAddressLabel = createVertexLabel(mgmt, "Location.Address")
     locationAddressStreet = createProp(mgmt, "Location.Address.Street", String.class, org.janusgraph.core.Cardinality.SINGLE)
@@ -1749,14 +1788,14 @@ def createIndicesPropsAndLabels() {
     objectPrivacyImpactAssessment6 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_Of_Reputational_Damage", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyImpactAssessment7 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Compliance_Check_Passed", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx0", objectPrivacyImpactAssessment0)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx1", objectPrivacyImpactAssessment1)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx2", objectPrivacyImpactAssessment2)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx3", objectPrivacyImpactAssessment3)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx4", objectPrivacyImpactAssessment4)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx5", objectPrivacyImpactAssessment5)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx6", objectPrivacyImpactAssessment6)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx7", objectPrivacyImpactAssessment7)
+//    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx0", objectPrivacyImpactAssessment0)
+    createCompIdx(mgmt, "Object_Privacy_Impact_Assessment_Start_Date", objectPrivacyImpactAssessment1)
+    createCompIdx(mgmt, "Object_Privacy_Impact_Assessment_Delivery_Date", objectPrivacyImpactAssessment2)
+    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx3", metadataType, objectPrivacyImpactAssessment3)
+    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx4", metadataType, objectPrivacyImpactAssessment4)
+    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx5", metadataType, objectPrivacyImpactAssessment5)
+    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx6", metadataType, objectPrivacyImpactAssessment6)
+    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx7", metadataType, objectPrivacyImpactAssessment7)
 
     objectAwarenessCampaignLabel = createVertexLabel(mgmt, "Object.Awareness_Campaign")
     objectAwarenessCampaignDescription = createProp(mgmt, "Object.Awareness_Campaign.Description", String.class, org.janusgraph.core.Cardinality.SINGLE)
@@ -1765,8 +1804,8 @@ def createIndicesPropsAndLabels() {
     objectAwarenessCampaignStop_Date = createProp(mgmt, "Object.Awareness_Campaign.Stop_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     createMixedIdx(mgmt, "objectAwarenessCampaignDescriptionMixedIdx", objectAwarenessCampaignDescription)
     createMixedIdx(mgmt, "objectAwarenessCampaignURLMixedIdx", objectAwarenessCampaignURL)
-    createMixedIdx(mgmt, "objectAwarenessCampaignStart_DateMixedIdx", objectAwarenessCampaignStart_Date)
-    createMixedIdx(mgmt, "objectAwarenessCampaignStop_DateMixedIdx", objectAwarenessCampaignStop_Date)
+    createCompIdx(mgmt, "objectAwarenessCampaignStart_DateCompIdx", objectAwarenessCampaignStart_Date)
+    createCompIdx(mgmt, "objectAwarenessCampaignStop_DateCompIdx", objectAwarenessCampaignStop_Date)
 
 
 
@@ -1782,7 +1821,7 @@ def createIndicesPropsAndLabels() {
     objectPrivacyNotice01 = createProp(mgmt, "Object.Privacy_Notice.Description", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice02 = createProp(mgmt, "Object.Privacy_Notice.Text", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice03 = createProp(mgmt, "Object.Privacy_Notice.Delivery_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectPrivacyNotice04 = createProp(mgmt, "Object.Privacy_Notice.Expiry_Date", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectPrivacyNotice04 = createProp(mgmt, "Object.Privacy_Notice.Expiry_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice05 = createProp(mgmt, "Object.Privacy_Notice.URL", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice06 = createProp(mgmt, "Object.Privacy_Notice.Info_Collected", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice07 = createProp(mgmt, "Object.Privacy_Notice.Who_Is_Collecting", String.class, org.janusgraph.core.Cardinality.SINGLE)
@@ -1794,19 +1833,19 @@ def createIndicesPropsAndLabels() {
     objectPrivacyNotice13 = createProp(mgmt, "Object.Privacy_Notice.Likely_To_Complain", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
     createMixedIdx(mgmt, "objectPrivacyNotice00MixedIdx", objectPrivacyNotice00)
-    createMixedIdx(mgmt, "objectPrivacyNotice01MixedIdx", objectPrivacyNotice01)
-    createMixedIdx(mgmt, "objectPrivacyNotice02MixedIdx", objectPrivacyNotice02)
-    createMixedIdx(mgmt, "objectPrivacyNotice03MixedIdx", objectPrivacyNotice03)
-    createMixedIdx(mgmt, "objectPrivacyNotice04MixedIdx", objectPrivacyNotice04)
-    createMixedIdx(mgmt, "objectPrivacyNotice05MixedIdx", objectPrivacyNotice05)
-    createMixedIdx(mgmt, "objectPrivacyNotice06MixedIdx", objectPrivacyNotice06)
-    createMixedIdx(mgmt, "objectPrivacyNotice07MixedIdx", objectPrivacyNotice07)
-    createMixedIdx(mgmt, "objectPrivacyNotice08MixedIdx", objectPrivacyNotice08)
-    createMixedIdx(mgmt, "objectPrivacyNotice09MixedIdx", objectPrivacyNotice09)
-    createMixedIdx(mgmt, "objectPrivacyNotice10MixedIdx", objectPrivacyNotice10)
-    createMixedIdx(mgmt, "objectPrivacyNotice11MixedIdx", objectPrivacyNotice11)
-    createMixedIdx(mgmt, "objectPrivacyNotice12MixedIdx", objectPrivacyNotice12)
-    createMixedIdx(mgmt, "objectPrivacyNotice13MixedIdx", objectPrivacyNotice13)
+//    createMixedIdx(mgmt, "objectPrivacyNotice01MixedIdx", objectPrivacyNotice01)
+//    createMixedIdx(mgmt, "objectPrivacyNotice02MixedIdx", objectPrivacyNotice02)
+//    createMixedIdx(mgmt, "objectPrivacyNotice03MixedIdx", objectPrivacyNotice03)
+//    createMixedIdx(mgmt, "objectPrivacyNotice04MixedIdx", objectPrivacyNotice04)
+    createMixedIdx(mgmt, "objectPrivacyNotice05MixedIdx", metadataType, objectPrivacyNotice05)
+    createMixedIdx(mgmt, "objectPrivacyNotice06MixedIdx", metadataType, objectPrivacyNotice06)
+    createMixedIdx(mgmt, "objectPrivacyNotice07MixedIdx", metadataType, objectPrivacyNotice07)
+    createMixedIdx(mgmt, "objectPrivacyNotice08MixedIdx", metadataType, objectPrivacyNotice08)
+    createMixedIdx(mgmt, "objectPrivacyNotice09MixedIdx", metadataType, objectPrivacyNotice09)
+    createMixedIdx(mgmt, "objectPrivacyNotice10MixedIdx", metadataType, objectPrivacyNotice10)
+    createMixedIdx(mgmt, "objectPrivacyNotice11MixedIdx", metadataType, objectPrivacyNotice11)
+    createMixedIdx(mgmt, "objectPrivacyNotice12MixedIdx", metadataType, objectPrivacyNotice12)
+    createMixedIdx(mgmt, "objectPrivacyNotice13MixedIdx", metadataType, objectPrivacyNotice13)
 
     personEmployee = createVertexLabel(mgmt, "Person.Employee")
     personEmployee00 = createProp(mgmt, "Person.Employee.Role", String.class, org.janusgraph.core.Cardinality.SINGLE)
@@ -1814,8 +1853,8 @@ def createIndicesPropsAndLabels() {
 
     createMixedIdx(mgmt, "personEmployeeMixedIdx00", personEmployee00)
     createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
-    createCompIdx(mgmt, "personEmployeeCompositeIdx00", personEmployee00)
-    createCompIdx(mgmt, "personEmployeeCompositeIdx01", personEmployee01)
+//    createCompIdx(mgmt, "personEmployeeCompositeIdx00", personEmployee00)
+//    createCompIdx(mgmt, "personEmployeeCompositeIdx01", personEmployee01)
 
 
     edgeLabel = createEdgeLabel(mgmt, "Reports_To")
@@ -1876,19 +1915,20 @@ def createIndicesPropsAndLabels() {
     orgURL = createProp(mgmt, "Person.Organisation.URL", String.class, org.janusgraph.core.Cardinality.SET)
 
     orgCountry = createProp(mgmt, "Person.Organisation.orgCountrySet", String.class, org.janusgraph.core.Cardinality.SET)
-    createMixedIdx(mgmt, "personOrgCountryMixedIdx", orgCountry)
+    createMixedIdx(mgmt, "personOrgShortNameMixedIdx", metadataType, orgShortName)
+    createMixedIdx(mgmt, "personOrgCountryMixedIdx", metadataType, orgCountry)
 
-    createMixedIdx(mgmt, "personOrgNameMixedMixedIdx", orgName)
-    createMixedIdx(mgmt, "personOrgRegNumberMixedIdx", orgRegNumber)
-    createMixedIdx(mgmt, "personOrgURLMixedIdx", orgURL)
+    createMixedIdx(mgmt, "personOrgNameMixedMixedIdx", metadataType, orgName)
+    createMixedIdx(mgmt, "personOrgRegNumberMixedIdx", metadataType, orgRegNumber)
+    createMixedIdx(mgmt, "personOrgURLMixedIdx",       metadataType, orgURL)
 
 
     orgLabel = createVertexLabel(mgmt, "Event.Consent")
 
     eventConsentDate = createProp(mgmt, "Event.Consent.Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     eventConsentStatus = createProp(mgmt, "Event.Consent.Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    createMixedIdx(mgmt, "eventConsentStatusMixedIdx", eventConsentStatus)
-    createMixedIdx(mgmt, "eventConsentDateMixedIdx", eventConsentDate)
+    createMixedIdx(mgmt, "eventConsentStatusMtdMixedIdx", metadataType,eventConsentStatus)
+    createCompIdx(mgmt, "eventConsentDateCompIdx",  eventConsentDate)
     mgmt.commit();
 
 }
