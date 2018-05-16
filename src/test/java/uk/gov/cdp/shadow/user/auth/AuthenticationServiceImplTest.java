@@ -6,10 +6,13 @@ import static org.mockito.Mockito.*;
 
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 import javax.inject.Inject;
 import javax.naming.NamingException;
 import org.hamcrest.core.IsInstanceOf;
 import org.jukito.JukitoRunner;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -32,6 +35,21 @@ public class AuthenticationServiceImplTest {
   private String subject = "UID-1234";
   private String userName = "Deepesh";
   private String bizContext = "/org/bu/role";
+  private List<String> groups = Collections.emptyList();
+
+  @BeforeClass
+  public static void setup() {
+      System.setProperty("ldap.create.user", "true");
+      System.setProperty("kerberos.authentication", "false");
+
+      System.setProperty("shadow.user.keystore.location", "keystore.ks");
+      System.setProperty("shadow.user.keystore.pwd", "**874");
+      System.setProperty("shadow.user.key.pwd", "874_###");
+      System.setProperty("shadow.user.key.alias", "Key_Alias");
+      System.setProperty("shadow.user.key.algo", "HmacSHA512");
+      System.setProperty("shadow.user.key.store.type", "JCEKS");
+      System.setProperty("shadow.user.salt.password.enable", "true");
+  }
 
   @Test
   public void userAuthenticatedWithGeneratedPassword_WhenUserExists(
@@ -43,10 +61,10 @@ public class AuthenticationServiceImplTest {
 
     when(ldapService.userExist(userName)).thenReturn(true);
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
 
     verify(ldapService).login(userName, password);
-    verify(ldapService, never()).createUserAccount(userName, password);
+    verify(ldapService, never()).createUserAccount(userName, password, groups);
   }
 
   @Test
@@ -59,10 +77,10 @@ public class AuthenticationServiceImplTest {
 
     when(ldapService.userExist(userName)).thenReturn(false);
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
 
     verify(ldapService).login(userName, password);
-    verify(ldapService).createUserAccount(userName, password);
+    verify(ldapService).createUserAccount(userName, password, groups);
   }
 
   @Test
@@ -74,7 +92,7 @@ public class AuthenticationServiceImplTest {
     expectedException.expect(AuthenticationFailureException.class);
     expectedException.expectCause(IsInstanceOf.instanceOf(PasswordGenerationFailedException.class));
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
   }
 
   @Test
@@ -87,14 +105,14 @@ public class AuthenticationServiceImplTest {
 
     doThrow(new LdapServiceException(new NamingException()))
         .when(ldapService)
-        .createUserAccount(userName, password);
+        .createUserAccount(userName, password, groups);
 
     when(ldapService.userExist(userName)).thenReturn(false);
 
     expectedException.expect(AuthenticationFailureException.class);
     expectedException.expectCause(IsInstanceOf.instanceOf(LdapServiceException.class));
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
   }
 
   @Test
@@ -111,6 +129,6 @@ public class AuthenticationServiceImplTest {
     expectedException.expect(AuthenticationFailureException.class);
     expectedException.expectCause(IsInstanceOf.instanceOf(LdapServiceException.class));
 
-    authenticationService.authenticate(userName, subject, bizContext);
+    authenticationService.authenticate(userName, subject, bizContext, groups);
   }
 }
