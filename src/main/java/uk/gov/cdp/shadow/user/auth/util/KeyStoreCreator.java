@@ -11,15 +11,20 @@ import javax.crypto.SecretKey;
 
 public class KeyStoreCreator {
 
-  private static final String KEY_ALGO = "AES";
-  private static final String KEYSTORE_TYPE = "JCEKS";
+    private static final String KEY_ALGO = "HmacSHA512";
+    private static final String KEYSTORE_TYPE = "JCEKS";
+    private static final String keyStoreLocation = property("shadow.user.keystore.location");
+    private static final String keyStorePassword = property("shadow.user.keystore.pwd");
+    private static final String keyAlias = property("shadow.user.key.alias");
+    private static final String keyPassword = property("shadow.user.key.pwd");
+    private static final String keySize = property("shadow.user.key.size");
+    private static final String keyAlgo = property("shadow.user.key.algo", KEY_ALGO);
+    private static final String keyStoreType = property("shadow.user.key.store.type", KEYSTORE_TYPE);
 
-  public static void main(String[] args) throws Exception {
 
-    String keyStoreLocation = property("shadow.user.keystore.location");
-    String keyStorePassword = property("shadow.user.keystore.pwd");
-    String keyAlias = property("shadow.user.key.alias");
-    String keyPassword = property("shadow.user.key.pwd");
+    public static void main(String[] args) throws Exception {
+
+
 
     File file = new File(keyStoreLocation);
     if (file.exists()) {
@@ -28,7 +33,7 @@ public class KeyStoreCreator {
       System.exit(0);
     }
 
-    KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+    KeyStore keyStore = KeyStore.getInstance(keyStoreType);
     keyStore.load(null, keyStorePassword.toCharArray());
     saveKeyStore(keyStore, keyStoreLocation, keyStorePassword);
 
@@ -50,8 +55,8 @@ public class KeyStoreCreator {
   }
 
   private static SecretKey getSecretKey() throws NoSuchAlgorithmException {
-    KeyGenerator keyGen = KeyGenerator.getInstance(KEY_ALGO);
-    keyGen.init(128);
+      KeyGenerator keyGen = KeyGenerator.getInstance(keyAlgo);
+      keyGen.init(Integer.parseInt(keySize));
     return keyGen.generateKey();
   }
 }
