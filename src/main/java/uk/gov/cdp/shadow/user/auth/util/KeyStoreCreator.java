@@ -25,38 +25,37 @@ public class KeyStoreCreator {
     public static void main(String[] args) throws Exception {
 
 
+        File file = new File(keyStoreLocation);
+        if (file.exists()) {
+            System.out.println("Key store already exists.");
+            System.out.println("Exiting...");
+            System.exit(0);
+        }
 
-    File file = new File(keyStoreLocation);
-    if (file.exists()) {
-      System.out.println("Key store already exists.");
-      System.out.println("Exiting...");
-      System.exit(0);
+        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+        keyStore.load(null, keyStorePassword.toCharArray());
+        saveKeyStore(keyStore, keyStoreLocation, keyStorePassword);
+
+        SecretKey secretKey = getSecretKey();
+        KeyStore.SecretKeyEntry secretKeyEntry = new KeyStore.SecretKeyEntry(secretKey);
+
+        KeyStore.ProtectionParameter entryPassword =
+                new KeyStore.PasswordProtection(keyPassword.toCharArray());
+        keyStore.setEntry(keyAlias, secretKeyEntry, entryPassword);
+
+        saveKeyStore(keyStore, keyStoreLocation, keyStorePassword);
     }
 
-    KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-    keyStore.load(null, keyStorePassword.toCharArray());
-    saveKeyStore(keyStore, keyStoreLocation, keyStorePassword);
-
-    SecretKey secretKey = getSecretKey();
-    KeyStore.SecretKeyEntry secretKeyEntry = new KeyStore.SecretKeyEntry(secretKey);
-
-    KeyStore.ProtectionParameter entryPassword =
-        new KeyStore.PasswordProtection(keyPassword.toCharArray());
-    keyStore.setEntry(keyAlias, secretKeyEntry, entryPassword);
-
-    saveKeyStore(keyStore, keyStoreLocation, keyStorePassword);
-  }
-
-  private static void saveKeyStore(
-      KeyStore keyStore, String keyStoreLocation, String keyStorePassword) throws Exception {
-    try (FileOutputStream keyStoreOutputStream = new FileOutputStream(keyStoreLocation)) {
-      keyStore.store(keyStoreOutputStream, keyStorePassword.toCharArray());
+    private static void saveKeyStore(
+            KeyStore keyStore, String keyStoreLocation, String keyStorePassword) throws Exception {
+        try (FileOutputStream keyStoreOutputStream = new FileOutputStream(keyStoreLocation)) {
+            keyStore.store(keyStoreOutputStream, keyStorePassword.toCharArray());
+        }
     }
-  }
 
-  private static SecretKey getSecretKey() throws NoSuchAlgorithmException {
-      KeyGenerator keyGen = KeyGenerator.getInstance(keyAlgo);
-      keyGen.init(Integer.parseInt(keySize));
-    return keyGen.generateKey();
-  }
+    private static SecretKey getSecretKey() throws NoSuchAlgorithmException {
+        KeyGenerator keyGen = KeyGenerator.getInstance(keyAlgo);
+        keyGen.init(Integer.parseInt(keySize));
+        return keyGen.generateKey();
+    }
 }
