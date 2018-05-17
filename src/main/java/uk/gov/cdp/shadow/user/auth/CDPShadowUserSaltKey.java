@@ -2,6 +2,7 @@ package uk.gov.cdp.shadow.user.auth;
 
 import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyStore;
@@ -18,7 +19,8 @@ class CDPShadowUserSaltKey {
     String keyPassword = property("shadow.user.key.pwd");
     String keyStoreType = property("shadow.user.key.store.type");
 
-    try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(keyStoreLocation)) {
+//    try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(keyStoreLocation)) {
+      try(InputStream is = new FileInputStream(keyStoreLocation)) {
       KeyStore keystore = KeyStore.getInstance(keyStoreType);
       keystore.load(is, keyStorePassword.toCharArray());
       key = keystore.getKey(keyAlias, keyPassword.toCharArray());

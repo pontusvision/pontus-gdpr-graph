@@ -4,6 +4,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URL;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -41,8 +44,8 @@ public class AuthenticationServiceImplTest {
   public static void setup() {
       System.setProperty("ldap.create.user", "true");
       System.setProperty("kerberos.authentication", "false");
-
-      System.setProperty("shadow.user.keystore.location", "keystore.ks");
+      URL resource = AuthenticationServiceImplTest.class.getResource("/keystore.ks");
+      System.setProperty("shadow.user.keystore.location", resource.getFile());
       System.setProperty("shadow.user.keystore.pwd", "**874");
       System.setProperty("shadow.user.key.pwd", "874_###");
       System.setProperty("shadow.user.key.alias", "Key_Alias");
