@@ -632,7 +632,11 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     ReferenceCountUtil.release(msg);
   }
 
-  private static class SSLContextService
+  public static SSLContextService getSSLContextServiceInstance () {
+    return new SSLContextService();
+  }
+
+  public static class SSLContextService
   {
     String keyStoreFile = "/etc/pki/java/keystore.jks";
     String keyStoreType = "JKS";
