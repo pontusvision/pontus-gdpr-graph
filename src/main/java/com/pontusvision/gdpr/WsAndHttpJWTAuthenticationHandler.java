@@ -632,8 +632,17 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     ReferenceCountUtil.release(msg);
   }
 
-  public static SSLContextService getSSLContextServiceInstance () {
-    return new SSLContextService();
+  public static SSLContextService getSSLContextServiceInstance (Settings.AuthenticationSettings authSettings) {
+
+
+    SSLContextService svc = new SSLContextService();
+    svc.keyPassword = (String) authSettings.config.getOrDefault("jwtKeyPassword", "pa55word");
+    svc.keyStoreFile = (String) authSettings.config.getOrDefault("jwtKeyStoreFile", "/etc/pki/java/jwt.jks");
+    svc.keyStorePassword = (String) authSettings.config.getOrDefault("jwtKeyStorePassword", "pa55word");
+    svc.keyStoreType = (String) authSettings.config.getOrDefault("jwtKeyStoreType", "jks");
+
+    return svc;
+
   }
 
   public static class SSLContextService
