@@ -179,7 +179,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
         }
 
 
-        awarenessCampaign = g.V().has("Metadata.Type", "Object.Awareness_Campaign")
+        awarenessCampaign = g.V().has("Metadata.Type", eq("Object.Awareness_Campaign"))
 
         if (awarenessCampaign.hasNext()) {
             awarenessCampaignId = awarenessCampaign.next().id();
@@ -328,7 +328,12 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
             if (counter > 1) {
                 person = g.V(personId).next();
 
-                boss = g.V().has('Person.Employee.Role', reportsTo).order().by(shuffle).range(0, 1).next();
+                boss = g.V()
+                        .has('Person.Employee.Role', eq(reportsTo))
+                        .order()
+                        .by(shuffle)
+                        .range(0, 1)
+                        .next();
 
                 g.addE("Reports_To").from(person).to(boss).next();
             }
@@ -534,7 +539,7 @@ def addRandomDataProcedures(graph, g) {
         for (def i = 0; i < types.length; i++) {
             def typeStr = types[i];
 
-            props = g.V().has('Metadata.Type', typeStr).range(0, 1).properties().key().findAll {
+            props = g.V().has('Metadata.Type', eq('typeStr')).range(0, 1).properties().key().findAll {
                 (!it.startsWith('Metadata'))
             }
 
@@ -566,7 +571,7 @@ def addRandomDataProcedures(graph, g) {
                         next()
 
                 for (def k = 0; k < randValK; k++) {
-                    def pia = g.V().has('Metadata.Type', 'Object.Privacy_Impact_Assessment').order().by(shuffle).range(0, 1).next()
+                    def pia = g.V().has('Metadata.Type', eq('Object.Privacy_Impact_Assessment')).order().by(shuffle).range(0, 1).next()
                     g.addE("Has_Data_Procedures").from(pia).to(dp).next()
                 }
             }
@@ -690,7 +695,7 @@ def addRandomDataBreachEvents(graph, g) {
             for (def j = 0; j < numServersImpacted; j++) {
                 def dataBreach = g.V(dataBreachVid).next();
 
-                def awsInstance = g.V().has('Metadata.Type', 'Object.AWS_Instance').order().by(shuffle).range(0, 1).next()
+                def awsInstance = g.V().has('Metadata.Type', eq('Object.AWS_Instance')).order().by(shuffle).range(0, 1).next()
                 g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataBreach).next()
 
 
@@ -711,14 +716,14 @@ def addRandomDataBreachEvents(graph, g) {
         }
     }
 
-    def event = g.V().has('Metadata.Type', 'Event.Data_Breach').order().by(shuffle).range(0, 1).next();
+    def event = g.V().has('Metadata.Type', eq('Event.Data_Breach')).order().by(shuffle).range(0, 1).next();
     def tx = graph.tx();
     if (!tx.isOpen()) {
         tx.open();
     }
 
     for (def i = 0; i < 10000; i++) {
-        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type', 'Person').order().by(shuffle).range(0, 1)).to(event).next();
+        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type', eq('Person')).order().by(shuffle).range(0, 1)).to(event).next();
     }
     tx.commit();
     tx.close();
@@ -782,9 +787,9 @@ def addRandomSARs(graph, g) {
                     next()
 
 
-            def employee = g.V().has('Metadata.Type', 'Person.Employee').order().by(shuffle).range(0, 1).next()
+            def employee = g.V().has('Metadata.Type', eq('Person.Employee')).order().by(shuffle).range(0, 1).next()
 
-            def person = g.V().has('Metadata.Type', 'Person').order().by(shuffle).range(0, 1).next()
+            def person = g.V().has('Metadata.Type', eq('Person')).order().by(shuffle).range(0, 1).next()
 
 
             g.addE("Made_SAR_Request").from(person).to(sar).next()
@@ -934,7 +939,7 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
 
             parentOrGuardian = g.V()
-                    .has('Metadata.Type', 'Person')
+                    .has('Metadata.Type', eq('Person'))
                     .where(__.values('Person.Date_Of_Birth').is(lt(dateThreshold)))
                     .order().by(shuffle).range(0, 1).next();
 
@@ -1039,9 +1044,9 @@ def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
                 property("Event.Consent.Date", metadataUpdateDate).
                 next()
 
-//        def employee = g.V().has('Metadata.Type','Person.Employee').order().by(shuffle).range(0,1).next()
+//        def employee = g.V().has('Metadata.Type',eq('Person.Employee')).order().by(shuffle).range(0,1).next()
 
-        def person = g.V().has('Metadata.Type', 'Person').order().by(shuffle).range(0, 1).next()
+        def person = g.V().has('Metadata.Type', eq('Person')).order().by(shuffle).range(0, 1).next()
 
 
         g.addE("Consent").from(person).to(consent).next()
@@ -1050,7 +1055,7 @@ def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
 
     }
 
-//    g.V().has("Metadata.Type", "Person").as("people")
+//    g.V().has("Metadata.Type", eq("Person")).as("people")
 //            .addE("Consent").property("Consent.Date", new Date())
 //            .from("people").to(privNoticeVertex).next()
 
@@ -1102,7 +1107,7 @@ and other relevant legislation.
 
      */
 
-    g.V().has("Metadata.Type", "Person.Employee").range(0, 10).as("employees").addE("Approved_Compliance_Check").from("employees").to(pia).next()
+    g.V().has("Metadata.Type", eq("Person.Employee")).range(0, 10).as("employees").addE("Approved_Compliance_Check").from("employees").to(pia).next()
 
 
 
@@ -1260,7 +1265,7 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
         for (i = 0; i < ilen; i++) {
 
 
-            lawfulBasis1 = g.V().has("Object.Lawful_Basis.Description", definitions[i])
+            lawfulBasis1 = g.V().has("Object.Lawful_Basis.Description", eq(definitions[i]))
 
             if (lawfulBasis1.hasNext()) {
                 lawfulBasisVertices[i] = lawfulBasis1.next()
@@ -1314,7 +1319,7 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
         for (i = 0; i < ilen; i++) {
 
 
-            privacyNotice = g.V().has("Object.Privacy_Notice.Text", privacyNoticeText[i])
+            privacyNotice = g.V().has("Object.Privacy_Notice.Text", eq(privacyNoticeText[i]))
 
             if (privacyNotice.hasNext()) {
                 privacyNoticeVertices[i] = privacyNotice.next()
@@ -2399,7 +2404,7 @@ def createDataProtectionAuthorities() {
             for (def k = 0; k < randValK; k++) {
                 def org = g.V(orgId);
 
-                def pia = g.V().has('Metadata.Type', 'Object.Privacy_Impact_Assessment')
+                def pia = g.V().has('Metadata.Type', eq('Object.Privacy_Impact_Assessment'))
                         .order().by(shuffle).range(0, 1).next()
 
                 g.addE("Has_Data_Procedures").from(pia).to(org).next()
@@ -2610,7 +2615,7 @@ def __addVPCEdgesFromUserIdGroupPairs(
 
 
         if (uidPair.VpcId != null && uidPair.PeeringStatus == "active") {
-            def peerVpc = g.V().has('Object.AWS_VPC.Id', uidPair.VpcId).next();
+            def peerVpc = g.V().has('Object.AWS_VPC.Id', eq(uidPair.VpcId)).next();
             trans = graph.tx()
 
             try {
@@ -2651,7 +2656,7 @@ def __addSecGroupEdgesFromUserIdGroupPairs(graph, g, Long origSecGroupVid, userI
 
 
         if (uidPair.GroupId != null) {
-            def peerSecGroup = g.V().has('Object.AWS_Security_Group.Id', uidPair.GroupId).next();
+            def peerSecGroup = g.V().has('Object.AWS_Security_Group.Id', eq(uidPair.GroupId)).next();
             trans = graph.tx()
 
             try {
@@ -2699,7 +2704,7 @@ def __addSecGroupEdges(graph, g, aws_sec_groups) {
 
         Long vpcVid = null;
         try {
-            vpcVid = g.V().has('Object.AWS_VPC.Id', sg.VpcId).next().id();
+            vpcVid = g.V().has('Object.AWS_VPC.Id', eq(sg.VpcId)).next().id();
 
             // sb.append('in __addSecGroupEdges -')
             //   .append('vpcVid = ').append(vpcVid).append('\n')
@@ -2738,7 +2743,7 @@ def __addSecGroupEdges(graph, g, aws_sec_groups) {
 
         Long sgVid = null;
         try {
-            sgVid = g.V().has('Object.AWS_Security_Group.Id', sg.GroupId).next().id();
+            sgVid = g.V().has('Object.AWS_Security_Group.Id', eq(sg.GroupId)).next().id();
 
             sg.IpPermissionsEgress.each { egressIpPerm ->
                 if (egressIpPerm.UserIdGroupPairs != null) {
@@ -2839,7 +2844,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
         sb.append("VPC looking for  - ").append(it.toString()).append('\n');
 
         try {
-            vpcId = g.V().has("Object.AWS_VPC.Id", it.toString()).next().id();
+            vpcId = g.V().has("Object.AWS_VPC.Id", eq(it.toString())).next().id();
 
 
         } catch (Throwable t) {
@@ -2893,7 +2898,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 
             def awsiId = null;
             try {
-                awsiId = g.V().has("Object.AWS_Instance.Id", iidStr).next().id()
+                awsiId = g.V().has("Object.AWS_Instance.Id", eq(iidStr)).next().id()
                 sb.append("AWSI found id   - ").append(awsiId).append('\n');
 
 
@@ -2965,7 +2970,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
                 sb.append("secGroup - looking for ").append(sgStr.toString()).append('\n');
 
                 try {
-                    sgvId = g.V().has("Object.AWS_Security_Group.Id", sgStr).next().id();
+                    sgvId = g.V().has("Object.AWS_Security_Group.Id", eq(sgStr)).next().id();
                     sb.append("secGroup - found id ").append(sgvId).append('\n');
 
 
