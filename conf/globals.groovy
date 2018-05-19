@@ -1422,7 +1422,7 @@ def createMixedIdx(mgmt, idxName, PropertyKey metadataType, Mapping mapping, Pro
             ib.addKey(metadataType);
 
             for (PropertyKey prop in props) {
-                ib.addKey(prop,mapping);
+                ib.addKey(prop,mapping.asParameter());
 //            ib.addKey(prop,Mapping.STRING.asParameter());
                 System.out.println("creating IDX ${idxName} for key ${prop}");
 
@@ -1539,7 +1539,7 @@ def createIndicesPropsAndLabels() {
 //    metadataLineageServerTagIdx = createMixedIdx(mgmt, "metadataLineageServerTagIdx", metadataLineageServerTag)
     metadataTypeIdx = createMixedIdx(mgmt, "metadataTypeIdx", metadataType)
     metadataLineageLocationTagIdx = createMixedIdx(mgmt, "metadataLineageLocationTagIdx", metadataLineageLocationTag)
-    metadataTypeCreateDateIdx = createMixedIdx(mgmt, 'metadataTypeCreateDateMixedIdx',metadataType,Mapping.DEFAULT.asParameter(),metadataCreateDate)
+    metadataTypeCreateDateIdx = createMixedIdx(mgmt, 'metadataTypeCreateDateMixedIdx',metadataType,Mapping.DEFAULT,metadataCreateDate)
 
 //    metadataCreateDateIdx = createCompIdx(mgmt, "metadataCreateDateMixedIdx", metadataCreateDate)
 //    metadataUpdateDateIdx = createCompIdx(mgmt, "metadataUpdateDateMixedIdx", metadataUpdateDate)
@@ -1738,7 +1738,7 @@ def createIndicesPropsAndLabels() {
     personNameQualifier = createProp(mgmt, "Person.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personTitle = createProp(mgmt, "Person.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",metadataType,Mapping.DEFAULT.asParameter(),personDateOfBirth);
+    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",metadataType,Mapping.DEFAULT,personDateOfBirth);
 //    createCompIdx(mgmt, "personDateOfBirth", personDateOfBirth)
     createMixedIdx(mgmt, "personTitleMixedIdx", metadataType, personTitle)
     createMixedIdx(mgmt, "personFullNameMixedIdx",metadataType, personFullName)
