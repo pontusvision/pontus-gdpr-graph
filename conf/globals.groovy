@@ -328,14 +328,16 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
             if (counter > 1) {
                 person = g.V(personId).next();
 
-                boss = g.V()
-                        .has('Person.Employee.Role', eq(reportsTo))
-                        .order()
-                        .by(shuffle)
-                        .range(0, 1)
-                        .next();
+                try {
+                  boss = g.V()
+                          .has('Person.Employee.Role', eq(reportsTo))
+                          .order()
+                          .by(shuffle)
+                          .range(0, 1)
+                          .next();
 
-                g.addE("Reports_To").from(person).to(boss).next();
+                  g.addE("Reports_To").from(person).to(boss).next();
+                } catch (e) { /* ignore */ }
             }
 
 
