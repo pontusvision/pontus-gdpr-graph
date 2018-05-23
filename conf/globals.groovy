@@ -1452,8 +1452,8 @@ def createMixedIdx(mgmt, idxName, PropertyKey ... props) {
         if (!mgmt.containsGraphIndex(idxName)) {
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName,Vertex.class )
             for (PropertyKey prop in props) {
-                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
-//            ib.addKey(prop,Mapping.STRING.asParameter());
+//                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
+              ib.addKey(prop,Mapping.STRING.asParameter());
                 System.out.println("creating IDX ${idxName} for key ${prop}");
 
             }
