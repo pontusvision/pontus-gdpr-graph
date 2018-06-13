@@ -6,6 +6,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.janusgraph.core.*
 import org.janusgraph.core.schema.*
 import scala.xml.Atom
+import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex;
 
 import java.util.concurrent.atomic.AtomicLong
 import java.util.regex.Pattern
@@ -50,6 +51,7 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
                 property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
                 property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
                 property("Metadata.Type", "Person").
+                property("Metadata.Type.Person", "Person").
                 property("Person.Full_Name", pg_name_first + " " + pg_name_last).
                 property("Person.Last_Name", pg_name_last).
                 property("Person.Gender", pg_gender).
@@ -70,6 +72,7 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
                 property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
                 property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
                 property("Metadata.Type", "Object.Email_Address").
+                property("Metadata.Type.Object.Email_Address", "Object.Email_Address").
                 property("Object.Email_Address.Email", pg_email).next()
 
 
@@ -86,6 +89,7 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
                 property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
                 property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
                 property("Metadata.Type", "Object.Credential").
+                property("Metadata.Type.Object.Credential", "Object.Credential").
                 property("Object.Credential.userId", pg_login_username).
                 property("Object.Credential.login.sha256", pg_login_sha256).next()
 
@@ -102,6 +106,7 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
                 property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
                 property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
                 property("Metadata.Type", "Object.Identity_Card").
+                property("Metadata.Type.Object.Identity_Card", "Object.Identity_Card").
                 property("Object.Identity_Card.id_name", pg_id_name).
                 property("Object.Identity_Card.id_value", pg_id_value).next()
 
@@ -119,6 +124,7 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
                 property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
                 property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
                 property("Metadata.Type", "Location.Address").
+                property("Metadata.Type.Location.Address", "Location.Address").
                 property("Location.Address.Street", pg_location_street).
                 property("Location.Address.City", pg_location_city).
                 property("Location.Address.State", pg_location_state).
@@ -179,7 +185,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
         }
 
 
-        awarenessCampaign = g.V().has("Metadata.Type", "Object.Awareness_Campaign")
+        awarenessCampaign = g.V().has("Metadata.Type.Object.Awareness_Campaign", eq("Object.Awareness_Campaign"))
 
         if (awarenessCampaign.hasNext()) {
             awarenessCampaignId = awarenessCampaign.next().id();
@@ -196,6 +202,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.GDPR_Status", "n/a").
                     property("Metadata.Lineage_Server_Tag", "AWS_AAA").
                     property("Metadata.Lineage_Location_Tag", "GB").
+                    property("Metadata.Type.Object.Awareness_Campaign", "Object.Awareness_Campaign").
                     property("Metadata.Type", "Object.Awareness_Campaign").
                     property("Object.Awareness_Campaign.Description", "GDPR Training Course Winter 2017").
                     property("Object.Awareness_Campaign.URL", "https://trainingcourses.com").
@@ -276,13 +283,14 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Person.Employee").
-                    property("Person.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
-                    property("Person.Last_Name", item.get("pg_name_last")).
-                    property("Person.Gender", item.get("pg_gender")).
-                    property("Person.Nationality", item.get("pg_nat")).
-                    property("Person.Date_Of_Birth", dob).
+                    property("Metadata.Type.Person.Employee", "Person.Employee").
+                    property("Person.Employee.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
+                    property("Person.Employee.Last_Name", item.get("pg_name_last")).
+                    property("Person.Employee.Gender", item.get("pg_gender")).
+                    property("Person.Employee.Nationality", item.get("pg_nat")).
+                    property("Person.Employee.Date_Of_Birth", dob).
                     property("Person.Employee.Role", role).
-                    property("Person.Title", item.get("pg_name_title"))
+                    property("Person.Employee.Title", item.get("pg_name_title"))
                     .next();
 
 
@@ -305,6 +313,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Event.Training").
+                    property("Metadata.Type.Event.Training", "Event.Training").
                     property("Event.Training.Status", distribution.sample()).next()
 
 
@@ -312,6 +321,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     .from(trainingEvent)
                     .to(g.V(awarenessCampaignId).next())
                     .property("Metadata.Type", "Event.Training.Awareness_Campaign")
+                    .property("Metadata.Type.Event.Training.Awareness_Campaign", "Event.Training.Awareness_Campaign")
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
 
@@ -322,6 +332,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     .from(trainingEvent)
                     .to(person)
                     .property("Metadata.Type", "Event.Training.Awareness_Campaign")
+                    .property("Metadata.Type.Event.Training.Awareness_Campaign", "Event.Training.Awareness_Campaign")
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
 
@@ -387,6 +398,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Person").
+                    property("Metadata.Type.Person", "Person").
                     property("Person.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
                     property("Person.Last_Name", item.get("pg_name_last")).
                     property("Person.Gender", item.get("pg_gender")).
@@ -408,6 +420,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Object.Email_Address").
+                    property("Metadata.Type.Object.Email_Address", "Object.Email_Address").
                     property("Object.Email_Address.Email", item.get("pg_email")).next()
 
 
@@ -424,6 +437,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Object.Credential").
+                    property("Metadata.Type.Object.Credential", "Object.Credential").
                     property("Object.Credential.User_Id", item.get("pg_login_username")).
                     property("Object.Credential.Login_SHA256", item.get("pg_login_sha256")).next()
 
@@ -440,6 +454,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Object.Identity_Card").
+                    property("Metadata.Type.Object.Identity_Card", "Object.Identity_Card").
                     property("Object.Identity_Card.Id_Name", item.get("pg_id_name")).
                     property("Object.Identity_Card.Id_Value", item.get("pg_id_value")).next()
 
@@ -457,6 +472,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Location.Address").
+                    property("Metadata.Type.Location.Address", "Location.Address").
                     property("Location.Address.Street", item.get("pg_location_street")).
                     property("Location.Address.City", item.get("pg_location_city")).
                     property("Location.Address.State", item.get("pg_location_state")).
@@ -534,7 +550,7 @@ def addRandomDataProcedures(graph, g) {
         for (def i = 0; i < types.length; i++) {
             def typeStr = types[i];
 
-            props = g.V().has('Metadata.Type', typeStr).range(0, 1).properties().key().findAll {
+            props = g.V().has('Metadata.Type'+"."+typeStr,eq(typeStr)).range(0, 1).properties().key().findAll {
                 (!it.startsWith('Metadata'))
             }
 
@@ -557,6 +573,7 @@ def addRandomDataProcedures(graph, g) {
                         property("Metadata.Lineage_Server_Tag", "AWS EUR1").
                         property("Metadata.Lineage_Location_Tag", "GB").
                         property("Metadata.Type", "Object.Data_Procedures").
+                        property("Metadata.Type.Object.Data_Procedures", "Object.Data_Procedures").
                         property("Object.Data_Procedures.Type", typeStr.replaceAll('[_.]', ' ')).
                         property("Object.Data_Procedures.Property", propStr.replaceAll('[_.]', ' ')).
                         property("Object.Data_Procedures.Delete_URL", 'https://api-gateway/delete-' + propStr.toLowerCase()).
@@ -566,7 +583,7 @@ def addRandomDataProcedures(graph, g) {
                         next()
 
                 for (def k = 0; k < randValK; k++) {
-                    def pia = g.V().has('Metadata.Type', 'Object.Privacy_Impact_Assessment').order().by(shuffle).range(0, 1).next()
+                    def pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment')).order().by(shuffle).range(0, 1).next()
                     g.addE("Has_Data_Procedures").from(pia).to(dp).next()
                 }
             }
@@ -669,6 +686,7 @@ def addRandomDataBreachEvents(graph, g) {
                     property("Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.GDPR_Status", "Data Breach").
                     property("Metadata.Type", "Event.Data_Breach").
+                    property("Metadata.Type.Event.Data_Breach", "Event.Data_Breach").
                     property("Event.Data_Breach.Status", status).
                     property("Event.Data_Breach.Source", source).
                     property("Event.Data_Breach.Impact", impact).
@@ -690,7 +708,7 @@ def addRandomDataBreachEvents(graph, g) {
             for (def j = 0; j < numServersImpacted; j++) {
                 def dataBreach = g.V(dataBreachVid).next();
 
-                def awsInstance = g.V().has('Metadata.Type', 'Object.AWS_Instance').order().by(shuffle).range(0, 1).next()
+                def awsInstance = g.V().has('Metadata.Type.Object.AWS_Instance', eq('Object.AWS_Instance')).order().by(shuffle).range(0, 1).next()
                 g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataBreach).next()
 
 
@@ -711,14 +729,14 @@ def addRandomDataBreachEvents(graph, g) {
         }
     }
 
-    def event = g.V().has('Metadata.Type', 'Event.Data_Breach').order().by(shuffle).range(0, 1).next();
+    def event = g.V().has('Metadata.Type.Event.Data_Breach', eq('Event.Data_Breach')).order().by(shuffle).range(0, 1).next();
     def tx = graph.tx();
     if (!tx.isOpen()) {
         tx.open();
     }
 
     for (def i = 0; i < 10000; i++) {
-        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type', 'Person').order().by(shuffle).range(0, 1)).to(event).next();
+        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1)).to(event).next();
     }
     tx.commit();
     tx.close();
@@ -777,14 +795,15 @@ def addRandomSARs(graph, g) {
                     property("Metadata.Lineage_Server_Tag", "AWS EUR1").
                     property("Metadata.Lineage_Location_Tag", "GB").
                     property("Metadata.Type", "Event.Subject_Access_Request").
+                    property("Metadata.Type.Event.Subject_Access_Request", "Event.Subject_Access_Request").
                     property("Event.Subject_Access_Request.Status", stat).
                     property("Event.Subject_Access_Request.Request_Type", distributionRequestType.sample()).
                     next()
 
 
-            def employee = g.V().has('Metadata.Type', 'Person.Employee').order().by(shuffle).range(0, 1).next()
+            def employee = g.V().has('Metadata.Type.Person.Employee',eq( 'Person.Employee')).order().by(shuffle).range(0, 1).next()
 
-            def person = g.V().has('Metadata.Type', 'Person').order().by(shuffle).range(0, 1).next()
+            def person = g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1).next()
 
 
             g.addE("Made_SAR_Request").from(person).to(sar).next()
@@ -857,6 +876,7 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Person").
+                    property("Metadata.Type.Person", "Person").
                     property("Person.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
                     property("Person.Last_Name", item.get("pg_name_last")).
                     property("Person.Gender", item.get("pg_gender")).
@@ -878,6 +898,7 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Object.Email_Address").
+                    property("Metadata.Type.Object.Email_Address", "Object.Email_Address").
                     property("Object.Email_Address.Email", item.get("pg_email")).next()
 
 
@@ -894,6 +915,7 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Object.Credential").
+                    property("Metadata.Type.Object.Credential", "Object.Credential").
                     property("Object.Credential.User_Id", item.get("pg_login_username")).
                     property("Object.Credential.Login_SHA256", item.get("pg_login_sha256")).next()
 
@@ -910,6 +932,7 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Object.Identity_Card").
+                    property("Metadata.Type.Object.Identity_Card", "Object.Identity_Card").
                     property("Object.Identity_Card.Id_Name", item.get("pg_id_name")).
                     property("Object.Identity_Card.Id_Value", item.get("pg_id_value")).next()
 
@@ -927,6 +950,7 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
                     property("Metadata.Type", "Location.Address").
+                    property("Metadata.Type.Location.Address", "Location.Address").
                     property("Location.Address.Street", item.get("pg_location_street")).
                     property("Location.Address.City", item.get("pg_location_city")).
                     property("Location.Address.State", item.get("pg_location_state")).
@@ -934,7 +958,7 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
 
             parentOrGuardian = g.V()
-                    .has('Metadata.Type', 'Person')
+                    .has('Metadata.Type.Person', eq('Person'))
                     .where(__.values('Person.Date_Of_Birth').is(lt(dateThreshold)))
                     .order().by(shuffle).range(0, 1).next();
 
@@ -1041,7 +1065,7 @@ def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
 
 //        def employee = g.V().has('Metadata.Type','Person.Employee').order().by(shuffle).range(0,1).next()
 
-        def person = g.V().has('Metadata.Type', 'Person').order().by(shuffle).range(0, 1).next()
+        def person = g.V().has('Metadata.Type', eq('Person')).order().by(shuffle).range(0, 1).next()
 
 
         g.addE("Consent").from(person).to(consent).next()
@@ -1080,6 +1104,7 @@ def __addPrivacyImpactAssessment(graph, g, Vertex privNoticeVertex) {
             property("Metadata.Lineage_Server_Tag", "AWS_EUR_HOST3").
             property("Metadata.Lineage_Location_Tag", "GB").
             property("Metadata.Type", "Object.Privacy_Impact_Assessment").
+            property("Metadata.Type.Object.Privacy_Impact_Assessment", "Object.Privacy_Impact_Assessment").
             property("Object.Privacy_Impact_Assessment.Description", "PIA for project xyz.").
             property("Object.Privacy_Impact_Assessment.Start_Date", new Date()).
             property("Object.Privacy_Impact_Assessment.Delivery_Date", new Date(System.currentTimeMillis() + 3600 * 24 * 365)).
@@ -1102,7 +1127,7 @@ and other relevant legislation.
 
      */
 
-    g.V().has("Metadata.Type", "Person.Employee").range(0, 10).as("employees").addE("Approved_Compliance_Check").from("employees").to(pia).next()
+    g.V().has("Metadata.Type.Person.Employee", eq("Person.Employee")).range(0, 10).as("employees").addE("Approved_Compliance_Check").from("employees").to(pia).next()
 
 
 
@@ -1276,6 +1301,7 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
                         property("Metadata.Lineage_Server_Tag", "AWS_AAA").
                         property("Metadata.Lineage_Location_Tag", "GB").
                         property("Metadata.Type", "Object.Lawful_Basis").
+                        property("Metadata.Type.Object.Lawful_Basis", "Object.Lawful_Basis").
                         property("Object.Lawful_Basis.Id", i).
                         property("Object.Lawful_Basis.Description", definitions[i]).
                         next()
@@ -1330,6 +1356,7 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
                         property("Metadata.Lineage_Server_Tag", "AWS_AAA").
                         property("Metadata.Lineage_Location_Tag", "GB").
                         property("Metadata.Type", "Object.Privacy_Notice").
+                        property("Metadata.Type.Object.Privacy_Notice", "Object.Privacy_Notice").
                         property("Object.Privacy_Notice.Id", i).
                         property("Object.Privacy_Notice.Description", privacyNoticeText[i]).
                         property("Object.Privacy_Notice.Text", privacyNoticeText[i]).
@@ -1383,11 +1410,19 @@ def createProp(mgmt, keyName, classType, org.janusgraph.core.Cardinality card) {
 
   try
   {
+    def key = null;
     if (!mgmt.containsPropertyKey(keyName)) {
-        return mgmt.makePropertyKey(keyName).dataType(classType).cardinality(card).make();
+        key = mgmt.makePropertyKey(keyName).dataType(classType).cardinality(card).make();
+        Long  id = ((JanusGraphSchemaVertex)key).id();
+
+        System.out.println("keyName = ${keyName}, keyID = " +id )
     } else {
-        return mgmt.getPropertyKey(keyName);
+        key = mgmt.getPropertyKey(keyName);
+        Long  id = ((JanusGraphSchemaVertex)key).id();
+        System.out.println("keyName = ${keyName}, keyID = " +id )
+
     }
+      return key;
   } 
   catch (Throwable t)
   {
@@ -1396,12 +1431,20 @@ def createProp(mgmt, keyName, classType, org.janusgraph.core.Cardinality card) {
 }
 
 
-def createCompIdx(mgmt, idxName, prop) {
+def createCompIdx(mgmt, idxName, PropertyKey ... props) {
   try
   {
     if (!mgmt.containsGraphIndex(idxName)) 
     {
-        return mgmt.buildIndex(idxName, Vertex.class).addKey(prop).buildCompositeIndex();
+        JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName,Vertex.class )
+        for (PropertyKey prop in props) {
+            ib.addKey(prop);
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+            System.out.println("creating Comp IDX ${idxName} for key ${prop}");
+
+        }
+
+        return ib.buildCompositeIndex();
     } 
     else 
     {
@@ -1445,7 +1488,7 @@ def createMixedIdx(mgmt, idxName, PropertyKey ... props) {
         if (!mgmt.containsGraphIndex(idxName)) {
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName,Vertex.class )
             for (PropertyKey prop in props) {
-                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
+                ib.addKey(prop,Mapping.STRING.asParameter());
 //            ib.addKey(prop,Mapping.STRING.asParameter());
                 System.out.println("creating IDX ${idxName} for key ${prop}");
 
@@ -1462,19 +1505,21 @@ def createMixedIdx(mgmt, idxName, PropertyKey ... props) {
     }
 }
 
-def createVertexLabel(mgmt, labelName) {
+def createVertexLabel(mgmt, String labelName) {
 
   try
   {
     if (!mgmt.containsVertexLabel(labelName)) {
-        return mgmt.makeVertexLabel(labelName).make()
+        mgmt.makeVertexLabel(labelName).make()
     }
-    return mgmt.getVertexLabel(labelName)
+    return  createProp(mgmt,"Metadata.Type." + labelName ,String.class,Cardinality.SINGLE);
+
   } 
   catch (Throwable t)
   {
     t.printStackTrace();
   }
+    return null;
 }
 
 def createEdgeLabel(mgmt, labelName) {
@@ -1537,15 +1582,15 @@ def createIndicesPropsAndLabels() {
     metadataType = createProp(mgmt, "Metadata.Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
 //    metadataLineageServerTagIdx = createMixedIdx(mgmt, "metadataLineageServerTagIdx", metadataLineageServerTag)
-    metadataTypeIdx = createMixedIdx(mgmt, "metadataTypeIdx", metadataType)
-    metadataLineageLocationTagIdx = createMixedIdx(mgmt, "metadataLineageLocationTagIdx", metadataLineageLocationTag)
-    metadataTypeCreateDateIdx = createMixedIdx(mgmt, 'metadataTypeCreateDateMixedIdx',metadataType,Mapping.DEFAULT.asParameter(),metadataCreateDate)
+    metadataTypeIdx = createMixedIdx(mgmt, "metadataTypeIdx", metadataType, metadataLineageLocationTag, metadataCreateDate)
+//    metadataLineageLocationTagIdx = createMixedIdx(mgmt, "metadataLineageLocationTagIdx", metadataLineageLocationTag)
+//    metadataTypeCreateDateIdx = createMixedIdx(mgmt, 'metadataTypeCreateDateMixedIdx',metadataType,Mapping.DEFAULT.asParameter(),metadataCreateDate)
 
 //    metadataCreateDateIdx = createCompIdx(mgmt, "metadataCreateDateMixedIdx", metadataCreateDate)
 //    metadataUpdateDateIdx = createCompIdx(mgmt, "metadataUpdateDateMixedIdx", metadataUpdateDate)
 
 
-    metadataGDPRStatusIdx = createMixedIdx(mgmt, "metadataGDPRStatusMixedIdx", metadataGDPRStatus)
+//    metadataGDPRStatusIdx = createMixedIdx(mgmt, "metadataGDPRStatusMixedIdx", metadataGDPRStatus)
 
 
 
@@ -1553,6 +1598,7 @@ def createIndicesPropsAndLabels() {
 
 
     objectAWSInstanceLabel = createVertexLabel(mgmt, "Object.Notification_Templates");
+
     objectNotificationTemplatesProp00 = createProp(mgmt, "Object.Notification_Templates.Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectNotificationTemplatesProp01 = createProp(mgmt, "Object.Notification_Templates.Types", String.class, org.janusgraph.core.Cardinality.SET);
     objectNotificationTemplatesProp02 = createProp(mgmt, "Object.Notification_Templates.URL", String.class, org.janusgraph.core.Cardinality.SINGLE);
@@ -1560,7 +1606,7 @@ def createIndicesPropsAndLabels() {
     objectNotificationTemplatesProp04 = createProp(mgmt, "Object.Notification_Templates.Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
     objectNotificationTemplatesIdx00 = createCompIdx(mgmt, "objectNotificationTemplatesIdx00", objectNotificationTemplatesProp00);
-    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectNotificationTemplatesIdx01", metadataType, objectNotificationTemplatesProp01);
+    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectNotificationTemplatesIdx01", objectAWSInstanceLabel, objectNotificationTemplatesProp01);
 //    objectNotificationTemplatesIdx02 = createCompIdx(mgmt, "objectNotificationTemplatesIdx02", objectNotificationTemplatesProp02);
 //    objectNotificationTemplatesIdx03 = createCompIdx(mgmt, "objectNotificationTemplatesIdx03", objectNotificationTemplatesProp03);
 
@@ -1572,12 +1618,12 @@ def createIndicesPropsAndLabels() {
     eventDataBreachProp03 = createProp(mgmt, "Event.Data_Breach.Source", String.class, org.janusgraph.core.Cardinality.SINGLE);
     eventDataBreachProp04 = createProp(mgmt, "Event.Data_Breach.Impact", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-    eventDataBreachIdx00 = createMixedIdx(mgmt, "eventDataBreachIdx00",metadataType,  eventDataBreachProp00);
+    eventDataBreachIdx00 = createMixedIdx(mgmt, "eventDataBreachIdx00",eventDataBreachLabel,  eventDataBreachProp00, eventDataBreachProp02,eventDataBreachProp03, eventDataBreachProp04, eventDataBreachIdx05);
 //    eventDataBreachIdx01 = createCompIdx(mgmt, "eventDataBreachIdx01", eventDataBreachProp01);
-    eventDataBreachIdx02 = createMixedIdx(mgmt, "eventDataBreachIdx02", metadataType, eventDataBreachProp02);
-    eventDataBreachIdx03 = createMixedIdx(mgmt, "eventDataBreachIdx03", metadataType, eventDataBreachProp03);
-    eventDataBreachIdx04 = createMixedIdx(mgmt, "eventDataBreachIdx04",  metadataType,eventDataBreachProp04);
-    eventDataBreachIdx05 = createMixedIdx(mgmt, "eventDataBreachIdx05",  eventDataBreachProp02,eventDataBreachProp04);
+//    eventDataBreachIdx02 = createMixedIdx(mgmt, "eventDataBreachIdx02", metadataType, eventDataBreachProp02);
+//    eventDataBreachIdx03 = createMixedIdx(mgmt, "eventDataBreachIdx03", metadataType, eventDataBreachProp03);
+//    eventDataBreachIdx04 = createMixedIdx(mgmt, "eventDataBreachIdx04",  metadataType,eventDataBreachProp04);
+//    eventDataBreachIdx05 = createMixedIdx(mgmt, "eventDataBreachIdx05",  eventDataBreachProp02,eventDataBreachProp04);
 
 
 
@@ -1603,21 +1649,21 @@ def createIndicesPropsAndLabels() {
     objectAWSProp11 = createProp(mgmt, "Object.AWS_Instance.EnaSupport", Boolean.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAWSProp12 = createProp(mgmt, "Object.AWS_Instance.Tags", String.class, org.janusgraph.core.Cardinality.SET)
 
-    objectAWSIdx00 = createMixedIdx(mgmt, "objectAWS_InstanceIdx00", objectAWSProp00)
-//    objectAWSIdx01 = createMixedIdx(mgmt, "objectAWS_InstanceIdx01", objectAWSProp01)
-//    objectAWSIdx02 = createMixedIdx(mgmt, "objectAWS_InstanceIdx02", objectAWSProp02)
-//    objectAWSIdx03 = createMixedIdx(mgmt, "objectAWS_InstanceIdx03", objectAWSProp03)
-//    objectAWSIdx04 = createMixedIdx(mgmt, "objectAWS_InstanceIdx04", objectAWSProp04)
-//    objectAWSIdx05 = createMixedIdx(mgmt, "objectAWS_InstanceIdx05", objectAWSProp05)
-    objectAWSIdx06 = createMixedIdx(mgmt, "objectAWS_InstanceIdx06", objectAWSProp06)
-    objectAWSIdx07 = createMixedIdx(mgmt, "objectAWS_InstanceIdx07", objectAWSProp07)
-//    objectAWSIdx08 = createMixedIdx(mgmt, "objectAWS_InstanceIdx08", objectAWSProp08)
-//    objectAWSIdx09 = createMixedIdx(mgmt, "objectAWS_InstanceIdx09", objectAWSProp09)
-    objectAWSIdx10 = createMixedIdx(mgmt, "objectAWS_InstanceIdx10", objectAWSProp10)
-//    objectAWSIdx11 = createMixedIdx(mgmt, "objectAWS_InstanceIdx11", objectAWSProp11)
-    objectAWSIdx12 = createMixedIdx(mgmt, "objectAWS_InstanceIdx12", objectAWSProp12)
-
-    objectAWSIdx06 = createMixedIdx(mgmt, "objectAWS_InstanceIdxMixedIdx06", objectAWSProp06)
+    objectAWSIdx00 = createMixedIdx(mgmt, "objectAWS_InstanceIdx00", objectAWSInstanceLabel, objectAWSProp00, objectAWSProp06,objectAWSProp07, objectAWSProp10,objectAWSProp12 )
+////    objectAWSIdx01 = createMixedIdx(mgmt, "objectAWS_InstanceIdx01", objectAWSProp01)
+////    objectAWSIdx02 = createMixedIdx(mgmt, "objectAWS_InstanceIdx02", objectAWSProp02)
+////    objectAWSIdx03 = createMixedIdx(mgmt, "objectAWS_InstanceIdx03", objectAWSProp03)
+////    objectAWSIdx04 = createMixedIdx(mgmt, "objectAWS_InstanceIdx04", objectAWSProp04)
+////    objectAWSIdx05 = createMixedIdx(mgmt, "objectAWS_InstanceIdx05", objectAWSProp05)
+//    objectAWSIdx06 = createMixedIdx(mgmt, "objectAWS_InstanceIdx06", objectAWSProp06)
+//    objectAWSIdx07 = createMixedIdx(mgmt, "objectAWS_InstanceIdx07", objectAWSProp07)
+////    objectAWSIdx08 = createMixedIdx(mgmt, "objectAWS_InstanceIdx08", objectAWSProp08)
+////    objectAWSIdx09 = createMixedIdx(mgmt, "objectAWS_InstanceIdx09", objectAWSProp09)
+//    objectAWSIdx10 = createMixedIdx(mgmt, "objectAWS_InstanceIdx10", objectAWSProp10)
+////    objectAWSIdx11 = createMixedIdx(mgmt, "objectAWS_InstanceIdx11", objectAWSProp11)
+//    objectAWSIdx12 = createMixedIdx(mgmt, "objectAWS_InstanceIdx12", objectAWSProp12)
+//
+//    objectAWSIdx06 = createMixedIdx(mgmt, "objectAWS_InstanceIdxMixedIdx06", objectAWSProp06)
 
 
     objectAWSSecurityGroupLabel = createVertexLabel(mgmt, "Object.AWS_Security_Group");
@@ -1627,17 +1673,14 @@ def createIndicesPropsAndLabels() {
     objectAWSProp02 = createProp(mgmt, "Object.AWS_Security_Group.Ip_Perms_Ingress_IpRanges", String.class, org.janusgraph.core.Cardinality.SET)
     objectAWSProp03 = createProp(mgmt, "Object.AWS_Security_Group.Ip_Perms_Egress_IpRanges", String.class, org.janusgraph.core.Cardinality.SET)
 
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Security_GroupIdx00", objectAWSProp00)
-    objectAWSIdx01 = createCompIdx(mgmt, "objectAWS_Security_GroupIdx01", objectAWSProp01)
-    objectAWSIdx02 = createCompIdx(mgmt, "objectAWS_Security_GroupIdx02", objectAWSProp02)
-    objectAWSIdx03 = createCompIdx(mgmt, "objectAWS_Security_GroupIdx03", objectAWSProp03)
+    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Security_GroupIdx00",objectAWSSecurityGroupLabel, objectAWSProp00, objectAWSProp01, objectAWSProp02,objectAWSProp03)
 
-    objectAWSIdx01 = createMixedIdx(mgmt, "objectAWS_Security_GroupMixedIdx01", objectAWSProp01)
+//    objectAWSIdx01 = createMixedIdx(mgmt, "objectAWS_Security_GroupMixedIdx01", objectAWSSecurityGroupLabel,objectAWSProp01)
 
     objectAWSVPCLabel = createVertexLabel(mgmt, "Object.AWS_VPC");
 
     objectAWSProp00 = createProp(mgmt, "Object.AWS_VPC.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx00", objectAWSProp00)
+    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx00", objectAWSVPCLabel,objectAWSProp00)
 
     /*
         NetworkInterfaces=[
@@ -1666,7 +1709,7 @@ def createIndicesPropsAndLabels() {
     objectAWSProp04 = createProp(mgmt, "Object.AWS_Network_Interface.PrivateDnsName", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAWSProp05 = createProp(mgmt, "Object.AWS_Network_Interface.AttachTime", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-//    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx00", objectAWSProp00)
+    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx00",objectAWSNetworkInterfaceLabel, objectAWSProp00,objectAWSProp01,objectAWSProp02,objectAWSProp03,objectAWSProp04)
 //    objectAWSIdx01 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx01", objectAWSProp01)
 //    objectAWSIdx02 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx02", objectAWSProp02)
 //    objectAWSIdx03 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx03", objectAWSProp03)
@@ -1686,12 +1729,12 @@ def createIndicesPropsAndLabels() {
     objectDataProceduresDeleteMechanism = createProp(mgmt, "Object.Data_Procedures.Delete_Mechanism", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectDataProceduresUpdateMechanism = createProp(mgmt, "Object.Data_Procedures.Update_Mechanism", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    objectDataProceduresTypeIdx = createMixedIdx(mgmt, "objectDataProceduresTypeIdx", objectDataProceduresType)
-    objectDataProceduresPropertyIdx = createMixedIdx(mgmt, "objectDataProceduresPropertyIdx", objectDataProceduresProperty)
-//    objectDataProceduresDeleteURLIdx = createMixedIdx(mgmt, "objectDataProceduresDeleteURLIdx", objectDataProceduresDeleteURL)
-//    objectDataProceduresUpdateURLIdx = createMixedIdx(mgmt, "objectDataProceduresUpdateURLIdx", objectDataProceduresUpdateURL)
-    objectDataProceduresDeleteMechanismIdx = createMixedIdx(mgmt, "objectDataProceduresDeleteMechanismIdx", objectDataProceduresDeleteMechanism)
-    objectDataProceduresUpdateMechanismIdx = createMixedIdx(mgmt, "objectDataProceduresUpdateMechanismIdx", objectDataProceduresUpdateMechanism)
+    objectDataProceduresTypeIdx = createMixedIdx(mgmt, "objectDataProceduresIdx", objectDataProceduresLabel, objectDataProceduresType,objectDataProceduresProperty,objectDataProceduresDeleteMechanism,objectDataProceduresUpdateMechanism)
+//    objectDataProceduresPropertyIdx = createMixedIdx(mgmt, "objectDataProceduresPropertyIdx", objectDataProceduresProperty)
+////    objectDataProceduresDeleteURLIdx = createMixedIdx(mgmt, "objectDataProceduresDeleteURLIdx", objectDataProceduresDeleteURL)
+////    objectDataProceduresUpdateURLIdx = createMixedIdx(mgmt, "objectDataProceduresUpdateURLIdx", objectDataProceduresUpdateURL)
+//    objectDataProceduresDeleteMechanismIdx = createMixedIdx(mgmt, "objectDataProceduresDeleteMechanismIdx", objectDataProceduresDeleteMechanism)
+//    objectDataProceduresUpdateMechanismIdx = createMixedIdx(mgmt, "objectDataProceduresUpdateMechanismIdx", objectDataProceduresUpdateMechanism)
 
 
 
@@ -1702,7 +1745,7 @@ def createIndicesPropsAndLabels() {
 
     eventTrainingStatus = createProp(mgmt, "Event.Training.Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
 //    metadataGDPRStatusIdx = createCompIdx(mgmt, "eventTrainingStatusIdx", eventTrainingStatus)
-    metadataGDPRStatusIdx = createMixedIdx(mgmt, "eventTrainingStatusMixedIdx", eventTrainingStatus)
+    metadataGDPRStatusIdx = createMixedIdx(mgmt, "eventTrainingStatusMixedIdx",eventTrainingLabel, eventTrainingStatus)
 
 
 
@@ -1710,11 +1753,13 @@ def createIndicesPropsAndLabels() {
     eventSubjAccessReq = createVertexLabel(mgmt, "Event.Subject_Access_Request")
 
     eventSARStatus = createProp(mgmt, "Event.Subject_Access_Request.Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    eventSARStatusIdx = createMixedIdx(mgmt, "eventSARStatusMixedIdx", eventSARStatus)
 //    eventSARStatusIdx = createCompIdx(mgmt, "eventSARStatusIdx", eventSARStatus)
 
     eventSARRequestType = createProp(mgmt, "Event.Subject_Access_Request.Request_Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    eventSARRequestTypeIdx = createMixedIdx(mgmt, "eventSARRequestTypeMixedIdx", eventSARRequestType)
+//    eventSARRequestTypeIdx = createMixedIdx(mgmt, "eventSARRequestTypeMixedIdx", eventSARRequestType)
+
+    eventSARStatusIdx = createMixedIdx(mgmt, "eventSARStatusMixedIdx",eventSubjAccessReq, eventSARStatus, eventSARRequestType)
+
 //    eventSARRequestTypeIdx = createCompIdx(mgmt, "eventSARRequestTypeIdx", eventSARRequestType)
 
     createEdgeLabel(mgmt, "Made_SAR_Request")
@@ -1738,31 +1783,31 @@ def createIndicesPropsAndLabels() {
     personNameQualifier = createProp(mgmt, "Person.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personTitle = createProp(mgmt, "Person.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",metadataType,Mapping.DEFAULT.asParameter(),personDateOfBirth);
+    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",personLabel,personFullName,personLastName,personGender, personNationality, personPlaceOfBirth,personReligion,personEthnicity,personMaritalStatus,personNameQualifier, personTitle);
 //    createCompIdx(mgmt, "personDateOfBirth", personDateOfBirth)
-    createMixedIdx(mgmt, "personTitleMixedIdx", metadataType, personTitle)
-    createMixedIdx(mgmt, "personFullNameMixedIdx",metadataType, personFullName)
-    createMixedIdx(mgmt, "personLastNameMixedIdx", metadataType, personLastName)
-    createMixedIdx(mgmt, "personGenderMixedIdx",metadataType,  personGender)
-    createMixedIdx(mgmt, "personNationalityMixedIdx",metadataType,  personNationality)
+//    createMixedIdx(mgmt, "personTitleMixedIdx", metadataType, personTitle)
+//    createMixedIdx(mgmt, "personFullNameMixedIdx",metadataType, personFullName)
+//    createMixedIdx(mgmt, "personLastNameMixedIdx", metadataType, personLastName)
+//    createMixedIdx(mgmt, "personGenderMixedIdx",metadataType,  personGender)
+//    createMixedIdx(mgmt, "personNationalityMixedIdx",metadataType,  personNationality)
 //    createMixedIdx(mgmt, "personDateOfBirthMixedIdx", personDateOfBirth)
 
 
     objectEmailAddressLabel = createVertexLabel(mgmt, "Object.Email_Address")
     objectEmailAddressEmail = createProp(mgmt, "Object.Email_Address.Email", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    createMixedIdx(mgmt, "objectEmailAddressEmailMixedIdx", objectEmailAddressEmail)
+    createMixedIdx(mgmt, "objectEmailAddressEmailMixedIdx", objectEmailAddressLabel, objectEmailAddressEmail)
 
 
     objectCredentialLabel = createVertexLabel(mgmt, "Object.Credential")
     objectCredentialUserId = createProp(mgmt, "Object.Credential.User_Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectCredentialLoginSha256 = createProp(mgmt, "Object.Credential.Login_SHA256", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    createMixedIdx(mgmt, "objectCredentialMixedIdx", objectCredentialUserId)
+    createMixedIdx(mgmt, "objectCredentialMixedIdx",objectCredentialLabel, objectCredentialUserId)
 
 
     objectIdentityCardLabel = createVertexLabel(mgmt, "Object.Identity_Card")
     objectIdentityCardIdName = createProp(mgmt, "Object.Identity_Card.Id_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectIdentityCardIdValue = createProp(mgmt, "Object.Identity_Card.Id_Value", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    createMixedIdx(mgmt, "objectIdentityCardIdNameMixedIdx", objectIdentityCardIdName)
+    createMixedIdx(mgmt, "objectIdentityCardIdNameMixedIdx", objectIdentityCardLabel,objectIdentityCardIdName)
 //    createMixedIdx(mgmt, "objectIdentityCardIdNameMixedIdx", objectIdentityCardIdName)
 
     locationAddressLabel = createVertexLabel(mgmt, "Location.Address")
@@ -1771,11 +1816,11 @@ def createIndicesPropsAndLabels() {
     locationAddressState = createProp(mgmt, "Location.Address.State", String.class, org.janusgraph.core.Cardinality.SINGLE)
     locationAddressPostCode = createProp(mgmt, "Location.Address.Post_Code", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "locationAddressStreetMixedIdx", locationAddressStreet)
-    createMixedIdx(mgmt, "locationAddressCityMixedIdx", locationAddressCity)
-    createMixedIdx(mgmt, "locationAddressStateMixedIdx", locationAddressState)
-    createMixedIdx(mgmt, "locationAddressPostCodeMixedIdx", locationAddressPostCode)
-
+    createMixedIdx(mgmt, "locationAddressStreetMixedIdx",locationAddressLabel, locationAddressStreet, locationAddressCity, locationAddressState,locationAddressPostCode )
+//    createMixedIdx(mgmt, "locationAddressCityMixedIdx", locationAddressCity)
+//    createMixedIdx(mgmt, "locationAddressStateMixedIdx", locationAddressState)
+//    createMixedIdx(mgmt, "locationAddressPostCodeMixedIdx", locationAddressPostCode)
+//
 
 
     objectPrivacyImpactAssessmentLabel = createVertexLabel(mgmt, "Object.Privacy_Impact_Assessment")
@@ -1789,23 +1834,23 @@ def createIndicesPropsAndLabels() {
     objectPrivacyImpactAssessment7 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Compliance_Check_Passed", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
 //    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx0", objectPrivacyImpactAssessment0)
-    createCompIdx(mgmt, "Object_Privacy_Impact_Assessment_Start_Date", objectPrivacyImpactAssessment1)
-    createCompIdx(mgmt, "Object_Privacy_Impact_Assessment_Delivery_Date", objectPrivacyImpactAssessment2)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx3", metadataType, objectPrivacyImpactAssessment3)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx4", metadataType, objectPrivacyImpactAssessment4)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx5", metadataType, objectPrivacyImpactAssessment5)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx6", metadataType, objectPrivacyImpactAssessment6)
-    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx7", metadataType, objectPrivacyImpactAssessment7)
+    createMixedIdx(mgmt, "Object_Privacy_Impact_Assessment_Start_Date",objectPrivacyImpactAssessmentLabel, objectPrivacyImpactAssessment1, objectPrivacyImpactAssessment2, objectPrivacyImpactAssessment3,objectPrivacyImpactAssessment4,objectPrivacyImpactAssessment5,objectPrivacyImpactAssessment6,objectPrivacyImpactAssessment7 )
+//    createCompIdx(mgmt, "Object_Privacy_Impact_Assessment_Delivery_Date", objectPrivacyImpactAssessment2)
+//    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx3", metadataType, objectPrivacyImpactAssessment3)
+//    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx4", metadataType, objectPrivacyImpactAssessment4)
+//    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx5", metadataType, objectPrivacyImpactAssessment5)
+//    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx6", metadataType, objectPrivacyImpactAssessment6)
+//    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx7", metadataType, objectPrivacyImpactAssessment7)
 
     objectAwarenessCampaignLabel = createVertexLabel(mgmt, "Object.Awareness_Campaign")
     objectAwarenessCampaignDescription = createProp(mgmt, "Object.Awareness_Campaign.Description", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignURL = createProp(mgmt, "Object.Awareness_Campaign.URL", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignStart_Date = createProp(mgmt, "Object.Awareness_Campaign.Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignStop_Date = createProp(mgmt, "Object.Awareness_Campaign.Stop_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    createMixedIdx(mgmt, "objectAwarenessCampaignDescriptionMixedIdx", objectAwarenessCampaignDescription)
-    createMixedIdx(mgmt, "objectAwarenessCampaignURLMixedIdx", objectAwarenessCampaignURL)
-    createCompIdx(mgmt, "objectAwarenessCampaignStart_DateCompIdx", objectAwarenessCampaignStart_Date)
-    createCompIdx(mgmt, "objectAwarenessCampaignStop_DateCompIdx", objectAwarenessCampaignStop_Date)
+    createMixedIdx(mgmt, "objectAwarenessCampaignDescriptionMixedIdx",objectAwarenessCampaignLabel, objectAwarenessCampaignDescription, objectAwarenessCampaignURL,objectAwarenessCampaignStart_Date,objectAwarenessCampaignStop_Date  )
+//    createMixedIdx(mgmt, "objectAwarenessCampaignURLMixedIdx", objectAwarenessCampaignURL)
+//    createCompIdx(mgmt, "objectAwarenessCampaignStart_DateCompIdx", objectAwarenessCampaignStart_Date)
+//    createCompIdx(mgmt, "objectAwarenessCampaignStop_DateCompIdx", objectAwarenessCampaignStop_Date)
 
 
 
@@ -1813,8 +1858,8 @@ def createIndicesPropsAndLabels() {
     objectLawfulBasis0 = createProp(mgmt, "Object.Lawful_Basis.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectLawfulBasis1 = createProp(mgmt, "Object.Lawful_Basis.Description", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "objectLawfulBasis0MixedIdx", objectLawfulBasis0)
-    createMixedIdx(mgmt, "objectLawfulBasis1MixedIdx", objectLawfulBasis1)
+//    createMixedIdx(mgmt, "objectLawfulBasis0MixedIdx", objectLawfulBasisLabel, objectLawfulBasis0, objectLawfulBasis1)
+//    createMixedIdx(mgmt, "objectLawfulBasis1MixedIdx", objectLawfulBasis1)
 
     objectPrivacyNoticeLabel = createVertexLabel(mgmt, "Object.Privacy_Notice")
     objectPrivacyNotice00 = createProp(mgmt, "Object.Privacy_Notice.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
@@ -1832,27 +1877,39 @@ def createIndicesPropsAndLabels() {
     objectPrivacyNotice12 = createProp(mgmt, "Object.Privacy_Notice.Effect_On_Individuals", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice13 = createProp(mgmt, "Object.Privacy_Notice.Likely_To_Complain", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "objectPrivacyNotice00MixedIdx", objectPrivacyNotice00)
+    createMixedIdx(mgmt, "objectPrivacyNotice00MixedIdx", objectPrivacyNoticeLabel, objectPrivacyNotice00 , objectPrivacyNotice05, objectPrivacyNotice06, objectPrivacyNotice07,objectPrivacyNotice08,objectPrivacyNotice09,objectPrivacyNotice10,objectPrivacyNotice11,objectPrivacyNotice12, objectPrivacyNotice13)
 //    createMixedIdx(mgmt, "objectPrivacyNotice01MixedIdx", objectPrivacyNotice01)
 //    createMixedIdx(mgmt, "objectPrivacyNotice02MixedIdx", objectPrivacyNotice02)
 //    createMixedIdx(mgmt, "objectPrivacyNotice03MixedIdx", objectPrivacyNotice03)
 //    createMixedIdx(mgmt, "objectPrivacyNotice04MixedIdx", objectPrivacyNotice04)
-    createMixedIdx(mgmt, "objectPrivacyNotice05MixedIdx", metadataType, objectPrivacyNotice05)
-    createMixedIdx(mgmt, "objectPrivacyNotice06MixedIdx", metadataType, objectPrivacyNotice06)
-    createMixedIdx(mgmt, "objectPrivacyNotice07MixedIdx", metadataType, objectPrivacyNotice07)
-    createMixedIdx(mgmt, "objectPrivacyNotice08MixedIdx", metadataType, objectPrivacyNotice08)
-    createMixedIdx(mgmt, "objectPrivacyNotice09MixedIdx", metadataType, objectPrivacyNotice09)
-    createMixedIdx(mgmt, "objectPrivacyNotice10MixedIdx", metadataType, objectPrivacyNotice10)
-    createMixedIdx(mgmt, "objectPrivacyNotice11MixedIdx", metadataType, objectPrivacyNotice11)
-    createMixedIdx(mgmt, "objectPrivacyNotice12MixedIdx", metadataType, objectPrivacyNotice12)
-    createMixedIdx(mgmt, "objectPrivacyNotice13MixedIdx", metadataType, objectPrivacyNotice13)
+//    createMixedIdx(mgmt, "objectPrivacyNotice05MixedIdx", metadataType, objectPrivacyNotice05)
+//    createMixedIdx(mgmt, "objectPrivacyNotice06MixedIdx", metadataType, objectPrivacyNotice06)
+//    createMixedIdx(mgmt, "objectPrivacyNotice07MixedIdx", metadataType, objectPrivacyNotice07)
+//    createMixedIdx(mgmt, "objectPrivacyNotice08MixedIdx", metadataType, objectPrivacyNotice08)
+//    createMixedIdx(mgmt, "objectPrivacyNotice09MixedIdx", metadataType, objectPrivacyNotice09)
+//    createMixedIdx(mgmt, "objectPrivacyNotice10MixedIdx", metadataType, objectPrivacyNotice10)
+//    createMixedIdx(mgmt, "objectPrivacyNotice11MixedIdx", metadataType, objectPrivacyNotice11)
+//    createMixedIdx(mgmt, "objectPrivacyNotice12MixedIdx", metadataType, objectPrivacyNotice12)
+//    createMixedIdx(mgmt, "objectPrivacyNotice13MixedIdx", metadataType, objectPrivacyNotice13)
 
     personEmployee = createVertexLabel(mgmt, "Person.Employee")
     personEmployee00 = createProp(mgmt, "Person.Employee.Role", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personEmployee01 = createProp(mgmt, "Person.Employee.Is_GDPR_Role", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeDateOfBirth = createProp(mgmt, "Person.Employee.Date_Of_Birth", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeFullName = createProp(mgmt, "Person.Employee.Full_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeLastName = createProp(mgmt, "Person.Employee.Last_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeGender = createProp(mgmt, "Person.Employee.Gender", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeNationality = createProp(mgmt, "Person.Employee.Nationality", String.class, org.janusgraph.core.Cardinality.SET)
+    personEmployeePlaceOfBirth = createProp(mgmt, "Person.Employee.Place_Of_Birth", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeReligion = createProp(mgmt, "Person.Employee.Religion", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeEthnicity = createProp(mgmt, "Person.Employee.Ethnicity", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeMaritalStatus = createProp(mgmt, "Person.Employee.Marital_Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeHeight = createProp(mgmt, "Person.Employee.Height", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeNameQualifier = createProp(mgmt, "Person.Employee.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEmployeeTitle = createProp(mgmt, "Person.Employee.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "personEmployeeMixedIdx00", personEmployee00)
-    createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
+    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",personEmployee, personEmployee00, personEmployee01,personEmployeeFullName,personEmployeeLastName,personEmployeeGender, personEmployeeNationality, personEmployeePlaceOfBirth,personEmployeeReligion,personEmployeeEthnicity,personEmployeeMaritalStatus,personEmployeeNameQualifier, personEmployeeTitle);
+//    createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
 //    createCompIdx(mgmt, "personEmployeeCompositeIdx00", personEmployee00)
 //    createCompIdx(mgmt, "personEmployeeCompositeIdx01", personEmployee01)
 
@@ -1915,20 +1972,20 @@ def createIndicesPropsAndLabels() {
     orgURL = createProp(mgmt, "Person.Organisation.URL", String.class, org.janusgraph.core.Cardinality.SET)
 
     orgCountry = createProp(mgmt, "Person.Organisation.orgCountrySet", String.class, org.janusgraph.core.Cardinality.SET)
-    createMixedIdx(mgmt, "personOrgShortNameMixedIdx", metadataType, orgShortName)
-    createMixedIdx(mgmt, "personOrgCountryMixedIdx", metadataType, orgCountry)
-
-    createMixedIdx(mgmt, "personOrgNameMixedMixedIdx", metadataType, orgName)
-    createMixedIdx(mgmt, "personOrgRegNumberMixedIdx", metadataType, orgRegNumber)
-    createMixedIdx(mgmt, "personOrgURLMixedIdx",       metadataType, orgURL)
+    createMixedIdx(mgmt, "personOrgShortNameMixedIdx", orgLabel, orgShortName, orgCountry, orgName, orgRegNumber, orgURL)
+//    createMixedIdx(mgmt, "personOrgCountryMixedIdx", metadataType, orgCountry)
+//
+//    createMixedIdx(mgmt, "personOrgNameMixedMixedIdx", metadataType, orgName)
+//    createMixedIdx(mgmt, "personOrgRegNumberMixedIdx", metadataType, orgRegNumber)
+//    createMixedIdx(mgmt, "personOrgURLMixedIdx",       metadataType, orgURL)
 
 
     orgLabel = createVertexLabel(mgmt, "Event.Consent")
 
     eventConsentDate = createProp(mgmt, "Event.Consent.Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     eventConsentStatus = createProp(mgmt, "Event.Consent.Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    createMixedIdx(mgmt, "eventConsentStatusMtdMixedIdx", metadataType,eventConsentStatus)
-    createCompIdx(mgmt, "eventConsentDateCompIdx",  eventConsentDate)
+    createMixedIdx(mgmt, "eventConsentStatusMtdMixedIdx", orgLabel,eventConsentStatus,eventConsentDate )
+//    createCompIdx(mgmt, "eventConsentDateCompIdx",  eventConsentDate)
     mgmt.commit();
 
 }
@@ -2371,6 +2428,7 @@ def createDataProtectionAuthorities() {
                     property("Metadata.Lineage_Server_Tag", "AWS EUR1").
                     property("Metadata.Lineage_Location_Tag", "GB").
                     property("Metadata.Type", "Location.Address").
+                    property("Metadata.Type.Location.Address", "Location.Address").
                     property("Location.Address.Street", authDataObj.locationAddrStreet).
                     property("Location.Address.City", authDataObj.locationAddrCity).
                     property("Location.Address.Post_Code", authDataObj.locationAddrCity).next()
@@ -2386,6 +2444,7 @@ def createDataProtectionAuthorities() {
                     property("Metadata.Lineage_Server_Tag", "AWS EUR1").
                     property("Metadata.Lineage_Location_Tag", "GB").
                     property("Metadata.Type", "Person.Organisation").
+                    property("Metadata.Type.Person.Organisation", "Person.Organisation").
                     property("Person.Organisation.Short_Name", authDataObj.orgShortName).
                     property("Person.Organisation.Name", authDataObj.orgName).
                     property("Person.Organisation.URL", authDataObj.orgURL).
@@ -2399,7 +2458,7 @@ def createDataProtectionAuthorities() {
             for (def k = 0; k < randValK; k++) {
                 def org = g.V(orgId);
 
-                def pia = g.V().has('Metadata.Type', 'Object.Privacy_Impact_Assessment')
+                def pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment'))
                         .order().by(shuffle).range(0, 1).next()
 
                 g.addE("Has_Data_Procedures").from(pia).to(org).next()
@@ -2434,6 +2493,7 @@ def createNotificationTemplates() {
             trans.open();
         }
         g.addV("Object.Notification_Templates")
+                .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR READ TEMPLATE")
                 .property("Object.Notification_Templates.Text",("<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
@@ -2465,6 +2525,7 @@ def createNotificationTemplates() {
 
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR UPDATE TEMPLATE")
                 .property("Object.Notification_Templates.Text", ("<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
                 "\n" +
@@ -2495,6 +2556,7 @@ def createNotificationTemplates() {
 
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "SAR DELETE TEMPLATE")
                 .property("Object.Notification_Templates.Text", ("<p>Dear {{ context.Person_Title | capitalize }} {{ context.Person_Last_Name |capitalize }}, </p>\n" +
                 "\n" +
@@ -2526,6 +2588,7 @@ def createNotificationTemplates() {
 
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "DATA BREACH REGULATOR TEMPLATE")
                 .property("Object.Notification_Templates.Text", "Dear {{ Person.Organisation.Short_Name }}, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.Types", "Event.Data_Breach")
@@ -2535,6 +2598,7 @@ def createNotificationTemplates() {
 
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "DATA BREACH BOARD TEMPLATE")
                 .property("Object.Notification_Templates.Text", "Dear Board Members, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_board_report")
@@ -2544,6 +2608,7 @@ def createNotificationTemplates() {
 
         g.addV("Object.Notification_Templates")
                 .property("Metadata.Type", "Object.Notification_Templates")
+                .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
                 .property("Object.Notification_Templates.Id", "DATA BREACH PERSON TEMPLATE")
                 .property("Object.Notification_Templates.Text", "Dear {{ connected_data.Person_Name }}, We regret to inform you that your data may have been stolen.".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
@@ -2610,7 +2675,7 @@ def __addVPCEdgesFromUserIdGroupPairs(
 
 
         if (uidPair.VpcId != null && uidPair.PeeringStatus == "active") {
-            def peerVpc = g.V().has('Object.AWS_VPC.Id', uidPair.VpcId).next();
+            def peerVpc = g.V().has('Object.AWS_VPC.Id', eq(uidPair.VpcId)).next();
             trans = graph.tx()
 
             try {
@@ -2651,7 +2716,7 @@ def __addSecGroupEdgesFromUserIdGroupPairs(graph, g, Long origSecGroupVid, userI
 
 
         if (uidPair.GroupId != null) {
-            def peerSecGroup = g.V().has('Object.AWS_Security_Group.Id', uidPair.GroupId).next();
+            def peerSecGroup = g.V().has('Object.AWS_Security_Group.Id', eq(uidPair.GroupId)).next();
             trans = graph.tx()
 
             try {
@@ -2738,7 +2803,7 @@ def __addSecGroupEdges(graph, g, aws_sec_groups) {
 
         Long sgVid = null;
         try {
-            sgVid = g.V().has('Object.AWS_Security_Group.Id', sg.GroupId).next().id();
+            sgVid = g.V().has('Object.AWS_Security_Group.Id',eq(sg.GroupId)).next().id();
 
             sg.IpPermissionsEgress.each { egressIpPerm ->
                 if (egressIpPerm.UserIdGroupPairs != null) {
@@ -2839,7 +2904,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
         sb.append("VPC looking for  - ").append(it.toString()).append('\n');
 
         try {
-            vpcId = g.V().has("Object.AWS_VPC.Id", it.toString()).next().id();
+            vpcId = g.V().has("Object.AWS_VPC.Id", eq(it.toString())).next().id();
 
 
         } catch (Throwable t) {
@@ -2866,6 +2931,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
                         property("Metadata.Status", "new").
                         property("Metadata.Lineage_Location_Tag", "GB").
                         property("Metadata.Type", "Object.AWS_VPC").
+                        property("Metadata.Type.Object.AWS_VPC", "Object.AWS_VPC").
                         property("Object.AWS_VPC.Id", it.toString()).next().
                         id();
 
@@ -2917,6 +2983,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 
                     awsiId = g.addV("Object.AWS_Instance").
                             property("Metadata.Type", "Object.AWS_Instance").
+                            property("Metadata.Type.Object.AWS_Instance", "Object.AWS_Instance").
                             property("Metadata.Lineage", "aws ec2 describe-instance").
                             property("Metadata.Redaction", "/data/protection/officer").
                             property("Metadata.Version", 1).
@@ -2990,6 +3057,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 
                         sgvId = g.addV("Object.AWS_Security_Group").
                                 property("Metadata.Type", "Object.AWS_Security_Group").
+                                property("Metadata.Type.Object.AWS_Security_Group", "Object.AWS_Security_Group").
                                 property("Metadata.Lineage", "aws ec2 describe-instance").
                                 property("Metadata.Redaction", "/data/protection/officer").
                                 property("Metadata.Version", 1).
