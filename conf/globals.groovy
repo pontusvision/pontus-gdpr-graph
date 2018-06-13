@@ -339,9 +339,16 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
             if (counter > 1) {
                 person = g.V(personId).next();
 
-                boss = g.V().has('Person.Employee.Role', reportsTo).order().by(shuffle).range(0, 1).next();
+                try {
+                  boss = g.V()
+                          .has('Person.Employee.Role', eq(reportsTo))
+                          .order()
+                          .by(shuffle)
+                          .range(0, 1)
+                          .next();
 
-                g.addE("Reports_To").from(person).to(boss).next();
+                  g.addE("Reports_To").from(person).to(boss).next();
+                } catch (e) { /* ignore */ }
             }
 
 
@@ -729,7 +736,7 @@ def addRandomDataBreachEvents(graph, g) {
         }
     }
 
-    def event = g.V().has('Metadata.Type.Event.Data_Breach', eq('Event.Data_Breach')).order().by(shuffle).range(0, 1).next();
+   def event = g.V().has('Metadata.Type.Event.Data_Breach', eq('Event.Data_Breach')).order().by(shuffle).range(0, 1).next();
     def tx = graph.tx();
     if (!tx.isOpen()) {
         tx.open();
@@ -1063,7 +1070,7 @@ def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
                 property("Event.Consent.Date", metadataUpdateDate).
                 next()
 
-//        def employee = g.V().has('Metadata.Type','Person.Employee').order().by(shuffle).range(0,1).next()
+//        def employee = g.V().has('Metadata.Type',eq('Person.Employee')).order().by(shuffle).range(0,1).next()
 
         def person = g.V().has('Metadata.Type', eq('Person')).order().by(shuffle).range(0, 1).next()
 
@@ -1074,7 +1081,7 @@ def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
 
     }
 
-//    g.V().has("Metadata.Type", "Person").as("people")
+//    g.V().has("Metadata.Type", eq("Person")).as("people")
 //            .addE("Consent").property("Consent.Date", new Date())
 //            .from("people").to(privNoticeVertex).next()
 
@@ -1285,7 +1292,7 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
         for (i = 0; i < ilen; i++) {
 
 
-            lawfulBasis1 = g.V().has("Object.Lawful_Basis.Description", definitions[i])
+            lawfulBasis1 = g.V().has("Object.Lawful_Basis.Description", eq(definitions[i]))
 
             if (lawfulBasis1.hasNext()) {
                 lawfulBasisVertices[i] = lawfulBasis1.next()
@@ -1340,7 +1347,7 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
         for (i = 0; i < ilen; i++) {
 
 
-            privacyNotice = g.V().has("Object.Privacy_Notice.Text", privacyNoticeText[i])
+            privacyNotice = g.V().has("Object.Privacy_Notice.Text", eq(privacyNoticeText[i]))
 
             if (privacyNotice.hasNext()) {
                 privacyNoticeVertices[i] = privacyNotice.next()
@@ -1465,7 +1472,7 @@ def createMixedIdx(mgmt, idxName, PropertyKey metadataType, Mapping mapping, Pro
             ib.addKey(metadataType);
 
             for (PropertyKey prop in props) {
-                ib.addKey(prop,mapping);
+                ib.addKey(prop,mapping.asParameter());
 //            ib.addKey(prop,Mapping.STRING.asParameter());
                 System.out.println("creating IDX ${idxName} for key ${prop}");
 
@@ -1489,7 +1496,8 @@ def createMixedIdx(mgmt, idxName, PropertyKey ... props) {
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName,Vertex.class )
             for (PropertyKey prop in props) {
                 ib.addKey(prop,Mapping.STRING.asParameter());
-//            ib.addKey(prop,Mapping.STRING.asParameter());
+//                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
+              ib.addKey(prop,Mapping.STRING.asParameter());
                 System.out.println("creating IDX ${idxName} for key ${prop}");
 
             }
@@ -2764,7 +2772,7 @@ def __addSecGroupEdges(graph, g, aws_sec_groups) {
 
         Long vpcVid = null;
         try {
-            vpcVid = g.V().has('Object.AWS_VPC.Id', sg.VpcId).next().id();
+            vpcVid = g.V().has('Object.AWS_VPC.Id', eq(sg.VpcId)).next().id();
 
             // sb.append('in __addSecGroupEdges -')
             //   .append('vpcVid = ').append(vpcVid).append('\n')
@@ -2959,7 +2967,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 
             def awsiId = null;
             try {
-                awsiId = g.V().has("Object.AWS_Instance.Id", iidStr).next().id()
+                awsiId = g.V().has("Object.AWS_Instance.Id", eq(iidStr)).next().id()
                 sb.append("AWSI found id   - ").append(awsiId).append('\n');
 
 
@@ -3032,7 +3040,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
                 sb.append("secGroup - looking for ").append(sgStr.toString()).append('\n');
 
                 try {
-                    sgvId = g.V().has("Object.AWS_Security_Group.Id", sgStr).next().id();
+                    sgvId = g.V().has("Object.AWS_Security_Group.Id", eq(sgStr)).next().id();
                     sb.append("secGroup - found id ").append(sgvId).append('\n');
 
 
