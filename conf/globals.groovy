@@ -1495,9 +1495,17 @@ def createMixedIdx(mgmt, idxName, PropertyKey ... props) {
         if (!mgmt.containsGraphIndex(idxName)) {
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName,Vertex.class )
             for (PropertyKey prop in props) {
-                ib.addKey(prop,Mapping.STRING.asParameter());
+
+                if (prop.dataType() == String.class){
+                    ib.addKey(prop,Mapping.STRING.asParameter());
+
+                }
+                else{
+                    ib.addKey(prop);
+
+                }
+
 //                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
-              ib.addKey(prop,Mapping.STRING.asParameter());
                 System.out.println("creating IDX ${idxName} for key ${prop}");
 
             }
@@ -1791,7 +1799,7 @@ def createIndicesPropsAndLabels() {
     personNameQualifier = createProp(mgmt, "Person.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personTitle = createProp(mgmt, "Person.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",personLabel,personFullName,personLastName,personGender, personNationality, personPlaceOfBirth,personReligion,personEthnicity,personMaritalStatus,personNameQualifier, personTitle);
+    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",personLabel,personFullName,personLastName,personGender, personNationality,personDateOfBirth, personPlaceOfBirth,personReligion,personEthnicity,personMaritalStatus,personNameQualifier, personTitle);
 //    createCompIdx(mgmt, "personDateOfBirth", personDateOfBirth)
 //    createMixedIdx(mgmt, "personTitleMixedIdx", metadataType, personTitle)
 //    createMixedIdx(mgmt, "personFullNameMixedIdx",metadataType, personFullName)
@@ -1916,7 +1924,7 @@ def createIndicesPropsAndLabels() {
     personEmployeeNameQualifier = createProp(mgmt, "Person.Employee.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personEmployeeTitle = createProp(mgmt, "Person.Employee.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",personEmployee, personEmployee00, personEmployee01,personEmployeeFullName,personEmployeeLastName,personEmployeeGender, personEmployeeNationality, personEmployeePlaceOfBirth,personEmployeeReligion,personEmployeeEthnicity,personEmployeeMaritalStatus,personEmployeeNameQualifier, personEmployeeTitle);
+    createMixedIdx(mgmt,"personDataOfBirthMixedIdx",personEmployee, personEmployee00, personEmployee01,personEmployeeFullName,personEmployeeLastName,personEmployeeGender, personEmployeeNationality, personEmployeeDateOfBirth, personEmployeePlaceOfBirth,personEmployeeReligion,personEmployeeEthnicity,personEmployeeMaritalStatus,personEmployeeNameQualifier, personEmployeeTitle);
 //    createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
 //    createCompIdx(mgmt, "personEmployeeCompositeIdx00", personEmployee00)
 //    createCompIdx(mgmt, "personEmployeeCompositeIdx01", personEmployee01)
