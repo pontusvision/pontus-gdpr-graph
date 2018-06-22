@@ -53,7 +53,12 @@ authentication: {
   config: {
     zookeeperConnStr: pontus-sandbox.pontusvision.com,
     zookeeperPrincipal: hbase/pontus-sandbox.pontusvision.com@PONTUSVISION.COM,
-    zookeeperKeytab: /etc/security/keytabs/hbase.service.keytab
+    zookeeperKeytab: /etc/security/keytabs/hbase.service.keytab,
+    jwtKeyStoreFile: /etc/pki/java/localhost.jks,
+    jwtKeyStorePassword: pa55word,
+    jwtKeyPassword: pa55word,
+    jwtKeyStoreType: jks,
+    jwtKeyAlias: localhost
   }
 }
 
