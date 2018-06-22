@@ -17,6 +17,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.hadoop.hbase.security.AccessDeniedException;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.tinkerpop.gremlin.groovy.engine.GremlinExecutor;
 import org.apache.tinkerpop.gremlin.server.GremlinServer;
@@ -578,7 +579,23 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         {
           logger.info("Got Exception" , t);
 
-          sendServerError(ctx,msg);
+          boolean isServerError = true;
+
+          Throwable cause = t.getCause();
+          while (cause != null){
+            if (cause instanceof AccessDeniedException){
+              isServerError = false;
+            }
+            cause = cause.getCause();
+          }
+          if (isServerError)
+          {
+            sendServerError(ctx, msg);
+          }
+          else
+          {
+            sendError(ctx,msg);
+          }
         }
       }
       catch (Exception ae)
