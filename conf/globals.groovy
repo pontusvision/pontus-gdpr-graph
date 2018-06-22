@@ -1547,7 +1547,7 @@ def createVertexLabel(mgmt, String labelName) {
         if (!mgmt.containsVertexLabel(labelName)) {
             mgmt.makeVertexLabel(labelName).make()
         }
-        return createProp(mgmt, "Metadata.Type." + labelName, String.class, Cardinality.SINGLE);
+        return createProp(mgmt, "Metadata.Type." + labelName, String.class, org.janusgraph.core.Cardinality.SINGLE);
 
     }
     catch (Throwable t) {
