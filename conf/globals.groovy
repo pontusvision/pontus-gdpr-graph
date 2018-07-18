@@ -1623,6 +1623,31 @@ def createIndicesPropsAndLabels() {
 
 //    metadataGDPRStatusIdx = createMixedIdx(mgmt, "metadataGDPRStatusMixedIdx", metadataGDPRStatus)
 
+/*
+O-Form Store
+O.Form.Metadata.Owner
+O.Form.Metadata.Create.Date
+O.Form.Metadata.GUID
+O.Form.Text
+O.Form.URL
+O.Form.Vertex_Label
+
+*/
+
+
+    objectFormLabel = createVertexLabel(mgmt, "Object.Form");
+
+    objectFormProp00 = createProp(mgmt, "Object.Form.Metadata_Owner", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_GUID", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp02 = createProp(mgmt, "Object.Form.URL", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp03 = createProp(mgmt, "Object.Form.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp04 = createProp(mgmt, "Object.Form.Vertex_Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
+
+    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectFormIdx01", objectFormLabel, objectFormProp00,objectFormProp01,objectFormProp02,objectFormProp04);
+
+
+
 
     objectAWSInstanceLabel = createVertexLabel(mgmt, "Object.Notification_Templates");
 
