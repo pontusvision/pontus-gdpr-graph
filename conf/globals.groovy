@@ -1,7 +1,6 @@
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.structure.Vertex
-import org.janusgraph.core.Cardinality
 import org.janusgraph.core.PropertyKey
 import org.janusgraph.core.schema.JanusGraphManagement
 import org.janusgraph.core.schema.Mapping
@@ -1106,8 +1105,7 @@ def __addMoU(graph, g, Vertex pia) {
             g.addE("Use_Their_Data").from(mou).to(org).next()
 
 
-        }
-        else {
+        } else {
             g.addE("Use_Our_Data").from(pia).to(mou).next()
             g.addE("Use_Our_Data").from(mou).to(org).next()
 
@@ -1170,7 +1168,7 @@ and other relevant legislation.
 
     g.addE("Has_Privacy_Notice").from(pia).to(privNoticeVertex).next()
 
-    __addMoU(graph,g,pia);
+    __addMoU(graph, g, pia);
 
 //        trans.commit()
 
@@ -1644,7 +1642,7 @@ O.Form.Vertex_Label
     objectFormProp03 = createProp(mgmt, "Object.Form.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectFormProp04 = createProp(mgmt, "Object.Form.Vertex_Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectFormIdx01", objectFormLabel, objectFormProp00,objectFormProp01,objectFormProp02,objectFormProp04);
+    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectFormIdx01", objectFormLabel, objectFormProp00, objectFormProp01, objectFormProp02, objectFormProp04);
 
 
 
@@ -1740,6 +1738,9 @@ O.Form.Vertex_Label
 
     objectAWSProp00 = createProp(mgmt, "Object.AWS_VPC.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx00", objectAWSVPCLabel, objectAWSProp00)
+
+
+    createMixedIdx(mgmt, 'awsMixedLabelIdx', objectAWSVPCLabel, objectAWSSecurityGroupLabel, objectAWSInstanceLabel);
 
     /*
         NetworkInterfaces=[
@@ -1959,7 +1960,7 @@ O.Form.Vertex_Label
     personEmployeeNameQualifier = createProp(mgmt, "Person.Employee.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personEmployeeTitle = createProp(mgmt, "Person.Employee.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "personDataOfBirthMixedIdx", personEmployee, personEmployee00, personEmployee01, personEmployeeFullName, personEmployeeLastName, personEmployeeGender, personEmployeeNationality, personEmployeeDateOfBirth, personEmployeePlaceOfBirth, personEmployeeReligion, personEmployeeEthnicity, personEmployeeMaritalStatus, personEmployeeNameQualifier, personEmployeeTitle);
+    createMixedIdx(mgmt, "personEmployeeMixedIdx", personEmployee, personEmployee00, personEmployee01, personEmployeeFullName, personEmployeeLastName, personEmployeeGender, personEmployeeNationality, personEmployeeDateOfBirth, personEmployeePlaceOfBirth, personEmployeeReligion, personEmployeeEthnicity, personEmployeeMaritalStatus, personEmployeeNameQualifier, personEmployeeTitle);
 //    createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
 //    createCompIdx(mgmt, "personEmployeeCompositeIdx00", personEmployee00)
 //    createCompIdx(mgmt, "personEmployeeCompositeIdx01", personEmployee01)
@@ -2041,6 +2042,77 @@ O.Form.Vertex_Label
 
 }
 
+def createForms() {
+
+//    objectFormLabel = createVertexLabel(mgmt, "Object.Form");
+//
+//    objectFormProp00 = createProp(mgmt, "Object.Form.Metadata_Owner", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_GUID", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp02 = createProp(mgmt, "Object.Form.URL", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp03 = createProp(mgmt, "Object.Form.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp04 = createProp(mgmt, "Object.Form.Vertex_Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//
+//    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectFormIdx01", objectFormLabel, objectFormProp00,objectFormProp01,objectFormProp02,objectFormProp04);
+
+    def formData = [
+            [
+                    formOwner      : 'Leonardo',
+                    formURL        : 'forms/gdpr/dsar_read',
+                    formText       : "{display: 'form'}",
+                    formVertexLabel: "Event.Subject_Access_Request"
+            ]
+            ,
+
+            [
+                    formOwner      : 'Leonardo',
+                    formURL        : 'forms/gdpr/consent',
+                    formText       : "{display: 'form'}",
+                    formVertexLabel: "Event.Consent"
+
+            ]
+    ]
+
+    def trans = graph.tx()
+    try {
+        trans.open();
+
+
+        for (def i = 0; i < formData.size(); i++) {
+            def formDataObj = formData[i];
+
+            def createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
+            def metadataCreateDate = new Date((long) createMillis)
+
+
+
+            def form = g.addV("Object.Form").
+                    property("Object.Form.Metadata_Owner", formDataObj.formOwner).
+
+                    property("Object.Form.Metadata_Create_Date", metadataCreateDate).
+                    property("Object.Form.URL", formDataObj.formURL).
+                    property("Object.Form.Text", formDataObj.formText).
+                    property("Object.Form.Vertex_Label", formDataObj.formVertexLabel).next();
+
+
+        }
+
+
+
+
+
+
+
+
+        trans.commit()
+    } catch (Throwable t) {
+        trans.rollback()
+        throw t
+    } finally {
+        trans.close()
+    }
+
+}
 
 def createDataProtectionAuthorities() {
 
@@ -3210,4 +3282,5 @@ def addRandomDataInit(graph, g) {
     addRandomAWSGraph(graph, g, null, null);
     addRandomDataBreachEvents(graph, g);
     createNotificationTemplates();
+    createForms();
 }
