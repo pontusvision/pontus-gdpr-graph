@@ -311,7 +311,6 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     .from(trainingEvent)
                     .to(g.V(awarenessCampaignId).next())
                     .property("Metadata.Type", "Event.Training.Awareness_Campaign")
-                    .property("Metadata.Type.Event.Training.Awareness_Campaign", "Event.Training.Awareness_Campaign")
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
 
@@ -322,7 +321,6 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     .from(trainingEvent)
                     .to(person)
                     .property("Metadata.Type", "Event.Training.Awareness_Campaign")
-                    .property("Metadata.Type.Event.Training.Awareness_Campaign", "Event.Training.Awareness_Campaign")
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
 
@@ -727,18 +725,23 @@ def addRandomDataBreachEvents(graph, g) {
         }
     }
 
-    def event = g.V().has('Metadata.Type.Event.Data_Breach', eq('Event.Data_Breach')).order().by(shuffle).range(0, 1).next();
-    def tx = graph.tx();
-    if (!tx.isOpen()) {
-        tx.open();
-    }
+    try {
 
-    for (def i = 0; i < 10000; i++) {
-        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1)).to(event).next();
-    }
-    tx.commit();
-    tx.close();
 
+        def event = g.V().has('Metadata.Type.Event.Data_Breach', eq('Event.Data_Breach')).order().by(shuffle).range(0, 1).next();
+        def tx = graph.tx();
+        if (!tx.isOpen()) {
+            tx.open();
+        }
+
+        for (def i = 0; i < 10000; i++) {
+            g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1)).to(event).next();
+        }
+        tx.commit();
+        tx.close();
+    } catch (Throwable t) {
+
+    }
 
 }
 
@@ -1095,22 +1098,25 @@ def __addMoU(graph, g, Vertex pia) {
                 property("Object.MoU.Link", "https://www.abcinc.com/mou").next();
 
 
+        try {
 
-        def org = g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
-                .order().by(shuffle).range(0, 1).next()
+            def org = g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
+                    .order().by(shuffle).range(0, 1).next()
 
-        def useTheirData = randVal.nextBoolean();
-        if (useTheirData) {
-            g.addE("Use_Their_Data").from(pia).to(mou).next()
-            g.addE("Use_Their_Data").from(mou).to(org).next()
+            def useTheirData = randVal.nextBoolean();
+            if (useTheirData) {
+                g.addE("Use_Their_Data").from(pia).to(mou).next()
+                g.addE("Use_Their_Data").from(mou).to(org).next()
 
 
-        } else {
-            g.addE("Use_Our_Data").from(pia).to(mou).next()
-            g.addE("Use_Our_Data").from(mou).to(org).next()
+            } else {
+                g.addE("Use_Our_Data").from(pia).to(mou).next()
+                g.addE("Use_Our_Data").from(mou).to(org).next()
+
+            }
+        } catch (Throwable t) {
 
         }
-
     }
 
 
@@ -1737,7 +1743,7 @@ O.Form.Vertex_Label
     objectAWSVPCLabel = createVertexLabel(mgmt, "Object.AWS_VPC");
 
     objectAWSProp00 = createProp(mgmt, "Object.AWS_VPC.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx00", objectAWSVPCLabel, objectAWSProp00)
+    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx01",  objectAWSProp00)
 
 
     createMixedIdx(mgmt, 'awsMixedLabelIdx', objectAWSVPCLabel, objectAWSSecurityGroupLabel, objectAWSInstanceLabel);
@@ -2081,7 +2087,7 @@ def createForms() {
         for (def i = 0; i < formData.size(); i++) {
             def formDataObj = formData[i];
 
-            def createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
+            def createMillis = System.currentTimeMillis() ;
             def metadataCreateDate = new Date((long) createMillis)
 
 
