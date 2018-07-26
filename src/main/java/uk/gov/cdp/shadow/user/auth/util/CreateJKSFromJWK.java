@@ -28,6 +28,8 @@ public class CreateJKSFromJWK extends KeyStoreCreator
 
 
     KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+    keyStore.load(null, keyStorePassword.toCharArray());
+
     keyStore.setKeyEntry(keyAlias,pubKey,keyPassword.toCharArray(),null);
 
 //    keyStore.load(null, keyStorePassword.toCharArray());
