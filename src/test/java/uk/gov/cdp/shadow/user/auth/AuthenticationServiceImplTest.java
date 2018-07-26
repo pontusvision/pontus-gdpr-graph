@@ -62,10 +62,7 @@ public class AuthenticationServiceImplTest {
   @Test
   public void testJWKPublicKey(){
 
-    String jwkStr = "{\"keys\":[{\"kid\":\"lX9v8wAa0YA6SCGBwOJ_qvKLBQP8N8EeRRVFFOFkd-U\",\"kty\":\"RSA\",\"alg\":\"RS256\",\"use\":\"sig\",\"n\":\"0WPixA5JOpqKpBIbPT1ZFdHcaOgkAXK7TkXza11_-OGbCXxT-pQ8isLGwrqjBm5DNnZif2XpBlIuDMWNfr9Q\n"
-        + "IUVGmEWIRZqGVJ26Lu3akfCk4bEZcNnuic6Qv1FhLqUWr7pgvea_sfYh1Stjl2x-GiZzmVSHx-rFMMyDLSkGSNqFbyclGEhWgLd7BDH3jzsSzFcb0dxrrjp_Jh-yT3a64RVqYjOTtjcxF_jpgUgR5bXGU8Iy3_FJDs7eyUUi6z8LkYDdu6yhvng_eY-IV\n"
-        + "FrWXadEbKITMQkBTaO1y60WJbppV_tl8_kuiYqOwtEJJc2AOjD9Fj0S4Oz5OfVtjfbIavhknIGKm2A_qE8Hfq4aEmarr063YKjGy8ll6SuAt4W_hshwDPOa_DY_SNh8uA_Ei1CkMtUV2bGX7keeEc5qTDW08PBYNgoPqza6GpgepXYNarKkqdgMfRt1qw\n"
-        + "ZS_TmA3Bm8rv9BlPK2ek2DXvvlLUUjzpsGpqV0JK0E7lR3DCurnP28VzOqaQFT5cU539QKp_5HLPRth0Zv4MqX68BtjKhG4HzS55Vq8BWCSv34OhzqxeGJ4mFIyijbToVJhEqfFZpozO2wjW7tZCsHA4QjjTCWeiODkscO0hEn-FLHh0\",\"e\":\"AQAB\"}";
+    String jwkStr = "{\"kid\":\"lX9v8wAa0YA6SCGBwOJ_qvKLBQP8N8EeRRVFFOFkd-U\",\"kty\":\"RSA\",\"alg\":\"RS256\",\"use\":\"sig\",\"n\":\"0WPixA5JOpqKpBIbPT1ZFdHcaOgkAXK7TkXza11_-OGbCXxT-pQ8isLGwrqjBm5DNnZif2XpBlIuDMWNfr9QGtENqLYdkwN05GuIUVGmEWIRZqGVJ26Lu3akfCk4bEZcNnuic6Qv1FhLqUWr7pgvea_sfYh1Stjl2x-GiZzmVSHx-rFMMyDLSkGSNqFbyclGEhWgLd7BDH3jzsSzFcb0dxrrjp_Jh-yT3a64RVqYjOTtjcxF_jpgUgR5bXGU8Iy3_FJDs7eyUUi6z8LkYDdu6yhvng_eY-IVajKHA5GYSQyXMm6FrWXadEbKITMQkBTaO1y60WJbppV_tl8_kuiYqOwtEJJc2AOjD9Fj0S4Oz5OfVtjfbIavhknIGKm2A_qE8Hfq4aEmarr063YKjGy8ll6SuAt4W_hshwDPOa_DY_SNh8uA_Ei1CkMtUV2bGX7keeEc5qTDW08PBYNgoPqza6GpgepXYNarKkqdgMfRt1qwR9p75gr9yNBEbPWZS_TmA3Bm8rv9BlPK2ek2DXvvlLUUjzpsGpqV0JK0E7lR3DCurnP28VzOqaQFT5cU539QKp_5HLPRth0Zv4MqX68BtjKhG4HzS55Vq8BWCSv34OhzqxeGJ4mFIyijbToVJhEqfFZpozO2wjW7tZCsHA4QjjTCWeiODkscO0hEn-FLHh0\",\"e\":\"AQAB\"}";
 
     try
     {
