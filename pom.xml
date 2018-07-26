@@ -33,12 +33,19 @@
         <maven-compiler-plugin.source>1.8</maven-compiler-plugin.source>
         <mockito-all.version>1.10.19</mockito-all.version>
         <jukito.version>1.5</jukito.version>
+        <keycloak.version>4.1.0.Final</keycloak.version>
         <!--<apache.directory-api-version>
             1.0.0
         </apache.directory-api-version>-->
 
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-core</artifactId>
+            <version>${keycloak.version}</version>
+
+        </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
@@ -73,7 +80,6 @@
 
             </exclusions>
         </dependency>
-
 
 
         <dependency>
@@ -649,9 +655,9 @@
             <version>0.99.0</version>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>org.apache.nifi</groupId>-->
-            <!--<artifactId>nifi-pontus-jwt-processor</artifactId>-->
-            <!--<version>1.0</version>-->
+        <!--<groupId>org.apache.nifi</groupId>-->
+        <!--<artifactId>nifi-pontus-jwt-processor</artifactId>-->
+        <!--<version>1.0</version>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
@@ -682,11 +688,11 @@
             <version>${mockito-all.version}</version>
             <scope>test</scope>
             <exclusions>
-            <exclusion>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-core</artifactId>
-            </exclusion>
-        </exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
 
         </dependency>
         <dependency>
