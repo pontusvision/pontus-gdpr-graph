@@ -679,6 +679,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
   public static class SSLContextService
   {
+
     String keyStoreFile = "/etc/pki/java/keystore.jks";
     String keyStoreType = "JKS";
     String keyStorePassword = "pa55word";
@@ -703,5 +704,25 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     {
       return keyPassword;
     }
+    public void setKeyStoreFile(String keyStoreFile)
+    {
+      this.keyStoreFile = keyStoreFile;
+    }
+
+    public void setKeyStoreType(String keyStoreType)
+    {
+      this.keyStoreType = keyStoreType;
+    }
+
+    public void setKeyStorePassword(String keyStorePassword)
+    {
+      this.keyStorePassword = keyStorePassword;
+    }
+
+    public void setKeyPassword(String keyPassword)
+    {
+      this.keyPassword = keyPassword;
+    }
+
   }
 }
