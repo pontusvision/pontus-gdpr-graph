@@ -1,7 +1,6 @@
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.structure.Vertex
-import org.janusgraph.core.Cardinality
 import org.janusgraph.core.PropertyKey
 import org.janusgraph.core.schema.JanusGraphManagement
 import org.janusgraph.core.schema.Mapping
@@ -312,7 +311,6 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     .from(trainingEvent)
                     .to(g.V(awarenessCampaignId).next())
                     .property("Metadata.Type", "Event.Training.Awareness_Campaign")
-                    .property("Metadata.Type.Event.Training.Awareness_Campaign", "Event.Training.Awareness_Campaign")
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
 
@@ -323,7 +321,6 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     .from(trainingEvent)
                     .to(person)
                     .property("Metadata.Type", "Event.Training.Awareness_Campaign")
-                    .property("Metadata.Type.Event.Training.Awareness_Campaign", "Event.Training.Awareness_Campaign")
                     .property("Metadata.Create_Date", metadataCreateDate)
                     .next()
 
@@ -728,18 +725,23 @@ def addRandomDataBreachEvents(graph, g) {
         }
     }
 
-    def event = g.V().has('Metadata.Type.Event.Data_Breach', eq('Event.Data_Breach')).order().by(shuffle).range(0, 1).next();
-    def tx = graph.tx();
-    if (!tx.isOpen()) {
-        tx.open();
-    }
+    try {
 
-    for (def i = 0; i < 10000; i++) {
-        g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1)).to(event).next();
-    }
-    tx.commit();
-    tx.close();
 
+        def event = g.V().has('Metadata.Type.Event.Data_Breach', eq('Event.Data_Breach')).order().by(shuffle).range(0, 1).next();
+        def tx = graph.tx();
+        if (!tx.isOpen()) {
+            tx.open();
+        }
+
+        for (def i = 0; i < 10000; i++) {
+            g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1)).to(event).next();
+        }
+        tx.commit();
+        tx.close();
+    } catch (Throwable t) {
+
+    }
 
 }
 
@@ -1096,23 +1098,25 @@ def __addMoU(graph, g, Vertex pia) {
                 property("Object.MoU.Link", "https://www.abcinc.com/mou").next();
 
 
+        try {
 
-        def org = g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
-                .order().by(shuffle).range(0, 1).next()
+            def org = g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
+                    .order().by(shuffle).range(0, 1).next()
 
-        def useTheirData = randVal.nextBoolean();
-        if (useTheirData) {
-            g.addE("Use_Their_Data").from(pia).to(mou).next()
-            g.addE("Use_Their_Data").from(mou).to(org).next()
+            def useTheirData = randVal.nextBoolean();
+            if (useTheirData) {
+                g.addE("Use_Their_Data").from(pia).to(mou).next()
+                g.addE("Use_Their_Data").from(mou).to(org).next()
 
+
+            } else {
+                g.addE("Use_Our_Data").from(pia).to(mou).next()
+                g.addE("Use_Our_Data").from(mou).to(org).next()
+
+            }
+        } catch (Throwable t) {
 
         }
-        else {
-            g.addE("Use_Our_Data").from(pia).to(mou).next()
-            g.addE("Use_Our_Data").from(mou).to(org).next()
-
-        }
-
     }
 
 
@@ -1170,7 +1174,7 @@ and other relevant legislation.
 
     g.addE("Has_Privacy_Notice").from(pia).to(privNoticeVertex).next()
 
-    __addMoU(graph,g,pia);
+    __addMoU(graph, g, pia);
 
 //        trans.commit()
 
@@ -1623,6 +1627,31 @@ def createIndicesPropsAndLabels() {
 
 //    metadataGDPRStatusIdx = createMixedIdx(mgmt, "metadataGDPRStatusMixedIdx", metadataGDPRStatus)
 
+/*
+O-Form Store
+O.Form.Metadata.Owner
+O.Form.Metadata.Create.Date
+O.Form.Metadata.GUID
+O.Form.Text
+O.Form.URL
+O.Form.Vertex_Label
+
+*/
+
+
+    objectFormLabel = createVertexLabel(mgmt, "Object.Form");
+
+    objectFormProp00 = createProp(mgmt, "Object.Form.Metadata_Owner", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_GUID", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp02 = createProp(mgmt, "Object.Form.URL", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp03 = createProp(mgmt, "Object.Form.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectFormProp04 = createProp(mgmt, "Object.Form.Vertex_Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
+
+    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectFormIdx01", objectFormLabel, objectFormProp00, objectFormProp01, objectFormProp02, objectFormProp04);
+
+
+
 
     objectAWSInstanceLabel = createVertexLabel(mgmt, "Object.Notification_Templates");
 
@@ -1714,7 +1743,10 @@ def createIndicesPropsAndLabels() {
     objectAWSVPCLabel = createVertexLabel(mgmt, "Object.AWS_VPC");
 
     objectAWSProp00 = createProp(mgmt, "Object.AWS_VPC.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx00", objectAWSVPCLabel, objectAWSProp00)
+    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx01",  objectAWSProp00)
+
+
+    createMixedIdx(mgmt, 'awsMixedLabelIdx', objectAWSVPCLabel, objectAWSSecurityGroupLabel, objectAWSInstanceLabel);
 
     /*
         NetworkInterfaces=[
@@ -1934,7 +1966,7 @@ def createIndicesPropsAndLabels() {
     personEmployeeNameQualifier = createProp(mgmt, "Person.Employee.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personEmployeeTitle = createProp(mgmt, "Person.Employee.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "personDataOfBirthMixedIdx", personEmployee, personEmployee00, personEmployee01, personEmployeeFullName, personEmployeeLastName, personEmployeeGender, personEmployeeNationality, personEmployeeDateOfBirth, personEmployeePlaceOfBirth, personEmployeeReligion, personEmployeeEthnicity, personEmployeeMaritalStatus, personEmployeeNameQualifier, personEmployeeTitle);
+    createMixedIdx(mgmt, "personEmployeeMixedIdx", personEmployee, personEmployee00, personEmployee01, personEmployeeFullName, personEmployeeLastName, personEmployeeGender, personEmployeeNationality, personEmployeeDateOfBirth, personEmployeePlaceOfBirth, personEmployeeReligion, personEmployeeEthnicity, personEmployeeMaritalStatus, personEmployeeNameQualifier, personEmployeeTitle);
 //    createMixedIdx(mgmt, "personEmployeeMixedIdx01", personEmployee01)
 //    createCompIdx(mgmt, "personEmployeeCompositeIdx00", personEmployee00)
 //    createCompIdx(mgmt, "personEmployeeCompositeIdx01", personEmployee01)
@@ -2016,6 +2048,78 @@ def createIndicesPropsAndLabels() {
 
 }
 
+def createForms() {
+
+//    objectFormLabel = createVertexLabel(mgmt, "Object.Form");
+//
+//    objectFormProp00 = createProp(mgmt, "Object.Form.Metadata_Owner", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_GUID", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp02 = createProp(mgmt, "Object.Form.URL", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp03 = createProp(mgmt, "Object.Form.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp04 = createProp(mgmt, "Object.Form.Vertex_Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//
+//    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectFormIdx01", objectFormLabel, objectFormProp00,objectFormProp01,objectFormProp02,objectFormProp04);
+
+    def formData = [
+            [
+                    formOwner      : 'Leonardo',
+                    formURL        : 'forms/gdpr/dsar_read',
+                    formText       : "{'display': 'form'}",
+                    formVertexLabel: "Event.Subject_Access_Request"
+            ]
+            ,
+
+            [
+                    formOwner      : 'Leonardo',
+                    formURL        : 'forms/gdpr/consent',
+                    formText       : "{'display': 'form'}",
+                    formVertexLabel: "Event.Consent"
+
+            ]
+    ]
+
+    def trans = graph.tx()
+    try {
+        trans.open();
+
+
+        for (def i = 0; i < formData.size(); i++) {
+            def formDataObj = formData[i];
+
+            def createMillis = System.currentTimeMillis() ;
+            def metadataCreateDate = new Date((long) createMillis)
+
+
+
+            def form = g.addV("Object.Form").
+                    property("Metadata.Type", "Object.Form").
+                    property("Metadata.Type.Object.Form", "Object.Form").
+                    property("Object.Form.Metadata_Owner", formDataObj.formOwner).
+                    property("Object.Form.Metadata_Create_Date", metadataCreateDate).
+                    property("Object.Form.URL", formDataObj.formURL).
+                    property("Object.Form.Text",    formDataObj.formText.bytes.encodeBase64().toString()).
+                    property("Object.Form.Vertex_Label", formDataObj.formVertexLabel).next();
+
+
+        }
+
+
+
+
+
+
+
+
+        trans.commit()
+    } catch (Throwable t) {
+        trans.rollback()
+        throw t
+    } finally {
+        trans.close()
+    }
+
+}
 
 def createDataProtectionAuthorities() {
 
@@ -3185,4 +3289,5 @@ def addRandomDataInit(graph, g) {
     addRandomAWSGraph(graph, g, null, null);
     addRandomDataBreachEvents(graph, g);
     createNotificationTemplates();
+    createForms();
 }

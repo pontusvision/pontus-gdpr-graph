@@ -18,6 +18,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.hadoop.hbase.security.AccessDeniedException;
+import org.apache.hadoop.hbase.shaded.org.apache.commons.io.IOUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.tinkerpop.gremlin.groovy.engine.GremlinExecutor;
 import org.apache.tinkerpop.gremlin.server.GremlinServer;
@@ -35,6 +36,7 @@ import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
 import org.janusgraph.diskstorage.configuration.ReadConfiguration;
 import org.janusgraph.diskstorage.configuration.backend.CommonsConfiguration;
+import org.keycloak.jose.jwk.JWKParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.cdp.ldap.LdapServiceImpl;
@@ -142,23 +144,35 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   {
     FileInputStream is = new FileInputStream(sslService.getKeyStoreFile());
 
-    KeyStore keystore = KeyStore.getInstance(sslService.getKeyStoreType());
-    keystore.load(is, sslService.getKeyStorePassword().toCharArray());
+    if ("JWK".equals(sslService.getKeyStoreType())){
+      JWKParser parser = JWKParser.create();
 
-    //    String alias = sslService.getIdentifier(); //"myalias";
+      String theString = IOUtils.toString(is);
 
-    Key key = keystore.getKey(alias, sslService.getKeyPassword().toCharArray());
-    if (key instanceof PrivateKey)
+      parser.parse(theString);
+      return parser.toPublicKey();
+
+    }
+    else
     {
-      // Get certificate of public key
-      java.security.cert.Certificate cert = keystore.getCertificate(alias);
+      KeyStore keystore = KeyStore.getInstance(sslService.getKeyStoreType());
+      keystore.load(is, sslService.getKeyStorePassword().toCharArray());
 
-      // Get public key
-      PublicKey publicKey = cert.getPublicKey();
+      //    String alias = sslService.getIdentifier(); //"myalias";
 
-      return publicKey;
-      // Return a key pair
-      //      new KeyPair(publicKey, (PrivateKey) key);
+      Key key = keystore.getKey(alias, sslService.getKeyPassword().toCharArray());
+      if (key instanceof PrivateKey)
+      {
+        // Get certificate of public key
+        java.security.cert.Certificate cert = keystore.getCertificate(alias);
+
+        // Get public key
+        PublicKey publicKey = cert.getPublicKey();
+
+        return publicKey;
+        // Return a key pair
+        //      new KeyPair(publicKey, (PrivateKey) key);
+      }
     }
 
     return null;
@@ -665,6 +679,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
   public static class SSLContextService
   {
+
     String keyStoreFile = "/etc/pki/java/keystore.jks";
     String keyStoreType = "JKS";
     String keyStorePassword = "pa55word";
@@ -689,5 +704,25 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     {
       return keyPassword;
     }
+    public void setKeyStoreFile(String keyStoreFile)
+    {
+      this.keyStoreFile = keyStoreFile;
+    }
+
+    public void setKeyStoreType(String keyStoreType)
+    {
+      this.keyStoreType = keyStoreType;
+    }
+
+    public void setKeyStorePassword(String keyStorePassword)
+    {
+      this.keyStorePassword = keyStorePassword;
+    }
+
+    public void setKeyPassword(String keyPassword)
+    {
+      this.keyPassword = keyPassword;
+    }
+
   }
 }

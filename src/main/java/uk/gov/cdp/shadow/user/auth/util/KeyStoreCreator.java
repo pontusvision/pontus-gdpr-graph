@@ -11,15 +11,15 @@ import javax.crypto.SecretKey;
 
 public class KeyStoreCreator {
 
-    private static final String KEY_ALGO = "HmacSHA512";
-    private static final String KEYSTORE_TYPE = "JCEKS";
-    private static final String keyStoreLocation = property("shadow.user.keystore.location");
-    private static final String keyStorePassword = property("shadow.user.keystore.pwd");
-    private static final String keyAlias = property("shadow.user.key.alias");
-    private static final String keyPassword = property("shadow.user.key.pwd");
-    private static final String keySize = property("shadow.user.key.size");
-    private static final String keyAlgo = property("shadow.user.key.algo", KEY_ALGO);
-    private static final String keyStoreType = property("shadow.user.key.store.type", KEYSTORE_TYPE);
+    static final String KEY_ALGO = "HmacSHA512";
+    static final String KEYSTORE_TYPE = "JCEKS";
+    static final String keyStoreLocation = property("shadow.user.keystore.location");
+    static final String keyStorePassword = property("shadow.user.keystore.pwd");
+    static final String keyAlias = property("shadow.user.key.alias");
+    static final String keyPassword = property("shadow.user.key.pwd");
+    static final String keySize = property("shadow.user.key.size");
+    static final String keyAlgo = property("shadow.user.key.algo", KEY_ALGO);
+    static final String keyStoreType = property("shadow.user.key.store.type", KEYSTORE_TYPE);
 
 
     public static void main(String[] args) throws Exception {
@@ -46,14 +46,14 @@ public class KeyStoreCreator {
         saveKeyStore(keyStore, keyStoreLocation, keyStorePassword);
     }
 
-    private static void saveKeyStore(
+    protected static void saveKeyStore(
             KeyStore keyStore, String keyStoreLocation, String keyStorePassword) throws Exception {
         try (FileOutputStream keyStoreOutputStream = new FileOutputStream(keyStoreLocation)) {
             keyStore.store(keyStoreOutputStream, keyStorePassword.toCharArray());
         }
     }
 
-    private static SecretKey getSecretKey() throws NoSuchAlgorithmException {
+    protected static SecretKey getSecretKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance(keyAlgo);
         keyGen.init(Integer.parseInt(keySize));
         return keyGen.generateKey();
