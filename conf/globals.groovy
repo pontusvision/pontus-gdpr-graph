@@ -2065,7 +2065,7 @@ def createForms() {
             [
                     formOwner      : 'Leonardo',
                     formURL        : 'forms/gdpr/dsar_read',
-                    formText       : "{display: 'form'}",
+                    formText       : "{'display': 'form'}",
                     formVertexLabel: "Event.Subject_Access_Request"
             ]
             ,
@@ -2073,7 +2073,7 @@ def createForms() {
             [
                     formOwner      : 'Leonardo',
                     formURL        : 'forms/gdpr/consent',
-                    formText       : "{display: 'form'}",
+                    formText       : "{'display': 'form'}",
                     formVertexLabel: "Event.Consent"
 
             ]
@@ -2093,11 +2093,12 @@ def createForms() {
 
 
             def form = g.addV("Object.Form").
+                    property("Metadata.Type", "Object.Form").
+                    property("Metadata.Type.Object.Form", "Object.Form").
                     property("Object.Form.Metadata_Owner", formDataObj.formOwner).
-
                     property("Object.Form.Metadata_Create_Date", metadataCreateDate).
                     property("Object.Form.URL", formDataObj.formURL).
-                    property("Object.Form.Text", formDataObj.formText).
+                    property("Object.Form.Text",    formDataObj.formText.bytes.encodeBase64().toString()).
                     property("Object.Form.Vertex_Label", formDataObj.formVertexLabel).next();
 
 
