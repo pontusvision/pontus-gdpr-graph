@@ -40,6 +40,7 @@ public class LdapServiceImpl implements LdapService {
     private static final String LDAP_USER_PREFIX_DEFAULT = "";
     private static final String LDAP_USER_SUFFIX = "ldap.user.suffix";
     private static final String LDAP_USER_SUFFIX_DEFAULT = ",cn=users,cn=compat";
+
     private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
     private static final String UID = "uid";
     private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
@@ -57,7 +58,7 @@ public class LdapServiceImpl implements LdapService {
 
         logger.debug(String.format("Trying to login..... user %s", getUserDN(userName)));
         try {
-            LdapContext ldapContext = connect(userName, password);
+            LdapContext ldapContext = connectAsUser(userName, password);
             logger.debug("user {} is authenticated...", userName);
             ldapContext.close();
             return true;
@@ -227,6 +228,11 @@ public class LdapServiceImpl implements LdapService {
         objClasses.add("user");
         return objClasses;
     }
+    private LdapContext connectAsUser(String userName, String userPwd) throws NamingException
+    {
+        return connect(getUserDN(userName), userPwd);
+
+    }
 
     private LdapContext connect(String userName, String userPwd) throws NamingException {
 
@@ -237,7 +243,7 @@ public class LdapServiceImpl implements LdapService {
 
         // set security credentials, note using simple cleartext authentication
         env.put(Context.SECURITY_AUTHENTICATION, property(LDAP_SECURITY_AUTHENTICATION, "simple"));
-        env.put(Context.SECURITY_PRINCIPAL, getUserDN(userName));
+        env.put(Context.SECURITY_PRINCIPAL, (userName));
         env.put(Context.SECURITY_CREDENTIALS, userPwd);
 
         // connect to my domain controller
@@ -247,6 +253,7 @@ public class LdapServiceImpl implements LdapService {
 
     private LdapContext connectAsAdmin() throws NamingException {
         return connect(property(LDAP_ADMIN_USER), property(LDAP_ADMIN_USER_PWD));
+
     }
 
     private String getUserDN(String aUsername) {
