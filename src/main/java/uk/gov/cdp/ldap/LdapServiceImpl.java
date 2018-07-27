@@ -250,14 +250,19 @@ public class LdapServiceImpl implements LdapService {
 
     private String getUserDN(String aUsername) {
 
-        return property(LDAP_USER_PREFIX,LDAP_USER_PREFIX_DEFAULT)+ aUsername + domainRoot();
+        String domainRootStr = domainRoot();
+
+        domainRootStr = domainRootStr.length() == 0? domainRootStr : ","+ domainRootStr;
+
+
+        return property(LDAP_USER_PREFIX,LDAP_USER_PREFIX_DEFAULT)+ aUsername + domainRootStr;
     }
 
     private String domainRoot() {
 
-        String domainRoot = property(LDAP_DOMAIN_ROOT,"");
+//        String domainRoot = property(LDAP_DOMAIN_ROOT,"");
 
-        return domainRoot.length() == 0? domainRoot : ","+ domainRoot;
+        return property(LDAP_DOMAIN_ROOT,"");
     }
 
     private static String url() {
