@@ -38,7 +38,8 @@ public class LdapServiceImpl implements LdapService {
     private static final String KRB_PASSWORD_EXPIRATION_DATE_DEFAULT = "20371231011529Z";
     private static final String LDAP_USER_PREFIX = "ldap.user.prefix";
     private static final String LDAP_USER_PREFIX_DEFAULT = "";
-
+    private static final String LDAP_USER_SUFFIX = "ldap.user.prefix";
+    private static final String LDAP_USER_SUFFIX_DEFAULT = ",cn=users,cn=compat";
     private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
     private static final String UID = "uid";
     private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
@@ -255,7 +256,7 @@ public class LdapServiceImpl implements LdapService {
         domainRootStr = domainRootStr.length() == 0? domainRootStr : ","+ domainRootStr;
 
 
-        return property(LDAP_USER_PREFIX,LDAP_USER_PREFIX_DEFAULT)+ aUsername + domainRootStr;
+        return property(LDAP_USER_PREFIX,LDAP_USER_PREFIX_DEFAULT)+ aUsername + property(LDAP_USER_SUFFIX,LDAP_USER_SUFFIX_DEFAULT) + domainRootStr;
     }
 
     private String domainRoot() {
