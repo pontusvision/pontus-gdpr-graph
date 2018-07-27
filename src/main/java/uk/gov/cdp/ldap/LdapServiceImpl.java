@@ -40,7 +40,6 @@ public class LdapServiceImpl implements LdapService {
     private static final String LDAP_USER_PREFIX_DEFAULT = "";
     private static final String LDAP_USER_SUFFIX = "ldap.user.prefix";
     private static final String LDAP_USER_SUFFIX_DEFAULT = ",cn=users,cn=compat";
-
     private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
     private static final String UID = "uid";
     private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
