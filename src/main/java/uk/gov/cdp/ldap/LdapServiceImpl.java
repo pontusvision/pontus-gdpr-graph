@@ -30,6 +30,7 @@ public class LdapServiceImpl implements LdapService {
     private static final String LDAP_ADMIN_USER_PWD = "ldap.admin.user.pwd";
     private static final String LDAP_USER_GROUP = "ldap.user.group";
     private static final String LDAP_DOMAIN_NAME = "ldap.domain.name";
+    private static final String LDAP_SECURITY_AUTHENTICATION = "ldap.security.authentication";
     private static final String LDAP_USER_EXP_DATE = "ldap.user.exp.date";
     private static final String CN = "cn";
     private static final String SAM_ACCOUNT_NAME = "sAMAccountName";
@@ -187,7 +188,7 @@ public class LdapServiceImpl implements LdapService {
 
     private Attribute passwordExpiration() {
         return new BasicAttribute(
-            KRB_PASSWORD_EXPIRATION, property(KRB_PASSWORD_EXPIRATION, KRB_PASSWORD_EXPIRATION_DATE_DEFAULT));
+            KRB_PASSWORD_EXPIRATION, property(LDAP_USER_EXP_DATE, KRB_PASSWORD_EXPIRATION_DATE_DEFAULT));
 
     }
 
@@ -232,7 +233,7 @@ public class LdapServiceImpl implements LdapService {
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 
         // set security credentials, note using simple cleartext authentication
-        env.put(Context.SECURITY_AUTHENTICATION, "simple");
+        env.put(Context.SECURITY_AUTHENTICATION, property(LDAP_SECURITY_AUTHENTICATION, "simple"));
         env.put(Context.SECURITY_PRINCIPAL, getUserDN(userName));
         env.put(Context.SECURITY_CREDENTIALS, userPwd);
 
