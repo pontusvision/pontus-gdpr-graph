@@ -8,6 +8,7 @@ import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -29,8 +30,12 @@ public class LdapServiceImpl implements LdapService {
     private static final String LDAP_ADMIN_USER_PWD = "ldap.admin.user.pwd";
     private static final String LDAP_USER_GROUP = "ldap.user.group";
     private static final String LDAP_DOMAIN_NAME = "ldap.domain.name";
+    private static final String LDAP_USER_EXP_DATE = "ldap.user.exp.date";
     private static final String CN = "cn";
     private static final String SAM_ACCOUNT_NAME = "sAMAccountName";
+    private static final String KRB_PASSWORD_EXPIRATION = "krbpasswordexpiration";
+    private static final String KRB_PASSWORD_EXPIRATION_DATE_DEFAULT = "20371231011529Z";
+
     private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
     private static final String UID = "uid";
     private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
@@ -113,6 +118,7 @@ public class LdapServiceImpl implements LdapService {
     private void addUserToGroups(LdapContext context, String userName, List<String> groups) throws NamingException {
 
         for (String group : groups) {
+            group = (group.replaceAll(Pattern.quote("/"),""));
             if (!findGroupByDn(context, group)) {
                 throw new LdapGroupNotFoundException(group);
             }
@@ -142,6 +148,7 @@ public class LdapServiceImpl implements LdapService {
         container.put(cnAttribute(userName));
         container.put(uidAttribute(userName));
         container.put(userAccountControlAttribute());
+        container.put(passwordExpiration());
 
         // Create the entry
         context.createSubcontext(getUserDN(userName), container);
@@ -176,6 +183,14 @@ public class LdapServiceImpl implements LdapService {
 
         context.modifyAttributes(userDn, mods);
     }
+
+
+    private Attribute passwordExpiration() {
+        return new BasicAttribute(
+            KRB_PASSWORD_EXPIRATION, property(KRB_PASSWORD_EXPIRATION, KRB_PASSWORD_EXPIRATION_DATE_DEFAULT));
+
+    }
+
 
     private Attribute userAccountControlAttribute() {
         return new BasicAttribute(
