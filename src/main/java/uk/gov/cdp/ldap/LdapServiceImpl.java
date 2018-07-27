@@ -41,6 +41,10 @@ public class LdapServiceImpl implements LdapService {
     private static final String LDAP_USER_SUFFIX = "ldap.user.suffix";
     private static final String LDAP_USER_SUFFIX_DEFAULT = ",cn=users,cn=compat";
 
+
+    private static final String LDAP_USER_SEARCH_FILTER_PATTERN = "ldap.user.search.filter.pattern";
+    private static final String LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=user)(sAMAccountName=\"{}\"))";
+
     private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
     private static final String UID = "uid";
     private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
@@ -69,7 +73,10 @@ public class LdapServiceImpl implements LdapService {
 
     @Override
     public boolean userExist(String userName) {
-        String searchFilter = "(&(objectClass=user)(sAMAccountName=" + userName + "))";
+
+        String filterPattern = property(LDAP_USER_SEARCH_FILTER_PATTERN, LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT);
+
+        String searchFilter = filterPattern.replaceAll(Pattern.quote("{}"), userName);
         SearchControls searchControls = new SearchControls();
         searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
         String ldapSearchBase = domainRoot();
