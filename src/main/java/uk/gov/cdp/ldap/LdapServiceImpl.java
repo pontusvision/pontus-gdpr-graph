@@ -36,6 +36,8 @@ public class LdapServiceImpl implements LdapService {
     private static final String SAM_ACCOUNT_NAME = "sAMAccountName";
     private static final String KRB_PASSWORD_EXPIRATION = "krbpasswordexpiration";
     private static final String KRB_PASSWORD_EXPIRATION_DATE_DEFAULT = "20371231011529Z";
+    private static final String LDAP_USER_PREFIX = "ldap.user.prefix";
+    private static final String LDAP_USER_PREFIX_DEFAULT = "";
 
     private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
     private static final String UID = "uid";
@@ -247,11 +249,15 @@ public class LdapServiceImpl implements LdapService {
     }
 
     private String getUserDN(String aUsername) {
-        return "CN=" + aUsername + "," + domainRoot();
+
+        return property(LDAP_USER_PREFIX,LDAP_USER_PREFIX_DEFAULT)+ aUsername + domainRoot();
     }
 
     private String domainRoot() {
-        return property(LDAP_DOMAIN_ROOT);
+
+        String domainRoot = property(LDAP_DOMAIN_ROOT,"");
+
+        return domainRoot.length() == 0? domainRoot : ","+ domainRoot;
     }
 
     private static String url() {
