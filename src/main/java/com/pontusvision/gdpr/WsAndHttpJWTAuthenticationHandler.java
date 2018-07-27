@@ -537,7 +537,11 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
 
         //TODO - Update pontus-redaction-common to add a method in JWTClaim to return user group list
-        List<String> groups = Collections.emptyList();
+        List<String> groups = sampleClaim.getGroups();
+        if (groups == null){
+          groups = Collections.emptyList();
+        }
+
 
         authenticationService.authenticate(user,user,sampleClaim.getBizctx(), groups);
 
