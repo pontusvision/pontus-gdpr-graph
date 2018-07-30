@@ -15,7 +15,6 @@ import javax.naming.directory.*;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import java.io.UnsupportedEncodingException;
-import java.util.Base64;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
@@ -55,7 +54,7 @@ public class LdapServiceImpl implements LdapService
 
   private static final String LDAP_GROUP_SEARCH_FILTER_PATTERN = "ldap.group.search.filter.pattern";
   private static final String LDAP_GROUP_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=groupofnames))";
-   //  = "(&(objectClass=group))"; (in samba)
+  //  = "(&(objectClass=group))"; (in samba)
 
   private static final String LDAP_USER_CREATION_OBJECTS_CSV = "ldap.user.creation.objects.csv";
   private static final String LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT = "top,person,organizationalPerson,user";
@@ -67,8 +66,6 @@ public class LdapServiceImpl implements LdapService
 
   private static final String LDAP_USER_KRB_TICKET_FLAGS = "ldap.user.krb.ticket.flags";
   private static final String LDAP_USER_KRB_TICKET_FLAGS_DEFAULT = "128";
-
-
 
   private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
   private static final String UID = "uid";
@@ -88,9 +85,8 @@ public class LdapServiceImpl implements LdapService
   private final int UF_PASSWD_CANT_CHANGE = 0x0040;
   private final int UF_PASSWORD_EXPIRED = 0x800000;
 
-
-  protected  String krbRealm ;
-  protected  final String krbTicketFlags ;
+  protected String krbRealm;
+  protected final String krbTicketFlags;
 
   protected final String groupSearchFilter;
 
@@ -98,18 +94,18 @@ public class LdapServiceImpl implements LdapService
 
   public LdapServiceImpl()
   {
-    ipaMode = Boolean.parseBoolean(property(LDAP_USER_FREE_IPA_MODE,LDAP_USER_FREE_IPA_MODE_DEFAULT));
+    ipaMode = Boolean.parseBoolean(property(LDAP_USER_FREE_IPA_MODE, LDAP_USER_FREE_IPA_MODE_DEFAULT));
 
     groupSearchFilter = property(LDAP_GROUP_SEARCH_FILTER_PATTERN, LDAP_GROUP_SEARCH_FILTER_PATTERN_DEFAULT);
-    krbRealm = property(LDAP_DOMAIN_NAME,LDAP_USER_KRB_REALM_DEFAULT);
-    if (!krbRealm.startsWith("@")){
+    krbRealm = property(LDAP_DOMAIN_NAME, LDAP_USER_KRB_REALM_DEFAULT);
+    if (!krbRealm.startsWith("@"))
+    {
       krbRealm = "@" + krbRealm;
     }
 
     krbTicketFlags = property(LDAP_USER_KRB_TICKET_FLAGS, LDAP_USER_KRB_TICKET_FLAGS_DEFAULT);
 
   }
-
 
   @Override public boolean login(String userName, String password)
   {
@@ -168,10 +164,15 @@ public class LdapServiceImpl implements LdapService
     try
     {
       context = connectAsAdmin();
-      createUser(context, userName);
+      createUser(context, userName, password);
       addUserToUserGroup(context, userName);
       addUserToGroups(context, userName, groups);
-      setUserPassword(context, getUserDN(userName), password);
+
+      if (!ipaMode)
+      {
+        setUserPassword(context, getUserDN(userName), password);
+      }
+      
       logger.info("Created user --- {}", userName);
     }
     catch (Exception ex)
@@ -214,7 +215,7 @@ public class LdapServiceImpl implements LdapService
 
   private boolean findGroupByDn(LdapContext context, String groupDN) throws NamingException
   {
-    String searchFilter = groupSearchFilter ;
+    String searchFilter = groupSearchFilter;
     SearchControls searchControls = new SearchControls();
     searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
     String ldapSearchBase = groupDN;
@@ -224,7 +225,7 @@ public class LdapServiceImpl implements LdapService
     return results.hasMore();
   }
 
-  private void createUser(LdapContext context, String userName) throws NamingException
+  private void createUser(LdapContext context, String userName, String password) throws NamingException
   {
     // Create a container set of attributes
     Attributes container = new BasicAttributes();
@@ -235,26 +236,27 @@ public class LdapServiceImpl implements LdapService
 
     if (ipaMode)
     {
+      container.put(new BasicAttribute("userPassword", password));
       container.put(passwordExpiration());
       container.put(homeDirectory());
       container.put(loginShell());
 
-      Integer uidHash = userName.hashCode() ;
-      if (uidHash < 0){
+      Integer uidHash = userName.hashCode();
+      if (uidHash < 0)
+      {
         uidHash *= -1;
       }
 
+      container.put(new BasicAttribute("gidNumber", uidHash.toString()));
+      container.put(new BasicAttribute("uidNumber", uidHash.toString()));
+      container.put(new BasicAttribute("sn", userName));
+      container.put(new BasicAttribute("givenName", userName));
 
-      container.put(new BasicAttribute("gidNumber",uidHash.toString()));
-      container.put(new BasicAttribute("uidNumber",uidHash.toString()));
-      container.put(new BasicAttribute("sn",userName));
-      container.put(new BasicAttribute("givenName",userName));
-
-      container.put(new BasicAttribute("krbPrincipalName",userName+krbRealm));
-      container.put(new BasicAttribute("krbTicketFlags",krbTicketFlags));
-      container.put(new BasicAttribute("nsaccountlock",Boolean.FALSE.toString()));
-      container.put(new BasicAttribute("displayName",Boolean.FALSE.toString()));
-      container.put(new BasicAttribute("initials",userName));
+      container.put(new BasicAttribute("krbPrincipalName", userName + krbRealm));
+      container.put(new BasicAttribute("krbTicketFlags", krbTicketFlags));
+      container.put(new BasicAttribute("nsaccountlock", Boolean.FALSE.toString()));
+      container.put(new BasicAttribute("displayName", Boolean.FALSE.toString()));
+      container.put(new BasicAttribute("initials", userName));
 
 
 
@@ -276,32 +278,32 @@ krbTicketFlags: 128
 
        */
 
-//      uid: barbar
-//      givenname: Bar
-//      sn: Bar
-//      cn: Bar Bar
-//      initials: BB
-//      homedirectory: /home/barbar
-//      gecos: Bar Bar
-//      loginshell: /bin/sh
-//      mail: barbar@rhel72.test
-//    uidnumber: 626000003
-//      gidnumber: 626000003
-//      nsaccountlock: FALSE
-//      has_password: FALSE
-//      has_keytab: FALSE
-//      displayName: Bar Bar
-//      ipaUniqueID: 9d5dddca-dc66-11e5-b542-001a4a23140a
-//      krbPrincipalName: barbar@RHEL72
-//    memberof: cn=ipausers,cn=groups,cn=accounts,dc=rhel72
-//      mepManagedEntry: cn=barbar,cn=groups,cn=accounts,dc=rhel72
+      //      uid: barbar
+      //      givenname: Bar
+      //      sn: Bar
+      //      cn: Bar Bar
+      //      initials: BB
+      //      homedirectory: /home/barbar
+      //      gecos: Bar Bar
+      //      loginshell: /bin/sh
+      //      mail: barbar@rhel72.test
+      //    uidnumber: 626000003
+      //      gidnumber: 626000003
+      //      nsaccountlock: FALSE
+      //      has_password: FALSE
+      //      has_keytab: FALSE
+      //      displayName: Bar Bar
+      //      ipaUniqueID: 9d5dddca-dc66-11e5-b542-001a4a23140a
+      //      krbPrincipalName: barbar@RHEL72
+      //    memberof: cn=ipausers,cn=groups,cn=accounts,dc=rhel72
+      //      mepManagedEntry: cn=barbar,cn=groups,cn=accounts,dc=rhel72
 
       //    String initials = userName.substring(0,2);
       //    container.put(new BasicAttribute("initials",initials));
 
       NamingException exc = null;
 
-      for (int i = 0; i < 5; i ++)
+      for (int i = 0; i < 5; i++)
       {
         // Create the entry
         try
@@ -316,14 +318,15 @@ krbTicketFlags: 128
           uidHash = rand.nextInt(9999999);
           container.remove("gidNumber");
           container.remove("uidNumber");
-          container.put(new BasicAttribute("gidNumber",uidHash.toString()));
-          container.put(new BasicAttribute("uidNumber",uidHash.toString()));
+          container.put(new BasicAttribute("gidNumber", uidHash.toString()));
+          container.put(new BasicAttribute("uidNumber", uidHash.toString()));
 
         }
 
       }
 
-      if (exc != null){
+      if (exc != null)
+      {
         throw exc;
       }
     }
@@ -336,8 +339,6 @@ krbTicketFlags: 128
       context.createSubcontext(getUserDN(userName), container);
 
     }
-
-
 
   }
 
@@ -365,14 +366,15 @@ krbTicketFlags: 128
 
     if (ipaMode)
     {
-      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,  passwordExpiration());
+      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, passwordExpiration());
 
       mods[1] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("userPassword", password));
 
     }
     else
     {
-      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
+      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+          new BasicAttribute("unicodePwd", newUnicodePassword));
       mods[1] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
           new BasicAttribute(USER_ACCOUNT_CONTROL, Integer.toString(UF_NORMAL_ACCOUNT + UF_DONT_EXPIRE_PASSWD)));
 
