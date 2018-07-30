@@ -44,7 +44,7 @@ public class LdapServiceImpl implements LdapService
   private static final String LDAP_USER_HOMEDIR_DEFAULT = "/";
   private static final String SAM_ACCOUNT_NAME = "sAMAccountName";
   private static final String KRB_PASSWORD_EXPIRATION = "krbpasswordexpiration";
-  private static final String KRB_PASSWORD_EXPIRATION_DATE_DEFAULT = "20371231011529Z";
+  private static final String KRB_PASSWORD_EXPIRATION_DATE_DEFAULT = "20351231011529Z";
   private static final String LDAP_USER_PREFIX = "ldap.user.prefix";
   private static final String LDAP_USER_PREFIX_DEFAULT = "";
   private static final String LDAP_USER_SUFFIX = "ldap.user.suffix";
@@ -361,21 +361,24 @@ krbTicketFlags: 128
 
     String newQuotedPassword = "\"" + password + "\"";
     byte[] newUnicodePassword = newQuotedPassword.getBytes("UTF-16LE");
+    ModificationItem[] mods = new ModificationItem[2];
+
     if (ipaMode)
     {
-      ModificationItem[] mods = new ModificationItem[1];
-      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("userPassword", password));
-      context.modifyAttributes(userDn, mods);
+      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,  passwordExpiration());
+
+      mods[1] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("userPassword", password));
+
     }
     else
     {
-      ModificationItem[] mods = new ModificationItem[2];
       mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
       mods[1] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
           new BasicAttribute(USER_ACCOUNT_CONTROL, Integer.toString(UF_NORMAL_ACCOUNT + UF_DONT_EXPIRE_PASSWD)));
-      context.modifyAttributes(userDn, mods);
 
     }
+    context.modifyAttributes(userDn, mods);
+
   }
 
   private Attribute loginShell()
