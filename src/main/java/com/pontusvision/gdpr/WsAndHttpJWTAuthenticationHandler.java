@@ -543,9 +543,8 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         }
 
 
-        authenticationService.authenticate(user,user,sampleClaim.getBizctx(), groups);
+        String pass = authenticationService.authenticate(user,user,sampleClaim.getBizctx(), groups);
 
-        String pass = sampleClaim.getSub();
 
 
 
