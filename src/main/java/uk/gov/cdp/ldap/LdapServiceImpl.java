@@ -235,9 +235,9 @@ public class LdapServiceImpl implements LdapService {
     private Attribute getObjectClasses() {
         Attribute objClasses = new BasicAttribute("objectClass");
         String objectClassesCSV = property(LDAP_USER_CREATION_OBJECTS_CSV, LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT);
-        String[] objectClasses = objectClassesCSV.split(",");
-        for (int i = 0; i < objClasses.size(); i++){
-            objClasses.add(objectClasses[i]);
+        String[] objectClassesCSVArray = objectClassesCSV.split(",");
+        for (int i = 0; i < objectClassesCSVArray.length; i++){
+            objClasses.add(objectClassesCSVArray[i]);
 
         }
 //        objClasses.add("top");
