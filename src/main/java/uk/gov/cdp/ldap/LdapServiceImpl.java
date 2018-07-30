@@ -193,6 +193,13 @@ public class LdapServiceImpl implements LdapService
     container.put(passwordExpiration());
     container.put(homeDirectory());
     container.put(loginShell());
+    container.put(new BasicAttribute("gidNumber",-1));
+    container.put(new BasicAttribute("uidNumber",-1));
+    container.put(new BasicAttribute("sn",userName));
+    container.put(new BasicAttribute("gecos",userName));
+    String initials = userName.substring(0,2);
+    container.put(new BasicAttribute("initials",initials));
+
 
     // Create the entry
     context.createSubcontext(getUserDN(userName), container);
