@@ -205,8 +205,8 @@ public class LdapServiceImpl implements LdapService
     container.put(new BasicAttribute("uidNumber",uidHash.toString()));
     container.put(new BasicAttribute("sn",userName));
     container.put(new BasicAttribute("gecos",userName));
-    String initials = userName.substring(0,2);
-    container.put(new BasicAttribute("initials",initials));
+//    String initials = userName.substring(0,2);
+//    container.put(new BasicAttribute("initials",initials));
 
     NamingException exc = null;
 
