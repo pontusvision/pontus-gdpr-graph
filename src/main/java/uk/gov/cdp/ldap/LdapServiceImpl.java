@@ -198,7 +198,7 @@ public class LdapServiceImpl implements LdapService
     container.put(homeDirectory());
     container.put(loginShell());
 
-    int uidHash = userName.hashCode();
+    Integer uidHash = userName.hashCode();
 
 
     container.put(new BasicAttribute("gidNumber",uidHash));
