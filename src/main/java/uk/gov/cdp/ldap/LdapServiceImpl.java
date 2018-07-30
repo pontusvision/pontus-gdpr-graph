@@ -3,23 +3,23 @@ package uk.gov.cdp.ldap;
   Author: Deepesh Rathore
  */
 
-import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.gov.cdp.shadow.user.auth.exception.LdapGroupNotFoundException;
+import uk.gov.cdp.shadow.user.auth.exception.LdapServiceException;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.regex.Pattern;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
+import java.io.UnsupportedEncodingException;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.cdp.shadow.user.auth.exception.LdapGroupNotFoundException;
-import uk.gov.cdp.shadow.user.auth.exception.LdapServiceException;
+import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
 
 public class LdapServiceImpl implements LdapService {
 
@@ -43,7 +43,12 @@ public class LdapServiceImpl implements LdapService {
 
 
     private static final String LDAP_USER_SEARCH_FILTER_PATTERN = "ldap.user.search.filter.pattern";
-    private static final String LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=user)(sAMAccountName=\"{}\"))";
+    private static final String LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=user)(sAMAccountName={}))";
+
+    private static final String LDAP_USER_CREATION_OBJECTS_CSV = "ldap.user.creation.objects.csv";
+    private static final String LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT = "top,person,organizationalPerson,user";
+
+
 
     private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
     private static final String UID = "uid";
@@ -229,10 +234,16 @@ public class LdapServiceImpl implements LdapService {
 
     private Attribute getObjectClasses() {
         Attribute objClasses = new BasicAttribute("objectClass");
-        objClasses.add("top");
-        objClasses.add("person");
-        objClasses.add("organizationalPerson");
-        objClasses.add("user");
+        String objectClassesCSV = property(LDAP_USER_CREATION_OBJECTS_CSV, LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT);
+        String[] objectClasses = objectClassesCSV.split(",");
+        for (int i = 0; i < objClasses.size(); i++){
+            objClasses.add(objectClasses[i]);
+
+        }
+//        objClasses.add("top");
+//        objClasses.add("person");
+//        objClasses.add("organizationalPerson");
+//        objClasses.add("user");
         return objClasses;
     }
     private LdapContext connectAsUser(String userName, String userPwd) throws NamingException
