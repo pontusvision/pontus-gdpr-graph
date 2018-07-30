@@ -15,8 +15,10 @@ import javax.naming.directory.*;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
@@ -60,6 +62,8 @@ public class LdapServiceImpl implements LdapService
   private static final String LDAP_PROTOCOL = "ldap.protocol";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String ldapServerUrl = url();
+
+  private static final Random rand = new Random();
 
   private final int UF_NORMAL_ACCOUNT = 0x0200;
   private final int UF_ACCOUNTENABLE = 0x0001;
@@ -193,16 +197,46 @@ public class LdapServiceImpl implements LdapService
     container.put(passwordExpiration());
     container.put(homeDirectory());
     container.put(loginShell());
-    container.put(new BasicAttribute("gidNumber",-1));
-    container.put(new BasicAttribute("uidNumber",-1));
+
+    int uidHash = userName.hashCode();
+
+
+    container.put(new BasicAttribute("gidNumber",uidHash));
+    container.put(new BasicAttribute("uidNumber",uidHash));
     container.put(new BasicAttribute("sn",userName));
     container.put(new BasicAttribute("gecos",userName));
     String initials = userName.substring(0,2);
     container.put(new BasicAttribute("initials",initials));
 
+    NamingException exc = null;
 
-    // Create the entry
-    context.createSubcontext(getUserDN(userName), container);
+    for (int i = 0; i < 5; i ++)
+    {
+      // Create the entry
+      try
+      {
+        exc = null;
+        context.createSubcontext(getUserDN(userName), container);
+        break;
+      }
+      catch (javax.naming.directory.InvalidAttributeValueException e)
+      {
+        exc = e;
+        uidHash = rand.nextInt(9999999);
+        container.remove("gidNumber");
+        container.remove("uidNumber");
+        container.put(new BasicAttribute("gidNumber",uidHash));
+        container.put(new BasicAttribute("uidNumber",uidHash));
+
+      }
+
+    }
+
+    if (exc != null){
+      throw exc;
+    }
+
+
   }
 
   private void addUserToUserGroup(LdapContext context, String userName) throws NamingException
