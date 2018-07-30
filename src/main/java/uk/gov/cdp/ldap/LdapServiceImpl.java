@@ -56,6 +56,10 @@ public class LdapServiceImpl implements LdapService
   private static final String LDAP_USER_CREATION_OBJECTS_CSV = "ldap.user.creation.objects.csv";
   private static final String LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT = "top,person,organizationalPerson,user";
 
+  private static final String LDAP_USER_FREE_IPA_MODE = "ldap.user.creation.freeipa.mode";
+  private static final String LDAP_USER_FREE_IPA_MODE_DEFAULT = "true";
+
+
   private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
   private static final String UID = "uid";
   private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
@@ -69,6 +73,21 @@ public class LdapServiceImpl implements LdapService
   private final int UF_ACCOUNTENABLE = 0x0001;
   private final int UF_PASSWD_NOTREQD = 0x0020;
   private final int UF_DONT_EXPIRE_PASSWD = 0x10000;
+
+  private final int UF_ACCOUNTDISABLE = 0x0002;
+  private final int UF_PASSWD_CANT_CHANGE = 0x0040;
+  private final int UF_PASSWORD_EXPIRED = 0x800000;
+
+
+  private final boolean ipaMode;
+
+  public LdapServiceImpl()
+  {
+    ipaMode = Boolean.parseBoolean(property(LDAP_USER_FREE_IPA_MODE,LDAP_USER_FREE_IPA_MODE_DEFAULT));
+
+
+  }
+
 
   @Override public boolean login(String userName, String password)
   {
@@ -193,48 +212,58 @@ public class LdapServiceImpl implements LdapService
     container.put(userPrincipalNameAttribute(userName));
     container.put(cnAttribute(userName));
     container.put(uidAttribute(userName));
-    container.put(userAccountControlAttribute());
-    container.put(passwordExpiration());
-    container.put(homeDirectory());
-    container.put(loginShell());
 
-    Integer uidHash = userName.hashCode();
-
-
-    container.put(new BasicAttribute("gidNumber",uidHash.toString()));
-    container.put(new BasicAttribute("uidNumber",uidHash.toString()));
-    container.put(new BasicAttribute("sn",userName));
-    container.put(new BasicAttribute("gecos",userName));
-//    String initials = userName.substring(0,2);
-//    container.put(new BasicAttribute("initials",initials));
-
-    NamingException exc = null;
-
-    for (int i = 0; i < 5; i ++)
+    if (ipaMode)
     {
-      // Create the entry
-      try
+      container.put(passwordExpiration());
+      container.put(homeDirectory());
+      container.put(loginShell());
+
+      Integer uidHash = userName.hashCode();
+
+
+      container.put(new BasicAttribute("gidNumber",uidHash.toString()));
+      container.put(new BasicAttribute("uidNumber",uidHash.toString()));
+      container.put(new BasicAttribute("sn",userName));
+      container.put(new BasicAttribute("gecos",userName));
+      //    String initials = userName.substring(0,2);
+      //    container.put(new BasicAttribute("initials",initials));
+
+      NamingException exc = null;
+
+      for (int i = 0; i < 5; i ++)
       {
-        exc = null;
-        context.createSubcontext(getUserDN(userName), container);
-        break;
-      }
-      catch (javax.naming.directory.InvalidAttributeValueException e)
-      {
-        exc = e;
-        uidHash = rand.nextInt(9999999);
-        container.remove("gidNumber");
-        container.remove("uidNumber");
-        container.put(new BasicAttribute("gidNumber",uidHash.toString()));
-        container.put(new BasicAttribute("uidNumber",uidHash.toString()));
+        // Create the entry
+        try
+        {
+          exc = null;
+          context.createSubcontext(getUserDN(userName), container);
+          break;
+        }
+        catch (javax.naming.directory.InvalidAttributeValueException e)
+        {
+          exc = e;
+          uidHash = rand.nextInt(9999999);
+          container.remove("gidNumber");
+          container.remove("uidNumber");
+          container.put(new BasicAttribute("gidNumber",uidHash.toString()));
+          container.put(new BasicAttribute("uidNumber",uidHash.toString()));
+
+        }
 
       }
+
+      if (exc != null){
+        throw exc;
+      }
+    }
+    else
+    {
+      container.put(userAccountControlAttribute());
+      context.createSubcontext(getUserDN(userName), container);
 
     }
 
-    if (exc != null){
-      throw exc;
-    }
 
 
   }
@@ -259,12 +288,21 @@ public class LdapServiceImpl implements LdapService
 
     String newQuotedPassword = "\"" + password + "\"";
     byte[] newUnicodePassword = newQuotedPassword.getBytes("UTF-16LE");
-    ModificationItem[] mods = new ModificationItem[2];
-    mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
-    mods[1] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-        new BasicAttribute(USER_ACCOUNT_CONTROL, Integer.toString(UF_NORMAL_ACCOUNT + UF_DONT_EXPIRE_PASSWD)));
+    if (ipaMode)
+    {
+      ModificationItem[] mods = new ModificationItem[1];
+      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
+      context.modifyAttributes(userDn, mods);
+    }
+    else
+    {
+      ModificationItem[] mods = new ModificationItem[2];
+      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
+      mods[1] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+          new BasicAttribute(USER_ACCOUNT_CONTROL, Integer.toString(UF_NORMAL_ACCOUNT + UF_DONT_EXPIRE_PASSWD)));
+      context.modifyAttributes(userDn, mods);
 
-    context.modifyAttributes(userDn, mods);
+    }
   }
 
   private Attribute loginShell()
