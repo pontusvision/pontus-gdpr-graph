@@ -214,7 +214,7 @@ public class LdapServiceImpl implements LdapService
 
     if (ipaMode)
     {
-      container.put(passwordExpiration());
+//      container.put(passwordExpiration());
       container.put(homeDirectory());
       container.put(loginShell());
 
