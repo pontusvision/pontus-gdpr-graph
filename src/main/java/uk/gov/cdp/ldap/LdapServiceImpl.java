@@ -53,6 +53,10 @@ public class LdapServiceImpl implements LdapService
   private static final String LDAP_USER_SEARCH_FILTER_PATTERN = "ldap.user.search.filter.pattern";
   private static final String LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=user)(sAMAccountName={}))";
 
+  private static final String LDAP_GROUP_SEARCH_FILTER_PATTERN = "ldap.group.search.filter.pattern";
+  private static final String LDAP_GROUP_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=groupofnames))";
+   //  = "(&(objectClass=group))"; (in samba)
+
   private static final String LDAP_USER_CREATION_OBJECTS_CSV = "ldap.user.creation.objects.csv";
   private static final String LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT = "top,person,organizationalPerson,user";
 
@@ -85,9 +89,10 @@ public class LdapServiceImpl implements LdapService
   private final int UF_PASSWORD_EXPIRED = 0x800000;
 
 
-  protected  final String krbRealm ;
+  protected  String krbRealm ;
   protected  final String krbTicketFlags ;
 
+  protected final String groupSearchFilter;
 
   protected final boolean ipaMode;
 
@@ -95,7 +100,12 @@ public class LdapServiceImpl implements LdapService
   {
     ipaMode = Boolean.parseBoolean(property(LDAP_USER_FREE_IPA_MODE,LDAP_USER_FREE_IPA_MODE_DEFAULT));
 
-    krbRealm = property(LDAP_USER_KRB_REALM,LDAP_USER_KRB_REALM_DEFAULT);
+    groupSearchFilter = property(LDAP_GROUP_SEARCH_FILTER_PATTERN, LDAP_GROUP_SEARCH_FILTER_PATTERN_DEFAULT);
+    krbRealm = property(LDAP_DOMAIN_NAME,LDAP_USER_KRB_REALM_DEFAULT);
+    if (!krbRealm.startsWith("@")){
+      krbRealm = "@" + krbRealm;
+    }
+
     krbTicketFlags = property(LDAP_USER_KRB_TICKET_FLAGS, LDAP_USER_KRB_TICKET_FLAGS_DEFAULT);
 
   }
@@ -204,7 +214,7 @@ public class LdapServiceImpl implements LdapService
 
   private boolean findGroupByDn(LdapContext context, String groupDN) throws NamingException
   {
-    String searchFilter = "(&(objectClass=group))";
+    String searchFilter = groupSearchFilter ;
     SearchControls searchControls = new SearchControls();
     searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
     String ldapSearchBase = groupDN;
