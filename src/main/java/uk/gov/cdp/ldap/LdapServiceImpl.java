@@ -209,7 +209,6 @@ public class LdapServiceImpl implements LdapService
     // Add these to the container
     container.put(getObjectClasses());
     container.put(sAMAccountNameAttribute(userName));
-    container.put(userPrincipalNameAttribute(userName));
     container.put(cnAttribute(userName));
     container.put(uidAttribute(userName));
 
@@ -259,6 +258,8 @@ public class LdapServiceImpl implements LdapService
     }
     else
     {
+      container.put(userPrincipalNameAttribute(userName));
+
       container.put(userAccountControlAttribute());
       context.createSubcontext(getUserDN(userName), container);
 
