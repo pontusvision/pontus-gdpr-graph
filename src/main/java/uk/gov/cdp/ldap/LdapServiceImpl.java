@@ -21,278 +21,324 @@ import java.util.regex.Pattern;
 
 import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
 
-public class LdapServiceImpl implements LdapService {
+public class LdapServiceImpl implements LdapService
+{
 
-    private static final String LDAP_DOMAIN_ROOT = "ldap.domain.root";
-    private static final String LDAP_SERVER_HOSTNAME = "ldap.server.hostname";
-    private static final String LDAP_PORT = "ldap.port";
-    private static final String LDAP_ADMIN_USER = "ldap.admin.user";
-    private static final String LDAP_ADMIN_USER_PWD = "ldap.admin.user.pwd";
-    private static final String LDAP_USER_GROUP = "ldap.user.group";
-    private static final String LDAP_DOMAIN_NAME = "ldap.domain.name";
-    private static final String LDAP_SECURITY_AUTHENTICATION = "ldap.security.authentication";
-    private static final String LDAP_USER_EXP_DATE = "ldap.user.exp.date";
-    private static final String CN = "cn";
-    private static final String SAM_ACCOUNT_NAME = "sAMAccountName";
-    private static final String KRB_PASSWORD_EXPIRATION = "krbpasswordexpiration";
-    private static final String KRB_PASSWORD_EXPIRATION_DATE_DEFAULT = "20371231011529Z";
-    private static final String LDAP_USER_PREFIX = "ldap.user.prefix";
-    private static final String LDAP_USER_PREFIX_DEFAULT = "";
-    private static final String LDAP_USER_SUFFIX = "ldap.user.suffix";
-    private static final String LDAP_USER_SUFFIX_DEFAULT = ",cn=users,cn=compat";
+  private static final String LDAP_DOMAIN_ROOT = "ldap.domain.root";
+  private static final String LDAP_SERVER_HOSTNAME = "ldap.server.hostname";
+  private static final String LDAP_PORT = "ldap.port";
+  private static final String LDAP_ADMIN_USER = "ldap.admin.user";
+  private static final String LDAP_ADMIN_USER_PWD = "ldap.admin.user.pwd";
+  private static final String LDAP_USER_GROUP = "ldap.user.group";
+  private static final String LDAP_DOMAIN_NAME = "ldap.domain.name";
+  private static final String LDAP_SECURITY_AUTHENTICATION = "ldap.security.authentication";
+  private static final String LDAP_USER_EXP_DATE = "ldap.user.exp.date";
+  private static final String CN = "cn";
 
+  private static final String LDAP_USER_LOGIN_SHELL = "loginShell";
+  private static final String LDAP_USER_LOGIN_SHELL_DEFAULT = "/sbin/nologin";
 
-    private static final String LDAP_USER_SEARCH_FILTER_PATTERN = "ldap.user.search.filter.pattern";
-    private static final String LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=user)(sAMAccountName={}))";
+  private static final String LDAP_USER_HOMEDIR = "homeDirectory";
+  private static final String LDAP_USER_HOMEDIR_DEFAULT = "/";
+  private static final String SAM_ACCOUNT_NAME = "sAMAccountName";
+  private static final String KRB_PASSWORD_EXPIRATION = "krbpasswordexpiration";
+  private static final String KRB_PASSWORD_EXPIRATION_DATE_DEFAULT = "20371231011529Z";
+  private static final String LDAP_USER_PREFIX = "ldap.user.prefix";
+  private static final String LDAP_USER_PREFIX_DEFAULT = "";
+  private static final String LDAP_USER_SUFFIX = "ldap.user.suffix";
+  private static final String LDAP_USER_SUFFIX_DEFAULT = ",cn=users,cn=compat";
 
-    private static final String LDAP_USER_CREATION_OBJECTS_CSV = "ldap.user.creation.objects.csv";
-    private static final String LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT = "top,person,organizationalPerson,user";
+  private static final String LDAP_USER_SEARCH_FILTER_PATTERN = "ldap.user.search.filter.pattern";
+  private static final String LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=user)(sAMAccountName={}))";
 
+  private static final String LDAP_USER_CREATION_OBJECTS_CSV = "ldap.user.creation.objects.csv";
+  private static final String LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT = "top,person,organizationalPerson,user";
 
+  private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
+  private static final String UID = "uid";
+  private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
+  private static final String LDAP_PROTOCOL = "ldap.protocol";
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final String ldapServerUrl = url();
 
-    private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
-    private static final String UID = "uid";
-    private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
-    private static final String LDAP_PROTOCOL = "ldap.protocol";
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private static final String ldapServerUrl = url();
+  private final int UF_NORMAL_ACCOUNT = 0x0200;
+  private final int UF_ACCOUNTENABLE = 0x0001;
+  private final int UF_PASSWD_NOTREQD = 0x0020;
+  private final int UF_DONT_EXPIRE_PASSWD = 0x10000;
 
-    private final int UF_NORMAL_ACCOUNT = 0x0200;
-    private final int UF_ACCOUNTENABLE = 0x0001;
-    private final int UF_PASSWD_NOTREQD = 0x0020;
-    private final int UF_DONT_EXPIRE_PASSWD = 0x10000;
+  @Override public boolean login(String userName, String password)
+  {
 
-    @Override
-    public boolean login(String userName, String password) {
-
-        logger.debug(String.format("Trying to login..... user %s", getUserDN(userName)));
-        try {
-            LdapContext ldapContext = connectAsUser(userName, password);
-            logger.debug("user {} is authenticated...", userName);
-            ldapContext.close();
-            return true;
-        } catch (NamingException e) {
-            throw new LdapServiceException(e);
-        }
-    }
-
-    @Override
-    public boolean userExist(String userName) {
-
-        String filterPattern = property(LDAP_USER_SEARCH_FILTER_PATTERN, LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT);
-
-        String searchFilter = filterPattern.replaceAll(Pattern.quote("{}"), userName);
-        SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        String ldapSearchBase = domainRoot();
-        boolean userFound;
-        LdapContext context = null;
-        try {
-            context = connectAsAdmin();
-
-            logger.debug("Searching for user === {}", userName);
-
-            NamingEnumeration<SearchResult> results =
-                    context.search(ldapSearchBase, searchFilter, searchControls);
-
-            userFound = results.hasMoreElements();
-        } catch (NamingException e) {
-            throw new LdapServiceException(e);
-        } finally {
-            closeContext(context);
-        }
-        return userFound;
-    }
-
-    @Override
-    public void createUserAccount(String userName, String password, List<String> groups) {
-
-        logger.info("Creating user --- {}", userName);
-        LdapContext context = null;
-        try {
-            context = connectAsAdmin();
-            createUser(context, userName);
-            addUserToUserGroup(context, userName);
-            addUserToGroups(context, userName, groups);
-            setUserPassword(context, getUserDN(userName), password);
-            logger.info("Created user --- {}", userName);
-        } catch (Exception ex) {
-            throw new LdapServiceException(ex);
-        } finally {
-            closeContext(context);
-        }
-    }
-
-    private void closeContext(LdapContext context) {
-        try {
-            if (context != null) {
-                context.close();
-            }
-        } catch (Exception ex) {
-        }
-    }
-
-    private void addUserToGroups(LdapContext context, String userName, List<String> groups) throws NamingException {
-
-        for (String group : groups) {
-            group = (group.replaceAll(Pattern.quote("/"),""));
-            if (!findGroupByDn(context, group)) {
-                throw new LdapGroupNotFoundException(group);
-            }
-            addUserToGroup(userName, group, context);
-        }
-    }
-
-    private boolean findGroupByDn(LdapContext context, String groupDN) throws NamingException {
-        String searchFilter = "(&(objectClass=group))";
-        SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        String ldapSearchBase = groupDN;
-        logger.debug("Searching for group === {}", groupDN);
-
-        NamingEnumeration<SearchResult> results =
-                context.search(ldapSearchBase, searchFilter, searchControls);
-        return results.hasMore();
-    }
-
-    private void createUser(LdapContext context, String userName) throws NamingException {
-        // Create a container set of attributes
-        Attributes container = new BasicAttributes();
-        // Add these to the container
-        container.put(getObjectClasses());
-        container.put(sAMAccountNameAttribute(userName));
-        container.put(userPrincipalNameAttribute(userName));
-        container.put(cnAttribute(userName));
-        container.put(uidAttribute(userName));
-        container.put(userAccountControlAttribute());
-        container.put(passwordExpiration());
-
-        // Create the entry
-        context.createSubcontext(getUserDN(userName), container);
-    }
-
-    private void addUserToUserGroup(LdapContext context, String userName) throws NamingException {
-        String defaultUserGroup = property(LDAP_USER_GROUP);
-        addUserToGroup(userName, defaultUserGroup, context);
-    }
-
-    private void addUserToGroup(String userName, String userGroup, LdapContext context) throws NamingException {
-        ModificationItem[] mods = new ModificationItem[1];
-        Attribute mod = new BasicAttribute("member", getUserDN(userName));
-        mods[0] = new ModificationItem(DirContext.ADD_ATTRIBUTE, mod);
-        context.modifyAttributes(userGroup, mods);
-    }
-
-    private void setUserPassword(LdapContext context, String userDn, String password)
-            throws NamingException, UnsupportedEncodingException {
-
-        String newQuotedPassword = "\"" + password + "\"";
-        byte[] newUnicodePassword = newQuotedPassword.getBytes("UTF-16LE");
-        ModificationItem[] mods = new ModificationItem[2];
-        mods[0] =
-                new ModificationItem(
-                        DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
-        mods[1] =
-                new ModificationItem(
-                        DirContext.REPLACE_ATTRIBUTE,
-                        new BasicAttribute(
-                                USER_ACCOUNT_CONTROL, Integer.toString(UF_NORMAL_ACCOUNT + UF_DONT_EXPIRE_PASSWD)));
-
-        context.modifyAttributes(userDn, mods);
-    }
-
-
-    private Attribute passwordExpiration() {
-        return new BasicAttribute(
-            KRB_PASSWORD_EXPIRATION, property(LDAP_USER_EXP_DATE, KRB_PASSWORD_EXPIRATION_DATE_DEFAULT));
-
-    }
-
-
-    private Attribute userAccountControlAttribute() {
-        return new BasicAttribute(
-                USER_ACCOUNT_CONTROL,
-                Integer.toString(
-                        UF_NORMAL_ACCOUNT + UF_PASSWD_NOTREQD + UF_DONT_EXPIRE_PASSWD + UF_ACCOUNTENABLE));
-    }
-
-    private BasicAttribute uidAttribute(String userName) {
-        return new BasicAttribute(UID, userName);
-    }
-
-    private BasicAttribute userPrincipalNameAttribute(String userName) {
-        return new BasicAttribute(USER_PRINCIPAL_NAME, userName + "@" + property(LDAP_DOMAIN_NAME));
-    }
-
-    private BasicAttribute sAMAccountNameAttribute(String userName) {
-        return new BasicAttribute(SAM_ACCOUNT_NAME, userName);
-    }
-
-    private BasicAttribute cnAttribute(String userName) {
-        return new BasicAttribute(CN, userName);
-    }
-
-    private Attribute getObjectClasses() {
-        Attribute objClasses = new BasicAttribute("objectClass");
-        String objectClassesCSV = property(LDAP_USER_CREATION_OBJECTS_CSV, LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT);
-        String[] objectClassesCSVArray = objectClassesCSV.split(",");
-        for (int i = 0; i < objectClassesCSVArray.length; i++){
-            objClasses.add(objectClassesCSVArray[i]);
-
-        }
-//        objClasses.add("top");
-//        objClasses.add("person");
-//        objClasses.add("organizationalPerson");
-//        objClasses.add("user");
-        return objClasses;
-    }
-    private LdapContext connectAsUser(String userName, String userPwd) throws NamingException
+    logger.debug(String.format("Trying to login..... user %s", getUserDN(userName)));
+    try
     {
-        return connect(getUserDN(userName), userPwd);
+      LdapContext ldapContext = connectAsUser(userName, password);
+      logger.debug("user {} is authenticated...", userName);
+      ldapContext.close();
+      return true;
+    }
+    catch (NamingException e)
+    {
+      throw new LdapServiceException(e);
+    }
+  }
+
+  @Override public boolean userExist(String userName)
+  {
+
+    String filterPattern = property(LDAP_USER_SEARCH_FILTER_PATTERN, LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT);
+
+    String searchFilter = filterPattern.replaceAll(Pattern.quote("{}"), userName);
+    SearchControls searchControls = new SearchControls();
+    searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    String ldapSearchBase = domainRoot();
+    boolean userFound;
+    LdapContext context = null;
+    try
+    {
+      context = connectAsAdmin();
+
+      logger.debug("Searching for user === {}", userName);
+
+      NamingEnumeration<SearchResult> results = context.search(ldapSearchBase, searchFilter, searchControls);
+
+      userFound = results.hasMoreElements();
+    }
+    catch (NamingException e)
+    {
+      throw new LdapServiceException(e);
+    }
+    finally
+    {
+      closeContext(context);
+    }
+    return userFound;
+  }
+
+  @Override public void createUserAccount(String userName, String password, List<String> groups)
+  {
+
+    logger.info("Creating user --- {}", userName);
+    LdapContext context = null;
+    try
+    {
+      context = connectAsAdmin();
+      createUser(context, userName);
+      addUserToUserGroup(context, userName);
+      addUserToGroups(context, userName, groups);
+      setUserPassword(context, getUserDN(userName), password);
+      logger.info("Created user --- {}", userName);
+    }
+    catch (Exception ex)
+    {
+      throw new LdapServiceException(ex);
+    }
+    finally
+    {
+      closeContext(context);
+    }
+  }
+
+  private void closeContext(LdapContext context)
+  {
+    try
+    {
+      if (context != null)
+      {
+        context.close();
+      }
+    }
+    catch (Exception ex)
+    {
+    }
+  }
+
+  private void addUserToGroups(LdapContext context, String userName, List<String> groups) throws NamingException
+  {
+
+    for (String group : groups)
+    {
+      group = (group.replaceAll(Pattern.quote("/"), ""));
+      if (!findGroupByDn(context, group))
+      {
+        throw new LdapGroupNotFoundException(group);
+      }
+      addUserToGroup(userName, group, context);
+    }
+  }
+
+  private boolean findGroupByDn(LdapContext context, String groupDN) throws NamingException
+  {
+    String searchFilter = "(&(objectClass=group))";
+    SearchControls searchControls = new SearchControls();
+    searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    String ldapSearchBase = groupDN;
+    logger.debug("Searching for group === {}", groupDN);
+
+    NamingEnumeration<SearchResult> results = context.search(ldapSearchBase, searchFilter, searchControls);
+    return results.hasMore();
+  }
+
+  private void createUser(LdapContext context, String userName) throws NamingException
+  {
+    // Create a container set of attributes
+    Attributes container = new BasicAttributes();
+    // Add these to the container
+    container.put(getObjectClasses());
+    container.put(sAMAccountNameAttribute(userName));
+    container.put(userPrincipalNameAttribute(userName));
+    container.put(cnAttribute(userName));
+    container.put(uidAttribute(userName));
+    container.put(userAccountControlAttribute());
+    container.put(passwordExpiration());
+    container.put(homeDirectory());
+    container.put(loginShell());
+
+    // Create the entry
+    context.createSubcontext(getUserDN(userName), container);
+  }
+
+  private void addUserToUserGroup(LdapContext context, String userName) throws NamingException
+  {
+    String defaultUserGroup = property(LDAP_USER_GROUP);
+    addUserToGroup(userName, defaultUserGroup, context);
+  }
+
+  private void addUserToGroup(String userName, String userGroup, LdapContext context) throws NamingException
+  {
+    ModificationItem[] mods = new ModificationItem[1];
+    Attribute mod = new BasicAttribute("member", getUserDN(userName));
+    mods[0] = new ModificationItem(DirContext.ADD_ATTRIBUTE, mod);
+    context.modifyAttributes(userGroup, mods);
+  }
+
+  private void setUserPassword(LdapContext context, String userDn, String password)
+      throws NamingException, UnsupportedEncodingException
+  {
+
+    String newQuotedPassword = "\"" + password + "\"";
+    byte[] newUnicodePassword = newQuotedPassword.getBytes("UTF-16LE");
+    ModificationItem[] mods = new ModificationItem[2];
+    mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
+    mods[1] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+        new BasicAttribute(USER_ACCOUNT_CONTROL, Integer.toString(UF_NORMAL_ACCOUNT + UF_DONT_EXPIRE_PASSWD)));
+
+    context.modifyAttributes(userDn, mods);
+  }
+
+  private Attribute loginShell()
+  {
+    return new BasicAttribute(LDAP_USER_LOGIN_SHELL, LDAP_USER_LOGIN_SHELL_DEFAULT);
+
+  }
+
+  private Attribute homeDirectory()
+  {
+    return new BasicAttribute(LDAP_USER_HOMEDIR, LDAP_USER_HOMEDIR_DEFAULT);
+
+  }
+
+  private Attribute passwordExpiration()
+  {
+    return new BasicAttribute(KRB_PASSWORD_EXPIRATION,
+        property(LDAP_USER_EXP_DATE, KRB_PASSWORD_EXPIRATION_DATE_DEFAULT));
+
+  }
+
+  private Attribute userAccountControlAttribute()
+  {
+    return new BasicAttribute(USER_ACCOUNT_CONTROL,
+        Integer.toString(UF_NORMAL_ACCOUNT + UF_PASSWD_NOTREQD + UF_DONT_EXPIRE_PASSWD + UF_ACCOUNTENABLE));
+  }
+
+  private BasicAttribute uidAttribute(String userName)
+  {
+    return new BasicAttribute(UID, userName);
+  }
+
+  private BasicAttribute userPrincipalNameAttribute(String userName)
+  {
+    return new BasicAttribute(USER_PRINCIPAL_NAME, userName + "@" + property(LDAP_DOMAIN_NAME));
+  }
+
+  private BasicAttribute sAMAccountNameAttribute(String userName)
+  {
+    return new BasicAttribute(SAM_ACCOUNT_NAME, userName);
+  }
+
+  private BasicAttribute cnAttribute(String userName)
+  {
+    return new BasicAttribute(CN, userName);
+  }
+
+  private Attribute getObjectClasses()
+  {
+    Attribute objClasses = new BasicAttribute("objectClass");
+    String objectClassesCSV = property(LDAP_USER_CREATION_OBJECTS_CSV, LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT);
+    String[] objectClassesCSVArray = objectClassesCSV.split(",");
+    for (int i = 0; i < objectClassesCSVArray.length; i++)
+    {
+      objClasses.add(objectClassesCSVArray[i]);
 
     }
+    //        objClasses.add("top");
+    //        objClasses.add("person");
+    //        objClasses.add("organizationalPerson");
+    //        objClasses.add("user");
+    return objClasses;
+  }
 
-    private LdapContext connect(String userName, String userPwd) throws NamingException {
+  private LdapContext connectAsUser(String userName, String userPwd) throws NamingException
+  {
+    return connect(getUserDN(userName), userPwd);
 
-        logger.debug("Connecting to LDAP Server === {}", ldapServerUrl);
-        Hashtable<String, String> env = new Hashtable<>();
+  }
 
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+  private LdapContext connect(String userName, String userPwd) throws NamingException
+  {
 
-        // set security credentials, note using simple cleartext authentication
-        env.put(Context.SECURITY_AUTHENTICATION, property(LDAP_SECURITY_AUTHENTICATION, "simple"));
-        env.put(Context.SECURITY_PRINCIPAL, (userName));
-        env.put(Context.SECURITY_CREDENTIALS, userPwd);
+    logger.debug("Connecting to LDAP Server === {}", ldapServerUrl);
+    Hashtable<String, String> env = new Hashtable<>();
 
-        // connect to my domain controller
-        env.put(Context.PROVIDER_URL, ldapServerUrl);
-        return new InitialLdapContext(env, null);
-    }
+    env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 
-    private LdapContext connectAsAdmin() throws NamingException {
-        return connect(property(LDAP_ADMIN_USER), property(LDAP_ADMIN_USER_PWD));
+    // set security credentials, note using simple cleartext authentication
+    env.put(Context.SECURITY_AUTHENTICATION, property(LDAP_SECURITY_AUTHENTICATION, "simple"));
+    env.put(Context.SECURITY_PRINCIPAL, (userName));
+    env.put(Context.SECURITY_CREDENTIALS, userPwd);
 
-    }
+    // connect to my domain controller
+    env.put(Context.PROVIDER_URL, ldapServerUrl);
+    return new InitialLdapContext(env, null);
+  }
 
-    private String getUserDN(String aUsername) {
+  private LdapContext connectAsAdmin() throws NamingException
+  {
+    return connect(property(LDAP_ADMIN_USER), property(LDAP_ADMIN_USER_PWD));
 
-        String domainRootStr = domainRoot();
+  }
 
-        domainRootStr = domainRootStr.length() == 0? domainRootStr : ","+ domainRootStr;
+  private String getUserDN(String aUsername)
+  {
 
+    String domainRootStr = domainRoot();
 
-        return property(LDAP_USER_PREFIX,LDAP_USER_PREFIX_DEFAULT)+ aUsername + property(LDAP_USER_SUFFIX,LDAP_USER_SUFFIX_DEFAULT) + domainRootStr;
-    }
+    domainRootStr = domainRootStr.length() == 0 ? domainRootStr : "," + domainRootStr;
 
-    private String domainRoot() {
+    return property(LDAP_USER_PREFIX, LDAP_USER_PREFIX_DEFAULT) + aUsername + property(LDAP_USER_SUFFIX,
+        LDAP_USER_SUFFIX_DEFAULT) + domainRootStr;
+  }
 
-//        String domainRoot = property(LDAP_DOMAIN_ROOT,"");
+  private String domainRoot()
+  {
 
-        return property(LDAP_DOMAIN_ROOT,"");
-    }
+    //        String domainRoot = property(LDAP_DOMAIN_ROOT,"");
 
-    private static String url() {
-        return String.format(
-                "%s://%s:%s", property(LDAP_PROTOCOL), property(LDAP_SERVER_HOSTNAME), property(LDAP_PORT));
-    }
+    return property(LDAP_DOMAIN_ROOT, "");
+  }
+
+  private static String url()
+  {
+    return String.format("%s://%s:%s", property(LDAP_PROTOCOL), property(LDAP_SERVER_HOSTNAME), property(LDAP_PORT));
+  }
 }
