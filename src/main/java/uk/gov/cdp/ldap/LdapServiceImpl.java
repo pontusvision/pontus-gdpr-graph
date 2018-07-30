@@ -201,8 +201,8 @@ public class LdapServiceImpl implements LdapService
     Integer uidHash = userName.hashCode();
 
 
-    container.put(new BasicAttribute("gidNumber",uidHash));
-    container.put(new BasicAttribute("uidNumber",uidHash));
+    container.put(new BasicAttribute("gidNumber",uidHash.toString()));
+    container.put(new BasicAttribute("uidNumber",uidHash.toString()));
     container.put(new BasicAttribute("sn",userName));
     container.put(new BasicAttribute("gecos",userName));
     String initials = userName.substring(0,2);
@@ -225,8 +225,8 @@ public class LdapServiceImpl implements LdapService
         uidHash = rand.nextInt(9999999);
         container.remove("gidNumber");
         container.remove("uidNumber");
-        container.put(new BasicAttribute("gidNumber",uidHash));
-        container.put(new BasicAttribute("uidNumber",uidHash));
+        container.put(new BasicAttribute("gidNumber",uidHash.toString()));
+        container.put(new BasicAttribute("uidNumber",uidHash.toString()));
 
       }
 
