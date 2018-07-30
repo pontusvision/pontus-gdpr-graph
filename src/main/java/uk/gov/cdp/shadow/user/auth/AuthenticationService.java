@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface AuthenticationService {
 
-  void authenticate(String userName, String subject, String bizContext, List<String> groups);
+  String authenticate(String userName, String subject, String bizContext, List<String> groups);
 }

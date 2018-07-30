@@ -32,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-  public void authenticate(String userName, String subject, String bizContext, List<String> groups) {
+  public String authenticate(String userName, String subject, String bizContext, List<String> groups) {
 
     LOGGER.info(
         String.format("Authenticating user === %s for bizContext == %s", userName, bizContext));
@@ -50,6 +50,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       } else {
         ldapService.login(userName, password);
       }
+      return password;
     } catch (Exception e) {
       throw new AuthenticationFailureException(e);
     }
