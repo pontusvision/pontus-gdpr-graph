@@ -58,6 +58,12 @@ public class LdapServiceImpl implements LdapService
 
   private static final String LDAP_USER_FREE_IPA_MODE = "ldap.user.creation.freeipa.mode";
   private static final String LDAP_USER_FREE_IPA_MODE_DEFAULT = "true";
+  private static final String LDAP_USER_KRB_REALM = "ldap.user.krb.realm";
+  private static final String LDAP_USER_KRB_REALM_DEFAULT = "@NONPROD.CDP.INTERNAL";
+
+  private static final String LDAP_USER_KRB_TICKET_FLAGS = "ldap.user.krb.ticket.flags";
+  private static final String LDAP_USER_KRB_TICKET_FLAGS_DEFAULT = "128";
+
 
 
   private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
@@ -79,12 +85,18 @@ public class LdapServiceImpl implements LdapService
   private final int UF_PASSWORD_EXPIRED = 0x800000;
 
 
-  private final boolean ipaMode;
+  protected  final String krbRealm ;
+  protected  final String krbTicketFlags ;
+
+
+  protected final boolean ipaMode;
 
   public LdapServiceImpl()
   {
     ipaMode = Boolean.parseBoolean(property(LDAP_USER_FREE_IPA_MODE,LDAP_USER_FREE_IPA_MODE_DEFAULT));
 
+    krbRealm = property(LDAP_USER_KRB_REALM,LDAP_USER_KRB_REALM_DEFAULT);
+    krbTicketFlags = property(LDAP_USER_KRB_TICKET_FLAGS, LDAP_USER_KRB_TICKET_FLAGS_DEFAULT);
 
   }
 
@@ -208,13 +220,12 @@ public class LdapServiceImpl implements LdapService
     Attributes container = new BasicAttributes();
     // Add these to the container
     container.put(getObjectClasses());
-    container.put(sAMAccountNameAttribute(userName));
     container.put(cnAttribute(userName));
     container.put(uidAttribute(userName));
 
     if (ipaMode)
     {
-//      container.put(passwordExpiration());
+      container.put(passwordExpiration());
       container.put(homeDirectory());
       container.put(loginShell());
 
@@ -224,7 +235,54 @@ public class LdapServiceImpl implements LdapService
       container.put(new BasicAttribute("gidNumber",uidHash.toString()));
       container.put(new BasicAttribute("uidNumber",uidHash.toString()));
       container.put(new BasicAttribute("sn",userName));
-      container.put(new BasicAttribute("gecos",userName));
+      container.put(new BasicAttribute("givenName",userName));
+
+      container.put(new BasicAttribute("krbPrincipalName",userName+krbRealm));
+      container.put(new BasicAttribute("krbTicketFlags",krbTicketFlags));
+      container.put(new BasicAttribute("nsaccountlock",Boolean.FALSE.toString()));
+      container.put(new BasicAttribute("displayName",Boolean.FALSE.toString()));
+      container.put(new BasicAttribute("initials",userName));
+
+
+
+      /*
+uid: test39 x
+givenname: test39 x
+sn: test39 x
+cn: test39 test39 x
+userPassword: pa55word
+krbprincipalname: test39@NONPROD.CDP.INTERNAL
+homedirectory: /home/test39
+initials: test39
+uidnumber: 976000039
+gidnumber: 976000039
+nsaccountlock: FALSE
+displayName: test39 test39
+krbPasswordExpiration: 20350606060606Z
+krbTicketFlags: 128
+
+       */
+
+//      uid: barbar
+//      givenname: Bar
+//      sn: Bar
+//      cn: Bar Bar
+//      initials: BB
+//      homedirectory: /home/barbar
+//      gecos: Bar Bar
+//      loginshell: /bin/sh
+//      mail: barbar@rhel72.test
+//    uidnumber: 626000003
+//      gidnumber: 626000003
+//      nsaccountlock: FALSE
+//      has_password: FALSE
+//      has_keytab: FALSE
+//      displayName: Bar Bar
+//      ipaUniqueID: 9d5dddca-dc66-11e5-b542-001a4a23140a
+//      krbPrincipalName: barbar@RHEL72
+//    memberof: cn=ipausers,cn=groups,cn=accounts,dc=rhel72
+//      mepManagedEntry: cn=barbar,cn=groups,cn=accounts,dc=rhel72
+
       //    String initials = userName.substring(0,2);
       //    container.put(new BasicAttribute("initials",initials));
 
@@ -259,6 +317,7 @@ public class LdapServiceImpl implements LdapService
     else
     {
       container.put(userPrincipalNameAttribute(userName));
+      container.put(sAMAccountNameAttribute(userName));
 
       container.put(userAccountControlAttribute());
       context.createSubcontext(getUserDN(userName), container);
@@ -292,7 +351,7 @@ public class LdapServiceImpl implements LdapService
     if (ipaMode)
     {
       ModificationItem[] mods = new ModificationItem[1];
-      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
+      mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("userPassword", password));
       context.modifyAttributes(userDn, mods);
     }
     else
