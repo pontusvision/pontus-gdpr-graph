@@ -2,6 +2,10 @@ package com.pontusvision.gdpr;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
 import io.netty.channel.ChannelFutureListener;
@@ -139,18 +143,55 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
   }
 
-  public static Key getPublicKey(SSLContextService sslService, String alias)
+  public static Key[] getPublicKey(SSLContextService sslService, String alias)
       throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException
   {
     FileInputStream is = new FileInputStream(sslService.getKeyStoreFile());
 
     if ("JWK".equals(sslService.getKeyStoreType())){
+
+
       JWKParser parser = JWKParser.create();
 
       String theString = IOUtils.toString(is);
 
-      parser.parse(theString);
-      return parser.toPublicKey();
+      Gson gson = new Gson();
+      JsonObject obj =  gson.fromJson(theString, JsonObject.class);
+      //{"keys":[{"kid":"fy8EMWnzLcgzvR6gil6tgAf5bNPiut6f4DO3XNf7rmQ","kty":"RSA","alg":"RS256","use":"sig","n":"oqeIQJ7Rp-duwY0gjjgqO7qwCs6Wf8TEATowAw9oJ2Rv2R4CK-7iAlJeB23uGtLkpWAtUkOgLX-U47tsScnBOoKeHGNPIfSH6ZFIY7QoKBcLIy1eQ0nBOaYqU1LbMlJBS8lChyt4hgiNStHFgHXuGtx6Q6MLUViTHvTeSzO876jWyXexzyh9ffmsLjekuxc53xQ216kTIRMUzrx6WiuM-5oBTJ5DpbkZFOs_bH2Hrpnmy-JB3TxToi-V0AAQYfXuAfwu0DvIjBRHHZg_iNN5CrhcsIvAmqRKGl1sXSXtXs-BSzrBwzlPzf1U2Fq1Ot9bD5HivZHx5Y1Z3hS-98nI1w","e":"AQAB"}]}
+
+      JsonElement keysElement =  obj.get("keys");
+
+      if (keysElement.isJsonArray())
+      {
+        JsonArray array = obj.get("keys").getAsJsonArray();
+
+        int numKeys = array.size();
+        Key[] retVals = new Key[numKeys];
+
+        for (int i = 0; i < numKeys; i++)
+        {
+          JsonElement keyJson = array.get(i);
+          String keyString = keyJson.toString();
+          parser.parse(keyString);
+          retVals[i] = parser.toPublicKey();
+        }
+
+        //      parser.parse(theString);
+        return retVals;
+      }
+      else
+      {
+        Key[] retVals = new Key[1];
+
+        String keyString = keysElement.toString();
+        parser.parse(keyString);
+
+        retVals [0] = parser.toPublicKey();
+
+        return retVals;
+
+
+      }
 
     }
     else
@@ -169,7 +210,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         // Get public key
         PublicKey publicKey = cert.getPublicKey();
 
-        return publicKey;
+        return new PublicKey[] { publicKey };
         // Return a key pair
         //      new KeyPair(publicKey, (PrivateKey) key);
       }
@@ -506,15 +547,23 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
       JWSObject jwsObject = null;
       try
       {
-        Key key = getPublicKey(sslContextService, keyAlias);
+        Key[] keys = getPublicKey(sslContextService, keyAlias);
 
         jwsObject = JWSObject.parse(jwtStr);
 
         JWSAlgorithm keyAlgo = JWSAlgorithm.parse(JWSAlgorithm.RS512.toString());
+        JWSVerifier verifier;
+        boolean passedVerification = false;
+        for (int i = 0, ilen = keys.length; i < ilen; i++)
+        {
+          verifier = getVerifier(keyAlgo, keys[i]);
+          passedVerification = jwsObject.verify(verifier);
+          if (passedVerification){
+            break;
+          }
+        }
 
-        JWSVerifier verifier = getVerifier(keyAlgo, key);
-
-        if (!jwsObject.verify(verifier))
+        if (!passedVerification)
         {
           sendError(ctx, msg);
           logger.error("Failed to verify the JWT with the supplied key");
@@ -523,6 +572,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
           return;
 
         }
+
 
         JWTClaim sampleClaim = JWTClaim.fromJson(jwsObject.getPayload().toString());
 
