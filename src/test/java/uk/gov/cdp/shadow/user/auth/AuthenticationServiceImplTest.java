@@ -78,11 +78,13 @@ public class AuthenticationServiceImplTest {
 
     try
     {
-      Key pubKey = WsAndHttpJWTAuthenticationHandler.getPublicKey(svc,"");
+      Key pubKey [] = WsAndHttpJWTAuthenticationHandler.getPublicKey(svc,"");
 
-      assert("RS256".equals(pubKey.getAlgorithm()));
-      assert("X.509".equals(pubKey.getFormat()));
-
+      for (int i = 0, ilen = pubKey.length; i < ilen; i++)
+      {
+        assert ("RS256".equals(pubKey[i].getAlgorithm()));
+        assert ("X.509".equals(pubKey[i].getFormat()));
+      }
     }
     catch (Throwable e)
     {

@@ -172,7 +172,7 @@ public class LdapServiceImpl implements LdapService
       {
         setUserPassword(context, getUserDN(userName), password);
       }
-      
+
       logger.info("Created user --- {}", userName);
     }
     catch (Exception ex)
