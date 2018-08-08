@@ -101,11 +101,16 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   public static final String JWT_SECURITY_CLAIM_CACHE_INIT_SIZE = "jwt_store.security_claim_cache.initSizeBytes";
   public static final String JWT_SECURITY_CLAIM_CACHE_LOAD_FACTOR = "jwt_store.security_claim_cache.loadFactor";
   public static final String JWT_SECURITY_CLAIM_CACHE_MAX_SIZE = "jwt_store.security_claim_cache.maxSizeBytes";
+  public static final String GRAPHDB_ENABLE_QUERY_AUDIT = "graphdb.enable.query.audit";
+  public static final String GRAPHDB_ENABLE_QUERY_AUDIT_DEFAULT = "true";
+
   public static final int JWT_SECURITY_CLAIM_CACHE_INIT_SIZE_DEFVAL = 20000;
   public static final float JWT_SECURITY_CLAIM_CACHE_LOAD_FACTOR_DEFVAL = 0.75F;
   public static final long JWT_SECURITY_CLAIM_CACHE_MAX_SIZE_DEFVAL = 50000000L;
 
   boolean ipaMode = Boolean.parseBoolean(System.getProperty(LDAP_USER_FREE_IPA_MODE,LDAP_USER_FREE_IPA_MODE_DEFAULT));
+
+  boolean enableUserAudit = Boolean.parseBoolean(System.getProperty(GRAPHDB_ENABLE_QUERY_AUDIT,GRAPHDB_ENABLE_QUERY_AUDIT_DEFAULT));
 
   LdapService ldapSvc = ipaMode? new LdapServiceImpl(): new LdapServiceSambaImpl();
 
@@ -630,7 +635,7 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         handleZookeeper(jwsObject,sampleClaim);
 
         // User name logged with the remote socket address and authenticator classname for audit logging
-        if (authenticationSettings.enableAuditLog)
+        if (enableUserAudit)
         {
           String address = ctx.channel().remoteAddress().toString();
           if (address.startsWith("/") && address.length() > 1)
