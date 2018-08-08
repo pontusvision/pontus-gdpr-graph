@@ -1471,6 +1471,29 @@ def createProp(mgmt, keyName, classType, org.janusgraph.core.Cardinality card) {
     }
 }
 
+def createCompIdx(mgmt, String idxName, boolean isUnique ,  PropertyKey... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
+            if (isUnique){
+                ib.unique()
+            }
+            for (PropertyKey prop in props) {
+                ib.addKey(prop);
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
+
+            }
+
+            return ib.buildCompositeIndex();
+        } else {
+            return mgmt.getGraphIndex(idxName);
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
 
 def createCompIdx(mgmt, idxName, PropertyKey... props) {
     try {
