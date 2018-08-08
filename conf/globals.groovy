@@ -1618,29 +1618,8 @@ def createMixedIdx(mgmt, String idxName, Pair<PropertyKey, Mapping>... props) {
 
 
 def createMixedIdx(mgmt, String idxName, Map<PropertyKey, String>  props) {
-    try {
-        if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
+  return createMixedIdx( mgmt,  Vertex.class, idxName, props)
 
-            props.each { prop,mappingStr ->
-
-                Mapping mapping = Mapping.valueOf(mappingStr)
-
-                ib.addKey(prop, mapping.asParameter());
-                System.out.println("creating IDX ${idxName} for key ${prop}");
-
-
-            }
-
-            return ib.buildMixedIndex("search");
-        } else {
-            return mgmt.getGraphIndex(idxName);
-
-        }
-    }
-    catch (Throwable t) {
-        t.printStackTrace();
-    }
 }
 
 
@@ -1669,6 +1648,8 @@ def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Map<Proper
     catch (Throwable t) {
         t.printStackTrace();
     }
+
+    return null
 }
 
 def createMixedIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
@@ -1922,8 +1903,12 @@ O.Form.Vertex_Label
     objectMoUProp01 = createProp(mgmt, "Object.MoU.Description", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectMoUProp02 = createProp(mgmt, "Object.MoU.Status", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectMoUProp03 = createProp(mgmt, "Object.MoU.Link", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectMoUProp04 = createProp(mgmt, "Object.MoU.Form_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectMoUProp05 = createProp(mgmt, "Object.MoU.Form_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectMoUProp06 = createProp(mgmt, "Object.MoU.Form_Submission_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectMoUProp07 = createProp(mgmt, "Object.MoU.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-    objectMoUIdx00 = createMixedIdx(mgmt, "objectMoUIdx00", objectMoULabel, objectMoUProp00, objectMoUProp02, objectMoUProp03);
+    objectMoUIdx00 = createMixedIdx(mgmt, "objectMoUIdx00", objectMoULabel, objectMoUProp00, objectMoUProp02, objectMoUProp03, objectMoUProp04,objectMoUProp05,objectMoUProp06,objectMoUProp07);
 
     createEdgeLabel(mgmt, "Has_MoU")
 
@@ -2124,11 +2109,22 @@ O.Form.Vertex_Label
     objectPrivacyImpactAssessment3 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_To_Individuals", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyImpactAssessment4 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Intrusion_On_Privacy", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyImpactAssessment5 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_To_Corporation", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectPrivacyImpactAssessment6 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_Of_Reputational_Damage", String.class, org.janusgraph.core.Cardinality.SINGLE)
+        objectPrivacyImpactAssessment6 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_Of_Reputational_Damage", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyImpactAssessment7 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Compliance_Check_Passed", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
+    objectPrivacyImpactAssessment8 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Form_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectPrivacyImpactAssessment9 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Form_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectPrivacyImpactAssessment10 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Form_Submission_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectPrivacyImpactAssessment11 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+
+
+
+
+
 //    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx0", objectPrivacyImpactAssessment0)
-    createMixedIdx(mgmt, "Object_Privacy_Impact_Assessment_Start_Date", objectPrivacyImpactAssessmentLabel, objectPrivacyImpactAssessment1, objectPrivacyImpactAssessment2, objectPrivacyImpactAssessment3, objectPrivacyImpactAssessment4, objectPrivacyImpactAssessment5, objectPrivacyImpactAssessment6, objectPrivacyImpactAssessment7)
+    createMixedIdx(mgmt, "Object_Privacy_Impact_Assessment_Start_Date", objectPrivacyImpactAssessmentLabel, objectPrivacyImpactAssessment1, objectPrivacyImpactAssessment2, objectPrivacyImpactAssessment3, objectPrivacyImpactAssessment4, objectPrivacyImpactAssessment5, objectPrivacyImpactAssessment6, objectPrivacyImpactAssessment7, objectPrivacyImpactAssessment8, objectPrivacyImpactAssessment9, objectPrivacyImpactAssessment10,objectPrivacyImpactAssessment11)
+
+
 //    createCompIdx(mgmt, "Object_Privacy_Impact_Assessment_Delivery_Date", objectPrivacyImpactAssessment2)
 //    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx3", metadataType, objectPrivacyImpactAssessment3)
 //    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx4", metadataType, objectPrivacyImpactAssessment4)
@@ -2141,7 +2137,26 @@ O.Form.Vertex_Label
     objectAwarenessCampaignURL = createProp(mgmt, "Object.Awareness_Campaign.URL", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignStart_Date = createProp(mgmt, "Object.Awareness_Campaign.Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAwarenessCampaignStop_Date = createProp(mgmt, "Object.Awareness_Campaign.Stop_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    createMixedIdx(mgmt, "objectAwarenessCampaignDescriptionMixedIdx", objectAwarenessCampaignLabel, objectAwarenessCampaignDescription, objectAwarenessCampaignURL, objectAwarenessCampaignStart_Date, objectAwarenessCampaignStop_Date)
+
+    objectAwarenessCampaignFormProp01 = createProp(mgmt, "Object.Awareness_Campaign.Form_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectAwarenessCampaignFormProp02 = createProp(mgmt, "Object.Awareness_Campaign.Form_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectAwarenessCampaignFormProp03 = createProp(mgmt, "Object.Awareness_Campaign.Form_Submission_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectAwarenessCampaignFormProp04 = createProp(mgmt, "Object.Awareness_Campaign.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+
+
+
+    createMixedIdx(mgmt, "objectAwarenessCampaignDescriptionMixedIdx", objectAwarenessCampaignLabel, objectAwarenessCampaignDescription, objectAwarenessCampaignURL, objectAwarenessCampaignStart_Date, objectAwarenessCampaignStop_Date
+            ,objectAwarenessCampaignFormProp01
+            ,objectAwarenessCampaignFormProp02
+            ,objectAwarenessCampaignFormProp03
+            ,objectAwarenessCampaignFormProp04)
+
+
+
+
+
+
+
 //    createMixedIdx(mgmt, "objectAwarenessCampaignURLMixedIdx", objectAwarenessCampaignURL)
 //    createCompIdx(mgmt, "objectAwarenessCampaignStart_DateCompIdx", objectAwarenessCampaignStart_Date)
 //    createCompIdx(mgmt, "objectAwarenessCampaignStop_DateCompIdx", objectAwarenessCampaignStop_Date)
@@ -2169,8 +2184,18 @@ O.Form.Vertex_Label
     objectPrivacyNotice11 = createProp(mgmt, "Object.Privacy_Notice.Who_Will_It_Be_Shared", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice12 = createProp(mgmt, "Object.Privacy_Notice.Effect_On_Individuals", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice13 = createProp(mgmt, "Object.Privacy_Notice.Likely_To_Complain", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectPrivacyNoticeFormProp01 = createProp(mgmt, "Object.Privacy_Notice.Form_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectPrivacyNoticeFormProp02 = createProp(mgmt, "Object.Privacy_Notice.Form_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectPrivacyNoticeFormProp03 = createProp(mgmt, "Object.Privacy_Notice.Form_Submission_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectPrivacyNoticeFormProp04 = createProp(mgmt, "Object.Privacy_Notice.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-    createMixedIdx(mgmt, "objectPrivacyNotice00MixedIdx", objectPrivacyNoticeLabel, objectPrivacyNotice00, objectPrivacyNotice05, objectPrivacyNotice06, objectPrivacyNotice07, objectPrivacyNotice08, objectPrivacyNotice09, objectPrivacyNotice10, objectPrivacyNotice11, objectPrivacyNotice12, objectPrivacyNotice13)
+    createMixedIdx(mgmt, "objectPrivacyNotice00MixedIdx", objectPrivacyNoticeLabel, objectPrivacyNotice00, objectPrivacyNotice05, objectPrivacyNotice06, objectPrivacyNotice07, objectPrivacyNotice08, objectPrivacyNotice09, objectPrivacyNotice10, objectPrivacyNotice11, objectPrivacyNotice12, objectPrivacyNotice13
+           ,objectPrivacyNoticeFormProp01
+           ,objectPrivacyNoticeFormProp02
+           ,objectPrivacyNoticeFormProp03
+           ,objectPrivacyNoticeFormProp04
+
+    )
 //    createMixedIdx(mgmt, "objectPrivacyNotice01MixedIdx", objectPrivacyNotice01)
 //    createMixedIdx(mgmt, "objectPrivacyNotice02MixedIdx", objectPrivacyNotice02)
 //    createMixedIdx(mgmt, "objectPrivacyNotice03MixedIdx", objectPrivacyNotice03)
