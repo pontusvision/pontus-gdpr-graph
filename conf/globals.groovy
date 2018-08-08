@@ -1471,7 +1471,7 @@ def createProp(mgmt, keyName, classType, org.janusgraph.core.Cardinality card) {
     }
 }
 
-def createCompIdx(mgmt, String idxName, boolean isUnique ,  PropertyKey... props) {
+def createCompIdx(mgmt,  String idxName, boolean isUnique ,  PropertyKey... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
@@ -1493,8 +1493,57 @@ def createCompIdx(mgmt, String idxName, boolean isUnique ,  PropertyKey... props
     catch (Throwable t) {
         t.printStackTrace();
     }
+
+
 }
 
+def createCompIdx(mgmt, Class<Element> elementClass, String idxName, boolean isUnique ,  PropertyKey... props) {
+
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            if (isUnique){
+                ib.unique()
+            }
+            for (PropertyKey prop in props) {
+                ib.addKey(prop);
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
+
+            }
+
+            return ib.buildCompositeIndex();
+        } else {
+            return mgmt.getGraphIndex(idxName);
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
+def createCompIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            for (PropertyKey prop in props) {
+                ib.addKey(prop);
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
+
+            }
+
+            return ib.buildCompositeIndex();
+        } else {
+            return mgmt.getGraphIndex(idxName);
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+
+}
 def createCompIdx(mgmt, idxName, PropertyKey... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
@@ -1515,6 +1564,137 @@ def createCompIdx(mgmt, idxName, PropertyKey... props) {
         t.printStackTrace();
     }
 }
+
+def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Pair<PropertyKey, Mapping>... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+
+            for (Pair<PropertyKey, Mapping> pair in pairs) {
+
+                PropertyKey prop = pair.getFirst();
+                Mapping mapping = pair.getSecond();
+                ib.addKey(prop, mapping.asParameter());
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
+def createMixedIdx(mgmt, String idxName, Pair<PropertyKey, Mapping>... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
+
+            for (Pair<PropertyKey, Mapping> pair in pairs) {
+
+                PropertyKey prop = pair.getFirst();
+                Mapping mapping = pair.getSecond();
+                ib.addKey(prop, mapping.asParameter());
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
+def createMixedIdx(mgmt, String idxName, Map<PropertyKey, String>  props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
+
+            props.each { prop,mappingStr ->
+
+                Mapping mapping = Mapping.valueOf(mappingStr)
+
+                ib.addKey(prop, mapping.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+
+            }
+
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
+//(PropertyKey vs String representing a Mapping
+def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Map<PropertyKey, String>  props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+
+            props.each { prop,mappingStr ->
+
+                Mapping mapping = Mapping.valueOf(mappingStr)
+
+                ib.addKey(prop, mapping.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+
+            }
+
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+def createMixedIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            ib.addKey(metadataType);
+
+            for (PropertyKey prop in props) {
+                ib.addKey(prop, mapping.asParameter());
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
 
 def createMixedIdx(mgmt, idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
     try {
@@ -1537,6 +1717,38 @@ def createMixedIdx(mgmt, idxName, PropertyKey metadataType, Mapping mapping, Pro
     catch (Throwable t) {
         t.printStackTrace();
     }
+}
+
+
+def createMixedIdx(mgmt,Class<Element> elementClass, idxName, PropertyKey... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            for (PropertyKey prop in props) {
+
+                if (prop.dataType() == String.class) {
+                    ib.addKey(prop, Mapping.STRING.asParameter());
+
+                } else {
+                    ib.addKey(prop);
+
+                }
+
+//                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+
+
 }
 
 def createMixedIdx(mgmt, idxName, PropertyKey... props) {
