@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -55,6 +56,7 @@ import javax.security.auth.login.LoginContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.interfaces.ECPrivateKey;
@@ -629,8 +631,15 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
           logger.info("Successfully authenticated user {}" , user);
 
-          auditLogger.info("User {} with address {} authenticated by {}", user, address,
-              authClassParts[authClassParts.length - 1]);
+          String contentStr = "<EMPTY_REQUEST>";
+
+          ByteBuf content = ((FullHttpMessage) msg).content();
+          if (content != null)
+          {
+            contentStr = content.toString(Charset.defaultCharset());
+          }
+          auditLogger.info("User {} with address {} authenticated by {}; request body = {}", user, address,
+              authClassParts[authClassParts.length - 1], contentStr);
         }
 
 
