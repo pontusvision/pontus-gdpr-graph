@@ -25,65 +25,13 @@ import static uk.gov.cdp.shadow.user.auth.util.PropertiesUtil.property;
 public class LdapServiceImpl implements LdapService
 {
 
-  private static final String LDAP_DOMAIN_ROOT = "ldap.domain.root";
-  private static final String LDAP_SERVER_HOSTNAME = "ldap.server.hostname";
-  private static final String LDAP_PORT = "ldap.port";
-  private static final String LDAP_ADMIN_USER = "ldap.admin.user";
-  private static final String LDAP_ADMIN_USER_PWD = "ldap.admin.user.pwd";
-  private static final String LDAP_USER_GROUP = "ldap.user.group";
-  private static final String LDAP_DOMAIN_NAME = "ldap.domain.name";
-  private static final String LDAP_SECURITY_AUTHENTICATION = "ldap.security.authentication";
-  private static final String LDAP_USER_EXP_DATE = "ldap.user.exp.date";
-  private static final String CN = "cn";
 
-  private static final String LDAP_USER_LOGIN_SHELL = "loginShell";
-  private static final String LDAP_USER_LOGIN_SHELL_DEFAULT = "/sbin/nologin";
-
-  private static final String LDAP_USER_HOMEDIR = "homeDirectory";
-  private static final String LDAP_USER_HOMEDIR_DEFAULT = "/";
-  private static final String SAM_ACCOUNT_NAME = "sAMAccountName";
-  private static final String KRB_PASSWORD_EXPIRATION = "krbpasswordexpiration";
-  private static final String KRB_PASSWORD_EXPIRATION_DATE_DEFAULT = "20351231011529Z";
-  private static final String LDAP_USER_PREFIX = "ldap.user.prefix";
-  private static final String LDAP_USER_PREFIX_DEFAULT = "";
-  private static final String LDAP_USER_SUFFIX = "ldap.user.suffix";
-  private static final String LDAP_USER_SUFFIX_DEFAULT = ",cn=users,cn=compat";
-
-  private static final String LDAP_USER_SEARCH_FILTER_PATTERN = "ldap.user.search.filter.pattern";
-  private static final String LDAP_USER_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=user)(sAMAccountName={}))";
-
-  private static final String LDAP_GROUP_SEARCH_FILTER_PATTERN = "ldap.group.search.filter.pattern";
-  private static final String LDAP_GROUP_SEARCH_FILTER_PATTERN_DEFAULT = "(&(objectClass=groupofnames))";
-  //  = "(&(objectClass=group))"; (in samba)
-
-  private static final String LDAP_USER_CREATION_OBJECTS_CSV = "ldap.user.creation.objects.csv";
-  private static final String LDAP_USER_CREATION_OBJECTS_CSV_DEFAULT = "top,person,organizationalPerson,user";
-
-  private static final String LDAP_USER_FREE_IPA_MODE = "ldap.user.creation.freeipa.mode";
-  private static final String LDAP_USER_FREE_IPA_MODE_DEFAULT = "true";
-  private static final String LDAP_USER_KRB_REALM = "ldap.user.krb.realm";
-  private static final String LDAP_USER_KRB_REALM_DEFAULT = "@NONPROD.CDP.INTERNAL";
-
-  private static final String LDAP_USER_KRB_TICKET_FLAGS = "ldap.user.krb.ticket.flags";
-  private static final String LDAP_USER_KRB_TICKET_FLAGS_DEFAULT = "128";
-
-  private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
-  private static final String UID = "uid";
-  private static final String USER_ACCOUNT_CONTROL = "userAccountControl";
-  private static final String LDAP_PROTOCOL = "ldap.protocol";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String ldapServerUrl = url();
 
   private static final Random rand = new Random();
 
-  private final int UF_NORMAL_ACCOUNT = 0x0200;
-  private final int UF_ACCOUNTENABLE = 0x0001;
-  private final int UF_PASSWD_NOTREQD = 0x0020;
-  private final int UF_DONT_EXPIRE_PASSWD = 0x10000;
 
-  private final int UF_ACCOUNTDISABLE = 0x0002;
-  private final int UF_PASSWD_CANT_CHANGE = 0x0040;
-  private final int UF_PASSWORD_EXPIRED = 0x800000;
 
   protected String krbRealm;
   protected final String krbTicketFlags;

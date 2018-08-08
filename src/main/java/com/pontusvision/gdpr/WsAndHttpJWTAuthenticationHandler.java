@@ -44,7 +44,9 @@ import org.janusgraph.diskstorage.configuration.backend.CommonsConfiguration;
 import org.keycloak.jose.jwk.JWKParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.cdp.ldap.LdapService;
 import uk.gov.cdp.ldap.LdapServiceImpl;
+import uk.gov.cdp.ldap.LdapServiceSambaImpl;
 import uk.gov.cdp.shadow.user.auth.AuthenticationService;
 import uk.gov.cdp.shadow.user.auth.AuthenticationServiceImpl;
 import uk.gov.cdp.shadow.user.auth.CDPShadowUserPasswordGenerator;
@@ -78,6 +80,8 @@ import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.*;
 import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.INDEX_CONF_FILE;
 import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.INDEX_DIRECTORY;
 import static org.janusgraph.util.system.LoggerUtil.sanitizeAndLaunder;
+import static uk.gov.cdp.ldap.LdapService.LDAP_USER_FREE_IPA_MODE;
+import static uk.gov.cdp.ldap.LdapService.LDAP_USER_FREE_IPA_MODE_DEFAULT;
 
 @ChannelHandler.Sharable
 
@@ -101,7 +105,11 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   public static final float JWT_SECURITY_CLAIM_CACHE_LOAD_FACTOR_DEFVAL = 0.75F;
   public static final long JWT_SECURITY_CLAIM_CACHE_MAX_SIZE_DEFVAL = 50000000L;
 
-  protected AuthenticationService authenticationService = new AuthenticationServiceImpl(new LdapServiceImpl(), new CDPShadowUserPasswordGeneratorImpl());
+  boolean ipaMode = Boolean.parseBoolean(System.getProperty(LDAP_USER_FREE_IPA_MODE,LDAP_USER_FREE_IPA_MODE_DEFAULT));
+
+  LdapService ldapSvc = ipaMode? new LdapServiceImpl(): new LdapServiceSambaImpl();
+
+  protected AuthenticationService authenticationService = new AuthenticationServiceImpl(ldapSvc, new CDPShadowUserPasswordGeneratorImpl());
   public String zookeeperConnStr = "localhost";
   public String zookeeperPrincipal = "";
   public String zookeeperKeytab = "";
