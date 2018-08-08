@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -43,7 +44,9 @@ import org.janusgraph.diskstorage.configuration.backend.CommonsConfiguration;
 import org.keycloak.jose.jwk.JWKParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.cdp.ldap.LdapService;
 import uk.gov.cdp.ldap.LdapServiceImpl;
+import uk.gov.cdp.ldap.LdapServiceSambaImpl;
 import uk.gov.cdp.shadow.user.auth.AuthenticationService;
 import uk.gov.cdp.shadow.user.auth.AuthenticationServiceImpl;
 import uk.gov.cdp.shadow.user.auth.CDPShadowUserPasswordGenerator;
@@ -55,6 +58,7 @@ import javax.security.auth.login.LoginContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.interfaces.ECPrivateKey;
@@ -76,6 +80,8 @@ import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.*;
 import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.INDEX_CONF_FILE;
 import static org.janusgraph.graphdb.configuration.GraphDatabaseConfiguration.INDEX_DIRECTORY;
 import static org.janusgraph.util.system.LoggerUtil.sanitizeAndLaunder;
+import static uk.gov.cdp.ldap.LdapService.LDAP_USER_FREE_IPA_MODE;
+import static uk.gov.cdp.ldap.LdapService.LDAP_USER_FREE_IPA_MODE_DEFAULT;
 
 @ChannelHandler.Sharable
 
@@ -99,7 +105,11 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
   public static final float JWT_SECURITY_CLAIM_CACHE_LOAD_FACTOR_DEFVAL = 0.75F;
   public static final long JWT_SECURITY_CLAIM_CACHE_MAX_SIZE_DEFVAL = 50000000L;
 
-  protected AuthenticationService authenticationService = new AuthenticationServiceImpl(new LdapServiceImpl(), new CDPShadowUserPasswordGeneratorImpl());
+  boolean ipaMode = Boolean.parseBoolean(System.getProperty(LDAP_USER_FREE_IPA_MODE,LDAP_USER_FREE_IPA_MODE_DEFAULT));
+
+  LdapService ldapSvc = ipaMode? new LdapServiceImpl(): new LdapServiceSambaImpl();
+
+  protected AuthenticationService authenticationService = new AuthenticationServiceImpl(ldapSvc, new CDPShadowUserPasswordGeneratorImpl());
   public String zookeeperConnStr = "localhost";
   public String zookeeperPrincipal = "";
   public String zookeeperKeytab = "";
@@ -629,8 +639,15 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
 
           logger.info("Successfully authenticated user {}" , user);
 
-          auditLogger.info("User {} with address {} authenticated by {}", user, address,
-              authClassParts[authClassParts.length - 1]);
+          String contentStr = "<EMPTY_REQUEST>";
+
+          ByteBuf content = ((FullHttpMessage) msg).content();
+          if (content != null)
+          {
+            contentStr = content.toString(Charset.defaultCharset());
+          }
+          auditLogger.info("User {} with address {} authenticated by {}; request body = {}", user, address,
+              authClassParts[authClassParts.length - 1], contentStr);
         }
 
 

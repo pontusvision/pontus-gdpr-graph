@@ -1471,7 +1471,79 @@ def createProp(mgmt, keyName, classType, org.janusgraph.core.Cardinality card) {
     }
 }
 
+def createCompIdx(mgmt,  String idxName, boolean isUnique ,  PropertyKey... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
+            if (isUnique){
+                ib.unique()
+            }
+            for (PropertyKey prop in props) {
+                ib.addKey(prop);
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
 
+            }
+
+            return ib.buildCompositeIndex();
+        } else {
+            return mgmt.getGraphIndex(idxName);
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+
+
+}
+
+def createCompIdx(mgmt, Class<Element> elementClass, String idxName, boolean isUnique ,  PropertyKey... props) {
+
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            if (isUnique){
+                ib.unique()
+            }
+            for (PropertyKey prop in props) {
+                ib.addKey(prop);
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
+
+            }
+
+            return ib.buildCompositeIndex();
+        } else {
+            return mgmt.getGraphIndex(idxName);
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
+def createCompIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            for (PropertyKey prop in props) {
+                ib.addKey(prop);
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
+
+            }
+
+            return ib.buildCompositeIndex();
+        } else {
+            return mgmt.getGraphIndex(idxName);
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+
+}
 def createCompIdx(mgmt, idxName, PropertyKey... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
@@ -1492,6 +1564,137 @@ def createCompIdx(mgmt, idxName, PropertyKey... props) {
         t.printStackTrace();
     }
 }
+
+def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Pair<PropertyKey, Mapping>... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+
+            for (Pair<PropertyKey, Mapping> pair in pairs) {
+
+                PropertyKey prop = pair.getFirst();
+                Mapping mapping = pair.getSecond();
+                ib.addKey(prop, mapping.asParameter());
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
+def createMixedIdx(mgmt, String idxName, Pair<PropertyKey, Mapping>... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
+
+            for (Pair<PropertyKey, Mapping> pair in pairs) {
+
+                PropertyKey prop = pair.getFirst();
+                Mapping mapping = pair.getSecond();
+                ib.addKey(prop, mapping.asParameter());
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
+def createMixedIdx(mgmt, String idxName, Map<PropertyKey, String>  props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
+
+            props.each { prop,mappingStr ->
+
+                Mapping mapping = Mapping.valueOf(mappingStr)
+
+                ib.addKey(prop, mapping.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+
+            }
+
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
+//(PropertyKey vs String representing a Mapping
+def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Map<PropertyKey, String>  props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+
+            props.each { prop,mappingStr ->
+
+                Mapping mapping = Mapping.valueOf(mappingStr)
+
+                ib.addKey(prop, mapping.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+
+            }
+
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+def createMixedIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            ib.addKey(metadataType);
+
+            for (PropertyKey prop in props) {
+                ib.addKey(prop, mapping.asParameter());
+//            ib.addKey(prop,Mapping.STRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+}
+
+
 
 def createMixedIdx(mgmt, idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
     try {
@@ -1514,6 +1717,38 @@ def createMixedIdx(mgmt, idxName, PropertyKey metadataType, Mapping mapping, Pro
     catch (Throwable t) {
         t.printStackTrace();
     }
+}
+
+
+def createMixedIdx(mgmt,Class<Element> elementClass, idxName, PropertyKey... props) {
+    try {
+        if (!mgmt.containsGraphIndex(idxName)) {
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            for (PropertyKey prop in props) {
+
+                if (prop.dataType() == String.class) {
+                    ib.addKey(prop, Mapping.STRING.asParameter());
+
+                } else {
+                    ib.addKey(prop);
+
+                }
+
+//                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
+                System.out.println("creating IDX ${idxName} for key ${prop}");
+
+            }
+            return ib.buildMixedIndex("search");
+        } else {
+            return mgmt.getGraphIndex(idxName);
+
+        }
+    }
+    catch (Throwable t) {
+        t.printStackTrace();
+    }
+
+
 }
 
 def createMixedIdx(mgmt, idxName, PropertyKey... props) {
@@ -1743,7 +1978,7 @@ O.Form.Vertex_Label
     objectAWSVPCLabel = createVertexLabel(mgmt, "Object.AWS_VPC");
 
     objectAWSProp00 = createProp(mgmt, "Object.AWS_VPC.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx01",  objectAWSProp00)
+    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx01", objectAWSProp00)
 
 
     createMixedIdx(mgmt, 'awsMixedLabelIdx', objectAWSVPCLabel, objectAWSSecurityGroupLabel, objectAWSInstanceLabel);
@@ -2048,6 +2283,269 @@ O.Form.Vertex_Label
 
 }
 
+class Convert {
+    private from
+    private to
+
+    private Convert(clazz) { from = clazz }
+
+    static def from(clazz) {
+        new Convert(clazz)
+    }
+
+    def to(clazz) {
+        to = clazz
+        return this
+    }
+
+    def using(closure) {
+        def originalAsType = from.metaClass.getMetaMethod('asType', [] as Class[])
+        from.metaClass.asType = { Class clazz ->
+            if (clazz == to) {
+                closure.setProperty('value', delegate)
+                closure(delegate)
+            } else {
+                originalAsType.doMethodInvoke(delegate, clazz)
+            }
+        }
+    }
+}
+
+//
+//{
+//    reqs: [/* each of these objs will be AND'd together */
+//            { /* each of these vals will be OR'd together */
+//                attribVals: ["asdf","Leo","Leo Martins"]
+//                ,attribType: "String"
+//                ,propName: "Person.Full_Name"
+//                ,vertexName: "Person"
+//                ,predicate: "textContainsFuzzy"
+//
+//            }
+//            , { /* each of these vals will be OR'd together */
+//                attribVals: ["asdf","Leo","Leo Martins"]
+//                ,attribType: "String"
+//                ,propName: "Person.Full_Name"
+//                ,vertexName: "Person"
+//                ,predicate: "textContainsFuzzy"
+//
+//            }
+//    ]
+//}
+
+
+class MatchReq<T> {
+
+    private List<T> attribNativeVals;
+    private List<String> attribVals;
+    private Class attribType;
+    private String propName;
+    private String vertexName;
+    private String predicate;
+
+    private List<String> dateFormats = [
+            "d M y",
+            "d/m/y",
+            "d/m/y",
+            "d-m-y",
+            "d-m-y",
+            "M",
+            "y",
+            "yyyy.MM.dd G 'at' HH:mm:ss z", //	2001.07.04 AD at 12:08:56 PDT
+            "EEE, MMM d, ''yy", //	Wed, Jul 4, '01
+            "h:mm a", //	12:08 PM
+            "hh 'o''clock' a, zzzz", //12 o'clock PM, Pacific Daylight Time
+            "K:mm a, z", //0:08 PM, PDT
+            "yyyyy.MMMMM.dd GGG hh:mm aaa", //	02001.July.04 AD 12:08 PM
+            "EEE, d MMM yyyy HH:mm:ss Z", //	Wed, 4 Jul 2001 12:08:56 -0700
+            "yyMMddHHmmssZ", //	010704120856-0700
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ"  // 2001-07-04T12:08:56.235-0700
+
+    ];
+
+    MatchReq(List<String> attribVals, Class<T> attribType, String propName, String vertexName, List<String> dateFormats) {
+        this.attribVals = attribVals
+        this.attribType = attribType
+        this.propName = propName
+        this.vertexName = vertexName
+
+        if (dateFormats != null) {
+            this.dateFormats = dateFormats;
+        }
+        convertListToNativeFormat();
+    }
+
+    protected void convertListToNativeFormat() {
+
+        int ilen = attribVals.size();
+        int jlen = dateFormats.size();
+
+        if (this.attribType == Date.class) {
+            for (int i = 0; i < ilen; i++) {
+                Date val = null;
+                for (int j = 0; j < jlen; j++) {
+                    try {
+                        val = Convert.from(String).to(Date).using({
+                            new java.text.SimpleDateFormat((String) dateFormats.get(j)).parse(attribVals.get(i))
+                        });
+                        break;
+                    }
+                    catch (Throwable t) {
+                        // ignore.
+                    }
+                }
+                if (val != null) {
+                    attribNativeVals.add((T) val)
+                }
+
+
+            }
+
+        } else if (this.attribType == Float.class) {
+            for (int i = 0; i < ilen; i++) {
+                T val = Convert.from(String).to(T).using({
+                    Float.parseFloat(attribVals.get(i))
+                });
+                attribNativeVals.add((T) val)
+            }
+        } else if (this.attribType == Double.class) {
+            for (int i = 0; i < ilen; i++) {
+                T val = Convert.from(String).to(T).using({
+                    Double.parseDouble(attribVals.get(i))
+                });
+                attribNativeVals.add((T) val)
+            }
+        } else if (this.attribType == Integer.class) {
+            for (int i = 0; i < ilen; i++) {
+                T val = Convert.from(String).to(T).using({
+                    Integer.parseInt(attribVals.get(i))
+                });
+                attribNativeVals.add((T) val)
+            }
+        } else if (this.attribType == Boolean.class) {
+            for (int i = 0; i < ilen; i++) {
+                T val = Convert.from(String).to(T).using({
+                    Boolean.parseBoolean(attribVals.get(i))
+                });
+                attribNativeVals.add((T) val)
+            }
+        }
+
+
+    }
+
+    List<String> getAttribVals() {
+        return attribVals
+    }
+
+    void setAttribVals(List<String> attribVals) {
+        this.attribVals = attribVals
+    }
+
+    Class getAttribType() {
+        return attribType
+    }
+
+    void setAttribType(Class attribType) {
+        this.attribType = attribType
+    }
+
+    String getPropName() {
+        return propName
+    }
+
+    void setPropName(String propName) {
+        this.propName = propName
+    }
+
+    String getVertexName() {
+        return vertexName
+    }
+
+    void setVertexName(String vertexName) {
+        this.vertexName = vertexName
+    }
+}
+
+
+def matchPerson(String jsonData) {
+
+
+    def jsonSlurper = new groovy.json.JsonSlurper();
+
+
+    def object = jsonSlurper.parseText(jsonData);
+
+    if (object.reqs instanceof List) {
+        List<MatchReq> matchReqs = new ArrayList<>(object.reqs.size());
+
+        object.reqs.each {
+
+            List<String> attribList = null;
+            if (it.attribVals instanceof List) {
+                attribList = it.attribVals;
+            } else if (it.attribVals instanceof String) {
+                def attrList = jsonSlurper.parseText((String) it.attribVals);
+
+                if (attrList instanceof List) {
+                    attribList = attrList;
+                }
+
+            } else {
+                throw new Exception("Failed to read Attribute List");
+            }
+
+            Class nativeType;
+            if (it.nativeType == null) {
+                nativeType = String.class;
+            } else {
+                nativeType = Class.forName((String) it.nativeType);
+            }
+
+
+            MatchReq mreq = new MatchReq(attribList, nativeType, (String) it.propName, (String) it.vertexName);
+
+            matchReqs.add(mreq);
+
+        }
+    }
+
+
+}
+
+
+def matchEdges(){
+
+    def ids = [4096,8192,16384,20480] as Long [];
+    def otherIds = [4184,24576 , 16496, 4256] as Long[];
+
+
+    g.V(ids)
+            .both()
+            .hasId(otherIds).id()
+}
+
+def matchPerson(List<MatchReq> matchReqs) {
+
+    HashMap<String, List<MatchReq>> matchReqByVertexName = new HashMap<>();
+    matchReqs.each {
+        List<MatchReq> matchReqList = matchReqByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() });
+        matchReqList.add(it)
+    }
+
+    matchReqByVertexName.each {
+        g = g.V().has("Metadata.Type." + it.value.vertexName, eq(it.value.vertexName));
+        it.value.attribNativeVals.each { it2 ->
+            g = g.V().has(it.value.propName, it2  )
+
+        }
+
+
+    }
+
+
+}
+
 def createForms() {
 
 //    objectFormLabel = createVertexLabel(mgmt, "Object.Form");
@@ -2087,7 +2585,7 @@ def createForms() {
         for (def i = 0; i < formData.size(); i++) {
             def formDataObj = formData[i];
 
-            def createMillis = System.currentTimeMillis() ;
+            def createMillis = System.currentTimeMillis();
             def metadataCreateDate = new Date((long) createMillis)
 
 
@@ -2098,7 +2596,7 @@ def createForms() {
                     property("Object.Form.Metadata_Owner", formDataObj.formOwner).
                     property("Object.Form.Metadata_Create_Date", metadataCreateDate).
                     property("Object.Form.URL", formDataObj.formURL).
-                    property("Object.Form.Text",    formDataObj.formText.bytes.encodeBase64().toString()).
+                    property("Object.Form.Text", formDataObj.formText.bytes.encodeBase64().toString()).
                     property("Object.Form.Vertex_Label", formDataObj.formVertexLabel).next();
 
 
