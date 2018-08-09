@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.structure.Edge
@@ -6,14 +7,12 @@ import org.janusgraph.core.PropertyKey
 import org.janusgraph.core.schema.JanusGraphManagement
 import org.janusgraph.core.schema.Mapping
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
-import groovy.json.JsonSlurper
 
 import java.text.SimpleDateFormat
 
 def globals = [:]
 globals << [g: graph.traversal()]
 globals << [mgmt: graph.openManagement()]
-
 
 // Thanks to yudong.cai@homeoffice.gsi.gov.uk for the load Schema options.
 def loadSchema(String... files) {
@@ -22,13 +21,29 @@ def loadSchema(String... files) {
     def mgmt = graph.openManagement();
     def propsMap = [:]
     for (f in files) {
-        def jsonStr = new File(f).text
-        def json = new JsonSlurper().parseText(jsonStr)
-        addVertexLabels(mgmt, json, sb)
-        addEdgeLabels(mgmt, json, sb)
-        propsMap << addpropertyKeys(mgmt, json, sb)
-        addIndexes(mgmt, json['vertexIndexes'], false, propsMap, sb)
-        addIndexes(mgmt, json['edgeIndexes'], true, propsMap, sb)
+        try {
+
+            def jsonFile = new File(f);
+
+            if (jsonFile.exists()) {
+                def jsonStr = jsonFile.text
+                def json = new JsonSlurper().parseText(jsonStr)
+                addVertexLabels(mgmt, json, sb)
+                addEdgeLabels(mgmt, json, sb)
+                propsMap << addpropertyKeys(mgmt, json, sb)
+                addIndexes(mgmt, json['vertexIndexes'], false, propsMap, sb)
+                addIndexes(mgmt, json['edgeIndexes'], true, propsMap, sb)
+                sb.append("Loading File ${f}\n")
+
+            }
+            else {
+                sb.append("NOT LOADING FILE ${f}\n")
+            }
+
+        } catch (Throwable t) {
+            sb.append('Failed to load schema!\n').append(t);
+
+        }
     }
     mgmt.commit()
 
@@ -119,7 +134,6 @@ def addpropertyKeys(def mgmt, def json, def sb) {
 def getClass(def type) {
     return (type == 'Date') ? "java.util.Date" : "java.lang.$type"
 }
-
 
 
 def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProcessor, pg_metadataLineage, pg_metadataRedaction, pg_metadataVersion, pg_metadataStatus, pg_metadataGDPRStatus, pg_metadataLineageServerTag, pg_metadataLineageLocationTag, pg_login_username, pg_login_sha256, pg_id_name, pg_id_value, pg_name_first, pg_name_last, pg_gender, pg_nat, pg_name_title, pg_email, pg_location_street, pg_location_city, pg_location_state, pg_location_postcode) {
@@ -1587,13 +1601,13 @@ def createCompIdx(def mgmt, String idxName, boolean isUnique, PropertyKey... pro
     createCompIdx(mgmt, idxName, false, isUnique, props)
 }
 
-def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique,  PropertyKey... props) {
+def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique, PropertyKey... props) {
 
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
             def clazz = isEdge ? Edge.class : Vertex.class
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
-            if (isUnique){
+            if (isUnique) {
                 ib.unique()
             }
             for (PropertyKey prop in props) {
@@ -1636,6 +1650,7 @@ def createCompIdx(mgmt, idxName, boolean isEdge, PropertyKey... props) {
     }
 
 }
+
 def createCompIdx(def mgmt, def idxName, PropertyKey... props) {
     createCompIdx(mgmt, idxName, false, props)
 }
@@ -1676,15 +1691,14 @@ def createMixedIdx(def mgmt, String idxName, Map<PropertyKey, String> props) {
     createMixedIdx(mgmt, idxName, false, props)
 }
 
-
 //(PropertyKey vs String representing a Mapping
-def createMixedIdx(def mgmt, String idxName, boolean isEdge, Map<PropertyKey, String>  props) {
+def createMixedIdx(def mgmt, String idxName, boolean isEdge, Map<PropertyKey, String> props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
             def clazz = isEdge ? Edge.class : Vertex.class
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
 
-            props.each { prop,mappingStr ->
+            props.each { prop, mappingStr ->
 
                 Mapping mapping = Mapping.valueOf(mappingStr)
 
@@ -1730,10 +1744,9 @@ def createMixedIdx(def mgmt, String idxName, boolean isEdge, Map<PropertyKey, St
 //}
 
 
-def createMixedIdx(def mgmt, String idxName,  PropertyKey... props) {
-    createMixedIdx(mgmt, idxName, false,  props)
+def createMixedIdx(def mgmt, String idxName, PropertyKey... props) {
+    createMixedIdx(mgmt, idxName, false, props)
 }
-
 
 //def createMixedIdx(def mgmt, String idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
 //    createMixedIdx(mgmt, idxName, false, metadataType, mapping, props)
@@ -1919,7 +1932,7 @@ O.Form.Vertex_Label
     objectMoUProp06 = createProp(mgmt, "Object.MoU.Form_Submission_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectMoUProp07 = createProp(mgmt, "Object.MoU.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-    objectMoUIdx00 = createMixedIdx(mgmt, "objectMoUIdx00", objectMoULabel, objectMoUProp00, objectMoUProp02, objectMoUProp03, objectMoUProp04,objectMoUProp05,objectMoUProp06,objectMoUProp07);
+    objectMoUIdx00 = createMixedIdx(mgmt, "objectMoUIdx00", objectMoULabel, objectMoUProp00, objectMoUProp02, objectMoUProp03, objectMoUProp04, objectMoUProp05, objectMoUProp06, objectMoUProp07);
 
     createEdgeLabel(mgmt, "Has_MoU")
 
@@ -2120,7 +2133,7 @@ O.Form.Vertex_Label
     objectPrivacyImpactAssessment3 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_To_Individuals", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyImpactAssessment4 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Intrusion_On_Privacy", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyImpactAssessment5 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_To_Corporation", String.class, org.janusgraph.core.Cardinality.SINGLE)
-        objectPrivacyImpactAssessment6 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_Of_Reputational_Damage", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectPrivacyImpactAssessment6 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Risk_Of_Reputational_Damage", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyImpactAssessment7 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Compliance_Check_Passed", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
     objectPrivacyImpactAssessment8 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Form_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
@@ -2128,13 +2141,8 @@ O.Form.Vertex_Label
     objectPrivacyImpactAssessment10 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Form_Submission_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectPrivacyImpactAssessment11 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-
-
-
-
 //    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx0", objectPrivacyImpactAssessment0)
-    createMixedIdx(mgmt, "Object_Privacy_Impact_Assessment_Start_Date", objectPrivacyImpactAssessmentLabel, objectPrivacyImpactAssessment1, objectPrivacyImpactAssessment2, objectPrivacyImpactAssessment3, objectPrivacyImpactAssessment4, objectPrivacyImpactAssessment5, objectPrivacyImpactAssessment6, objectPrivacyImpactAssessment7, objectPrivacyImpactAssessment8, objectPrivacyImpactAssessment9, objectPrivacyImpactAssessment10,objectPrivacyImpactAssessment11)
-
+    createMixedIdx(mgmt, "Object_Privacy_Impact_Assessment_Start_Date", objectPrivacyImpactAssessmentLabel, objectPrivacyImpactAssessment1, objectPrivacyImpactAssessment2, objectPrivacyImpactAssessment3, objectPrivacyImpactAssessment4, objectPrivacyImpactAssessment5, objectPrivacyImpactAssessment6, objectPrivacyImpactAssessment7, objectPrivacyImpactAssessment8, objectPrivacyImpactAssessment9, objectPrivacyImpactAssessment10, objectPrivacyImpactAssessment11)
 
 //    createCompIdx(mgmt, "Object_Privacy_Impact_Assessment_Delivery_Date", objectPrivacyImpactAssessment2)
 //    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx3", metadataType, objectPrivacyImpactAssessment3)
@@ -2157,16 +2165,10 @@ O.Form.Vertex_Label
 
 
     createMixedIdx(mgmt, "objectAwarenessCampaignDescriptionMixedIdx", objectAwarenessCampaignLabel, objectAwarenessCampaignDescription, objectAwarenessCampaignURL, objectAwarenessCampaignStart_Date, objectAwarenessCampaignStop_Date
-            ,objectAwarenessCampaignFormProp01
-            ,objectAwarenessCampaignFormProp02
-            ,objectAwarenessCampaignFormProp03
-            ,objectAwarenessCampaignFormProp04)
-
-
-
-
-
-
+            , objectAwarenessCampaignFormProp01
+            , objectAwarenessCampaignFormProp02
+            , objectAwarenessCampaignFormProp03
+            , objectAwarenessCampaignFormProp04)
 
 //    createMixedIdx(mgmt, "objectAwarenessCampaignURLMixedIdx", objectAwarenessCampaignURL)
 //    createCompIdx(mgmt, "objectAwarenessCampaignStart_DateCompIdx", objectAwarenessCampaignStart_Date)
@@ -2201,10 +2203,10 @@ O.Form.Vertex_Label
     objectPrivacyNoticeFormProp04 = createProp(mgmt, "Object.Privacy_Notice.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
     createMixedIdx(mgmt, "objectPrivacyNotice00MixedIdx", objectPrivacyNoticeLabel, objectPrivacyNotice00, objectPrivacyNotice05, objectPrivacyNotice06, objectPrivacyNotice07, objectPrivacyNotice08, objectPrivacyNotice09, objectPrivacyNotice10, objectPrivacyNotice11, objectPrivacyNotice12, objectPrivacyNotice13
-           ,objectPrivacyNoticeFormProp01
-           ,objectPrivacyNoticeFormProp02
-           ,objectPrivacyNoticeFormProp03
-           ,objectPrivacyNoticeFormProp04
+            , objectPrivacyNoticeFormProp01
+            , objectPrivacyNoticeFormProp02
+            , objectPrivacyNoticeFormProp03
+            , objectPrivacyNoticeFormProp04
 
     )
 //    createMixedIdx(mgmt, "objectPrivacyNotice01MixedIdx", objectPrivacyNotice01)
@@ -2550,10 +2552,10 @@ def matchPerson(String jsonData) {
 }
 
 
-def matchEdges(){
+def matchEdges() {
 
-    def ids = [4096,8192,16384,20480] as Long [];
-    def otherIds = [4184,24576 , 16496, 4256] as Long[];
+    def ids = [4096, 8192, 16384, 20480] as Long[];
+    def otherIds = [4184, 24576, 16496, 4256] as Long[];
 
 
     g.V(ids)
@@ -2572,7 +2574,7 @@ def matchPerson(List<MatchReq> matchReqs) {
     matchReqByVertexName.each {
         g = g.V().has("Metadata.Type." + it.value.vertexName, eq(it.value.vertexName));
         it.value.attribNativeVals.each { it2 ->
-            g = g.V().has(it.value.propName, it2  )
+            g = g.V().has(it.value.propName, it2)
 
         }
 
