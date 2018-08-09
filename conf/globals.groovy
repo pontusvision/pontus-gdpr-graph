@@ -1705,37 +1705,39 @@ def createMixedIdx(def mgmt, String idxName, boolean isEdge, Map<PropertyKey, St
     return null
 }
 
-def createMixedIdx(def mgmt, String idxName, boolean isEdge, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
-    try {
-        if (!mgmt.containsGraphIndex(idxName)) {
-            def clazz = isEdge ? Edge.class : Vertex.class
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
-            ib.addKey(metadataType);
+//def createMixedIdx(def mgmt, String idxName, boolean isEdge, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
+//    try {
+//        if (!mgmt.containsGraphIndex(idxName)) {
+//            def clazz = isEdge ? Edge.class : Vertex.class
+//            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
+//            ib.addKey(metadataType);
+//
+//            for (PropertyKey prop in props) {
+//                ib.addKey(prop, mapping.asParameter());
+////            ib.addKey(prop,Mapping.STRING.asParameter());
+//                System.out.println("creating IDX ${idxName} for key ${prop}");
+//
+//            }
+//            return ib.buildMixedIndex("search");
+//        } else {
+//            return mgmt.getGraphIndex(idxName);
+//
+//        }
+//    }
+//    catch (Throwable t) {
+//        t.printStackTrace();
+//    }
+//}
 
-            for (PropertyKey prop in props) {
-                ib.addKey(prop, mapping.asParameter());
-//            ib.addKey(prop,Mapping.STRING.asParameter());
-                System.out.println("creating IDX ${idxName} for key ${prop}");
 
-            }
-            return ib.buildMixedIndex("search");
-        } else {
-            return mgmt.getGraphIndex(idxName);
-
-        }
-    }
-    catch (Throwable t) {
-        t.printStackTrace();
-    }
+def createMixedIdx(def mgmt, String idxName,  PropertyKey... props) {
+    createMixedIdx(mgmt, idxName, false,  props)
 }
 
-def createMixedIdx(def mgmt, String idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
-    createMixedIdx(mgmt, idxName, false, metadataType, mapping, props)
-}
 
-def createMixedIdx(def mgmt, String idxName, PropertyKey metadataType, PropertyKey... props) {
-    createMixedIdx(mgmt, idxName, false, metadataType, props)
-}
+//def createMixedIdx(def mgmt, String idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
+//    createMixedIdx(mgmt, idxName, false, metadataType, mapping, props)
+//}
 
 def createMixedIdx(def mgmt, String idxName, boolean isEdge, PropertyKey... props) {
     try {

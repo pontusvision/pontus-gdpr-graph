@@ -17,6 +17,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.util.ReferenceCountUtil;
+import net.minidev.json.JSONObject;
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -573,6 +574,25 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         {
           verifier = getVerifier(keyAlgo, keys[i]);
           passedVerification = jwsObject.verify(verifier);
+
+          Payload payload = jwsObject.getPayload();
+          JSONObject obj = payload.toJSONObject();
+
+          long exp = obj.getAsNumber( "exp" ).longValue();
+
+          if ( exp == 0 || System.currentTimeMillis() <= exp )
+          {
+            passedVerification = true;
+          }
+          else
+          {
+            auditLogger.error("The JWT Token  has expired: {}",obj.toJSONString());
+
+          }
+
+
+          jwsObject.getHeader().getIncludedParams();
+
           if (passedVerification){
             break;
           }
