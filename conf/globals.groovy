@@ -1,8 +1,8 @@
-import com.hubspot.jinjava.Jinjava
 import groovy.json.JsonSlurper
 import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
+import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.janusgraph.core.Cardinality
 import org.janusgraph.core.EdgeLabel
 import org.janusgraph.core.PropertyKey
@@ -569,7 +569,6 @@ class Schema {
     }
 }
 
-
 def class Convert<T> {
     private from
     private to
@@ -596,7 +595,11 @@ def class Convert<T> {
     private List<SimpleDateFormat> dateFormatters = [];
 
 
-    public Convert(clazz) { from = clazz }
+    public Convert(clazz) {
+        from = clazz
+        setDateFormats(this.dateFormats)
+
+    }
 
     static def from(clazz) {
         new Convert(clazz)
@@ -632,7 +635,8 @@ def class Convert<T> {
         }
     }
 
-    static T fromString(String data, Class<T> requiredType) {
+
+    T fromString(String data, Class<T> requiredType) {
 
         if (requiredType == Date.class) {
 
@@ -669,6 +673,59 @@ def class Convert<T> {
     }
 }
 
+class DateConvMixin {
+
+    static List<String> dateFormats = [
+            "d/m/y",
+            "d M y",
+            "d-m-y",
+            "M",
+            "y",
+            "yyyy.MM.dd G 'at' HH:mm:ss z", //	2001.07.04 AD at 12:08:56 PDT
+            "EEE, MMM d, ''yy", //	Wed, Jul 4, '01
+            "h:mm a", //	12:08 PM
+            "hh 'o''clock' a, zzzz", //12 o'clock PM, Pacific Daylight Time
+            "K:mm a, z", //0:08 PM, PDT
+            "yyyyy.MMMMM.dd GGG hh:mm aaa", //	02001.July.04 AD 12:08 PM
+            "EEE, d MMM yyyy HH:mm:ss Z", //	Wed, 4 Jul 2001 12:08:56 -0700
+            "yyMMddHHmmssZ", //	010704120856-0700
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ"  // 2001-07-04T12:08:56.235-0700
+
+    ];
+
+
+    private static List<SimpleDateFormat> dateFormatters = []
+
+
+    static final def convert = StringGroovyMethods.&asType
+
+    static {
+        dateFormatters.clear()
+        dateFormats.each {
+            dateFormatters.add(new SimpleDateFormat(it))
+        }
+    }
+
+    static def asType(String self, Class cls) {
+        if (cls == Date) {
+            int ilen = dateFormatters.size();
+            for (int i = 0; i < ilen; i++) {
+                try {
+                    Date retVal = dateFormatters.get(i).parse(self);
+                    return retVal as Date;
+
+                } catch (Throwable t) {
+                    // ignore
+                }
+            }
+
+        } else convert(self, cls)
+    }
+
+
+}
+
+String.mixin(DateConvMixin)
 
 class MatchReq<T> {
 
@@ -695,7 +752,6 @@ class MatchReq<T> {
     }
 
     protected void convertListToNativeFormat() {
-
 
 //        Convert.fromString("asdf", this.attribType);
 
@@ -738,6 +794,99 @@ class MatchReq<T> {
     }
 }
 
+def addFormData(String dataFromFormInJSON, String dataType, StringBuffer sb = new StringBuffer())
+{
+    def slurper = new JsonSlurper()
+    def formDataParsed = slurper.parseText(dataFromFormInJSON)
+    def formOwnerId = formDataParsed.request.owner as String
+    def formId = formDataParsed.request.form as String
+
+    def submissionId = formDataParsed.submission._id as String
+    def submissionOwner = formDataParsed.submission.owner as String
+
+    def data = formDataParsed.request.data
+
+    def trans = graph.tx()
+
+    mgmt = graph.openManagement()
+
+    def retVal = -1L;
+
+    try{
+
+        if (!trans.isOpen()) {
+            trans.open();
+        }
+
+        // g.V().drop()
+        // g.E().drop()
+
+        def gtrav = g
+
+        def Key_Form_Owner_Id = "${dataType}.Form_Owner_Id" as String
+        def Key_Form_Id = "${dataType}.Form_Id" as String
+        def Key_Form_Submission_Id = "${dataType}.Form_Submission_Id" as String
+        def Key_Form_Submission_Owner_Id = "${dataType}.Form_Submission_Owner_Id" as String
+        def Key_Metadata_Type = "Metadata.Type.${dataType}" as String
+
+        gtrav = gtrav.addV(dataType)
+
+        gtrav.property(Key_Form_Owner_Id, (String)formOwnerId)
+        gtrav.property(Key_Form_Id, (String) formId)
+        gtrav.property(Key_Form_Submission_Id, (String)submissionId)
+        gtrav.property(Key_Metadata_Type, (String)dataType)
+        gtrav.property("Metadata.Type", (String)dataType)
+        gtrav.property(Key_Form_Submission_Owner_Id, (String) submissionOwner)
+
+
+        sb.append("ADDED basic form props\n")
+
+
+        sb.append("${dataType}.Form_Owner_Id = ").append(formOwnerId)
+        data.each { k, v ->
+            if (k != 'submit'){
+                def key = "$dataType.$k" as String
+                def val = "$v" as String
+                sb.append("\nadding $key with val = $v =>").append(v.getClass().toString())
+
+                try {
+                    def prop =  mgmt.getPropertyKey(key);
+                    if (prop == null) {
+                        prop = createProp(mgmt,val,String.class,Cardinality.SINGLE);
+                    }
+
+                    if (prop != null){
+                        def dataTypeClazz = prop.dataType();
+                        gtrav.property(key, DateConvMixin.asType(val,dataTypeClazz))
+                    }
+                } catch (Throwable t)  {
+                    sb.append("\n$t")
+                }
+            }
+        }
+
+        retVal = gtrav.iterate().id()
+
+        trans.commit();
+        sb.append("\nAFTER COMMITT")
+
+
+        // def newEntry = gtrav.next()
+    } catch (Throwable t){
+        sb.append("\n$t")
+        trans.rollback();
+    }
+    finally{
+        trans.close()
+    }
+    mgmt.commit();
+
+
+    return retVal;
+
+}
+
+
 def renderReportInBase64(long pg_id, String pg_templateTextInBase64) {
 
     def context = g.V(pg_id).valueMap()[0].collectEntries { key, val ->
@@ -755,7 +904,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64) {
     allData.put('context', context);
     allData.put('connected_data', neighbours);
 
-    Jinjava jinJava = new Jinjava();
+    com.hubspot.jinjava.Jinjava jinJava = new com.hubspot.jinjava.Jinjava();
     return jinJava.render(new String(pg_templateTextInBase64.decodeBase64()), allData).bytes.encodeBase64().toString();
 
 }
