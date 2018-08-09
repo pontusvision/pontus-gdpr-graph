@@ -1,16 +1,126 @@
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
+import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.janusgraph.core.PropertyKey
 import org.janusgraph.core.schema.JanusGraphManagement
 import org.janusgraph.core.schema.Mapping
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
+import groovy.json.JsonSlurper
 
 import java.text.SimpleDateFormat
 
 def globals = [:]
 globals << [g: graph.traversal()]
 globals << [mgmt: graph.openManagement()]
+
+
+// Thanks to yudong.cai@homeoffice.gsi.gov.uk for the load Schema options.
+def loadSchema(String... files) {
+    StringBuilder sb = new StringBuilder()
+
+    def mgmt = graph.openManagement();
+    def propsMap = [:]
+    for (f in files) {
+        def jsonStr = new File(f).text
+        def json = new JsonSlurper().parseText(jsonStr)
+        addVertexLabels(mgmt, json, sb)
+        addEdgeLabels(mgmt, json, sb)
+        propsMap << addpropertyKeys(mgmt, json, sb)
+        addIndexes(mgmt, json['vertexIndexes'], false, propsMap, sb)
+        addIndexes(mgmt, json['edgeIndexes'], true, propsMap, sb)
+    }
+    mgmt.commit()
+
+    sb.append('Done!\n')
+    return sb.toString()
+}
+
+def addIndexes(def mgmt, def json, boolean isEdge, def propsMap, sb) {
+    if (!json) {
+        return
+    }
+    json.each {
+        def propertyKeys = it.propertyKeys
+        if (!propertyKeys) {
+            return
+        }
+
+        def name = it.name
+        def props = []
+        propertyKeys.each { key ->
+            def prop = propsMap[key]
+            if (!prop) {
+                throw new RuntimeException("Failed to create index - $name, because property - $key doesn't exist")
+            }
+            props << prop
+        }
+
+        def composite = it.composite
+        def unique = it.unique
+        def mixedIndex = it.mixedIndex
+        def mapping = it.mapping
+
+        if (mixedIndex && composite) {
+            throw new RuntimeException("Failed to create index - $name, because it can't be both MixedIndex and CompositeIndex")
+        }
+
+        if (mapping && composite) {
+            throw new RuntimeException("Failed to create index - $name, because it can't be CompositeIndex and have mapping")
+        }
+
+        if (mixedIndex) {
+            if (!mapping) {
+                createMixedIdx(mgmt, name, isEdge, props as org.janusgraph.core.PropertyKey[])
+            } else {
+                def map = [:]
+                map[propsMap[props.get(0)]] = mapping
+                createMixedIdx(mgmt, name, isEdge, map)
+            }
+
+        } else {
+            createCompIdx(mgmt, name, isEdge, unique, props as org.janusgraph.core.PropertyKey[])
+        }
+
+        sb.append("Success added index - $name\n")
+    }
+}
+
+def addVertexLabels(def mgmt, def json, def sb) {
+    json['vertexLabels'].each {
+        def name = it.name
+        createVertexLabel(mgmt, name)
+        sb.append("Success added vertext label - $name\n")
+    }
+}
+
+def addEdgeLabels(def mgmt, def json, def sb) {
+    json['edgeLabels'].each {
+        def name = it.name
+        createEdgeLabel(mgmt, name)
+        sb.append("Success added edge label - $name\n")
+    }
+}
+
+def addpropertyKeys(def mgmt, def json, def sb) {
+    def map = [:]
+    json['propertyKeys'].each {
+        def name = it.name
+        def typeClass = Class.forName(getClass(it.dataType))
+        def cardinality = it.cardinality
+        def card = cardinality == 'SET' ? org.janusgraph.core.Cardinality.SET : org.janusgraph.core.Cardinality.SINGLE
+        def prop = createProp(mgmt, name, typeClass, card);
+        sb.append("Success added property key - $name\n")
+        map[name] = prop
+    }
+    return map
+}
+
+def getClass(def type) {
+    return (type == 'Date') ? "java.util.Date" : "java.lang.$type"
+}
+
+
 
 def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProcessor, pg_metadataLineage, pg_metadataRedaction, pg_metadataVersion, pg_metadataStatus, pg_metadataGDPRStatus, pg_metadataLineageServerTag, pg_metadataLineageLocationTag, pg_login_username, pg_login_sha256, pg_id_name, pg_id_value, pg_name_first, pg_name_last, pg_gender, pg_nat, pg_name_title, pg_email, pg_location_street, pg_location_city, pg_location_state, pg_location_postcode) {
 
@@ -25,7 +135,9 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
 
     trans = graph.tx()
     try {
-        trans.open()
+        if (!trans.isOpen()) {
+            trans.open();
+        }
 
 
         person = g.addV("Person").
@@ -1471,37 +1583,16 @@ def createProp(mgmt, keyName, classType, org.janusgraph.core.Cardinality card) {
     }
 }
 
-def createCompIdx(mgmt,  String idxName, boolean isUnique ,  PropertyKey... props) {
-    try {
-        if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
-            if (isUnique){
-                ib.unique()
-            }
-            for (PropertyKey prop in props) {
-                ib.addKey(prop);
-//            ib.addKey(prop,Mapping.STRING.asParameter());
-                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
-
-            }
-
-            return ib.buildCompositeIndex();
-        } else {
-            return mgmt.getGraphIndex(idxName);
-        }
-    }
-    catch (Throwable t) {
-        t.printStackTrace();
-    }
-
-
+def createCompIdx(def mgmt, String idxName, boolean isUnique, PropertyKey... props) {
+    createCompIdx(mgmt, idxName, false, isUnique, props)
 }
 
-def createCompIdx(mgmt, Class<Element> elementClass, String idxName, boolean isUnique ,  PropertyKey... props) {
+def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique,  PropertyKey... props) {
 
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            def clazz = isEdge ? Edge.class : Vertex.class
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
             if (isUnique){
                 ib.unique()
             }
@@ -1523,10 +1614,11 @@ def createCompIdx(mgmt, Class<Element> elementClass, String idxName, boolean isU
 }
 
 
-def createCompIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey... props) {
+def createCompIdx(mgmt, idxName, boolean isEdge, PropertyKey... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            def clazz = isEdge ? Edge.class : Vertex.class
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
             for (PropertyKey prop in props) {
                 ib.addKey(prop);
 //            ib.addKey(prop,Mapping.STRING.asParameter());
@@ -1544,31 +1636,15 @@ def createCompIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey... pro
     }
 
 }
-def createCompIdx(mgmt, idxName, PropertyKey... props) {
-    try {
-        if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
-            for (PropertyKey prop in props) {
-                ib.addKey(prop);
-//            ib.addKey(prop,Mapping.STRING.asParameter());
-                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
-
-            }
-
-            return ib.buildCompositeIndex();
-        } else {
-            return mgmt.getGraphIndex(idxName);
-        }
-    }
-    catch (Throwable t) {
-        t.printStackTrace();
-    }
+def createCompIdx(def mgmt, def idxName, PropertyKey... props) {
+    createCompIdx(mgmt, idxName, false, props)
 }
 
-def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Pair<PropertyKey, Mapping>... props) {
+def createMixedIdx(def mgmt, String idxName, boolean isEdge, Pair<PropertyKey, Mapping>... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            def clazz = isEdge ? Edge.class : Vertex.class
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
 
             for (Pair<PropertyKey, Mapping> pair in pairs) {
 
@@ -1591,43 +1667,22 @@ def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Pair<Prope
 }
 
 
-def createMixedIdx(mgmt, String idxName, Pair<PropertyKey, Mapping>... props) {
-    try {
-        if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
-
-            for (Pair<PropertyKey, Mapping> pair in pairs) {
-
-                PropertyKey prop = pair.getFirst();
-                Mapping mapping = pair.getSecond();
-                ib.addKey(prop, mapping.asParameter());
-//            ib.addKey(prop,Mapping.STRING.asParameter());
-                System.out.println("creating IDX ${idxName} for key ${prop}");
-
-            }
-            return ib.buildMixedIndex("search");
-        } else {
-            return mgmt.getGraphIndex(idxName);
-
-        }
-    }
-    catch (Throwable t) {
-        t.printStackTrace();
-    }
+def createMixedIdx(def mgmt, String idxName, Pair<PropertyKey, Mapping>... props) {
+    createMixedIdx(mgmt, idxName, false, props)
 }
 
 
-def createMixedIdx(mgmt, String idxName, Map<PropertyKey, String>  props) {
-  return createMixedIdx( mgmt,  Vertex.class, idxName, props)
-
+def createMixedIdx(def mgmt, String idxName, Map<PropertyKey, String> props) {
+    createMixedIdx(mgmt, idxName, false, props)
 }
 
 
 //(PropertyKey vs String representing a Mapping
-def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Map<PropertyKey, String>  props) {
+def createMixedIdx(def mgmt, String idxName, boolean isEdge, Map<PropertyKey, String>  props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            def clazz = isEdge ? Edge.class : Vertex.class
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
 
             props.each { prop,mappingStr ->
 
@@ -1635,8 +1690,6 @@ def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Map<Proper
 
                 ib.addKey(prop, mapping.asParameter());
                 System.out.println("creating IDX ${idxName} for key ${prop}");
-
-
             }
 
             return ib.buildMixedIndex("search");
@@ -1652,10 +1705,11 @@ def createMixedIdx(mgmt, Class<Element> elementClass, String idxName, Map<Proper
     return null
 }
 
-def createMixedIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
+def createMixedIdx(def mgmt, String idxName, boolean isEdge, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            def clazz = isEdge ? Edge.class : Vertex.class
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
             ib.addKey(metadataType);
 
             for (PropertyKey prop in props) {
@@ -1675,36 +1729,16 @@ def createMixedIdx(mgmt, Class<Element> elementClass, idxName, PropertyKey metad
     }
 }
 
-
-
-def createMixedIdx(mgmt, idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
-    try {
-        if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
-            ib.addKey(metadataType);
-
-            for (PropertyKey prop in props) {
-                ib.addKey(prop, mapping.asParameter());
-//            ib.addKey(prop,Mapping.STRING.asParameter());
-                System.out.println("creating IDX ${idxName} for key ${prop}");
-
-            }
-            return ib.buildMixedIndex("search");
-        } else {
-            return mgmt.getGraphIndex(idxName);
-
-        }
-    }
-    catch (Throwable t) {
-        t.printStackTrace();
-    }
+def createMixedIdx(def mgmt, String idxName, PropertyKey metadataType, Mapping mapping, PropertyKey... props) {
+    createMixedIdx(mgmt, idxName, false, metadataType, mapping, props)
 }
 
 
-def createMixedIdx(mgmt,Class<Element> elementClass, idxName, PropertyKey... props) {
+def createMixedIdx(def mgmt, String idxName, boolean isEdge, PropertyKey... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, elementClass)
+            def clazz = isEdge ? Edge.class : Vertex.class
+            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
             for (PropertyKey prop in props) {
 
                 if (prop.dataType() == String.class) {
@@ -1732,34 +1766,6 @@ def createMixedIdx(mgmt,Class<Element> elementClass, idxName, PropertyKey... pro
 
 }
 
-def createMixedIdx(mgmt, idxName, PropertyKey... props) {
-    try {
-        if (!mgmt.containsGraphIndex(idxName)) {
-            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, Vertex.class)
-            for (PropertyKey prop in props) {
-
-                if (prop.dataType() == String.class) {
-                    ib.addKey(prop, Mapping.STRING.asParameter());
-
-                } else {
-                    ib.addKey(prop);
-
-                }
-
-//                ib.addKey(prop,Mapping.TEXTSTRING.asParameter());
-                System.out.println("creating IDX ${idxName} for key ${prop}");
-
-            }
-            return ib.buildMixedIndex("search");
-        } else {
-            return mgmt.getGraphIndex(idxName);
-
-        }
-    }
-    catch (Throwable t) {
-        t.printStackTrace();
-    }
-}
 
 def createVertexLabel(mgmt, String labelName) {
 
