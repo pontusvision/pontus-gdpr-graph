@@ -1733,6 +1733,9 @@ def createMixedIdx(def mgmt, String idxName, PropertyKey metadataType, Mapping m
     createMixedIdx(mgmt, idxName, false, metadataType, mapping, props)
 }
 
+def createMixedIdx(def mgmt, String idxName, PropertyKey metadataType, PropertyKey... props) {
+    createMixedIdx(mgmt, idxName, false, metadataType, mapping, props)
+}
 
 def createMixedIdx(def mgmt, String idxName, boolean isEdge, PropertyKey... props) {
     try {
