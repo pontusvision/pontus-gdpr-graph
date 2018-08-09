@@ -573,28 +573,31 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
         for (int i = 0, ilen = keys.length; i < ilen; i++)
         {
           verifier = getVerifier(keyAlgo, keys[i]);
-          passedVerification = jwsObject.verify(verifier);
+          boolean passedSignatureVerification  = jwsObject.verify(verifier);
 
-          Payload payload = jwsObject.getPayload();
-          JSONObject obj = payload.toJSONObject();
-
-          long exp = obj.getAsNumber( "exp" ).longValue();
-
-          if ( exp == 0 || System.currentTimeMillis() <= exp )
+          if (passedSignatureVerification)
           {
-            passedVerification = true;
-          }
-          else
-          {
-            auditLogger.error("The JWT Token  has expired: {}",obj.toJSONString());
+            Payload payload = jwsObject.getPayload();
+            JSONObject obj = payload.toJSONObject();
 
-          }
+            long exp = obj.getAsNumber("exp").longValue();
 
+            if (exp == 0 || System.currentTimeMillis() <= exp)
+            {
+              passedVerification = true;
+            }
+            else
+            {
+              passedVerification = false;
+              auditLogger.error("The JWT Token  has expired: {}", obj.toJSONString());
 
-          jwsObject.getHeader().getIncludedParams();
+            }
 
-          if (passedVerification){
-            break;
+            if (passedVerification)
+            {
+              break;
+            }
+
           }
         }
 
