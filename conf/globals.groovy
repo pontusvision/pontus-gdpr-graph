@@ -88,21 +88,20 @@ def addIndexes(def mgmt, def json, boolean isEdge, def propsMap, sb) {
             throw new RuntimeException("Failed to create index - $name, because it can't be CompositeIndex and have mapping")
         }
 
+        def idxCreated
         if (mixedIndex) {
             if (!mapping) {
-                createMixedIdx(mgmt, name, isEdge, props as PropertyKey[])
+                idxCreated = createMixedIdx(mgmt, name, isEdge, props as org.janusgraph.core.PropertyKey[])
             } else {
-                def map = [:]
-                map[propsMap[props.get(0)]] = mapping
-//                System.out.println("Line 93 - About to add index - $name $isEdge \n")
-                createMixedIdx(mgmt, name, isEdge, map)
+                idxCreated = createMixedIdx(mgmt, name, isEdge, propertyKeys, mapping)
             }
 
         } else {
-            createCompIdx(mgmt, name, isEdge, unique, props as PropertyKey[])
+            idxCreated = createCompIdx(mgmt, name, isEdge, unique, props as org.janusgraph.core.PropertyKey[])
         }
 
-        sb.append("Success added index - $name\n")
+        def status = idxCreated ? 'Success added' : 'Failed to add'
+        sb.append("$status index - $name\n")
     }
 }
 
@@ -128,7 +127,7 @@ def addpropertyKeys(def mgmt, def json, def sb) {
         def name = it.name
         def typeClass = Class.forName(getClass(it.dataType))
         def cardinality = it.cardinality
-        def card = cardinality == 'SET' ? Cardinality.SET : Cardinality.SINGLE
+        def card = cardinality == 'SET' ? org.janusgraph.core.Cardinality.SET : org.janusgraph.core.Cardinality.SINGLE
         def prop = createProp(mgmt, name, typeClass, card);
         sb.append("Success added property key - $name\n")
         map[name] = prop
@@ -141,7 +140,7 @@ def getClass(def type) {
 }
 
 
-def createProp(mgmt, keyName, classType, Cardinality card) {
+def createProp(mgmt, keyName, classType, org.janusgraph.core.Cardinality card) {
 
     try {
         def key = null;
@@ -161,10 +160,11 @@ def createProp(mgmt, keyName, classType, Cardinality card) {
     catch (Throwable t) {
         t.printStackTrace();
     }
+    return null
 }
 
 def createCompIdx(def mgmt, String idxName, boolean isUnique, PropertyKey... props) {
-    createCompIdx(mgmt, idxName, false, isUnique, props)
+    return createCompIdx(mgmt, idxName, false, isUnique, props)
 }
 
 def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique, PropertyKey... props) {
@@ -191,6 +191,7 @@ def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique, Pr
     catch (Throwable t) {
         t.printStackTrace();
     }
+    return null
 }
 
 
@@ -214,11 +215,12 @@ def createCompIdx(mgmt, idxName, boolean isEdge, PropertyKey... props) {
     catch (Throwable t) {
         t.printStackTrace();
     }
+    return null
 
 }
 
 def createCompIdx(def mgmt, def idxName, PropertyKey... props) {
-    createCompIdx(mgmt, idxName, false, props)
+    return createCompIdx(mgmt, idxName, false, props)
 }
 
 def createMixedIdx(def mgmt, String idxName, boolean isEdge, Pair<PropertyKey, Mapping>... props) {
@@ -239,42 +241,41 @@ def createMixedIdx(def mgmt, String idxName, boolean isEdge, Pair<PropertyKey, M
             return ib.buildMixedIndex("search");
         } else {
             return mgmt.getGraphIndex(idxName);
-
         }
     }
     catch (Throwable t) {
         t.printStackTrace();
     }
+    return null
 }
 
 
 def createMixedIdx(def mgmt, String idxName, Pair<PropertyKey, Mapping>... props) {
-    createMixedIdx(mgmt, idxName, false, props)
+    return createMixedIdx(mgmt, idxName, false, props)
 }
 
-
-def createMixedIdx(def mgmt, String idxName, Map<PropertyKey, String> props) {
-    createMixedIdx(mgmt, idxName, false, props)
-}
 
 //(PropertyKey vs String representing a Mapping
-def createMixedIdx(def mgmt, String idxName, boolean isEdge, Map<PropertyKey, String> props) {
+def createMixedIdx(def mgmt, String idxName, boolean isEdge, List<String> props, String mappingStr) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
             def clazz = isEdge ? Edge.class : Vertex.class
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
 
-            props.each { prop, mappingStr ->
-
-                Mapping mapping = Mapping.valueOf(mappingStr)
-                if (mapping == null) {
-                    mapping = Mapping.DEFAULT
-                }
-
-                ib.addKey(prop, mapping.asParameter());
-                System.out.println("creating IDX ${idxName} for key ${prop}");
+            Mapping mapping = Mapping.valueOf(mappingStr)
+            if (mapping == null){
+                mapping = Mapping.DEFAULT
             }
+            def mappingParam = mapping.asParameter()
 
+            props.each { property ->
+                def propKey = mgmt.getPropertyKey(property)
+                if (! propKey) {
+                    throw new RuntimeException("$property not found")
+                }
+                ib.addKey(propKey, mappingParam);
+            }
+            System.out.println("creating IDX ${idxName} for key(s) - ${props}");
             return ib.buildMixedIndex("search");
         } else {
             return mgmt.getGraphIndex(idxName);
@@ -290,7 +291,7 @@ def createMixedIdx(def mgmt, String idxName, boolean isEdge, Map<PropertyKey, St
 
 
 def createMixedIdx(def mgmt, String idxName, PropertyKey... props) {
-    createMixedIdx(mgmt, idxName, false, props)
+   return createMixedIdx(mgmt, idxName, false, props)
 }
 
 
@@ -574,23 +575,7 @@ def class Convert<T> {
     private to
 
 
-    public List<String> dateFormats = [
-            "d/m/y",
-            "d M y",
-            "d-m-y",
-            "M",
-            "y",
-            "yyyy.MM.dd G 'at' HH:mm:ss z", //	2001.07.04 AD at 12:08:56 PDT
-            "EEE, MMM d, ''yy", //	Wed, Jul 4, '01
-            "h:mm a", //	12:08 PM
-            "hh 'o''clock' a, zzzz", //12 o'clock PM, Pacific Daylight Time
-            "K:mm a, z", //0:08 PM, PDT
-            "yyyyy.MMMMM.dd GGG hh:mm aaa", //	02001.July.04 AD 12:08 PM
-            "EEE, d MMM yyyy HH:mm:ss Z", //	Wed, 4 Jul 2001 12:08:56 -0700
-            "yyMMddHHmmssZ", //	010704120856-0700
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ"  // 2001-07-04T12:08:56.235-0700
-
-    ];
+    public List<String> dateFormats =  DateConvMixin.dateFormats;
 
     private List<SimpleDateFormat> dateFormatters = [];
 
@@ -676,7 +661,8 @@ def class Convert<T> {
 class DateConvMixin {
 
     static List<String> dateFormats = [
-            "d/m/y",
+            "dd/mm/yyyy",
+            "dd/mm/yy",
             "d M y",
             "d-m-y",
             "M",
@@ -865,7 +851,7 @@ def addFormData(String dataFromFormInJSON, String dataType, StringBuffer sb = ne
             }
         }
 
-        retVal = gtrav.iterate().id()
+        retVal = gtrav.next()
 
         trans.commit();
         sb.append("\nAFTER COMMITT")
