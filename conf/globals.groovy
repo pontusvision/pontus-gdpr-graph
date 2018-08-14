@@ -2,8 +2,6 @@ import groovy.json.JsonSlurper
 import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
-import org.codehaus.groovy.runtime.StringGroovyMethods
-import org.janusgraph.core.Cardinality
 import org.janusgraph.core.EdgeLabel
 import org.janusgraph.core.PropertyKey
 import org.janusgraph.core.RelationType
@@ -12,8 +10,6 @@ import org.janusgraph.core.schema.JanusGraphManagement
 import org.janusgraph.core.schema.Mapping
 import org.janusgraph.core.schema.RelationTypeIndex
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
-
-import java.text.SimpleDateFormat
 
 def globals = [:]
 globals << [g: graph.traversal()]
@@ -254,7 +250,6 @@ def createMixedIdx(def mgmt, String idxName, Pair<PropertyKey, Mapping>... props
     return createMixedIdx(mgmt, idxName, false, props)
 }
 
-
 //(PropertyKey vs String representing a Mapping
 def createMixedIdx(def mgmt, String idxName, boolean isEdge, List<String> props, String mappingStr) {
     try {
@@ -263,14 +258,14 @@ def createMixedIdx(def mgmt, String idxName, boolean isEdge, List<String> props,
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
 
             Mapping mapping = Mapping.valueOf(mappingStr)
-            if (mapping == null){
+            if (mapping == null) {
                 mapping = Mapping.DEFAULT
             }
             def mappingParam = mapping.asParameter()
 
             props.each { property ->
                 def propKey = mgmt.getPropertyKey(property)
-                if (! propKey) {
+                if (!propKey) {
                     throw new RuntimeException("$property not found")
                 }
                 ib.addKey(propKey, mappingParam);
@@ -291,7 +286,7 @@ def createMixedIdx(def mgmt, String idxName, boolean isEdge, List<String> props,
 
 
 def createMixedIdx(def mgmt, String idxName, PropertyKey... props) {
-   return createMixedIdx(mgmt, idxName, false, props)
+    return createMixedIdx(mgmt, idxName, false, props)
 }
 
 
@@ -570,308 +565,6 @@ class Schema {
     }
 }
 
-def class Convert<T> {
-    private from
-    private to
-
-
-    public List<String> dateFormats =  DateConvMixin.dateFormats;
-
-    private List<SimpleDateFormat> dateFormatters = [];
-
-
-    public Convert(clazz) {
-        from = clazz
-        setDateFormats(this.dateFormats)
-
-    }
-
-    static def from(clazz) {
-        new Convert(clazz)
-    }
-
-    List<String> getDateFormats() {
-        return dateFormats
-    }
-
-    void setDateFormats(List<String> dateFormats) {
-        this.dateFormats = dateFormats
-        dateFormatters.clear();
-        dateFormats.each {
-            dateFormatters.add(new SimpleDateFormat(it));
-        }
-
-    }
-
-    def to(clazz) {
-        to = clazz
-        return this
-    }
-
-    def using(closure) {
-        def originalAsType = from.metaClass.getMetaMethod('asType', [] as Class[])
-        from.metaClass.asType = { Class clazz ->
-            if (clazz == to) {
-                closure.setProperty('value', delegate)
-                closure(delegate)
-            } else {
-                originalAsType.doMethodInvoke(delegate, clazz)
-            }
-        }
-    }
-
-
-    T fromString(String data, Class<T> requiredType) {
-
-        if (requiredType == Date.class) {
-
-            int ilen = dateFormatters.size();
-            for (int i = 0; i < ilen; i++) {
-                try {
-                    Date retVal = dateFormatters.get(i).parse(data);
-                    return retVal as T;
-
-                } catch (Throwable t) {
-                    // ignore
-                }
-            }
-
-        } else if (requiredType == String.class) {
-            return data as T
-        } else if (requiredType == Boolean.class) {
-            return Boolean.valueOf(data) as T
-        } else if (requiredType == Integer.class) {
-            return Integer.valueOf(data) as T
-        } else if (requiredType == Long.class) {
-            return Long.valueOf(data) as T
-        } else if (requiredType == Float.class) {
-            return Float.valueOf(data) as T
-        } else if (requiredType == Double.class) {
-            return Double.valueOf(data) as T
-        } else if (requiredType == Short.class) {
-            return Short.valueOf(data) as T
-        } else {
-            return data as T
-        }
-
-
-    }
-}
-
-class DateConvMixin {
-
-    static List<String> dateFormats = [
-            "dd/mm/yyyy",
-            "dd/mm/yy",
-            "d M y",
-            "d-m-y",
-            "M",
-            "y",
-            "yyyy.MM.dd G 'at' HH:mm:ss z", //	2001.07.04 AD at 12:08:56 PDT
-            "EEE, MMM d, ''yy", //	Wed, Jul 4, '01
-            "h:mm a", //	12:08 PM
-            "hh 'o''clock' a, zzzz", //12 o'clock PM, Pacific Daylight Time
-            "K:mm a, z", //0:08 PM, PDT
-            "yyyyy.MMMMM.dd GGG hh:mm aaa", //	02001.July.04 AD 12:08 PM
-            "EEE, d MMM yyyy HH:mm:ss Z", //	Wed, 4 Jul 2001 12:08:56 -0700
-            "yyMMddHHmmssZ", //	010704120856-0700
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ"  // 2001-07-04T12:08:56.235-0700
-
-    ];
-
-
-    private static List<SimpleDateFormat> dateFormatters = []
-
-
-    static final def convert = StringGroovyMethods.&asType
-
-    static {
-        dateFormatters.clear()
-        dateFormats.each {
-            dateFormatters.add(new SimpleDateFormat(it))
-        }
-    }
-
-    static def asType(String self, Class cls) {
-        if (cls == Date) {
-            int ilen = dateFormatters.size();
-            for (int i = 0; i < ilen; i++) {
-                try {
-                    Date retVal = dateFormatters.get(i).parse(self);
-                    return retVal as Date;
-
-                } catch (Throwable t) {
-                    // ignore
-                }
-            }
-
-        } else convert(self, cls)
-    }
-
-
-}
-
-String.mixin(DateConvMixin)
-
-class MatchReq<T> {
-
-    private List<T> attribNativeVals;
-    private List<String> attribVals;
-    private Class attribType;
-    private String propName;
-    private String vertexName;
-    private String predicate;
-    private Convert<T> conv;
-
-
-    MatchReq(List<String> attribVals, Class<T> attribType, String propName, String vertexName, List<String> dateFormats) {
-        this.attribVals = attribVals
-        this.attribType = attribType
-        this.propName = propName
-        this.vertexName = vertexName
-        this.conv = new Convert<>(attribType)
-
-        if (dateFormats != null) {
-            this.dateFormats = dateFormats;
-        }
-        convertListToNativeFormat();
-    }
-
-    protected void convertListToNativeFormat() {
-
-//        Convert.fromString("asdf", this.attribType);
-
-
-        attribVals.each {
-            attribNativeVals.add(conv.fromString(it, this.attribType))
-        }
-    }
-
-    List<String> getAttribVals() {
-        return attribVals
-    }
-
-    void setAttribVals(List<String> attribVals) {
-        this.attribVals = attribVals
-    }
-
-    Class getAttribType() {
-        return attribType
-    }
-
-    void setAttribType(Class attribType) {
-        this.attribType = attribType
-    }
-
-    String getPropName() {
-        return propName
-    }
-
-    void setPropName(String propName) {
-        this.propName = propName
-    }
-
-    String getVertexName() {
-        return vertexName
-    }
-
-    void setVertexName(String vertexName) {
-        this.vertexName = vertexName
-    }
-}
-
-def addFormData(String dataFromFormInJSON, String dataType, StringBuffer sb = new StringBuffer())
-{
-    def slurper = new JsonSlurper()
-    def formDataParsed = slurper.parseText(dataFromFormInJSON)
-    def formOwnerId = formDataParsed.request.owner as String
-    def formId = formDataParsed.request.form as String
-
-    def submissionId = formDataParsed.submission._id as String
-    def submissionOwner = formDataParsed.submission.owner as String
-
-    def data = formDataParsed.request.data
-
-    def trans = graph.tx()
-
-    mgmt = graph.openManagement()
-
-    def retVal = -1L;
-
-    try{
-
-        if (!trans.isOpen()) {
-            trans.open();
-        }
-
-        // g.V().drop()
-        // g.E().drop()
-
-        def gtrav = g
-
-        def Key_Form_Owner_Id = "${dataType}.Form_Owner_Id" as String
-        def Key_Form_Id = "${dataType}.Form_Id" as String
-        def Key_Form_Submission_Id = "${dataType}.Form_Submission_Id" as String
-        def Key_Form_Submission_Owner_Id = "${dataType}.Form_Submission_Owner_Id" as String
-        def Key_Metadata_Type = "Metadata.Type.${dataType}" as String
-
-        gtrav = gtrav.addV(dataType)
-
-        gtrav.property(Key_Form_Owner_Id, (String)formOwnerId)
-        gtrav.property(Key_Form_Id, (String) formId)
-        gtrav.property(Key_Form_Submission_Id, (String)submissionId)
-        gtrav.property(Key_Metadata_Type, (String)dataType)
-        gtrav.property("Metadata.Type", (String)dataType)
-        gtrav.property(Key_Form_Submission_Owner_Id, (String) submissionOwner)
-
-
-        sb.append("ADDED basic form props\n")
-
-
-        sb.append("${dataType}.Form_Owner_Id = ").append(formOwnerId)
-        data.each { k, v ->
-            if (k != 'submit'){
-                def key = "$dataType.$k" as String
-                def val = "$v" as String
-                sb.append("\nadding $key with val = $v =>").append(v.getClass().toString())
-
-                try {
-                    def prop =  mgmt.getPropertyKey(key);
-                    if (prop == null) {
-                        prop = createProp(mgmt,val,String.class,Cardinality.SINGLE);
-                    }
-
-                    if (prop != null){
-                        def dataTypeClazz = prop.dataType();
-                        gtrav.property(key, DateConvMixin.asType(val,dataTypeClazz))
-                    }
-                } catch (Throwable t)  {
-                    sb.append("\n$t")
-                }
-            }
-        }
-
-        retVal = gtrav.next()
-
-        trans.commit();
-        sb.append("\nAFTER COMMITT")
-
-
-        // def newEntry = gtrav.next()
-    } catch (Throwable t){
-        sb.append("\n$t")
-        trans.rollback();
-    }
-    finally{
-        trans.close()
-    }
-    mgmt.commit();
-
-
-    return retVal;
-
-}
-
 
 def renderReportInBase64(long pg_id, String pg_templateTextInBase64) {
 
@@ -895,83 +588,6 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64) {
 
 }
 
-def matchPerson(List<MatchReq> matchReqs) {
-
-    HashMap<String, List<MatchReq>> matchReqByVertexName = new HashMap<>();
-    matchReqs.each {
-        List<MatchReq> matchReqList = matchReqByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() });
-        matchReqList.add(it)
-    }
-
-    matchReqByVertexName.each {
-        g = g.V().has("Metadata.Type." + it.value.vertexName, eq(it.value.vertexName));
-        it.value.attribNativeVals.each { it2 ->
-            g = g.V().has(it.value.propName, it2)
-
-        }
-
-
-    }
-
-
-}
-
-
-def matchPerson(String jsonData) {
-
-
-    def jsonSlurper = new groovy.json.JsonSlurper();
-
-
-    def object = jsonSlurper.parseText(jsonData);
-
-    if (object.reqs instanceof List) {
-        List<MatchReq> matchReqs = new ArrayList<>(object.reqs.size());
-
-        object.reqs.each {
-
-            List<String> attribList = null;
-            if (it.attribVals instanceof List) {
-                attribList = it.attribVals;
-            } else if (it.attribVals instanceof String) {
-                def attrList = jsonSlurper.parseText((String) it.attribVals);
-
-                if (attrList instanceof List) {
-                    attribList = attrList;
-                }
-
-            } else {
-                throw new Exception("Failed to read Attribute List");
-            }
-
-            Class nativeType;
-            if (it.nativeType == null) {
-                nativeType = String.class;
-            } else {
-                nativeType = Class.forName((String) it.nativeType);
-            }
-
-
-            MatchReq mreq = new MatchReq(attribList, nativeType, (String) it.propName, (String) it.vertexName);
-
-            matchReqs.add(mreq);
-
-        }
-    }
-
-
-}
-
-def matchEdges() {
-
-    def ids = [4096, 8192, 16384, 20480] as Long[];
-    def otherIds = [4184, 24576, 16496, 4256] as Long[];
-
-
-    g.V(ids)
-            .both()
-            .hasId(otherIds).id()
-}
 //
 //{
 //    reqs: [/* each of these objs will be AND'd together */
