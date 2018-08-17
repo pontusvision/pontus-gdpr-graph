@@ -291,8 +291,9 @@ O.Form.Vertex_Label
     personHeight = createProp(mgmt, "Person.Height", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personNameQualifier = createProp(mgmt, "Person.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personTitle = createProp(mgmt, "Person.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personCustomerId = createProp(mgmt, "Person.Customer_ID", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "personDataOfBirthMixedIdx", personLabel, personFullName, personLastName, personGender, personNationality, personDateOfBirth, personPlaceOfBirth, personReligion, personEthnicity, personMaritalStatus, personNameQualifier, personTitle);
+    createMixedIdx(mgmt, "personDataOfBirthMixedIdx", personLabel, personFullName, personLastName, personGender, personNationality, personDateOfBirth, personPlaceOfBirth, personReligion, personEthnicity, personMaritalStatus, personNameQualifier, personTitle,personCustomerId);
 //    createCompIdx(mgmt, "personDateOfBirth", personDateOfBirth)
 //    createMixedIdx(mgmt, "personTitleMixedIdx", metadataType, personTitle)
 //    createMixedIdx(mgmt, "personFullNameMixedIdx",metadataType, personFullName)
@@ -324,8 +325,9 @@ O.Form.Vertex_Label
     locationAddressCity = createProp(mgmt, "Location.Address.City", String.class, org.janusgraph.core.Cardinality.SINGLE)
     locationAddressState = createProp(mgmt, "Location.Address.State", String.class, org.janusgraph.core.Cardinality.SINGLE)
     locationAddressPostCode = createProp(mgmt, "Location.Address.Post_Code", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    locationAddressFullAddress = createProp(mgmt, "Location.Address.Full_Address", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "locationAddressStreetMixedIdx", locationAddressLabel, locationAddressStreet, locationAddressCity, locationAddressState, locationAddressPostCode)
+    createMixedIdx(mgmt, "locationAddressStreetMixedIdx", locationAddressLabel, locationAddressStreet, locationAddressCity, locationAddressState, locationAddressPostCode, locationAddressFullAddress)
 //    createMixedIdx(mgmt, "locationAddressCityMixedIdx", locationAddressCity)
 //    createMixedIdx(mgmt, "locationAddressStateMixedIdx", locationAddressState)
 //    createMixedIdx(mgmt, "locationAddressPostCodeMixedIdx", locationAddressPostCode)

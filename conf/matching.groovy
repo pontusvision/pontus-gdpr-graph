@@ -7,19 +7,28 @@ import java.text.SimpleDateFormat
 /// NOTE : look at groovy subsequences, then iterate, and check which ones are unique().size() == .size()
 
 
-def jsonData = '{"reqs":[{"attribVals":["Leo","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["Martins","Zukker","Silva"],"attribType":"java.lang.String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["01/03/1933","11/03/1933","01/03/2011"],"attribType":"java.util.Date","propName":"Person.Date_Of_Birth","vertexName":"Person","predicateStr":"eq"},{"attribVals":["SW1W 9QL","E14 4BB","SW1W 3LL"],"attribType":"java.lang.String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
+//def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attribType":"java.lang.String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["01/03/1933","11/03/1933","01/03/2011","01/01/1666"],"attribType":"java.util.Date","propName":"Person.Date_Of_Birth","vertexName":"Person","predicateStr":"eq"},{"attribVals":["SW1W 9QL","E14 4BB","60412"],"attribType":"java.lang.String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
+//def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attribType":"java.lang.String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["01/03/1933","11/03/1933","01/03/2011","01/01/1666"],"attribType":"java.util.Date","propName":"Person.Date_Of_Birth","vertexName":"Person","predicateStr":"eq"},{"attribVals":["SW1W 9QL","E14 4BB","60412"],"attribType":"java.lang.String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
+// def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attribType":"java.lang.String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["SW1W 9QL","E14 4BB","60412"],"attribType":"java.lang.String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
 
-StringBuffer sb = new StringBuffer();
+//StringBuffer sb = new StringBuffer();
 // String.mixin(DateConvMixin)
 
 // try {
-matchPerson(jsonData,  sb ,  g , "Person")
+//matchPerson(jsonData,  sb ,  g , "Person")
 // } catch (Throwable t){
-//   sb.append("\n Failed to match Person; err: $t")
+//   sb?.append("\n Failed to match Person; err: $t")
 // }
-sb.toString()
+// g.V().has('Metadata.Type.Person',eq('Person'))
+//     .has('Person.Last_Name',eq('owens'))
+// .has('Person.Date_Of_Birth',eq (new Date("Tue Mar 01 00:00:00 UTC 2011")))
+// g.V().has('Metadata.Type.Person',eq('Person'))
+// .has('Person.Full_Name',eq('chris owens'))
+// def test = [41005304, 122900712, 204845216, 122921056, 122896536, 81928200, 122884248, 81969160, 81960968, 122958056, 81944664, 40964344, 204869792, 41025784, 163868912, 122892360, 122925128, 122904672, 41005304, 40980728, 204820640, 81965144, 204857504, 41033976, 204882080, 81973256, 122892520, 81948760, 122888288, 122937496, 204853408, 122916960, 41005304, 41005304, 41005304, 41005304, 41005304]
+// Map counts = test.countBy{ it }
 
-
+// sb?.append("\n\ncounts = $counts")
+//sb?.toString()
 
 def class Convert<T> {
     private from
@@ -72,7 +81,7 @@ def class Convert<T> {
     }
 
 
-    T fromString(String data, Class<T> requiredType, StringBuffer sb = new StringBuffer()) {
+    T fromString(String data, Class<T> requiredType, StringBuffer sb = null) {
 
         if (requiredType == Date.class) {
 
@@ -80,11 +89,11 @@ def class Convert<T> {
             for (int i = 0; i < ilen; i++) {
                 try {
                     Date retVal = dateFormatters.get(i).parse(data);
-                    sb.append("\n Converted $data to Date")
+                    sb?.append("\n Converted $data to Date")
                     return retVal as T;
 
                 } catch (Throwable t) {
-                    sb.append("\n Failed to convert $data to Date: $t")
+                    sb?.append("\n Failed to convert $data to Date: $t")
                     // ignore
                 }
             }
@@ -149,18 +158,18 @@ class DateConvMixin {
         String.mixin(DateConvMixin)
     }
 
-    static def asType(String self, Class cls, StringBuffer sb = new StringBuffer()) {
+    static def asType(String self, Class cls, StringBuffer sb = null) {
         if (cls == Date) {
             int ilen = dateFormatters.size();
             for (int i = 0; i < ilen; i++) {
                 try {
                     Date retVal = dateFormatters.get(i).parse(self);
-                    sb.append("\n Successfully parsed $self")  // ignore
+                    sb?.append("\n Successfully parsed $self")  // ignore
 
                     return retVal as Date;
 
                 } catch (Throwable t) {
-                    sb.append("\nfailed to parseDate $self; err: $t")  // ignore
+                    sb?.append("\nfailed to parseDate $self; err: $t")  // ignore
                 }
             }
 
@@ -182,7 +191,7 @@ class MatchReq<T>  {
 
     private Closure predicate;
     private Convert<T> conv;
-    private StringBuffer sb;
+    private StringBuffer sb = null;
 
     static Closure convertPredicateFromStr(String predicateStr) {
         if ("eq".equals(predicateStr)) {
@@ -216,7 +225,7 @@ class MatchReq<T>  {
     }
 
 
-    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, List<String> dateFormats, StringBuffer sb) {
+    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, List<String> dateFormats, StringBuffer sb = null) {
         this.attribVal = attribVals
         this.attribType = attribType
 
@@ -227,7 +236,7 @@ class MatchReq<T>  {
 
         this.sb = sb;
 
-        sb.append("\n In MatchReq($attribVals, $attribType, $propName, $vertexName, $predicateStr)")
+        sb?.append("\n In MatchReq($attribVals, $attribType, $propName, $vertexName, $predicateStr)")
         if (dateFormats != null) {
             this.conv.setDateFormats(dateFormats)
         }
@@ -334,7 +343,7 @@ def matchPerson(ArrayList<MatchReq> matchReqs, StringBuffer sb, g) {
 
         def subs = v.subsequences()
 
-        // sb.append("\n $subs")
+        // sb?.append("\n $subs")
 
 
 
@@ -346,24 +355,24 @@ def matchPerson(ArrayList<MatchReq> matchReqs, StringBuffer sb, g) {
             // the subsequences can do its job without repetition
 
             if (it.size() == it.unique{ entry -> entry.propName }.size() ) {
-                sb.append("\ng.V().has('Metadata.Type.").append(k).append("',eq('").append(k).append("')")
+                sb?.append("\ng.V().has('Metadata.Type.").append(k).append("',eq('").append(k).append("')")
                 gtrav = g.V().has("Metadata.Type." + k, eq(k)).clone()
 
                 it.each { it2 ->
                     gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
-                    sb.append("\n     .has('").append(it2.propName).append("',")
+                    sb?.append("\n     .has('").append(it2.propName).append("',")
                             .append(it2.predicate).append(",'").append(it2.attribNativeVal).append("')")
 
                 }
 
-                vertexListsByVertexName.get(k).addAll(gtrav.id())
-                sb.append("\n $it")
+                vertexListsByVertexName.get(k).addAll(gtrav.id() as Long[])
+                sb?.append("\n $it")
 
             }
 
         }
 
-        sb.append('\n').append(vertexListsByVertexName).append("\n")
+        sb?.append('\n').append(vertexListsByVertexName).append("\n")
 
 
     }
@@ -408,7 +417,7 @@ def matchPerson(ArrayList<MatchReq> matchReqs, StringBuffer sb, g) {
 }
  */
 
-def matchPerson(String jsonData, StringBuffer sb = new StringBuffer(), gTrav = g, String targetType = "Person") {
+def matchPerson(String jsonData, StringBuffer sb = null, gTrav = g, String targetType = "Person") {
 
 
     def jsonSlurper = new JsonSlurper();
@@ -444,7 +453,7 @@ def matchPerson(String jsonData, StringBuffer sb = new StringBuffer(), gTrav = g
 
                 attribList?.each{ it2 ->
 
-                    sb.append("\nAdding new MatchReq ($it2, $nativeType, ${it.attribType})")
+                    sb?.append("\nAdding new MatchReq ($it2, $nativeType, ${it.attribType})")
                     MatchReq mreq = new MatchReq(
                             (String) it2
                             , nativeType
@@ -466,7 +475,7 @@ def matchPerson(String jsonData, StringBuffer sb = new StringBuffer(), gTrav = g
 
     }
 
-    sb.toString()
+    sb?.toString()
 }
 
 
@@ -477,6 +486,9 @@ def matchEdges(HashMap<String, List<Long>> vertexListsByVertexName, String targe
     Set<Long> idsSet = new HashSet<>(ids.length)
 
     idsSet.addAll(ids)
+    Map counts = ids.countBy { it }
+
+    counts = counts.sort { a, b -> b.value <=> a.value }
 
     Set<Long> otherIdsSet = new HashSet<>();
 
@@ -486,23 +498,25 @@ def matchEdges(HashMap<String, List<Long>> vertexListsByVertexName, String targe
     def otherIds = otherIdsSet as Long[];
 
 
-    def foundIds = g.V(idsSet)
+    def foundIds = g.V(otherIds)
             .both()
-            .hasId(otherIds).id()
+            .hasId(within(idsSet)).id()
+            .toSet() as Long[]
 
-    sb.append(foundIds)
+    sb?.append("\n$foundIds")
+    sb?.append("\n\n$counts")
+
+
 
     /* THIS will create a map of entries by count....  it'll come in handy for ranking the matches.
-    Map counts = certs.countBy { it }
+Map counts = certs.countBy { it }
 counts.findAll { it.value == counts.values().max() }
 or by an one-liner
 
 certs.countBy { it }.groupBy { it.value }.max { it.key }.value.keySet()
 
 
-     */
-
-
+ */
 
 }
 
