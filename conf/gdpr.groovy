@@ -150,6 +150,17 @@ def dumpData(List<Map<String, String>> listOfMaps) {
     return strBuilder.toString()
 }
 
+/*
+ *
+def listOfMaps = new LinkedList<HashMap<String,String>>()
+
+def map1 = [pg_metadataProcessor: '',pg_metadataLineage:'', pg_metadataRedaction:'', pg_metadataVersion: 1, pg_metadataStatus:'' , pg_metadataGDPRStatus:'', pg_metadataLineageServerTag:'', pg_metadataLineageLocationTag:'',pg_metadataController:'controller123', "pg_gender":"male","pg_name_title":"mr","pg_name_first":"quoc","pg_name_last":"bastiaansen","pg_location_street":"7247 lucasbolwerk","pg_location_city":"epe","pg_location_state":"flevoland","pg_location_postcode":"92775","pg_email":"quoc.bastiaansen@example.com","pg_login_username":"heavybear983","pg_login_password":"writer","pg_login_salt":"avKgfb4e","pg_login_md5":"d918e55da9d17937c718b9f7688821cb","pg_login_sha1":"2cb2bba91deef25c64f15a6ac96d84c21c1189e3","pg_login_sha256":"2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df","pg_dob":"1955-12-01 16:58:49","pg_registered":"2012-07-15 09:50:59","pg_phone":"(668)-056-6802","pg_cell":"(859)-113-0976","pg_id_name":"BSN","pg_id_value":"94173707","pg_picture_large":"https://randomuser.me/api/portraits/men/63.jpg","pg_picture_medium":"https://randomuser.me/api/portraits/med/men/63.jpg","pg_picture_thumbnail":"https://randomuser.me/api/portraits/thumb/men/63.jpg","pg_nat":"NL"]
+def map2 = [pg_metadataProcessor: '',pg_metadataLineage:'', pg_metadataRedaction:'', pg_metadataVersion: 1, pg_metadataStatus:'' , pg_metadataGDPRStatus:'', pg_metadataLineageServerTag:'', pg_metadataLineageLocationTag:'',pg_metadataController:'controller123', "pg_gender":"male","pg_name_title":"mr","pg_name_first":"quo333c","pg_name_last":"bastiaan3333sen","pg_location_street":"7247 lucasbo333lwerk","pg_location_city":"epe","pg_location_state":"flevoland","pg_location_postcode":"92775","pg_email":"quoc.bastiaansen@example.com","pg_login_username":"heavybear983","pg_login_password":"writer","pg_login_salt":"avKgfb4e","pg_login_md5":"d918e55da9d17937c718b9f7688821cb","pg_login_sha1":"2cb2bba91deef25c64f15a6ac96d84c21c1189e3","pg_login_sha256":"2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df","pg_dob":"1955-12-01 16:58:49","pg_registered":"2012-07-15 09:50:59","pg_phone":"(668)-056-6802","pg_cell":"(859)-113-0976","pg_id_name":"BSN","pg_id_value":"94173707","pg_picture_large":"https://randomuser.me/api/portraits/men/63.jpg","pg_picture_medium":"https://randomuser.me/api/portraits/med/men/63.jpg","pg_picture_thumbnail":"https://randomuser.me/api/portraits/thumb/men/63.jpg","pg_nat":"NL"]
+
+listOfMaps.add(map1);
+listOfMaps.add(map2);
+
+addCampaignAwarenessBulk(graph,g, listOfMaps) */
 
 def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
@@ -507,6 +518,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
 /*
 {
+        "Customer ID": "1010100110"
 		"First_Name": " ROZELL",
 		"Last_Name": "COLEMAN ",
 		"Adress": "26 Silverweed Rd, Chatham ME5 0QU, UK",
@@ -532,7 +544,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
 
 
-def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps) {
+def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb = null) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
@@ -546,9 +558,10 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps) {
 
         for (Map<String, String> item in listOfMaps) {
 
-
+            sb?.append("\nin ingestCRMData(); Processing $item");
             Date dob
 
+            String dobRawStr = item.get("pg_dob");
             try {
                 dob = new SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
             } catch (Throwable t) {
@@ -562,6 +575,7 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps) {
                 }
             }
 
+            sb?.append("Converted $dobRawStr to $dob")
 
             Date renewalDate
             try {
@@ -571,40 +585,25 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps) {
             }
 
 
-            def gender = item.get("pg_Sex").toUpperCase();
+            def gender = item.get("pg_Sex")?.toUpperCase() ?:"MALE";
             def title = item.get("pg_name_title")  ?: (gender.startsWith("M")?"MR":"MS")
             def nationality = (item.get("pg_nat"))?.toUpperCase() ?: "GB"
 
-            def emailStr = item.get("pg_Email_address")?.toLowerCase() ?: "UNKNOWN"
+            def emailStr = item.get("pg_Email_address")?.toLowerCase()
 
 
+            def customerId = item.get("pg_Customer_ID")
 
+            def personTrav = g.V().has("Person.Customer_ID",customerId )
 
+            def person = null;
 
-            person = g.addV("Person").
-                    property("Metadata.Controller", item.get("pg_metadataController")).
-                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-                    property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
-                    property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Person").
-                    property("Metadata.Type.Person", "Person").
-                    property("Person.Full_Name", (item.get("pg_First_Name") + " " + item.get("pg_Last_Name")).toUpperCase()).
-                    property("Person.Last_Name", item.get("pg_Last_Name").toUpperCase()).
-                    property("Person.Gender", gender).
-                    property("Person.Nationality", nationality).
-                    property("Person.Date_Of_Birth", dob).
-                    property("Person.Title", title).next()
+            if (personTrav.hasNext()){
+                person = personTrav.next()
+            }
 
-
-            if (emailStr){
-                email = g.addV("Object.Email_Address").
+            else{
+                person = g.addV("Person").
                         property("Metadata.Controller", item.get("pg_metadataController")).
                         property("Metadata.Processor", item.get("pg_metadataProcessor")).
                         property("Metadata.Lineage", item.get("pg_metadataLineage")).
@@ -616,74 +615,96 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps) {
                         property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
                         property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                         property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                        property("Metadata.Type", "Object.Email_Address").
-                        property("Metadata.Type.Object.Email_Address", "Object.Email_Address").
-                        property("Object.Email_Address.Email", item.get("pg_email")).next()
+                        property("Metadata.Type", "Person").
+                        property("Metadata.Type.Person", "Person").
+                        property("Person.Full_Name", (item.get("pg_First_Name") + " " + item.get("pg_Last_Name"))?.toUpperCase()).
+                        property("Person.Last_Name", item.get("pg_Last_Name")?.toUpperCase()).
+                        property("Person.Gender", gender).
+                        property("Person.Nationality", nationality).
+                        property("Person.Date_Of_Birth", dob).
+                        property("Person.Customer_ID", customerId).
+                        property("Person.Title", title).next()
 
             }
 
 
-//            credential = g.addV("Object.Credential").
-//                    property("Metadata.Controller", item.get("pg_metadataController")).
-//                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-//                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-//                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-//                    property("Metadata.Version", item.get("pg_metadataVersion")).
-//                    property("Metadata.Create_Date", metadataCreateDate).
-//                    property("Metadata.Update_Date", metadataUpdateDate).
-//                    property("Metadata.Status", item.get("pg_metadataStatus")).
-//                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-//                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-//                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-//                    property("Metadata.Type", "Object.Credential").
-//                    property("Metadata.Type.Object.Credential", "Object.Credential").
-//                    property("Object.Credential.User_Id", item.get("pg_login_username")).
-//                    property("Object.Credential.Login_SHA256", item.get("pg_login_sha256")).next()
+            def email = null
 
-//            idCard = g.addV("Object.Identity_Card").
-//                    property("Metadata.Controller", item.get("pg_metadataController")).
-//                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-//                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-//                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-//                    property("Metadata.Version", item.get("pg_metadataVersion")).
-//                    property("Metadata.Create_Date", metadataCreateDate).
-//                    property("Metadata.Update_Date", metadataUpdateDate).
-//                    property("Metadata.Status", item.get("pg_metadataStatus")).
-//                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-//                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-//                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-//                    property("Metadata.Type", "Object.Identity_Card").
-//                    property("Metadata.Type.Object.Identity_Card", "Object.Identity_Card").
-//                    property("Object.Identity_Card.Id_Name", item.get("pg_id_name")).
-//                    property("Object.Identity_Card.Id_Value", item.get("pg_id_value")).next()
+            if (emailStr){
 
+                def emailTrav = g.V().has("Object.Email_Address.Email")
 
-            location = g.addV("Location.Address").
-                    property("Metadata.Controller", item.get("pg_metadataController")).
-                    property("Metadata.Processor", item.get("pg_metadataProcessor")).
-                    property("Metadata.Lineage", item.get("pg_metadataLineage")).
-                    property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-                    property("Metadata.Version", item.get("pg_metadataVersion")).
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
-                    property("Metadata.Status", item.get("pg_metadataStatus")).
-                    property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-                    property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-                    property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Location.Address").
-                    property("Metadata.Type.Location.Address", "Location.Address").
-                    property("Location.Address.Street", item.get("pg_location_street")).
-                    property("Location.Address.City", item.get("pg_location_city")).
-                    property("Location.Address.State", item.get("pg_location_state")).
-                    property("Location.Address.Post_Code", item.get("pg_location_postcode")).next()
+                if (emailTrav.hasNext()){
+                    email = emailTrav.next()
+                }
+                else {
+                    email = g.addV("Object.Email_Address").
+                            property("Metadata.Controller", item.get("pg_metadataController")).
+                            property("Metadata.Processor", item.get("pg_metadataProcessor")).
+                            property("Metadata.Lineage", item.get("pg_metadataLineage")).
+                            property("Metadata.Redaction", item.get("pg_metadataRedaction")).
+                            property("Metadata.Version", item.get("pg_metadataVersion")).
+                            property("Metadata.Create_Date", metadataCreateDate).
+                            property("Metadata.Update_Date", metadataUpdateDate).
+                            property("Metadata.Status", item.get("pg_metadataStatus")).
+                            property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                            property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                            property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
+                            property("Metadata.Type", "Object.Email_Address").
+                            property("Metadata.Type.Object.Email_Address", "Object.Email_Address").
+                            property("Object.Email_Address.Email", emailStr).next()
+                }
+
+            }
+
+            def postCode = item.get("pg_Post_Code")
+
+            def address = item.get("pg_Adress") /* SIC - address is misspelled */
 
 
 
+            def location = null
+            def locationTrav = g.V().has("Location.Address.Post_Code", postCode).has("Location.Address.Full_Address", address)
 
-            g.addE("Uses_Email").from(person).to(email).next()
-            g.addE("Has_Credential").from(person).to(credential).next()
-            g.addE("Has_Id_Card").from(person).to(idCard).next()
-            g.addE("Lives").from(person).to(location).next()
+            if (locationTrav.hasNext()) {
+                location = locationTrav.next()
+            }
+            else{
+                location = g.addV("Location.Address").
+                        property("Metadata.Controller", item.get("pg_metadataController")).
+                        property("Metadata.Processor", item.get("pg_metadataProcessor")).
+                        property("Metadata.Lineage", item.get("pg_metadataLineage")).
+                        property("Metadata.Redaction", item.get("pg_metadataRedaction")).
+                        property("Metadata.Version", item.get("pg_metadataVersion")).
+                        property("Metadata.Create_Date", metadataCreateDate).
+                        property("Metadata.Update_Date", metadataUpdateDate).
+                        property("Metadata.Status", item.get("pg_metadataStatus")).
+                        property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
+                        property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
+                        property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
+                        property("Metadata.Type", "Location.Address").
+                        property("Metadata.Type.Location.Address", "Location.Address").
+                        property("Location.Address.Full_Address", address).
+                        property("Location.Address.Street", item.get("pg_location_street")).
+                        property("Location.Address.City", item.get("pg_location_city")).
+                        property("Location.Address.State", item.get("pg_location_state")).
+                        property("Location.Address.Post_Code", item.get("pg_location_postcode")).next()
+
+
+            }
+
+
+            if (person && email ){
+                sb?.append("\nadding email to person link ")
+                g.addE("Uses_Email").from(person).to(email).next()
+
+            }
+            if (person && location){
+                sb?.append("\nadding person to location link ")
+
+                g.addE("Lives").from(person).to(location).next()
+
+            }
         }
 
 
@@ -1654,9 +1675,14 @@ def createForms() {
 
 //    objectFormLabel = createVertexLabel(mgmt, "Object.Form");
 //
-   Class <String> stringClass = String.class;
-
-    stringClass.class
+//    objectFormProp00 = createProp(mgmt, "Object.Form.Metadata_Owner", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp01 = createProp(mgmt, "Object.Form.Metadata_GUID", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp02 = createProp(mgmt, "Object.Form.URL", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp03 = createProp(mgmt, "Object.Form.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//    objectFormProp04 = createProp(mgmt, "Object.Form.Vertex_Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
+//
+//    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectFormIdx01", objectFormLabel, objectFormProp00,objectFormProp01,objectFormProp02,objectFormProp04);
 
     def formData = [
             [
@@ -2364,12 +2390,7 @@ def createNotificationTemplates() {
 
 }
 
-//mgmt = graph.openManagement()
-//try {
-//createIndicesPropsAndLabels(graph.openManagement())
-//} catch (e){
-//e.printStackTrace()
-//}
+
 
 
 def __addVPCEdgesFromUserIdGroupPairs(

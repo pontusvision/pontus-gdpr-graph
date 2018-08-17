@@ -34,12 +34,25 @@
         <mockito-all.version>1.10.19</mockito-all.version>
         <jukito.version>1.5</jukito.version>
         <keycloak.version>4.1.0.Final</keycloak.version>
+        <pontus-jpostal.version>1.0.0</pontus-jpostal.version>
+        <pontus-jchronic.version>100.2.9</pontus-jchronic.version>
         <!--<apache.directory-api-version>
             1.0.0
         </apache.directory-api-version>-->
 
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.pontusvision</groupId>
+            <artifactId>pontus-jpostal</artifactId>
+            <version>${pontus-jpostal.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pontusvision</groupId>
+            <artifactId>pontus-jchronic</artifactId>
+            <version>${pontus-jchronic.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-core</artifactId>
