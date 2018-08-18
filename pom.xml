@@ -35,7 +35,7 @@
         <jukito.version>1.5</jukito.version>
         <keycloak.version>4.1.0.Final</keycloak.version>
         <pontus-jpostal.version>1.0.0</pontus-jpostal.version>
-        <pontus-jchronic.version>100.2.9</pontus-jchronic.version>
+        <pontus-natty.version>100.14</pontus-natty.version>
         <!--<apache.directory-api-version>
             1.0.0
         </apache.directory-api-version>-->
@@ -49,8 +49,8 @@
         </dependency>
         <dependency>
             <groupId>com.pontusvision</groupId>
-            <artifactId>pontus-jchronic</artifactId>
-            <version>${pontus-jchronic.version}</version>
+            <artifactId>pontus-natty</artifactId>
+            <version>${pontus-natty.version}</version>
         </dependency>
 
         <dependency>
