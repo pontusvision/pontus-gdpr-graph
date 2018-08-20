@@ -1,8 +1,3 @@
-
-import groovy.json.JsonSlurper
-
-
-
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
 import com.pontusvision.jpostal.AddressExpander
@@ -17,13 +12,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.P
 import org.codehaus.groovy.runtime.StringGroovyMethods
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 // String.mixin(DateConvMixin2)
-
-
-
 
 
 def benchmark = { closure ->
@@ -280,6 +270,7 @@ class PVConvMixin {
 
 
 }
+
 PVConvMixin dummy = null
 String.mixin(PVConvMixin)
 
@@ -480,21 +471,25 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
             // the subsequences can do its job without repetition
 
             if (it.size() == it.unique { entry -> entry.propName }.size()) {
-                sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
-                gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
 
-                it.each { it2 ->
-                    if (!it2.getExcludeFromSearch()) {
+                def searchableItems = it.findAll { it2 -> !it2.excludeFromSearch }
+
+                if (searchableItems.size() > 0) {
+                    sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
+                    gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
+
+                    searchableItems.each { it2 ->
                         gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
                         sb?.append("\n     .has('")?.append(it2.propName)?.append("',")
                                 ?.append(it2.predicate)?.append(",'")?.append(it2.attribNativeVal)?.append("')")
 
+
                     }
+                    vertexListsByVertexName.get(k).addAll(gtrav.range(0, maxHitsPerType).id().toList() as Long[])
+                    sb?.append("\n $it")
 
                 }
 
-                vertexListsByVertexName.get(k).addAll(gtrav.range(0, maxHitsPerType).id().toList() as Long[])
-                sb?.append("\n $it")
 
             }
 
@@ -687,8 +682,10 @@ def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> other
 
  */
 
-def getMatchRequests(Map<String, String> currRecord, Object parsedRules, StringBuffer sb = null) {
+def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String rulesJsonStr, StringBuffer sb = null) {
     def binding = currRecord
+
+    binding.put("original_request", rulesJsonStr)
 
     def rules = parsedRules
 
@@ -727,7 +724,6 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, StringB
             }
 
 
-
         }
 
 
@@ -747,7 +743,7 @@ def getTopHit(g, Long[] potentialHitIDs, int numHitsRequiredForMatch, HashMap<St
     Long topHit = null
     Integer numEdgesRequired = edgeReqsByVertexType.get(vertexTypeStr)?.size()
 
-    if (numEdgesRequired != null && numEdgesRequired > 0){
+    if (numEdgesRequired != null && numEdgesRequired > 0) {
         if (topHits.size() > 0) {
             // Sanity check: we now have one or more candidates, so let's check
             // if this has conns to other vertices in our little world
@@ -766,10 +762,8 @@ def getTopHit(g, Long[] potentialHitIDs, int numHitsRequiredForMatch, HashMap<St
 
 
         }
-    }
-    else
-    {
-        if (topHits.size()>0){
+    } else {
+        if (topHits.size() > 0) {
             topHit = topHits[0]
         }
 
@@ -786,7 +780,7 @@ def addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> matchReqsF
     def localTrav = g
 
     localTrav = localTrav.addV(vertexTypeStr)
-            .property('Metadata.Type.'+vertexTypeStr, vertexTypeStr)
+            .property('Metadata.Type.' + vertexTypeStr, vertexTypeStr)
             .property('Metadata.Type', vertexTypeStr)
 
     matchReqsForThisVertexType.each { it ->
@@ -802,8 +796,7 @@ def addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> matchReqsF
 }
 
 
-
-def updateExistingVertexWithMatchReqs(g, Long vertexId,  List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
+def updateExistingVertexWithMatchReqs(g, Long vertexId, List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
 
     def localTrav = g
     def deletionTrav = g
@@ -886,38 +879,38 @@ class EdgeRequest {
         return result
     }
 
-    String toString(){
+    String toString() {
         return "${label} = ($fromVertexLabel)->($toVertexLabel)"
     }
 }
 
 
-def parseEdges (def rules ){
+def parseEdges(def rules) {
 
     Map<String, List<EdgeRequest>> edgeReqsByVertexName = new HashMap<>()
     Set<EdgeRequest> edgeReqs = new HashSet<>()
 
-    rules.edges.each{ it ->
+    rules.edges.each { it ->
         String fromVertexLabel = it.fromVertexLabel
         String toVertexLabel = it.toVertexLabel
         String label = it.label
 
-        EdgeRequest req = new EdgeRequest(label,fromVertexLabel,toVertexLabel);
+        EdgeRequest req = new EdgeRequest(label, fromVertexLabel, toVertexLabel);
 
         edgeReqs.add(req)
-        fromEdgeList =  edgeReqsByVertexName.computeIfAbsent(fromVertexLabel, {k -> new ArrayList<EdgeRequest>()})
+        fromEdgeList = edgeReqsByVertexName.computeIfAbsent(fromVertexLabel, { k -> new ArrayList<EdgeRequest>() })
         fromEdgeList.add(req)
-        toEdgeList =  edgeReqsByVertexName.computeIfAbsent(toVertexLabel, {k -> new ArrayList<EdgeRequest>()})
+        toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexLabel, { k -> new ArrayList<EdgeRequest>() })
         toEdgeList.add(req)
 
     }
 
-    return  [edgeReqsByVertexName, edgeReqs]
+    return [edgeReqsByVertexName, edgeReqs]
 }
 
-def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexIdByVertexName, StringBuffer sb = null){
+def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexIdByVertexName, StringBuffer sb = null) {
 
-    edgeReqs.each{ it ->
+    edgeReqs.each { it ->
 
         sb?.append("\n in createEdges; edgeReq = $it ")
 
@@ -936,7 +929,7 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
 
         sb?.append("\n in createEdges $foundIds")
 
-        if (foundIds.size() == 0){
+        if (foundIds.size() == 0) {
             def fromV = gTrav.V(fromId)
             def toV = gTrav.V(toId)
 
@@ -946,7 +939,6 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
 
     }
 }
-
 
 
 def ingestDataUsingRules(graph, g, List<Map<String, String>> listOfMaps, String jsonRules, StringBuffer sb = null) {
@@ -963,7 +955,7 @@ def ingestDataUsingRules(graph, g, List<Map<String, String>> listOfMaps, String 
 
         for (Map<String, String> item in listOfMaps) {
 
-            def matchReqs = getMatchRequests(item, rules.updatereq, sb)
+            def matchReqs = getMatchRequests(item, rules.updatereq, jsonRules, sb)
             def (matchIdsByVertexType, vertexListsByVertexName) = matchVertices(g, matchReqs, 10, sb);
 
             Map<String, Long> finalVertexIdByVertexName = new HashMap<>();
@@ -980,24 +972,24 @@ def ingestDataUsingRules(graph, g, List<Map<String, String>> listOfMaps, String 
                         , potentialHitIDs as Long[]
                         , (int) numHitsRequiredForMatch
                         , (HashMap<String, List<Long>>) matchIdsByVertexType
-                        , (String)vertexTypeStr
+                        , (String) vertexTypeStr
                         , (Map<String, List<EdgeRequest>>) edgeReqsByVertexName
                         , sb)
 
                 if (topHit != null) {
 
-                    updateExistingVertexWithMatchReqs(g,topHit,matchReqsForThisVertexType,sb)
-                    finalVertexIdByVertexName.put((String) vertexTypeStr,topHit)
+                    updateExistingVertexWithMatchReqs(g, topHit, matchReqsForThisVertexType, sb)
+                    finalVertexIdByVertexName.put((String) vertexTypeStr, topHit)
                 } else {
                     Long newVertexId = addNewVertexFromMatchReqs(g, (String) vertexTypeStr, matchReqsForThisVertexType, sb)
-                    finalVertexIdByVertexName.put((String) vertexTypeStr,newVertexId)
+                    finalVertexIdByVertexName.put((String) vertexTypeStr, newVertexId)
 
                 }
 
 
             }
 
-            createEdges(g, (Set<EdgeRequest>) edgeReqs, (Map<String, Long> )finalVertexIdByVertexName,sb)
+            createEdges(g, (Set<EdgeRequest>) edgeReqs, (Map<String, Long>) finalVertexIdByVertexName, sb)
 
 
         }
@@ -1012,7 +1004,6 @@ def ingestDataUsingRules(graph, g, List<Map<String, String>> listOfMaps, String 
         trans.close()
     }
 }
-
 
 /*
 
