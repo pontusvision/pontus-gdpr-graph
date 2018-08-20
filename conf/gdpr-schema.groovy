@@ -304,7 +304,7 @@ O.Form.Vertex_Label
 
 
     objectEmailAddressLabel = createVertexLabel(mgmt, "Object.Email_Address")
-    objectEmailAddressEmail = createProp(mgmt, "Object.Email_Address.Email", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectEmailAddressEmail = createProp(mgmt, "Object.Email_Address.Email", String.class, org.janusgraph.core.Cardinality.SET)
     createMixedIdx(mgmt, "objectEmailAddressEmailMixedIdx", objectEmailAddressLabel, objectEmailAddressEmail)
 
 
@@ -326,8 +326,81 @@ O.Form.Vertex_Label
     locationAddressState = createProp(mgmt, "Location.Address.State", String.class, org.janusgraph.core.Cardinality.SINGLE)
     locationAddressPostCode = createProp(mgmt, "Location.Address.Post_Code", String.class, org.janusgraph.core.Cardinality.SINGLE)
     locationAddressFullAddress = createProp(mgmt, "Location.Address.Full_Address", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    locationAddressParser_00 = createProp(mgmt, "Location.Address.parser.house", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_01 = createProp(mgmt, "Location.Address.parser.category", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_02 = createProp(mgmt, "Location.Address.parser.near", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_03 = createProp(mgmt, "Location.Address.parser.house_number", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_04 = createProp(mgmt, "Location.Address.parser.road", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_05 = createProp(mgmt, "Location.Address.parser.unit", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_06 = createProp(mgmt, "Location.Address.parser.level", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_07 = createProp(mgmt, "Location.Address.parser.staircase", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_08 = createProp(mgmt, "Location.Address.parser.entrance", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_09 = createProp(mgmt, "Location.Address.parser.po_box", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_10 = createProp(mgmt, "Location.Address.parser.postcode", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_11 = createProp(mgmt, "Location.Address.parser.suburb", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_12 = createProp(mgmt, "Location.Address.parser.city_district", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_13 = createProp(mgmt, "Location.Address.parser.city", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_14 = createProp(mgmt, "Location.Address.parser.island", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_15 = createProp(mgmt, "Location.Address.parser.state_district", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_16 = createProp(mgmt, "Location.Address.parser.state", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_17 = createProp(mgmt, "Location.Address.parser.country_region", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_18 = createProp(mgmt, "Location.Address.parser.country", String.class, org.janusgraph.core.Cardinality.SET)
+    locationAddressParser_19 = createProp(mgmt, "Location.Address.parser.world_region", String.class, org.janusgraph.core.Cardinality.SET)
 
-    createMixedIdx(mgmt, "locationAddressStreetMixedIdx", locationAddressLabel, locationAddressStreet, locationAddressCity, locationAddressState, locationAddressPostCode, locationAddressFullAddress)
+    /*
+    house: venue name e.g. "Brooklyn Academy of Music", and building names e.g. "Empire State Building"
+category: for category queries like "restaurants", etc.
+near: phrases like "in", "near", etc. used after a category phrase to help with parsing queries like "restaurants in Brooklyn"
+house_number: usually refers to the external (street-facing) building number. In some countries this may be a compount, hyphenated number which also includes an apartment number, or a block number (a la Japan), but libpostal will just call it the house_number for simplicity.
+road: street name(s)
+unit: an apartment, unit, office, lot, or other secondary unit designator
+level: expressions indicating a floor number e.g. "3rd Floor", "Ground Floor", etc.
+staircase: numbered/lettered staircase
+entrance: numbered/lettered entrance
+po_box: post office box: typically found in non-physical (mail-only) addresses
+postcode: postal codes used for mail sorting
+suburb: usually an unofficial neighborhood name like "Harlem", "South Bronx", or "Crown Heights"
+city_district: these are usually boroughs or districts within a city that serve some official purpose e.g. "Brooklyn" or "Hackney" or "Bratislava IV"
+city: any human settlement including cities, towns, villages, hamlets, localities, etc.
+island: named islands e.g. "Maui"
+state_district: usually a second-level administrative division or county.
+state: a first-level administrative division. Scotland, Northern Ireland, Wales, and England in the UK are mapped to "state" as well (convention used in OSM, GeoPlanet, etc.)
+country_region: informal subdivision of a country without any political status
+country: sovereign nations and their dependent territories, anything with an ISO-3166 code.
+world_region: currently only used for appending “West Indies” after the country name, a pattern frequently used in the English-speaking Caribbean e.g. “Jamaica, West Indies”
+
+     */
+
+
+
+
+    createMixedIdx(mgmt, "locationAddressStreetMixedIdx", locationAddressLabel,
+            locationAddressStreet
+            , locationAddressCity
+            , locationAddressState
+            , locationAddressPostCode
+            , locationAddressFullAddress
+            , locationAddressParser_00
+            , locationAddressParser_01
+            , locationAddressParser_02
+            , locationAddressParser_03
+            , locationAddressParser_04
+            , locationAddressParser_05
+            , locationAddressParser_06
+            , locationAddressParser_07
+            , locationAddressParser_08
+            , locationAddressParser_09
+            , locationAddressParser_10
+            , locationAddressParser_11
+            , locationAddressParser_12
+            , locationAddressParser_13
+            , locationAddressParser_14
+            , locationAddressParser_15
+            , locationAddressParser_16
+            , locationAddressParser_17
+            , locationAddressParser_18
+            , locationAddressParser_19
+    )
 //    createMixedIdx(mgmt, "locationAddressCityMixedIdx", locationAddressCity)
 //    createMixedIdx(mgmt, "locationAddressStateMixedIdx", locationAddressState)
 //    createMixedIdx(mgmt, "locationAddressPostCodeMixedIdx", locationAddressPostCode)
@@ -381,6 +454,38 @@ O.Form.Vertex_Label
 //    createMixedIdx(mgmt, "objectAwarenessCampaignURLMixedIdx", objectAwarenessCampaignURL)
 //    createCompIdx(mgmt, "objectAwarenessCampaignStart_DateCompIdx", objectAwarenessCampaignStart_Date)
 //    createCompIdx(mgmt, "objectAwarenessCampaignStop_DateCompIdx", objectAwarenessCampaignStop_Date)
+
+    objectInsurancePolicyLabel         = createVertexLabel(mgmt, "Object.Insurance_Policy")
+    objectInsurancePolicyNumber        = createProp(mgmt, "Object.Insurance_Policy.Number", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectInsurancePolicyType          = createProp(mgmt, "Object.Insurance_Policy.Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectInsurancePolicyStatus        = createProp(mgmt, "Object.Insurance_Policy.Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectInsurancePolicyProduct_Type  = createProp(mgmt, "Object.Insurance_Policy.Product_Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectInsurancePolicyProperty_Type = createProp(mgmt, "Object.Insurance_Policy.Property_Type", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectInsurancePolicyRenewal_Date  = createProp(mgmt, "Object.Insurance_Policy.Renewal_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectInsurancePolicyFormProp01    = createProp(mgmt, "Object.Insurance_Policy.Form_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectInsurancePolicyFormProp02    = createProp(mgmt, "Object.Insurance_Policy.Form_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectInsurancePolicyFormProp03    = createProp(mgmt, "Object.Insurance_Policy.Form_Submission_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    objectInsurancePolicyFormProp04    = createProp(mgmt, "Object.Insurance_Policy.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
+
+
+
+    createMixedIdx(mgmt, "objectInsurancePolicyMixedIdx"
+            , objectInsurancePolicyLabel
+            , objectInsurancePolicyNumber
+            , objectInsurancePolicyType
+            , objectInsurancePolicyStatus
+            , objectInsurancePolicyProduct_Type
+            , objectInsurancePolicyProperty_Type
+            , objectInsurancePolicyRenewal_Date
+            , objectInsurancePolicyFormProp01
+            , objectInsurancePolicyFormProp02
+            , objectInsurancePolicyFormProp03
+            , objectInsurancePolicyFormProp04
+    )
+
+
+
+
 
 
     objectLawfulBasisLabel = createVertexLabel(mgmt, "Object.Lawful_Basis")
@@ -465,6 +570,7 @@ O.Form.Vertex_Label
     edgeLabel = createEdgeLabel(mgmt, "Has_Lawful_Basis_On")
     edgeLabel = createEdgeLabel(mgmt, "Event.Training.Awareness_Campaign")
     edgeLabel = createEdgeLabel(mgmt, "Event.Training.Person")
+    edgeLabel = createEdgeLabel(mgmt, "Has_Policy")
 
     if (!mgmt.containsGraphIndex("eventTrainingAwareness_CampaignIdx")) {
         try {

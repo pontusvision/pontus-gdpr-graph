@@ -544,6 +544,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
 
 
+
 def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb = null) {
 
     metadataCreateDate = new Date()
@@ -561,9 +562,10 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
             sb?.append("\nin ingestCRMData(); Processing $item");
             Date dob
 
-            String dobRawStr = item.get("pg_dob");
+
+            String dobRawStr = item.get("pg_DateofBirth");
             try {
-                dob = new SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
+                dob = dobRawStr as Date //; new SimpleDateFormat("yyyy-MM-dd").parse((String) dobRawStr)
             } catch (Throwable t) {
                 try{
                     dob = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String) item.get("pg_dob"))
@@ -575,15 +577,21 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
                 }
             }
 
-            sb?.append("Converted $dobRawStr to $dob")
+            sb?.append("\n\nConverted $dobRawStr to $dob")
 
+            String renewalDateRawStr = item.get("pg_RenewalDate")
             Date renewalDate
-            try {
-                renewalDate = new SimpleDateFormat("dd/MM/yyyy").parse((String) item.get("pg_RenewalDate"))
-            } catch (Throwable t) {
-                renewalDate = new Date("01/01/1666")
+            try{
+                renewalDate = renewalDateRawStr as Date
             }
+            catch (Throwable t2){
+                try {
 
+                    renewalDate = new SimpleDateFormat("dd/MM/yyyy").parse((String) renewalDateRawStr)
+                } catch (Throwable t) {
+                    renewalDate = new Date("01/01/1666")
+                }
+            }
 
             def gender = item.get("pg_Sex")?.toUpperCase() ?:"MALE";
             def title = item.get("pg_name_title")  ?: (gender.startsWith("M")?"MR":"MS")
@@ -594,12 +602,16 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
 
             def customerId = item.get("pg_Customer_ID")
 
+
+            sb?.append("\n Looking for  existing person based on the $customerId ")
+
             def personTrav = g.V().has("Person.Customer_ID",customerId )
 
             def person = null;
-
             if (personTrav.hasNext()){
                 person = personTrav.next()
+                sb?.append("\n Found  existing person based on the $customerId ")
+
             }
 
             else{
@@ -659,18 +671,33 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
 
             def postCode = item.get("pg_Post_Code")
 
-            def address = item.get("pg_Adress") /* SIC - address is misspelled */
+            def address = item.get("pg_Address")
 
 
 
             def location = null
+            sb?.append("\n Looking for  existing location based on the $postCode and $address")
+
+            LocationAddress addr = LocationAddress.fromString(address);
+
+
+
             def locationTrav = g.V().has("Location.Address.Post_Code", postCode).has("Location.Address.Full_Address", address)
 
+
+
+
+
+
             if (locationTrav.hasNext()) {
+                sb?.append("\n found existing location based on the $postCode and $address")
                 location = locationTrav.next()
             }
             else{
-                location = g.addV("Location.Address").
+                sb?.append("\n DID NOT FIND an existing location based on the $postCode and $address")
+
+
+                locationTrav = g.addV("Location.Address").
                         property("Metadata.Controller", item.get("pg_metadataController")).
                         property("Metadata.Processor", item.get("pg_metadataProcessor")).
                         property("Metadata.Lineage", item.get("pg_metadataLineage")).
@@ -685,10 +712,16 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
                         property("Metadata.Type", "Location.Address").
                         property("Metadata.Type.Location.Address", "Location.Address").
                         property("Location.Address.Full_Address", address).
-                        property("Location.Address.Street", item.get("pg_location_street")).
-                        property("Location.Address.City", item.get("pg_location_city")).
-                        property("Location.Address.State", item.get("pg_location_state")).
-                        property("Location.Address.Post_Code", item.get("pg_location_postcode")).next()
+                        property("Location.Address.Post_Code", item.get("pg_Post_Code"))
+
+
+
+                locationTrav = addr.addPropsToGraphTraverser(locationTrav, "Location.Address.parser.",sb)
+                location = locationTrav.next()
+
+                // property("Location.Address.Street", item.get("pg_location_street")).
+                // property("Location.Address.City", item.get("pg_location_city")).
+                // property("Location.Address.State", item.get("pg_location_state")).
 
 
             }

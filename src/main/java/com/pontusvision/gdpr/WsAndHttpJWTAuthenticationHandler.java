@@ -342,14 +342,10 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     final CountDownLatch connectedSignal = new CountDownLatch(1);
     ZooKeeper zoo = null;
 
-    zoo = new ZooKeeper(host, 5000, new Watcher()
-    {
-      public void process(WatchedEvent we)
+    zoo = new ZooKeeper(host, 3600000*24 * 7, we -> {
+      if (we.getState() == Watcher.Event.KeeperState.SyncConnected)
       {
-        if (we.getState() == Event.KeeperState.SyncConnected)
-        {
-          connectedSignal.countDown();
-        }
+        connectedSignal.countDown();
       }
     });
 
