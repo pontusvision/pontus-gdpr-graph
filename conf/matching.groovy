@@ -301,6 +301,7 @@ class MatchReq<T> {
     private StringBuffer sb = null;
 
     private excludeFromSearch;
+    private excludeFromUpdate;
 
     static Closure convertPredicateFromStr(String predicateStr) {
         if ("eq".equals(predicateStr)) {
@@ -333,7 +334,7 @@ class MatchReq<T> {
 
     }
 
-    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, StringBuffer sb = null) {
+    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromUpdate = false, StringBuffer sb = null) {
         this.attribVal = attribVals
         this.attribType = attribType
 
@@ -345,7 +346,7 @@ class MatchReq<T> {
         this.sb = sb;
 
         this.excludeFromSearch = excludeFromSearch
-
+        this.excludeFromUpdate = excludeFromUpdate
 
         sb?.append("\n In MatchReq($attribVals, $attribType, $propName, $vertexName, $predicateStr)")
         convertToNativeFormat()
@@ -377,6 +378,14 @@ class MatchReq<T> {
         this.excludeFromSearch = excludeFromSearch
     }
 
+
+    def getExcludeFromUpdate() {
+        return excludeFromUpdate
+    }
+
+    void setExcludeFromUpdate(excludeFromUpdate) {
+        this.excludeFromUpdate = excludeFromUpdate
+    }
 
     T getAttribNativeVal() {
         return attribNativeVal
@@ -588,6 +597,7 @@ def matchVertices(gTrav = g, String jsonData, String targetType = "Person", int 
                             , (String) it.vertexName
                             , (String) it.predicate ?: "eq"
                             , (boolean) it.excludeFromSearch ? true : false
+                            , (boolean) it.excludeFromUpdate ? true : false
                             , sb
                     )
 
@@ -718,6 +728,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
                         , (String) vertexName
                         , (String) predicate
                         , (boolean) prop.excludeFromSearch ? true : false
+                        , (boolean) prop.excludeFromUpdate ? true : false
                         , sb
                 )
                 matchReqs.add(mreq)
@@ -805,18 +816,32 @@ def updateExistingVertexWithMatchReqs(g, Long vertexId, List<MatchReq> matchReqs
 
     localTrav = localTrav.V(vertexId)
 
+    boolean atLeastOneUpdate = false;
     matchReqsForThisVertexType.each { it ->
-        String propName = it.getPropName();
-        sb?.append("\n in updateExistingVertexWithMatchReqs() - updating new vertex of id = ${vertexId} prop=${propName} val = it.attribNativeVal")
+        if (! it.excludeFromUpdate){
 
-        deletionTrav.V(vertexId).properties(it.getPropName()).drop().iterate()
-        localTrav = localTrav.property(propName, it.attribNativeVal)
+            String propName = it.getPropName();
+            sb?.append("\n in updateExistingVertexWithMatchReqs() - updating new vertex of id = ${vertexId} prop=${propName} val = it.attribNativeVal")
+
+            deletionTrav.V(vertexId).properties(it.getPropName()).drop().iterate()
+            localTrav = localTrav.property(propName, it.attribNativeVal)
+            atLeastOneUpdate = true
+
+        }
     }
-    localTrav.iterate()
+
+    if (atLeastOneUpdate){
+        localTrav.iterate()
+        sb?.append("\n in updateExistingVertexWithMatchReqs() - updated vertex with  id ${vertexId}")
+
+    }
+    else{
+        sb?.append("\n in updateExistingVertexWithMatchReqs() - SKIPPED UPDATES for  vertex with id ${vertexId}")
+
+    }
 
     // Long retVal = localTrav.next().id() as Long
 
-    sb?.append("\n in updateExistingVertexWithMatchReqs() - updated vertex of id ${vertexId}")
     // return retVal
 
 
@@ -924,22 +949,26 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
 
         if (fromId != null && toId != null){
 
-          def foundIds = gTrav.V(toId)
-                  .both()
-                  .hasId(within(fromId)).id()
-                  .toSet() as Long[]
+            def foundIds = gTrav.V(toId)
+                    .both()
+                    .hasId(within(fromId)).id()
+                    .toSet() as Long[]
 
-          sb?.append("\n in createEdges $foundIds")
+            sb?.append("\n in createEdges $foundIds")
 
-          if (foundIds.size() == 0){
-              def fromV = gTrav.V(fromId)
-              def toV = gTrav.V(toId)
-              sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId")
-              gTrav.addE(it.label).from(fromV).to(toV).next()
-          }
+            if (foundIds.size() == 0){
+                def fromV = gTrav.V(fromId)
+                def toV = gTrav.V(toId)
+                sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId")
+                gTrav.addE(it.label).from(fromV).to(toV).next()
+            }
+            else{
+                sb?.append("\n in createEdges SKIPPING Edge creations")
+
+            }
         }
         else{
-           sb?.append("\n in createEdges SKIPPING Edge creations")
+            sb?.append("\n in createEdges SKIPPING Edge creations")
 
         }
 
@@ -1013,10 +1042,6 @@ def ingestDataUsingRules(graph, g, List<Map<String, String>> listOfMaps, String 
 }
 
 /*
-
-
-//NOTE: FOR SOME REASON, THE Object.Insurance_Policy is not working as expected!!!  check whether it's the flag
-// to exclude from search that is causing trouble!!!
 
 
 def jsonSlurper = new JsonSlurper()
@@ -1306,91 +1331,118 @@ def rulesStr =  '''
   "updatereq":
   {
 
-   ,"vertices":
-        [
-          {
-            "label": "Person"
-           ,"props":
-                [
-                  {
-                    "name": "Person.Full_Name"
-                   ,"val": "${pg_FirstName?.toUpperCase() } ${pg_LastName?.toUpperCase()}"
-                   ,"predicate": "textContains"
-                  }
-                 ,{
-                        "name": "Person.Last_Name"
-                   ,"val": "${pg_LastName?.toUpperCase()}"
-                  }
-                 ,{
-                        "name": "Person.Date_Of_Birth"
-                   ,"val": "${pg_DateofBirth}"
-                   ,"type": "java.util.Date"
-                  }
-                 ,{
-                        "name": "Person.Gender"
-                   ,"val": "${pg_Sex}"
-                  }
-                ]
-          }
-         ,{
-            "label": "Location.Address"
-        ,"props":
-                [
-                  {
-                    "name": "Location.Address.parser.postcode"
-                   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
-                  }
-                 ,{
-                        "name": "Location.Address.parser.city"
-                   ,"val": "${pg_City?.toLowerCase()}"
-                  }
-                 ,{
-                        "name": "Location.Address.Post_Code"
-                   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
-                   ,"excludeFromSearch": true
-                  }
-                ]
+    "vertices":
+	[
+	  {
+		"label": "Person"
+	   ,"props":
+			[
+			  {
+				"name": "Person.Full_Name"
+			   ,"val": "${pg_FirstName?.toUpperCase() } ${pg_LastName?.toUpperCase()}"
+			   ,"predicate": "textContains"
+			  }
+			 ,{
+					"name": "Person.Last_Name"
+			   ,"val": "${pg_LastName?.toUpperCase()}"
+			  }
+			 ,{
+					"name": "Person.Date_Of_Birth"
+			   ,"val": "${pg_DateofBirth}"
+			   ,"type": "java.util.Date"
+			  }
+			 ,{
+					"name": "Person.Gender"
+			   ,"val": "${pg_Sex}"
+			  }
+			]
+	  }
+	 ,{
+		"label": "Location.Address"
+	,"props":
+			[
+			  {
+				"name": "Location.Address.parser.postcode"
+			   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
+			  }
+			 ,{
+					"name": "Location.Address.parser.city"
+			   ,"val": "${pg_City?.toLowerCase()}"
+			  }
+			 ,{
+					"name": "Location.Address.Post_Code"
+			   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
+			   ,"excludeFromSearch": true
+			  }
+			]
 
-          }
-         ,{
-            "label": "Object.Email_Address"
-                ,"props":
-                [
-                  {
-                    "name": "Object.Email_Address.Email"
-                   ,"val": "${pg_PrimaryEmailAddress}"
-                  }
-                ]
+	  }
+	 ,{
+		"label": "Object.Email_Address"
+			,"props":
+			[
+			  {
+				"name": "Object.Email_Address.Email"
+			   ,"val": "${pg_PrimaryEmailAddress}"
+			  }
+			]
 
-          }
-         ,{
-            "label": "Object.Insurance_Policy"
-                ,"props":
-                [
-                  {
-                    "name": "Object.Insurance_Policy.Number"
-                   ,"val": "${pg_Policynumber}"
-                  }
-                 ,{
-                    "name": "Object.Insurance_Policy.Type"
-                   ,"val": "${pg_PolicyType}"
-                  }
-                 ,{
-                        "name": "Object.Insurance_Policy.Status"
-                   ,"val": "${pg_PolicyStatus}"
-                   ,"excludeFromSearch": true
-                  }
+	  }
+	 ,{
+		"label": "Object.Insurance_Policy"
+			,"props":
+			[
+			  {
+				"name": "Object.Insurance_Policy.Number"
+			   ,"val": "${pg_Policynumber}"
+			  }
+			 ,{
+				"name": "Object.Insurance_Policy.Type"
+			   ,"val": "${pg_PolicyType}"
+			  }
+			 ,{
+					"name": "Object.Insurance_Policy.Status"
+			   ,"val": "${pg_PolicyStatus}"
+			   ,"excludeFromSearch": true
+			  }
 
-                ]
+			]
 
-          }
+	  }
+	 ,{
+		"label": "Event.Ingestion"
+	   ,"props":
+		[
+		  {
+			"name": "Event.Ingestion.Type"
+		   ,"val": "MarketingEmailSystem"
+		   ,"excludeFromSearch": true
+		  }
+		 ,{
+			"name": "Event.Ingestion.Operation"
+		   ,"val": "Upsert"
+		   ,"excludeFromSearch": true
+		  }
+		 ,{
+			"name": "Event.Ingestion.Domain_b64"
+		   ,"val": "${original_request?.bytes?.encodeBase64()?.toString()}"
+		   ,"excludeFromSearch": true
+		  }
+		 ,{
+			"name": "Event.Ingestion.Metadata_Create_Date"
+		   ,"val": "${new Date()}"
+		   ,"excludeFromSearch": true
+		  }
 
-        ]
+		]
+	  }
+	]
    ,"edges":
     [
       { "label": "Uses_Email", "fromVertexLabel": "Person", "toVertexLabel": "Object.Email_Address" }
-         ,{     "label": "Lives", "fromVertexLabel": "Person", "toVertexLabel": "Location.Address"  }
-         ,{     "label": "Has_Policy", "fromVertexLabel": "Person", "toVertexLabel": "Object.Insurance_Policy"  }
+     ,{ "label": "Lives", "fromVertexLabel": "Person", "toVertexLabel": "Location.Address"  }
+     ,{ "label": "Has_Policy", "fromVertexLabel": "Person", "toVertexLabel": "Object.Insurance_Policy"  }
+     ,{ "label": "Has_Ingestion_Event", "fromVertexLabel": "Person", "toVertexLabel": "Event.Ingestion"  }
     ]
   }
 }
@@ -1403,13 +1455,10 @@ StringBuffer sb = new StringBuffer ()
 
 // sb.append("${PostCode.format(pg_ZipCode)}")
 try{
-ingestDataUsingRules(graph, g, listOfMaps, rulesStr, sb)
+    ingestDataUsingRules(graph, g, listOfMaps, rulesStr, sb)
 }
 catch (Throwable t){
     String stackTrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t)
-    // Arrays.stream( t.getStackTrace())
-    //               .map( { s -> s.toString() })
-    //               .collect(Collectors.joining("\n"));
 
     sb.append("\n$t\n$stackTrace")
 
@@ -1422,4 +1471,6 @@ sb.toString()
 
 // describeSchema()
 // g.V()
+
+
 */
