@@ -1,3 +1,4 @@
+
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
 import com.pontusvision.jpostal.AddressExpander
@@ -24,9 +25,9 @@ def benchmark = { closure ->
 }
 /// NOTE : look at groovy subsequences, then iterate, and check which ones are unique().size() == .size()
 
-//def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attribType":"java.lang.String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["01/03/1933","11/03/1933","01/03/2011","01/01/1666"],"attribType":"java.util.Date","propName":"Person.Date_Of_Birth","vertexName":"Person","predicateStr":"eq"},{"attribVals":["SW1W 9QL","E14 4BB","60412"],"attribType":"java.lang.String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
-//def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attribType":"java.lang.String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["01/03/1933","11/03/1933","01/03/2011","01/01/1666"],"attribType":"java.util.Date","propName":"Person.Date_Of_Birth","vertexName":"Person","predicateStr":"eq"},{"attribVals":["SW1W 9QL","E14 4BB","60412"],"attribType":"java.lang.String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
-// def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attribType":"java.lang.String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["SW1W 9QL","E14 4BB","60412"],"attribType":"java.lang.String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
+//def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["Martins","Zukker","Silva", "owens"],'
+//def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attrib'
+// def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attri'
 
 //StringBuffer sb = new StringBuffer();
 // String.mixin(PVConvMixin)
@@ -41,7 +42,7 @@ def benchmark = { closure ->
 // .has('Person.Date_Of_Birth',eq (new Date("Tue Mar 01 00:00:00 UTC 2011")))
 // g.V().has('Metadata.Type.Person',eq('Person'))
 // .has('Person.Full_Name',eq('chris owens'))
-// def test = [41005304, 122900712, 204845216, 122921056, 122896536, 81928200, 122884248, 81969160, 81960968, 122958056, 81944664, 40964344, 204869792, 41025784, 163868912, 122892360, 122925128, 122904672, 41005304, 40980728, 204820640, 81965144, 204857504, 41033976, 204882080, 81973256, 122892520, 81948760, 122888288, 122937496, 204853408, 122916960, 41005304, 41005304, 41005304, 41005304, 41005304]
+// def test = [41005304, 122900712, 204845216, 122921056, 122896536, 81928200, 122884248, 81969160, 81960968, 122958056, 81944664, 40964344, 204869792, 41025784, 163868912, 122892360, 122925128, 122904672, 41005304, 40980728, 204820640,]
 // Map counts = test.countBy{ it }
 
 // sb?.append("\n\ncounts = $counts")
@@ -198,14 +199,14 @@ class PVConvMixin {
 //            "dd/MM/yy",
 //            "d M y",
 //            "d-m-y",
-//            "yyyy.MM.dd G 'at' HH:mm:ss z", //	2001.07.04 AD at 12:08:56 PDT
-//            "EEE, MMM d, ''yy", //	Wed, Jul 4, '01
-//            "h:mm a", //	12:08 PM
+//            "yyyy.MM.dd G 'at' HH:mm:ss z", //        2001.07.04 AD at 12:08:56 PDT
+//            "EEE, MMM d, ''yy", //    Wed, Jul 4, '01
+//            "h:mm a", //      12:08 PM
 //            "hh 'o''clock' a, zzzz", //12 o'clock PM, Pacific Daylight Time
 //            "K:mm a, z", //0:08 PM, PDT
-//            "yyyyy.MMMMM.dd GGG hh:mm aaa", //	02001.July.04 AD 12:08 PM
-//            "EEE, d MMM yyyy HH:mm:ss Z", //	Wed, 4 Jul 2001 12:08:56 -0700
-//            "yyMMddHHmmssZ", //	010704120856-0700
+//            "yyyyy.MMMMM.dd GGG hh:mm aaa", //        02001.July.04 AD 12:08 PM
+//            "EEE, d MMM yyyy HH:mm:ss Z", //  Wed, 4 Jul 2001 12:08:56 -0700
+//            "yyMMddHHmmssZ", //       010704120856-0700
 //            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",  // 2001-07-04T12:08:56.235-0700
 //            "yyyy-MM-dd'T'HH:mm:ss",  // 2001-07-04T12:08:56.235-0700
 //            "M",
@@ -510,35 +511,35 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 /*
 {
   "reqs": [
-  	{
-  		"attribVals":["Leo","Mark", "Mardy"],
-  		"attribType": "String",
-  		"propName": "Person.Full_Name",
-  		"vertexName": "Person",
-  		"predicateStr": "textFuzzy"
-  	}
-  	,{
-  		"attribVals":["Martins","Zukker", "Silva"],
-  		"attribType": "String",
-  		"propName": "Person.Last_Name",
-  		"vertexName": "Person",
-  		"predicateStr": "textFuzzy"
-  	}
-  	,{
-  		"attribVals":["01/03/1933","11/03/1933", "01/03/2011"],
-  		"attribType": "java.util.Date",
-  		"propName": "Person.Date_Of_Birth",
-  		"vertexName": "Person",
-  		"predicateStr": "eq"
-  	}
+        {
+                "attribVals":["Leo","Mark", "Mardy"],
+                "attribType": "String",
+                "propName": "Person.Full_Name",
+                "vertexName": "Person",
+                "predicateStr": "textFuzzy"
+        }
+        ,{
+                "attribVals":["Martins","Zukker", "Silva"],
+                "attribType": "String",
+                "propName": "Person.Last_Name",
+                "vertexName": "Person",
+                "predicateStr": "textFuzzy"
+        }
+        ,{
+                "attribVals":["01/03/1933","11/03/1933", "01/03/2011"],
+                "attribType": "java.util.Date",
+                "propName": "Person.Date_Of_Birth",
+                "vertexName": "Person",
+                "predicateStr": "eq"
+        }
 
-  	,{
-  		"attribVals":["SW1W 9QL","E14 4BB", "SW1W 3LL"],
-  		"attribType": "String",
-  		"propName": "Location.Address.Post_Code",
-  		"vertexName": "Location.Address",
-  		"predicateStr": "eq"
-  	}
+        ,{
+                "attribVals":["SW1W 9QL","E14 4BB", "SW1W 3LL"],
+                "attribType": "String",
+                "propName": "Location.Address.Post_Code",
+                "vertexName": "Location.Address",
+                "predicateStr": "eq"
+        }
   ]
 }
  */
@@ -921,19 +922,25 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
 
         sb?.append("\n in createEdges; from=$fromId; to=$toId ")
 
+        if (fromId != null && toId != null){
 
-        def foundIds = gTrav.V(toId)
-                .both()
-                .hasId(within(fromId)).id()
-                .toSet() as Long[]
+          def foundIds = gTrav.V(toId)
+                  .both()
+                  .hasId(within(fromId)).id()
+                  .toSet() as Long[]
 
-        sb?.append("\n in createEdges $foundIds")
+          sb?.append("\n in createEdges $foundIds")
 
-        if (foundIds.size() == 0) {
-            def fromV = gTrav.V(fromId)
-            def toV = gTrav.V(toId)
+          if (foundIds.size() == 0){
+              def fromV = gTrav.V(fromId)
+              def toV = gTrav.V(toId)
+              sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId")
+              gTrav.addE(it.label).from(fromV).to(toV).next()
+          }
+        }
+        else{
+           sb?.append("\n in createEdges SKIPPING Edge creations")
 
-            gTrav.addE(it.label).from(fromV).to(toV).next()
         }
 
 
@@ -1300,90 +1307,90 @@ def rulesStr =  '''
   {
 
    ,"vertices":
-	[
-	  {
-	    "label": "Person"
-	   ,"props":
-		[
-		  {
-		    "name": "Person.Full_Name"
-		   ,"val": "${pg_FirstName?.toUpperCase() } ${pg_LastName?.toUpperCase()}"
-		   ,"predicate": "textContains"
-		  }
-		 ,{
-		 	"name": "Person.Last_Name"
-		   ,"val": "${pg_LastName?.toUpperCase()}"
-		  }
-		 ,{
-		 	"name": "Person.Date_Of_Birth"
-		   ,"val": "${pg_DateofBirth}"
-		   ,"type": "java.util.Date"
-		  }
-		 ,{
-		 	"name": "Person.Gender"
-		   ,"val": "${pg_Sex}"
-		  }
-		]
-	  }
-	 ,{
-	    "label": "Location.Address"
-	,"props":
-		[
-		  {
-		    "name": "Location.Address.parser.postcode"
-		   ,"val": "${pg_ZipCode}"
-		  }
-		 ,{
-		 	"name": "Location.Address.parser.city"
-		   ,"val": "${pg_City?.toLowerCase()}"
-		  }
-		 ,{
-		 	"name": "Location.Address.Post_Code"
-		   ,"val": "${pg_ZipCode}"
-		   ,"excludeFromSearch": true
-		  }
-		]
+        [
+          {
+            "label": "Person"
+           ,"props":
+                [
+                  {
+                    "name": "Person.Full_Name"
+                   ,"val": "${pg_FirstName?.toUpperCase() } ${pg_LastName?.toUpperCase()}"
+                   ,"predicate": "textContains"
+                  }
+                 ,{
+                        "name": "Person.Last_Name"
+                   ,"val": "${pg_LastName?.toUpperCase()}"
+                  }
+                 ,{
+                        "name": "Person.Date_Of_Birth"
+                   ,"val": "${pg_DateofBirth}"
+                   ,"type": "java.util.Date"
+                  }
+                 ,{
+                        "name": "Person.Gender"
+                   ,"val": "${pg_Sex}"
+                  }
+                ]
+          }
+         ,{
+            "label": "Location.Address"
+        ,"props":
+                [
+                  {
+                    "name": "Location.Address.parser.postcode"
+                   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
+                  }
+                 ,{
+                        "name": "Location.Address.parser.city"
+                   ,"val": "${pg_City?.toLowerCase()}"
+                  }
+                 ,{
+                        "name": "Location.Address.Post_Code"
+                   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
+                   ,"excludeFromSearch": true
+                  }
+                ]
 
-	  }
-	 ,{
-	    "label": "Object.Email_Address"
-		,"props":
-		[
-		  {
-		    "name": "Object.Email_Address.Email"
-		   ,"val": "${pg_PrimaryEmailAddress}"
-		  }
-		]
+          }
+         ,{
+            "label": "Object.Email_Address"
+                ,"props":
+                [
+                  {
+                    "name": "Object.Email_Address.Email"
+                   ,"val": "${pg_PrimaryEmailAddress}"
+                  }
+                ]
 
-	  }
-	 ,{
-	    "label": "Object.Insurance_Policy"
-		,"props":
-		[
-		  {
-		    "name": "Object.Insurance_Policy.Number"
-		   ,"val": "${pg_Policynumber}"
-		  }
-		 ,{
-		    "name": "Object.Insurance_Policy.Type"
-		   ,"val": "${pg_PolicyType}"
-		  }
-		 ,{
-		 	"name": "Object.Insurance_Policy.Status"
-		   ,"val": "${pg_PolicyStatus}"
-		   ,"excludeFromSearch": true
-		  }
+          }
+         ,{
+            "label": "Object.Insurance_Policy"
+                ,"props":
+                [
+                  {
+                    "name": "Object.Insurance_Policy.Number"
+                   ,"val": "${pg_Policynumber}"
+                  }
+                 ,{
+                    "name": "Object.Insurance_Policy.Type"
+                   ,"val": "${pg_PolicyType}"
+                  }
+                 ,{
+                        "name": "Object.Insurance_Policy.Status"
+                   ,"val": "${pg_PolicyStatus}"
+                   ,"excludeFromSearch": true
+                  }
 
-		]
+                ]
 
-	  }
+          }
 
-	]
+        ]
    ,"edges":
     [
       { "label": "Uses_Email", "fromVertexLabel": "Person", "toVertexLabel": "Object.Email_Address" }
-	 ,{	"label": "Lives", "fromVertexLabel": "Person", "toVertexLabel": "Location.Address"  }
-	 ,{	"label": "Has_Policy", "fromVertexLabel": "Person", "toVertexLabel": "Object.Insurance_Policy"  }
+         ,{     "label": "Lives", "fromVertexLabel": "Person", "toVertexLabel": "Location.Address"  }
+         ,{     "label": "Has_Policy", "fromVertexLabel": "Person", "toVertexLabel": "Object.Insurance_Policy"  }
     ]
   }
 }
@@ -1396,7 +1403,7 @@ StringBuffer sb = new StringBuffer ()
 
 // sb.append("${PostCode.format(pg_ZipCode)}")
 try{
-    ingestDataUsingRules(graph, g, listOfMaps, rulesStr, sb)
+ingestDataUsingRules(graph, g, listOfMaps, rulesStr, sb)
 }
 catch (Throwable t){
     String stackTrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t)
