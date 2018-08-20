@@ -14,7 +14,7 @@ scriptEngines: {
   gremlin-groovy: {
     plugins: { org.apache.tinkerpop.gremlin.server.jsr223.GremlinServerGremlinPlugin: {},
                org.apache.tinkerpop.gremlin.tinkergraph.jsr223.TinkerGraphGremlinPlugin: {},
-               org.apache.tinkerpop.gremlin.jsr223.ImportGremlinPlugin: {classImports: [java.lang.Math, com.pontusvision.gdpr.CIDRUtils], methodImports: [java.lang.Math#*]},
+               org.apache.tinkerpop.gremlin.jsr223.ImportGremlinPlugin: {classImports: [java.lang.Math, com.pontusvision.gdpr.CIDRUtils, com.joestelmach.natty.DateGroup, com.joestelmach.natty.Parser, com.pontusvision.jpostal.AddressParser ,com.pontusvision.jpostal.ParsedComponent], methodImports: [java.lang.Math#*]},
                org.apache.tinkerpop.gremlin.jsr223.ScriptFileGremlinPlugin: {files: [/opt/pontus/pontus-graph/current/conf/globals.groovy ,/opt/pontus/pontus-graph/current/conf/gdpr-schema.groovy,/opt/pontus/pontus-graph/current/conf/matching.groovy,/opt/pontus/pontus-graph/current/conf/formio.groovy   ,  /opt/pontus/pontus-graph/current/conf/gdpr.groovy, /opt/pontus/pontus-graph/current/conf/bootstrap.groovy]}
                }}}
 
