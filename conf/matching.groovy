@@ -8,6 +8,7 @@ import com.joestelmach.natty.Parser
 import com.pontusvision.jpostal.AddressExpander
 import com.pontusvision.jpostal.AddressParser
 import com.pontusvision.jpostal.ParsedComponent
+import com.pontusvision.utils.PostCode
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
@@ -294,52 +295,6 @@ def class PVValTemplate {
 
 }
 
-def class PostCode {
-    static String regex = '^(([A-Z][A-HJ-Y]?\\d[A-Z\\d]?|ASCN|STHL|TDCU|BBND|[BFS]IQQ|PCRN|TKCA) ?\\d[A-Z]{2}|BFPO ?\\d{1,4}|(KY\\d|MSR|VG|AI)[ -]?\\d{4}|[A-Z]{2} ?\\d{2}|GE ?CX|GIR ?0A{2}|SAN ?TA1)$'
-    static Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-
-    String postCodeFormatted;
-
-    static String format(String raw) {
-
-        String rawLowerCase = raw.toLowerCase()
-        final Matcher matcher = pattern.matcher(rawLowerCase);
-
-        StringBuffer retVal = new StringBuffer();
-        while (matcher.find()) {
-            def fullPostCode = matcher.group(0);
-            int ilen = matcher.groupCount()
-            def firstHalf = fullPostCode
-            for (int i = 1; i <= ilen; i++) {
-                def currStr = matcher.group(i)
-                if (currStr != null && currStr != fullPostCode) {
-                    firstHalf = currStr
-                }
-            }
-            firstHalf = firstHalf.trim()
-            def secondHalf = fullPostCode - firstHalf // = fullPostCode.split(groupFound)
-            secondHalf = secondHalf.trim()
-
-            retVal.append(firstHalf).append(' ').append(secondHalf)
-//            sb?.append("\n${label}:${firstHalf} ${secondHalf}")
-        }
-        if (retVal.size() == 0) {
-            retVal.append(rawLowerCase)
-        }
-        return retVal.toString()
-
-
-    }
-
-
-    PostCode(String postCodeRaw) {
-        postCodeFormatted = format(postCodeRaw)
-    }
-
-    String toString() {
-        return postCodeFormatted;
-    }
-}
 
 class MatchReq<T> {
 
