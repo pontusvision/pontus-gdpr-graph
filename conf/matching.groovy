@@ -1,11 +1,9 @@
-
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
 import com.pontusvision.jpostal.AddressExpander
 import com.pontusvision.jpostal.AddressParser
 import com.pontusvision.jpostal.ParsedComponent
 import com.pontusvision.utils.PostCode
-import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
@@ -14,39 +12,15 @@ import org.codehaus.groovy.runtime.StringGroovyMethods
 
 import java.util.concurrent.ConcurrentHashMap
 
-// String.mixin(DateConvMixin2)
 
-
+/*
 def benchmark = { closure ->
     start = System.nanoTime()
     closure.call()
     now = System.nanoTime()
     now - start
 }
-/// NOTE : look at groovy subsequences, then iterate, and check which ones are unique().size() == .size()
-
-//def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVals":["Martins","Zukker","Silva", "owens"],'
-//def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attrib'
-// def jsonData = '{"reqs":[{"attribVals":["chris owens","Mark","Mardy"],"attribType":"java.lang.String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"eq"},{"attribVals":["Martins","Zukker","Silva", "owens"],"attri'
-
-//StringBuffer sb = new StringBuffer();
-// String.mixin(PVConvMixin)
-
-// try {
-//matchPerson(jsonData,  sb ,  g , "Person")
-// } catch (Throwable t){
-//   sb?.append("\n Failed to match Person; err: $t")
-// }
-// g.V().has('Metadata.Type.Person',eq('Person'))
-//     .has('Person.Last_Name',eq('owens'))
-// .has('Person.Date_Of_Birth',eq (new Date("Tue Mar 01 00:00:00 UTC 2011")))
-// g.V().has('Metadata.Type.Person',eq('Person'))
-// .has('Person.Full_Name',eq('chris owens'))
-// def test = [41005304, 122900712, 204845216, 122921056, 122896536, 81928200, 122884248, 81969160, 81960968, 122958056, 81944664, 40964344, 204869792, 41025784, 163868912, 122892360, 122925128, 122904672, 41005304, 40980728, 204820640,]
-// Map counts = test.countBy{ it }
-
-// sb?.append("\n\ncounts = $counts")
-//sb?.toString()
+*/
 
 
 class LocationAddress {
@@ -193,29 +167,6 @@ class Convert<T> {
 }
 
 class PVConvMixin {
-
-//    static List<String> dateFormats = [
-//            "dd/MM/yyyy",
-//            "dd/MM/yy",
-//            "d M y",
-//            "d-m-y",
-//            "yyyy.MM.dd G 'at' HH:mm:ss z", //        2001.07.04 AD at 12:08:56 PDT
-//            "EEE, MMM d, ''yy", //    Wed, Jul 4, '01
-//            "h:mm a", //      12:08 PM
-//            "hh 'o''clock' a, zzzz", //12 o'clock PM, Pacific Daylight Time
-//            "K:mm a, z", //0:08 PM, PDT
-//            "yyyyy.MMMMM.dd GGG hh:mm aaa", //        02001.July.04 AD 12:08 PM
-//            "EEE, d MMM yyyy HH:mm:ss Z", //  Wed, 4 Jul 2001 12:08:56 -0700
-//            "yyMMddHHmmssZ", //       010704120856-0700
-//            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",  // 2001-07-04T12:08:56.235-0700
-//            "yyyy-MM-dd'T'HH:mm:ss",  // 2001-07-04T12:08:56.235-0700
-//            "M",
-//            "y"
-//
-//
-//    ];
-
-//    private static List<SimpleDateFormat> dateFormatters = []
 
 
     static final def convert = StringGroovyMethods.&asType
@@ -449,7 +400,6 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
     HashMap<String, List<MatchReq>> matchReqByVertexName = new HashMap<>();
 
-
     matchReqs.each {
         List<MatchReq> matchReqList = matchReqByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() });
         matchReqList.push(it)
@@ -462,11 +412,16 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
         def gtrav = gTrav
 
+        int expectedSizeOfQueries = v.unique{a, b -> a.propName <=> b.propName}.size()
 
-        def matchReqByPropName = new HashMap<String, List<MatchReq>>()
+
 
         // HashMap<Object, MatchReq>  params = new HashMap<>();
 
+        // NOTICE: MUST GET this to only do a Full match across all the elements in the property name;
+        // otherwise, with large datasets, the other subsequences of smaller sizes may return loads of
+        // false positives, and many false negatives (e.g. if a person lives in London, we may end up with
+        // loads of hits for London, and with the cap, we may exclude the real match).
 
         def subs = v.subsequences()
 
@@ -480,7 +435,8 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
             // comparator here rather than at the class so
             // the subsequences can do its job without repetition
 
-            if (it.size() == it.unique { entry -> entry.propName }.size()) {
+//            if (it.size() == it.unique { entry -> entry.propName }.size()) { SEE NOTICE ABOVE TO SEE WHY THIS IS COMMENTED OUT (LPPM - 21/08/2018)
+            if (it.size() == expectedSizeOfQueries) {
 
                 def searchableItems = it.findAll { it2 -> !it2.excludeFromSearch }
 
@@ -517,105 +473,6 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
 }
 
-/*
-{
-  "reqs": [
-        {
-                "attribVals":["Leo","Mark", "Mardy"],
-                "attribType": "String",
-                "propName": "Person.Full_Name",
-                "vertexName": "Person",
-                "predicateStr": "textFuzzy"
-        }
-        ,{
-                "attribVals":["Martins","Zukker", "Silva"],
-                "attribType": "String",
-                "propName": "Person.Last_Name",
-                "vertexName": "Person",
-                "predicateStr": "textFuzzy"
-        }
-        ,{
-                "attribVals":["01/03/1933","11/03/1933", "01/03/2011"],
-                "attribType": "java.util.Date",
-                "propName": "Person.Date_Of_Birth",
-                "vertexName": "Person",
-                "predicateStr": "eq"
-        }
-
-        ,{
-                "attribVals":["SW1W 9QL","E14 4BB", "SW1W 3LL"],
-                "attribType": "String",
-                "propName": "Location.Address.Post_Code",
-                "vertexName": "Location.Address",
-                "predicateStr": "eq"
-        }
-  ]
-}
- */
-
-def matchVertices(gTrav = g, String jsonData, String targetType = "Person", int maxHitsPerType, StringBuffer sb = null) {
-
-
-    def jsonSlurper = new JsonSlurper();
-
-
-    def object = jsonSlurper.parseText(jsonData);
-
-    if (object.reqs instanceof List) {
-
-        int size = object.reqs.size();
-        List<MatchReq> matchReqs = new ArrayList<>(size)
-
-        object.reqs.each { it ->
-
-            if (it) {
-
-                Class nativeType;
-                if (it.attribType == null) {
-                    nativeType = String.class
-                } else {
-                    nativeType = Class.forName((String) it.attribType)
-                }
-
-                def attribList
-                if (it.attribVals instanceof String) {
-                    attribList = JsonOutput.toJson(it.attribVals)
-                } else { //if (it.attribVals instanceof Collection){
-                    attribList = it.attribVals
-                }
-
-
-                attribList?.each { it2 ->
-
-                    sb?.append("\nAdding new MatchReq ($it2, $nativeType, ${it.attribType})")
-                    //    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, StringBuffer sb = null) {
-
-                    MatchReq mreq = new MatchReq(
-                            (String) it2
-                            , nativeType
-                            , (String) it.propName
-                            , (String) it.vertexName
-                            , (String) it.predicate ?: "eq"
-                            , (boolean) it.excludeFromSearch ? true : false
-                            , (boolean) it.excludeFromUpdate ? true : false
-                            , sb
-                    )
-
-                    matchReqs.add(mreq)
-                }
-            }
-
-
-        }
-        return matchVertices(gTrav, matchReqs, maxHitsPerType, sb)
-
-
-    }
-
-    sb?.toString()
-
-    return new Collections.EmptyMap<String, List<Long>>();
-}
 
 
 def getTopHits(HashMap<String, List<Long>> vertexListsByVertexName, String targetType, int countThreshold, StringBuffer sb = null) {
@@ -702,6 +559,8 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
     List<MatchReq> matchReqs = new ArrayList<>(rules.vertices.size())
 
+    JsonSlurper slurper = new JsonSlurper()
+
     rules.vertices.each { vtx ->
 
         String vertexName = vtx.label
@@ -718,20 +577,51 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
             String propName = prop.name
 
             String propVal = PVValTemplate.getTemplate((String) prop.val).make(binding)
-            if (!"null".equals(propVal)) {
+            if (propVal != null && !"null".equals(propVal)) {
                 String predicate = prop.predicate ?: "eq"
 
-                MatchReq mreq = new MatchReq(
-                        (String) propVal
-                        , nativeType
-                        , (String) propName
-                        , (String) vertexName
-                        , (String) predicate
-                        , (boolean) prop.excludeFromSearch ? true : false
-                        , (boolean) prop.excludeFromUpdate ? true : false
-                        , sb
-                )
-                matchReqs.add(mreq)
+
+                if (nativeType.isArray()) {
+
+                    nativeType = nativeType.getComponentType();
+
+                    def propVals = slurper.parseText(propVal)
+
+
+                    propVals.each { propValItem ->
+                        MatchReq mreq = new MatchReq(
+                                (String) propValItem as String
+                                , nativeType
+                                , (String) propName
+                                , (String) vertexName
+                                , (String) predicate
+                                , (boolean) prop.excludeFromSearch ? true : false
+                                , (boolean) prop.excludeFromUpdate ? true : false
+                                , sb
+                        )
+                        if (mreq.attribNativeVal != null){
+                            matchReqs.add(mreq)
+
+                        }
+
+                    }
+
+
+                } else {
+                    MatchReq mreq = new MatchReq(
+                            (String) propVal
+                            , nativeType
+                            , (String) propName
+                            , (String) vertexName
+                            , (String) predicate
+                            , (boolean) prop.excludeFromSearch ? true : false
+                            , (boolean) prop.excludeFromUpdate ? true : false
+                            , sb
+                    )
+                    matchReqs.add(mreq)
+
+                }
+
 
             }
 
@@ -818,24 +708,34 @@ def updateExistingVertexWithMatchReqs(g, Long vertexId, List<MatchReq> matchReqs
 
     boolean atLeastOneUpdate = false;
     matchReqsForThisVertexType.each { it ->
-        if (! it.excludeFromUpdate){
+        if (!it.excludeFromUpdate && it.attribNativeVal != null) {
 
             String propName = it.getPropName();
-            sb?.append("\n in updateExistingVertexWithMatchReqs() - updating new vertex of id = ${vertexId} prop=${propName} val = it.attribNativeVal")
+            sb?.append("\n in updateExistingVertexWithMatchReqs() - updating new vertex of id = ${vertexId} prop=${propName} val = ${it.attribNativeVal}")
 
-            deletionTrav.V(vertexId).properties(it.getPropName()).drop().iterate()
+            try {
+                deletionTrav.V(vertexId).properties(it.getPropName()).drop().iterate()
+
+            }
+            catch (Throwable t){
+                sb?.append("\n in updateExistingVertexWithMatchReqs() - FAILED TO DELETE  = ${vertexId} prop=${propName} val = ${it.attribNativeVal}; err = $t")
+            }
             localTrav = localTrav.property(propName, it.attribNativeVal)
             atLeastOneUpdate = true
 
         }
+        else
+        {
+            sb?.append("\n in updateExistingVertexWithMatchReqs() - SKIPPING UPDATE either due to null value or excludeFromUpdate == ${it.excludeFromUpdate} ; vertexId = ${vertexId} prop=${it.propName} val = ${it.attribNativeVal} ")
+
+        }
     }
 
-    if (atLeastOneUpdate){
+    if (atLeastOneUpdate) {
         localTrav.iterate()
         sb?.append("\n in updateExistingVertexWithMatchReqs() - updated vertex with  id ${vertexId}")
 
-    }
-    else{
+    } else {
         sb?.append("\n in updateExistingVertexWithMatchReqs() - SKIPPED UPDATES for  vertex with id ${vertexId}")
 
     }
@@ -947,7 +847,7 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
 
         sb?.append("\n in createEdges; from=$fromId; to=$toId ")
 
-        if (fromId != null && toId != null){
+        if (fromId != null && toId != null) {
 
             def foundIds = gTrav.V(toId)
                     .both()
@@ -956,18 +856,16 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
 
             sb?.append("\n in createEdges $foundIds")
 
-            if (foundIds.size() == 0){
+            if (foundIds.size() == 0) {
                 def fromV = gTrav.V(fromId)
                 def toV = gTrav.V(toId)
                 sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId")
                 gTrav.addE(it.label).from(fromV).to(toV).next()
-            }
-            else{
+            } else {
                 sb?.append("\n in createEdges SKIPPING Edge creations")
 
             }
-        }
-        else{
+        } else {
             sb?.append("\n in createEdges SKIPPING Edge creations")
 
         }
@@ -976,8 +874,7 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
     }
 }
 
-
-def ingestDataUsingRules(graph, g, List<Map<String, String>> listOfMaps, String jsonRules, StringBuffer sb = null) {
+def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
 
     def jsonSlurper = new JsonSlurper()
     def rules = jsonSlurper.parseText(jsonRules)
@@ -989,7 +886,72 @@ def ingestDataUsingRules(graph, g, List<Map<String, String>> listOfMaps, String 
             trans.open()
         }
 
-        for (Map<String, String> item in listOfMaps) {
+        def matchReqs = getMatchRequests(bindings, rules.updatereq, jsonRules, sb)
+        def (matchIdsByVertexType, vertexListsByVertexName) = matchVertices(g, matchReqs, 10, sb);
+
+        Map<String, Long> finalVertexIdByVertexName = new HashMap<>();
+        matchIdsByVertexType.each { vertexTypeStr, potentialHitIDs ->
+
+            List<MatchReq> matchReqsForThisVertexType = vertexListsByVertexName.get(vertexTypeStr)
+//            int numHitsRequiredForMatch = matchReqsForThisVertexType?.size()
+//
+//            if (numHitsRequiredForMatch > 0) {
+//                numHitsRequiredForMatch += (numHitsRequiredForMatch - 1)
+//            }
+
+            int numHitsRequiredForMatch = 1;
+
+            Long topHit = getTopHit(g
+                    , potentialHitIDs as Long[]
+                    , (int) numHitsRequiredForMatch
+                    , (HashMap<String, List<Long>>) matchIdsByVertexType
+                    , (String) vertexTypeStr
+                    , (Map<String, List<EdgeRequest>>) edgeReqsByVertexName
+                    , sb)
+
+            if (topHit != null) {
+
+                updateExistingVertexWithMatchReqs(g, topHit, matchReqsForThisVertexType, sb)
+                finalVertexIdByVertexName.put((String) vertexTypeStr, topHit)
+            } else {
+                Long newVertexId = addNewVertexFromMatchReqs(g, (String) vertexTypeStr, matchReqsForThisVertexType, sb)
+                finalVertexIdByVertexName.put((String) vertexTypeStr, newVertexId)
+
+            }
+
+
+        }
+
+        createEdges(g, (Set<EdgeRequest>) edgeReqs, (Map<String, Long>) finalVertexIdByVertexName, sb)
+
+
+
+
+
+
+        trans.commit()
+    } catch (Throwable t) {
+        trans.rollback()
+        throw t
+    } finally {
+        trans.close()
+    }
+}
+
+
+def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, String jsonRules, StringBuffer sb = null) {
+
+    def jsonSlurper = new JsonSlurper()
+    def rules = jsonSlurper.parseText(jsonRules)
+
+    def (edgeReqsByVertexName, edgeReqs) = parseEdges(rules.updatereq)
+    trans = graph.tx()
+    try {
+        if (!trans.isOpen()) {
+            trans.open()
+        }
+
+        for (Map<String, String> item in recordList) {
 
             def matchReqs = getMatchRequests(item, rules.updatereq, jsonRules, sb)
             def (matchIdsByVertexType, vertexListsByVertexName) = matchVertices(g, matchReqs, 10, sb);
@@ -998,11 +960,12 @@ def ingestDataUsingRules(graph, g, List<Map<String, String>> listOfMaps, String 
             matchIdsByVertexType.each { vertexTypeStr, potentialHitIDs ->
 
                 List<MatchReq> matchReqsForThisVertexType = vertexListsByVertexName.get(vertexTypeStr)
-                int numHitsRequiredForMatch = matchReqsForThisVertexType?.size()
-
-                if (numHitsRequiredForMatch > 0) {
-                    numHitsRequiredForMatch += (numHitsRequiredForMatch - 1)
-                }
+                int numHitsRequiredForMatch = 1;
+//                        matchReqsForThisVertexType?.size()
+//
+//                if (numHitsRequiredForMatch > 0) {
+//                    numHitsRequiredForMatch += (numHitsRequiredForMatch - 1)
+//                }
 
                 Long topHit = getTopHit(g
                         , potentialHitIDs as Long[]
@@ -1455,7 +1418,7 @@ StringBuffer sb = new StringBuffer ()
 
 // sb.append("${PostCode.format(pg_ZipCode)}")
 try{
-    ingestDataUsingRules(graph, g, listOfMaps, rulesStr, sb)
+    ingestRecordListUsingRules(graph, g, listOfMaps, rulesStr, sb)
 }
 catch (Throwable t){
     String stackTrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t)
