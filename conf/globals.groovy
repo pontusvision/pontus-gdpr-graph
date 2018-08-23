@@ -225,7 +225,7 @@ def createMixedIdx(def mgmt, String idxName, boolean isEdge, Pair<PropertyKey, M
             def clazz = isEdge ? Edge.class : Vertex.class
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
 
-            for (Pair<PropertyKey, Mapping> pair in pairs) {
+            for (Pair<PropertyKey, Mapping> pair in props) {
 
                 PropertyKey prop = pair.getFirst();
                 Mapping mapping = pair.getSecond();
