@@ -15,7 +15,9 @@ public class PostCode
 
   public static java.lang.String format(java.lang.String raw)
   {
-
+    if (raw == null){
+      return null;
+    }
     java.lang.String rawLowerCase = raw.toLowerCase();
     final java.util.regex.Matcher matcher = pattern.matcher(rawLowerCase);
 
