@@ -1,7 +1,7 @@
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
-import com.pontusvision.utils.PostCode
 import com.pontusvision.utils.LocationAddress
+import com.pontusvision.utils.PostCode
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
@@ -9,7 +9,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.P
 import org.codehaus.groovy.runtime.StringGroovyMethods
 
 import java.util.concurrent.ConcurrentHashMap
-
 
 /*
 def benchmark = { closure ->
@@ -19,8 +18,6 @@ def benchmark = { closure ->
     now - start
 }
 */
-
-
 
 
 class Convert<T> {
@@ -330,9 +327,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
         def gtrav = gTrav
 
-        int expectedSizeOfQueries = v.unique{a, b -> a.propName <=> b.propName}.size()
-
-
+//        int expectedSizeOfQueries = v.unique { a, b -> a.propName <=> b.propName }.size()
 
         // HashMap<Object, MatchReq>  params = new HashMap<>();
 
@@ -340,6 +335,9 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
         // otherwise, with large datasets, the other subsequences of smaller sizes may return loads of
         // false positives, and many false negatives (e.g. if a person lives in London, we may end up with
         // loads of hits for London, and with the cap, we may exclude the real match).
+
+        // NOTICE2: LPPM 23Aug2018 -> actually, it's fine to have the smaller subsequences, as the higher ones
+        // will produce higher counts anyway; otherwise, the NLP logic will be quite hard.
 
         def subs = v.subsequences()
 
@@ -353,8 +351,8 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
             // comparator here rather than at the class so
             // the subsequences can do its job without repetition
 
-//            if (it.size() == it.unique { entry -> entry.propName }.size()) { SEE NOTICE ABOVE TO SEE WHY THIS IS COMMENTED OUT (LPPM - 21/08/2018)
-            if (it.size() == expectedSizeOfQueries) {
+            if (it.size() == it.unique { entry -> entry.propName }.size()) { //SEE NOTICEs ABOVE TO SEE WHY THIS was  COMMENTED OUT (LPPM - 21/08/2018)
+//            if (it.size() == expectedSizeOfQueries) {
 
                 def searchableItems = it.findAll { it2 -> !it2.excludeFromSearch }
 
@@ -390,7 +388,6 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
     return [vertexListsByVertexName, matchReqByVertexName];
 
 }
-
 
 
 def getTopHits(HashMap<String, List<Long>> vertexListsByVertexName, String targetType, int countThreshold, StringBuffer sb = null) {
@@ -468,6 +465,76 @@ def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> other
 
  */
 
+void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String predicate, boolean excludeFromSearch, boolean excludeFromUpdate, String postProcessor, String postProcessorVar, StringBuffer sb = null) {
+
+    MatchReq mreq = null;
+
+    if (nativeType == LocationAddress) {
+
+        LocationAddress addr = LocationAddress.fromString(propValItem as String);
+
+        Class nativeTypeAddrParts = String.class;
+
+        addr.tokens.each { key, val ->
+
+            val.each { it ->
+
+
+                binding.put(postProcessorVar ?: "it", it);
+                String processedVal = (postProcessor != null) ?
+                        PVValTemplate.getTemplate((String) postProcessor).make(binding) :
+                        it;
+
+
+                mreq = new MatchReq(
+                        (String) processedVal as String
+                        , nativeTypeAddrParts
+                        , (String) "${propName}.${key}" as String
+                        , (String) vertexName
+                        , (String) predicate
+                        , (boolean) excludeFromSearch
+                        , (boolean) excludeFromUpdate
+                        , sb
+                );
+
+                if (mreq?.attribNativeVal != null) {
+                    matchReqs.add(mreq)
+
+                }
+            }
+
+        }
+
+
+    } else {
+
+        binding.put(postProcessorVar ?: "it", propValItem);
+
+        String processedVal = (postProcessor != null) ?
+                PVValTemplate.getTemplate((String) postProcessor).make(binding) :
+                propValItem;
+
+        mreq = new MatchReq(
+                (String) processedVal as String
+                , nativeType
+                , (String) propName
+                , (String) vertexName
+                , (String) predicate
+                , (boolean) excludeFromSearch
+                , (boolean) excludeFromUpdate
+                , sb
+
+        );
+
+        if (mreq?.attribNativeVal != null) {
+            matchReqs.add(mreq)
+
+        }
+    }
+
+
+}
+
 def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String rulesJsonStr, StringBuffer sb = null) {
     def binding = currRecord
 
@@ -507,37 +574,41 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
 
                     propVals.each { propValItem ->
-                        MatchReq mreq = new MatchReq(
-                                (String) propValItem as String
+
+                        addNewMatchRequest(
+                                binding
+                                , matchReqs
+                                , (String) propValItem as String
                                 , nativeType
                                 , (String) propName
                                 , (String) vertexName
                                 , (String) predicate
                                 , (boolean) prop.excludeFromSearch ? true : false
                                 , (boolean) prop.excludeFromUpdate ? true : false
+                                , (String) prop.postProcessor ?: null
+                                , (String) prop.postProcessorVar ?: null
                                 , sb
-                        )
-                        if (mreq.attribNativeVal != null){
-                            matchReqs.add(mreq)
+                        );
 
-                        }
 
                     }
 
 
                 } else {
-                    MatchReq mreq = new MatchReq(
-                            (String) propVal
+                    addNewMatchRequest(
+                            binding
+                            , matchReqs
+                            , (String) propVal
                             , nativeType
                             , (String) propName
                             , (String) vertexName
                             , (String) predicate
                             , (boolean) prop.excludeFromSearch ? true : false
                             , (boolean) prop.excludeFromUpdate ? true : false
+                            , (String) prop.postProcessor ?: null
+                            , (String) prop.postProcessorVar ?: null
                             , sb
-                    )
-                    matchReqs.add(mreq)
-
+                    );
                 }
 
 
@@ -635,15 +706,13 @@ def updateExistingVertexWithMatchReqs(g, Long vertexId, List<MatchReq> matchReqs
                 deletionTrav.V(vertexId).properties(it.getPropName()).drop().iterate()
 
             }
-            catch (Throwable t){
+            catch (Throwable t) {
                 sb?.append("\n in updateExistingVertexWithMatchReqs() - FAILED TO DELETE  = ${vertexId} prop=${propName} val = ${it.attribNativeVal}; err = $t")
             }
             localTrav = localTrav.property(propName, it.attribNativeVal)
             atLeastOneUpdate = true
 
-        }
-        else
-        {
+        } else {
             sb?.append("\n in updateExistingVertexWithMatchReqs() - SKIPPING UPDATE either due to null value or excludeFromUpdate == ${it.excludeFromUpdate} ; vertexId = ${vertexId} prop=${it.propName} val = ${it.attribNativeVal} ")
 
         }
