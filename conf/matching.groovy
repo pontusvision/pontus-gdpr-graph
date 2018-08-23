@@ -166,8 +166,10 @@ class MatchReq<T> {
     private Convert<T> conv;
     private StringBuffer sb = null;
 
-    private excludeFromSearch;
-    private excludeFromUpdate;
+    private boolean mandatoryInSearch;
+    private boolean excludeFromSearch;
+    private boolean excludeFromSubsequenceSearch
+    private boolean excludeFromUpdate;
 
     static Closure convertPredicateFromStr(String predicateStr) {
         if ("eq".equals(predicateStr)) {
@@ -200,7 +202,7 @@ class MatchReq<T> {
 
     }
 
-    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromUpdate = false, StringBuffer sb = null) {
+    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromSubsequenceSearch = false, boolean excludeFromUpdate = false, boolean mandatoryInSearch = false,  StringBuffer sb = null) {
         this.attribVal = attribVals
         this.attribType = attribType
 
@@ -212,7 +214,9 @@ class MatchReq<T> {
         this.sb = sb;
 
         this.excludeFromSearch = excludeFromSearch
+        this.excludeFromSubsequenceSearch = excludeFromSubsequenceSearch
         this.excludeFromUpdate = excludeFromUpdate
+        this.mandatoryInSearch = mandatoryInSearch
 
         sb?.append("\n In MatchReq($attribVals, $attribType, $propName, $vertexName, $predicateStr)")
         convertToNativeFormat()
@@ -235,21 +239,36 @@ class MatchReq<T> {
         }
     }
 
+    boolean getMandatoryInSearch() {
+        return mandatoryInSearch
+    }
 
-    def getExcludeFromSearch() {
+    void setMandatoryInSearch(boolean mandatoryInSearch) {
+        this.mandatoryInSearch = mandatoryInSearch
+    }
+
+    boolean getExcludeFromSubsequenceSearch() {
+        return excludeFromSubsequenceSearch
+    }
+
+    void setExcludeFromSubsequenceSearch(boolean excludeFromSubsequenceSearch) {
+        this.excludeFromSubsequenceSearch = excludeFromSubsequenceSearch
+    };
+
+    boolean getExcludeFromSearch() {
         return excludeFromSearch
     }
 
-    void setExcludeFromSearch(excludeFromSearch) {
+    void setExcludeFromSearch(boolean excludeFromSearch) {
         this.excludeFromSearch = excludeFromSearch
     }
 
 
-    def getExcludeFromUpdate() {
+    boolean getExcludeFromUpdate() {
         return excludeFromUpdate
     }
 
-    void setExcludeFromUpdate(excludeFromUpdate) {
+    void setExcludeFromUpdate(boolean excludeFromUpdate) {
         this.excludeFromUpdate = excludeFromUpdate
     }
 
@@ -327,21 +346,43 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
         def gtrav = gTrav
 
-//        int expectedSizeOfQueries = v.unique { a, b -> a.propName <=> b.propName }.size()
+        // LPPM - must do a deep copy here, because unique is a bit nasty and actually changes the
+        // original record.
+        def vFiltered= [];
 
-        // HashMap<Object, MatchReq>  params = new HashMap<>();
+        vFiltered.addAll(v.findAll{ it2 -> !(it2.excludeFromSearch)});
 
-        // NOTICE: MUST GET this to only do a Full match across all the elements in the property name;
-        // otherwise, with large datasets, the other subsequences of smaller sizes may return loads of
-        // false positives, and many false negatives (e.g. if a person lives in London, we may end up with
-        // loads of hits for London, and with the cap, we may exclude the real match).
+        def vCopy2= [];
+        vCopy2.addAll(vFiltered);
 
-        // NOTICE2: LPPM 23Aug2018 -> actually, it's fine to have the smaller subsequences, as the higher ones
-        // will produce higher counts anyway; otherwise, the NLP logic will be quite hard.
 
-        def subs = v.subsequences()
+        def uniqueProps = vCopy2.unique { a, b -> a.propName <=> b.propName }
 
-        // sb?.append("\n $subs")
+        int maxExpectedSizeOfQueries = uniqueProps.size()
+
+
+        def mandatoryFields = uniqueProps.findAll { it2 -> it2.mandatoryInSearch}
+
+        def mandatoryFieldPropNames = []
+        mandatoryFields.each{ it2 ->
+            mandatoryFieldPropNames << it2.propName
+        }
+
+
+
+        def subs = vFiltered.subsequences()
+
+
+//        expectedSizeOfQueries = expectedSizeOfQueries > 2? expectedSizeOfQueries - 1: expectedSizeOfQueries
+
+        // LPPM - 23/08/2018
+        // NOTICE: To get an accurate answer, we need to get this to only do a  match across properties with
+        // relatively few hits; otherwise, with large datasets, the other subsequences of smaller
+        // sizes may return loads of false positives, and many false negatives (e.g. if a person lives
+        // in London, we may end up with loads of hits for London, and with the cap, we may exclude the real
+        // match).  To achieve this, we get all the match requests that have a excludeFromSearch set to false,
+        // for the sequences with the full number of props, and then, for subsequences with smaller values, we
+        // only include entries that have excludeFromSubsequenceSearch set to false.
 
 
         subs.each { it ->
@@ -350,26 +391,41 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
             // Also, we should always this lambda
             // comparator here rather than at the class so
             // the subsequences can do its job without repetition
+            int currSize = it.size();
 
-            if (it.size() == it.unique { entry -> entry.propName }.size()) { //SEE NOTICEs ABOVE TO SEE WHY THIS was  COMMENTED OUT (LPPM - 21/08/2018)
-//            if (it.size() == expectedSizeOfQueries) {
+            if (currSize == it.unique { entry -> entry.propName }.size()) {
 
-                def searchableItems = it.findAll { it2 -> !it2.excludeFromSearch }
+                boolean checkForMandatoryFields = mandatoryFieldPropNames.size() > 0;
 
-                if (searchableItems.size() > 0) {
-                    sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
-                    gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
+                boolean mandatoryFieldChecksOK = true;
+                if (checkForMandatoryFields){
+                    def currFieldPropNames = []
+                    it.each{ it2 ->
+                        currFieldPropNames << it2.propName
+                    }
 
-                    searchableItems.each { it2 ->
-                        gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
-                        sb?.append("\n     .has('")?.append(it2.propName)?.append("',")
-                                ?.append(it2.predicate)?.append(",'")?.append(it2.attribNativeVal)?.append("')")
+                    mandatoryFieldChecksOK = currFieldPropNames.containsAll(mandatoryFieldPropNames);
 
+                }
+                if ( mandatoryFieldChecksOK ) {
+
+                    def searchableItems = it.findAll { it2 -> (!(currSize < maxExpectedSizeOfQueries && it2.excludeFromSubsequenceSearch)) }
+
+                    if (searchableItems.size() > 0) {
+                        sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
+                        gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
+
+                        searchableItems.each { it2 ->
+                            gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
+                            sb?.append("\n     .has('")?.append(it2.propName)?.append("',")
+                                    ?.append(it2.predicate)?.append(",'")?.append(it2.attribNativeVal)?.append("')")
+
+
+                        }
+                        vertexListsByVertexName.get(k).addAll(gtrav.range(0, maxHitsPerType).id().toList() as Long[])
+                        sb?.append("\n $it")
 
                     }
-                    vertexListsByVertexName.get(k).addAll(gtrav.range(0, maxHitsPerType).id().toList() as Long[])
-                    sb?.append("\n $it")
-
                 }
 
 
@@ -465,7 +521,7 @@ def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> other
 
  */
 
-void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String predicate, boolean excludeFromSearch, boolean excludeFromUpdate, String postProcessor, String postProcessorVar, StringBuffer sb = null) {
+void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String predicate, boolean excludeFromSearch, boolean excludeFromSubsequenceSearch, boolean excludeFromUpdate, boolean mandatoryInSearch, String postProcessor, String postProcessorVar, StringBuffer sb = null) {
 
     MatchReq mreq = null;
 
@@ -493,7 +549,9 @@ void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, S
                         , (String) vertexName
                         , (String) predicate
                         , (boolean) excludeFromSearch
+                        , (boolean) excludeFromSubsequenceSearch
                         , (boolean) excludeFromUpdate
+                        , (boolean) mandatoryInSearch
                         , sb
                 );
 
@@ -521,7 +579,9 @@ void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, S
                 , (String) vertexName
                 , (String) predicate
                 , (boolean) excludeFromSearch
+                , (boolean) excludeFromSubsequenceSearch
                 , (boolean) excludeFromUpdate
+                , (boolean) mandatoryInSearch
                 , sb
 
         );
@@ -549,6 +609,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
     rules.vertices.each { vtx ->
 
         String vertexName = vtx.label
+        int minSizeSubsequences = vtx.minSizeSubsequences?: - 1;
         vtx.props.each { prop ->
 
             Class nativeType;
@@ -584,7 +645,9 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
                                 , (String) vertexName
                                 , (String) predicate
                                 , (boolean) prop.excludeFromSearch ? true : false
+                                , (boolean) prop.excludeFromSubsequenceSearch ? true : false
                                 , (boolean) prop.excludeFromUpdate ? true : false
+                                , (boolean) prop.mandatoryInSearch ? true : false
                                 , (String) prop.postProcessor ?: null
                                 , (String) prop.postProcessorVar ?: null
                                 , sb
@@ -604,7 +667,9 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
                             , (String) vertexName
                             , (String) predicate
                             , (boolean) prop.excludeFromSearch ? true : false
+                            , (boolean) prop.excludeFromSubsequenceSearch ? true : false
                             , (boolean) prop.excludeFromUpdate ? true : false
+                            , (boolean) prop.mandatoryInSearch ? true : false
                             , (String) prop.postProcessor ?: null
                             , (String) prop.postProcessorVar ?: null
                             , sb
@@ -991,9 +1056,151 @@ def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, S
     }
 }
 
+
 /*
+def rulesStr = '''
+{
+  "updatereq":
+  {
+
+    "vertices":
+  [
+    {
+    "label": "Person"
+     ,"props":
+    [
+      {
+      "name": "Person.Full_Name"
+       ,"val": "${pg_nlp_res_person}"
+       ,"predicate": "eq"
+       ,"type":"[Ljava.lang.String;"
+       ,"excludeFromUpdate": true
+       ,"postProcessor": "${it?.toUpperCase()}"
+
+      }
+    ]
+    }
+   ,{
+    "label": "Location.Address"
+     ,"props":
+    [
+      {
+      "name": "Location.Address.parser.postcode"
+       ,"val": "${pg_nlp_res_postcode}"
+       ,"type":"[Ljava.lang.String;"
+       ,"postProcessorVar": "eachPostCode"
+       ,"postProcessor": "${com.pontusvision.utils.PostCode.format(eachPostCode)}"
+       ,"excludeFromUpdate": true
+      }
+
+    ]
+
+    }
+   ,{
+    "label": "Object.Email_Address"
+     ,"props":
+    [
+      {
+      "name": "Object.Email_Address.Email"
+       ,"val": "${pg_nlp_res_emailaddress}"
+       ,"type":"[Ljava.lang.String;"
+       ,"excludeFromUpdate": true
+      }
+    ]
+
+    }
+   ,{
+    "label": "Object.Insurance_Policy"
+     ,"props":
+    [
+      {
+      "name": "Object.Insurance_Policy.Number"
+       ,"val": "${pg_nlp_res_policy_number}"
+       ,"type":"[Ljava.lang.String;"
+       ,"excludeFromUpdate": true
+      }
+    ]
+
+    }
+   ,{
+    "label": "Event.Ingestion"
+     ,"props":
+    [
+      {
+      "name": "Event.Ingestion.Type"
+       ,"val": "MarketingEmailSystem"
+       ,"excludeFromSearch": true
+      }
+     ,{
+      "name": "Event.Ingestion.Operation"
+       ,"val": "Upsert"
+       ,"excludeFromSearch": true
+      }
+     ,{
+      "name": "Event.Ingestion.Domain_b64"
+       ,"val": "${original_request?.bytes?.encodeBase64()?.toString()}"
+       ,"excludeFromSearch": true
+      }
+     ,{
+      "name": "Event.Ingestion.Metadata_Create_Date"
+       ,"val": "${new Date()}"
+       ,"excludeFromSearch": true
+      }
+
+    ]
+    }
+  ]
+   ,"edges":
+    [
+      { "label": "Has_Ingestion_Event", "fromVertexLabel": "Person", "toVertexLabel": "Event.Ingestion"  }
+    ]
+  }
+}
+'''
+
+// edgeLabel = createEdgeLabel(mgmt, "Has_Policy")
+// trigger the String.Mixin() call in the static c-tor
+
+// sb.append("${PostCode.format(pg_ZipCode)}")
 
 
+def bindings = [:]
+
+
+bindings['pg_metadataController'] = 'abc inc';
+bindings['pg_metadataGDPRStatus'] = 'Personal';
+bindings['pg_metadataLineage'] = 'https://randomuser.me/api/?format=csv';
+bindings['pg_nlp_res_address'] = '[" ","ddress: "]';
+bindings['pg_nlp_res_company'] = '["DoD"]';
+bindings['pg_nlp_res_cred_card'] = '[]';
+bindings['pg_nlp_res_emailaddress'] = '["retoh@optonline.net"]';
+bindings['pg_nlp_res_location'] = '["Greenock","UK","London","Paris"]';
+bindings['pg_nlp_res_city'] = '[]';
+bindings['pg_nlp_res_person'] = '["John Smith"," ","\t1: "]';
+bindings['pg_nlp_res_phone'] = '[null,"01475545350","01","5350","47","554"]';
+bindings['pg_nlp_res_postcode'] = '["PA15",null,"PA15 4SY"]';
+bindings['pg_nlp_res_policy_number'] = '[]';
+
+
+
+StringBuffer sb = new StringBuffer();
+try {
+    ingestDataUsingRules(graph, g, bindings, rulesStr, sb)
+}
+catch (Throwable t) {
+    String stackTrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t)
+
+    sb.append("\n$t\n$stackTrace")
+
+    throw new Throwable(sb.toString())
+
+
+}
+sb.toString()
+
+*/
+
+/*
 def jsonSlurper = new JsonSlurper()
 def listOfMaps = jsonSlurper.parseText '''
 [ {
@@ -1275,7 +1482,6 @@ def listOfMaps = jsonSlurper.parseText '''
 '''
 
 
-
 def rulesStr =  '''
 {
   "updatereq":
@@ -1286,77 +1492,98 @@ def rulesStr =  '''
 	  {
 		"label": "Person"
 	   ,"props":
-			[
-			  {
-				"name": "Person.Full_Name"
-			   ,"val": "${pg_FirstName?.toUpperCase() } ${pg_LastName?.toUpperCase()}"
-			   ,"predicate": "textContains"
-			  }
-			 ,{
-					"name": "Person.Last_Name"
-			   ,"val": "${pg_LastName?.toUpperCase()}"
-			  }
-			 ,{
-					"name": "Person.Date_Of_Birth"
-			   ,"val": "${pg_DateofBirth}"
-			   ,"type": "java.util.Date"
-			  }
-			 ,{
-					"name": "Person.Gender"
-			   ,"val": "${pg_Sex}"
-			  }
-			]
+		[
+		  {
+			"name": "Person.Full_Name"
+		   ,"val": "${pg_FirstName?.toUpperCase()?.trim()} ${pg_LastName?.toUpperCase()?.trim()}"
+		   ,"predicate": "eq"
+		   ,"mandatoryInSearch": true
+		  }
+		 ,{
+			"name": "Person.Last_Name"
+		   ,"val": "${pg_LastName?.toUpperCase()?.trim()}"
+		   ,"excludeFromSubsequenceSearch": true
+		  }
+		 ,{
+			"name": "Person.Date_Of_Birth"
+		   ,"val": "${pg_DateofBirth}"
+		   ,"type": "java.util.Date"
+		   ,"mandatoryInSearch": true
+
+		  }
+		 ,{
+			"name": "Person.Gender"
+		   ,"val": "${pg_Sex?.toUpperCase()}"
+		   ,"excludeFromSubsequenceSearch": true
+
+		  }
+		 ,{
+			"name": "Person.Title"
+		   ,"val": "${'MALE' == pg_Sex?.toUpperCase()? 'MR':'MS'}"
+		   ,"excludeFromSearch": true
+		  }
+		 ,{
+			"name": "Person.Nationality"
+		   ,"val": "Not Provided"
+		   ,"excludeFromSearch": true
+		  }
+		]
 	  }
 	 ,{
 		"label": "Location.Address"
-	,"props":
-			[
-			  {
-				"name": "Location.Address.parser.postcode"
-			   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
-			  }
-			 ,{
-					"name": "Location.Address.parser.city"
-			   ,"val": "${pg_City?.toLowerCase()}"
-			  }
-			 ,{
-					"name": "Location.Address.Post_Code"
-			   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
-			   ,"excludeFromSearch": true
-			  }
-			]
+		,"props":
+		[
+		  {
+			"name": "Location.Address.parser.postcode"
+		   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
+		   ,"mandatoryInSearch": true
+		  }
+		 ,{
+			"name": "Location.Address.parser.city"
+		   ,"val": "${pg_City?.toLowerCase()}"
+		   ,"excludeFromSubsequenceSearch": true
+		  }
+		 ,{
+			"name": "Location.Address.Post_Code"
+		   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
+		   ,"excludeFromSearch": true
+		  }
+		]
 
 	  }
 	 ,{
 		"label": "Object.Email_Address"
-			,"props":
-			[
-			  {
-				"name": "Object.Email_Address.Email"
-			   ,"val": "${pg_PrimaryEmailAddress}"
-			  }
-			]
+		,"props":
+		[
+		  {
+			"name": "Object.Email_Address.Email"
+		   ,"val": "${pg_PrimaryEmailAddress}"
+		  }
+		]
 
 	  }
 	 ,{
 		"label": "Object.Insurance_Policy"
-			,"props":
-			[
-			  {
-				"name": "Object.Insurance_Policy.Number"
-			   ,"val": "${pg_Policynumber}"
-			  }
-			 ,{
-				"name": "Object.Insurance_Policy.Type"
-			   ,"val": "${pg_PolicyType}"
-			  }
-			 ,{
-					"name": "Object.Insurance_Policy.Status"
-			   ,"val": "${pg_PolicyStatus}"
-			   ,"excludeFromSearch": true
-			  }
+		,"props":
+		[
+		  {
+			"name": "Object.Insurance_Policy.Number"
+		   ,"val": "${pg_Policynumber}"
+		   ,"mandatoryInSearch": true
+		  }
+		 ,{
+			"name": "Object.Insurance_Policy.Type"
+		   ,"val": "${pg_PolicyType}"
+		   ,"excludeFromSubsequenceSearch": true
 
-			]
+		  }
+		 ,{
+			"name": "Object.Insurance_Policy.Status"
+		   ,"val": "${pg_PolicyStatus}"
+		   ,"excludeFromSearch": true
+		  }
+
+		]
 
 	  }
 	 ,{
@@ -1396,6 +1623,7 @@ def rulesStr =  '''
     ]
   }
 }
+
 '''
 // edgeLabel = createEdgeLabel(mgmt, "Has_Policy")
 
@@ -1421,6 +1649,5 @@ sb.toString()
 
 // describeSchema()
 // g.V()
-
 
 */
