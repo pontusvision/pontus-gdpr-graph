@@ -1,9 +1,7 @@
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
-import com.pontusvision.jpostal.AddressExpander
-import com.pontusvision.jpostal.AddressParser
-import com.pontusvision.jpostal.ParsedComponent
 import com.pontusvision.utils.PostCode
+import com.pontusvision.utils.LocationAddress
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
@@ -23,86 +21,6 @@ def benchmark = { closure ->
 */
 
 
-class LocationAddress {
-    static final String ADDRESS_PARSER_DIR = '/opt/pontus/pontus-graph/current/datadir/libpostal';
-
-
-    static AddressParser parser = AddressParser.getInstanceDataDir(ADDRESS_PARSER_DIR)
-    static AddressExpander expander = AddressExpander.getInstanceDataDir(ADDRESS_PARSER_DIR)
-
-    private Map<String, Set<String>> tokens = new HashMap<>();
-
-    private LocationAddress(StringBuffer sb = null) {
-        sb?.append("\nin LocationAddress constructor")
-    }
-
-
-    public static LocationAddress fromString(String strVal, StringBuffer sb = null) {
-
-        sb?.append("\n\n\n\n #########################\n$strVal\n")
-
-        LocationAddress retVal = new LocationAddress(sb)
-
-        sb?.append("\nin LocationAddress fromString() - before parsing addr")
-
-        ParsedComponent[] res = parser.parseAddress(strVal)
-        sb?.append("\nin LocationAddress fromString() - after parsing addr; res= $res")
-
-        res.each {
-            String label = it.getLabel();
-            String value = it.getValue();
-
-            // sb?.append("\n$label = $value")
-
-            String[] expansions = expander.expandAddress(value)
-
-            expansions.each {
-                Set<String> vals = retVal.tokens.computeIfAbsent(label, { k -> new HashSet<>() })
-
-                if ("postcode".equals(label)) {
-
-                    vals.add(PostCode.format(it))
-
-                } else {
-                    sb?.append("\n")?.append(label)?.append(":")?.append(it);
-
-                    vals.add(it)
-
-
-                }
-
-            }
-
-        }
-        return retVal
-
-    }
-
-
-    def addPropsToGraphTraverser(g, String propPrefix, StringBuffer sb = null) {
-        tokens.each { k, vals ->
-            vals.each { val ->
-                sb?.append("\nadding ${propPrefix}${k} = ${val}")
-                g = g.property("${propPrefix}${k}" as String, val as String)
-            }
-        }
-        return g
-    }
-
-
-    Map<String, Set<String>> getTokens() {
-        return tokens;//.asImmutable()
-    }
-
-    Set<String> getVals(String key) {
-        return tokens.get(key);
-    }
-
-    String toString() {
-        return tokens.toString()
-    }
-
-}
 
 
 class Convert<T> {

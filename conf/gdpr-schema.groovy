@@ -1,3 +1,7 @@
+import org.apache.commons.math3.util.Pair
+import org.janusgraph.core.schema.Mapping
+
+
 def createIndicesPropsAndLabels() {
 
 /*
@@ -293,7 +297,27 @@ O.Form.Vertex_Label
     personTitle = createProp(mgmt, "Person.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
     personCustomerId = createProp(mgmt, "Person.Customer_ID", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "personDataOfBirthMixedIdx", personLabel, personFullName, personLastName, personGender, personNationality, personDateOfBirth, personPlaceOfBirth, personReligion, personEthnicity, personMaritalStatus, personNameQualifier, personTitle,personCustomerId);
+//    createMixedIdx(mgmt, "personDataOfBirthMixedIdx", personLabel, personFullName, personLastName, personGender, personNationality, personDateOfBirth,
+//            personPlaceOfBirth, personReligion, personEthnicity, personMaritalStatus, personNameQualifier, personTitle,personCustomerId);
+    Pair<PropertyKey,Mapping>[] personIdxProps = [
+            new Pair<>(personLabel, Mapping.STRING)
+            ,new Pair<>(personFullName, Mapping.TEXT)
+            ,new Pair<>(personLastName, Mapping.TEXT)
+            ,new Pair<>(personGender, Mapping.STRING)
+            ,new Pair<>(personNationality, Mapping.STRING)
+            ,new Pair<>(personDateOfBirth, Mapping.DEFAULT)
+            ,new Pair<>(personPlaceOfBirth, Mapping.TEXT)
+            ,new Pair<>(personReligion, Mapping.STRING)
+            ,new Pair<>(personEthnicity, Mapping.STRING)
+            ,new Pair<>(personMaritalStatus, Mapping.STRING)
+            ,new Pair<>(personNameQualifier, Mapping.STRING)
+            ,new Pair<>(personTitle, Mapping.STRING)
+            ,new Pair<>(personCustomerId, Mapping.STRING)
+    ] ;
+
+    createMixedIdx(mgmt, "personDataMixedIdx", false, personIdxProps) ;
+
+
 //    createCompIdx(mgmt, "personDateOfBirth", personDateOfBirth)
 //    createMixedIdx(mgmt, "personTitleMixedIdx", metadataType, personTitle)
 //    createMixedIdx(mgmt, "personFullNameMixedIdx",metadataType, personFullName)
