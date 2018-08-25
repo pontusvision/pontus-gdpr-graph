@@ -202,7 +202,7 @@ class MatchReq<T> {
 
     }
 
-    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromSubsequenceSearch = false, boolean excludeFromUpdate = false, boolean mandatoryInSearch = false,  StringBuffer sb = null) {
+    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromSubsequenceSearch = false, boolean excludeFromUpdate = false, boolean mandatoryInSearch = false, StringBuffer sb = null) {
         this.attribVal = attribVals
         this.attribType = attribType
 
@@ -348,11 +348,11 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
         // LPPM - must do a deep copy here, because unique is a bit nasty and actually changes the
         // original record.
-        def vFiltered= [];
+        def vFiltered = [];
 
-        vFiltered.addAll(v.findAll{ it2 -> !(it2.excludeFromSearch)});
+        vFiltered.addAll(v.findAll { it2 -> !(it2.excludeFromSearch) });
 
-        def vCopy2= [];
+        def vCopy2 = [];
         vCopy2.addAll(vFiltered);
 
 
@@ -361,17 +361,16 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
         int maxExpectedSizeOfQueries = uniqueProps.size()
 
 
-        def mandatoryFields = uniqueProps.findAll { it2 -> it2.mandatoryInSearch}
+        def mandatoryFields = uniqueProps.findAll { it2 -> it2.mandatoryInSearch }
 
         def mandatoryFieldPropNames = []
-        mandatoryFields.each{ it2 ->
+        mandatoryFields.each { it2 ->
             mandatoryFieldPropNames << it2.propName
         }
 
 
 
         def subs = vFiltered.subsequences()
-
 
 //        expectedSizeOfQueries = expectedSizeOfQueries > 2? expectedSizeOfQueries - 1: expectedSizeOfQueries
 
@@ -398,16 +397,16 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
                 boolean checkForMandatoryFields = mandatoryFieldPropNames.size() > 0;
 
                 boolean mandatoryFieldChecksOK = true;
-                if (checkForMandatoryFields){
+                if (checkForMandatoryFields) {
                     def currFieldPropNames = []
-                    it.each{ it2 ->
+                    it.each { it2 ->
                         currFieldPropNames << it2.propName
                     }
 
                     mandatoryFieldChecksOK = currFieldPropNames.containsAll(mandatoryFieldPropNames);
 
                 }
-                if ( mandatoryFieldChecksOK ) {
+                if (mandatoryFieldChecksOK) {
 
                     def searchableItems = it.findAll { it2 -> (!(currSize < maxExpectedSizeOfQueries && it2.excludeFromSubsequenceSearch)) }
 
@@ -609,7 +608,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
     rules.vertices.each { vtx ->
 
         String vertexName = vtx.label
-        int minSizeSubsequences = vtx.minSizeSubsequences?: - 1;
+        int minSizeSubsequences = vtx.minSizeSubsequences ?: -1;
         vtx.props.each { prop ->
 
             Class nativeType;
@@ -699,26 +698,25 @@ def getTopHit(g, Long[] potentialHitIDs, int numHitsRequiredForMatch, HashMap<St
     Long topHit = null
     Integer numEdgesRequired = edgeReqsByVertexType.get(vertexTypeStr)?.size()
 
-    if (numEdgesRequired != null && numEdgesRequired > 0) {
-        if (topHits.size() > 0) {
-            // Sanity check: we now have one or more candidates, so let's check
-            // if this has conns to other vertices in our little world
-            def otherTopHits = getOtherTopHits(matchIdsByVertexType, vertexTypeStr, 1, sb)
+    if (numEdgesRequired != null && numEdgesRequired > 0 && topHits.size() > 1) {
+        // Sanity check: we now have one or more candidates, so let's check
+        // if this has conns to other vertices in our little world
+        def otherTopHits = getOtherTopHits(matchIdsByVertexType, vertexTypeStr, 1, sb)
 
-            int ilen = topHits.size()
+        int ilen = topHits.size()
 
-            for (int i = 0; i < ilen; i++) {
+        for (int i = 0; i < ilen; i++) {
 
-                Long[] tempTopHits = findMatchingNeighboursFromSingleRequired(g, topHits[i] as Long, otherTopHits as Set<Long>, sb)
-                if (tempTopHits?.size() > 0) {
-                    topHit = tempTopHits[0]
-                    break
-                }
+            Long[] tempTopHits = findMatchingNeighboursFromSingleRequired(g, topHits[i] as Long, otherTopHits as Set<Long>, sb)
+            if (tempTopHits?.size() > 0) {
+                topHit = tempTopHits[0]
+                break
             }
-
-
         }
-    } else {
+
+
+    }
+    else {
         if (topHits.size() > 0) {
             topHit = topHits[0]
         }
@@ -1055,7 +1053,6 @@ def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, S
         trans.close()
     }
 }
-
 
 /*
 def rulesStr = '''
