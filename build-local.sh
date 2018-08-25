@@ -1,7 +1,7 @@
 #!/bin/bash
 git pull
 DIR="$( cd "$(dirname "$0")" ; pwd -P )"
-VERSION=1.1.0
+VERSION=1.2.0
 echo DIR is $DIR
 export DISTDIR="$DIR/../pontus-dist/opt/pontus/pontus-graph/pv-gdpr-$VERSION";
 
