@@ -40,7 +40,7 @@ public class LocationAddress {
 
       String[] expansions = expander.expandAddress(value);
 
-      for (int j = 0, jlen = expansions.length; j < jlen){
+      for (int j = 0, jlen = expansions.length; j < jlen; j++){
 
 
         Set<String> vals = retVal.tokens.computeIfAbsent(label,  k -> new HashSet<>() );
