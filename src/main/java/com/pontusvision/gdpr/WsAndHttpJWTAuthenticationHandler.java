@@ -1,6 +1,7 @@
 package com.pontusvision.gdpr;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -51,6 +52,7 @@ import uk.gov.cdp.shadow.user.auth.AuthenticationServiceImpl;
 import uk.gov.cdp.shadow.user.auth.CDPShadowUserPasswordGeneratorImpl;
 import uk.gov.homeoffice.pontus.JWTClaim;
 
+import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileInputStream;
@@ -457,7 +459,14 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
               + ")");
 
       final Iterator<String> keysToMangle = Iterators
-          .filter(configuration.getKeys(), key -> null != key && p.matcher(key).matches());
+          .filter(configuration.getKeys(), new Predicate<String>()
+              {
+                @Override public boolean apply(@Nullable String key)
+                {
+                  return ((null != key) && p.matcher((CharSequence) key).matches());
+                }
+              });
+
 
       while (keysToMangle.hasNext())
       {
