@@ -30,3 +30,5 @@ unlink current
 ln -s pv-gdpr-$VERSION current
 
 cd $CURDIR
+
+echo cd $DISTDIR
