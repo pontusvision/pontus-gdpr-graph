@@ -32,3 +32,5 @@ ln -s pv-gdpr-$VERSION current
 cd $CURDIR
 
 echo cd $DISTDIR
+echo docker cp lib/pontus-gdpr-graph-${VERSION}.jar d:/opt/pontus/pontus-graph/current/lib
+echo cd -
