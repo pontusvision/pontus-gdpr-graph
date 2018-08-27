@@ -303,8 +303,8 @@ O.Form.Vertex_Label
     Pair<PropertyKey,Mapping>[] personIdxProps = [
             new Pair<>(personLabel, Mapping.STRING)
             ,new Pair<>(personFullName, Mapping.STRING)
-            ,new Pair<>(personLastName, Mapping.STRING)
             ,new Pair<>(personFullNameFuzzy, Mapping.TEXT)
+            ,new Pair<>(personLastName, Mapping.STRING)
             ,new Pair<>(personGender, Mapping.STRING)
             ,new Pair<>(personNationality, Mapping.STRING)
             ,new Pair<>(personDateOfBirth, Mapping.DEFAULT)
