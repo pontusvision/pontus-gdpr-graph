@@ -11,7 +11,7 @@ public class NLPCleaner
   {
     if (filterList != null)
     {
-      return s != null && s.length() > 2 && !filterList.contains(s);
+      return s != null && s.length() > 2 && ! org.apache.commons.lang.StringUtils.isNumeric(s) && !filterList.contains(s);
     }
 
     return s != null && s.length() > 2;
@@ -26,8 +26,7 @@ public class NLPCleaner
 
     Set<String> retVal = new HashSet<>();
 
-    Stream<String> stringStream = filterList == null ?
-        listOfNames.parallelStream().filter(s -> s != null && s.length() > 2) :
+    Stream<String> stringStream =
         listOfNames.parallelStream().filter(s -> filterPassFunc(s, filterList));
 
     stringStream.forEach(s -> {
