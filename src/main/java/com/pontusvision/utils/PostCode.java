@@ -18,7 +18,7 @@ public class PostCode
     if (raw == null){
       return null;
     }
-    java.lang.String rawLowerCase = raw.toLowerCase();
+    java.lang.String rawLowerCase = raw.toLowerCase().replaceAll("\\s","");
     final java.util.regex.Matcher matcher = pattern.matcher(rawLowerCase);
 
     java.lang.StringBuffer retVal = new java.lang.StringBuffer();
