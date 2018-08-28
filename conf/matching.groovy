@@ -733,18 +733,33 @@ def addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> matchReqsF
 
     def localTrav = g
 
-    localTrav = localTrav.addV(vertexTypeStr)
-            .property('Metadata.Type.' + vertexTypeStr, vertexTypeStr)
-            .property('Metadata.Type', vertexTypeStr)
+    def matchesForUpdate = [];
 
-    matchReqsForThisVertexType.each { it ->
-        localTrav = localTrav.property(it.getPropName(), it.attribNativeVal)
+    matchesForUpdate.addAll(matchReqsForThisVertexType.findAll {it2 -> !(it2.excludeFromUpdate)})
+
+    boolean atLeastOneUpdate = matchesForUpdate.size() > 0
+
+    if (atLeastOneUpdate){
+
+        localTrav = localTrav.addV(vertexTypeStr)
+                .property('Metadata.Type.' + vertexTypeStr, vertexTypeStr)
+                .property('Metadata.Type', vertexTypeStr)
+
+        matchesForUpdate.each { it ->
+            if (!it.excludeFromUpdate && it.attribNativeVal != null) {
+                localTrav = localTrav.property(it.getPropName(), it.attribNativeVal);
+            }
+        }
+
+        Long retVal = localTrav.next().id() as Long
+
+        sb?.append("\n in addNewVertexFromMatchReqs() - added new vertex of type ${vertexTypeStr}; id = ${retVal}")
+        return retVal
     }
+    sb?.append("\n in addNewVertexFromMatchReqs() - could not add ${vertexTypeStr}; no match requests marked for update");
 
-    Long retVal = localTrav.next().id() as Long
+    return null;
 
-    sb?.append("\n in addNewVertexFromMatchReqs() - added new vertex of type ${vertexTypeStr}; id = ${retVal}")
-    return retVal
 
 
 }
