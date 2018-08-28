@@ -37,16 +37,18 @@ public class LocationAddress {
       String label = it.getLabel();
       String value = it.getValue();
 
+      Set<String> vals = retVal.tokens.computeIfAbsent(label,  k -> new HashSet<>() );
+
       // sb?.append("\n$label = $value")
+
+      vals.add(value);
 
       String[] expansions = expander.expandAddress(value);
 
       for (int j = 0, jlen = expansions.length; j < jlen; j++){
 
 
-        Set<String> vals = retVal.tokens.computeIfAbsent(label,  k -> new HashSet<>() );
-
-        if ("postcode".equals(label)) {
+        if (! "postcode".equals(label)) {
 
           vals.add(PostCode.format(expansions[j]));
 
