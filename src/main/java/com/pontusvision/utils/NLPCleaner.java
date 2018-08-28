@@ -1,5 +1,6 @@
 package com.pontusvision.utils;
 
+import com.google.gson.Gson;
 import org.json.JSONArray;
 
 import java.util.*;
@@ -7,6 +8,8 @@ import java.util.stream.Stream;
 
 public class NLPCleaner
 {
+  public static Gson gson = new Gson();
+
   public static boolean filterPassFunc(String s, Set<String> filterList)
   {
     if (filterList != null)
@@ -17,10 +20,28 @@ public class NLPCleaner
     return s != null && s.length() > 2;
   }
 
+
+
   public static String filter(Collection<String> listOfNames)
   {
     return filter(listOfNames,true, null);
   }
+
+  public static String filter (String jsonArrayStr){
+
+    return filter(gson.fromJson(jsonArrayStr, ArrayList.class), true, null);
+
+
+  }
+
+
+  public static String filter (String jsonArrayStr, boolean splitSpaces, Set<String> filterList){
+
+    return filter(gson.fromJson(jsonArrayStr, ArrayList.class), splitSpaces, filterList);
+
+
+  }
+
   public static String filter(Collection<String> listOfNames, boolean splitSpaces, Set<String> filterList)
   {
 
