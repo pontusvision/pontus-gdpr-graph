@@ -288,7 +288,7 @@ def updateFormData(def gtrav, String dataFromFormInJSON, String dataType, String
 
                         if (prop != null) {
                             def dataTypeClazz = prop.dataType();
-                            gtrav.property(key, DateConvMixin.asType(val, dataTypeClazz))
+                            gtrav.property(key, PVConvMixin.asType(val, dataTypeClazz))
                         }
                     } catch (Throwable t) {
                         sb.append("Error Updating Prop $k, $v:\n$t")
@@ -476,7 +476,7 @@ def addFormData(def gtrav, String dataFromFormInJSON, String dataType, StringBuf
 
                     if (prop != null) {
                         def dataTypeClazz = prop.dataType();
-                        gtrav.property(key, DateConvMixin.asType(val, dataTypeClazz))
+                        gtrav.property(key, PVConvMixin.asType(val, dataTypeClazz))
                     }
                 } catch (Throwable t) {
                     sb.append("Error adding prop $k with val ($v): \n$t")
