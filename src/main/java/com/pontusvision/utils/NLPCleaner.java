@@ -66,9 +66,9 @@ public class NLPCleaner
       retVal.add(s.trim());
     });
 
-    JSONArray array = new JSONArray();
+    JSONArray array = new JSONArray(retVal);
 
-    return array.put(retVal).toString();
+    return array.toString();
 
   }
 
