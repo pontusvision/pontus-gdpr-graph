@@ -5,11 +5,9 @@ import com.pontusvision.utils.PostCode
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
-import groovy.transform.TypeChecked
 import org.apache.tinkerpop.gremlin.process.traversal.P
-import org.apache.tinkerpop.gremlin.structure.Graph
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.codehaus.groovy.runtime.StringGroovyMethods
 
 import java.util.concurrent.ConcurrentHashMap
@@ -26,31 +24,27 @@ def benchmark = { closure ->
 
 @CompileStatic
 class Convert<T> {
-    private from
-    private to
+    private Class from
+    private Class to
 
 
-    @CompileDynamic
-    public Convert(clazz) {
+    Convert(Class clazz) {
         from = clazz
 
 
     }
 
-    @CompileDynamic
-    static def from(clazz) {
+    static def from(Class clazz) {
         new Convert(clazz)
     }
 
 
-    @CompileDynamic
-    def to(clazz) {
+    def to(Class clazz) {
         to = clazz
         return this
     }
 
-    @CompileDynamic
-    def using(closure) {
+    def using(Closure closure) {
         def originalAsType = from.metaClass.getMetaMethod('asType', [] as Class[])
         from.metaClass.asType = { Class clazz ->
             if (clazz == to) {
@@ -63,7 +57,7 @@ class Convert<T> {
     }
 
 
-    T fromString(String data, Class<T> requiredType, StringBuffer sb = null) {
+    T fromString(String data, Class<T> requiredType) {
 
         if (requiredType == Date.class) {
             return data as Date as T
@@ -93,7 +87,7 @@ class Convert<T> {
 class PVConvMixin {
 
 
-    static final def Closure<T> convert = StringGroovyMethods.&asType
+    static final  Closure<T> convert = StringGroovyMethods.&asType
 
     static Date invalidDate = new Date("01/01/1666")
     static Parser parser = new Parser();
@@ -183,7 +177,6 @@ class MatchReq<T> {
     private boolean excludeFromSubsequenceSearch
     private boolean excludeFromUpdate;
 
-    @CompileDynamic
     static Closure convertPredicateFromStr(String predicateStr) {
         if ("eq".equals(predicateStr)) {
             return P.&eq
@@ -246,7 +239,7 @@ class MatchReq<T> {
         if (this.attribType == String) {
             this.attribNativeVal = this.attribVal as T;
         } else {
-            this.attribNativeVal = conv.fromString(this.attribVal, this.attribType, this.sb)
+            this.attribNativeVal = conv.fromString(this.attribVal, this.attribType)
 
 
         }
@@ -340,7 +333,7 @@ class MatchReq<T> {
 }
 
 
-def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
+def matchVertices(GraphTraversalSource gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
 
 
     HashMap<String, List<Long>> vertexListsByVertexName = new HashMap();
@@ -504,7 +497,7 @@ def getOtherTopHits(Map<String, List<Long>> vertexListsByVertexName, String targ
 }
 
 
-def findMatchingNeighboursFromSingleRequired(gTrav = g, Long requiredTypeId, Set<Long> otherIds, StringBuffer sb = null) {
+def findMatchingNeighboursFromSingleRequired(GraphTraversalSource gTrav = g, Long requiredTypeId, Set<Long> otherIds, StringBuffer sb = null) {
 
 
     def foundIds = gTrav.V(otherIds)
@@ -518,7 +511,7 @@ def findMatchingNeighboursFromSingleRequired(gTrav = g, Long requiredTypeId, Set
 
 }
 
-def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> otherIds, StringBuffer sb = null) {
+def findMatchingNeighbours(GraphTraversalSource gTrav = g, Set<Long> requiredTypeIds, Set<Long> otherIds, StringBuffer sb = null) {
 
 
     def foundIds = gTrav.V(otherIds)
@@ -705,7 +698,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 }
 
 
-def getTopHit(g, Long[] potentialHitIDs, int numHitsRequiredForMatch, HashMap<String, List<Long>> matchIdsByVertexType, String vertexTypeStr, Map<String, List<EdgeRequest>> edgeReqsByVertexType, StringBuffer sb = null) {
+def getTopHit(GraphTraversalSource g, Long[] potentialHitIDs, int numHitsRequiredForMatch, HashMap<String, List<Long>> matchIdsByVertexType, String vertexTypeStr, Map<String, List<EdgeRequest>> edgeReqsByVertexType, StringBuffer sb = null) {
 
     sb?.append("\nIn getTopHit() -- vertType = ${vertexTypeStr} ; potentialHitIDs = ${potentialHitIDs} ")
     Long[] topHits = getTopHits(potentialHitIDs as Long[], numHitsRequiredForMatch, sb)
@@ -746,7 +739,7 @@ def getTopHit(g, Long[] potentialHitIDs, int numHitsRequiredForMatch, HashMap<St
 
 }
 
-def addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
+def addNewVertexFromMatchReqs(GraphTraversalSource g, String vertexTypeStr, List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
 
     def localTrav = g
 
@@ -782,7 +775,7 @@ def addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> matchReqsF
 }
 
 
-def updateExistingVertexWithMatchReqs(g, Long vertexId, List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
+def updateExistingVertexWithMatchReqs(GraphTraversalSource g, Long vertexId, List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
 
     def localTrav = g
     def deletionTrav = g
@@ -867,8 +860,7 @@ class EdgeRequest {
         this.toVertexLabel = toVertexLabel
     }
 
-    @CompileDynamic
-    boolean equals(o) {
+    boolean equals(Object o) {
         if (this.is(o)) return true
         if (!(o instanceof EdgeRequest)) return false
 
@@ -958,7 +950,7 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
     }
 }
 
-def ingestDataUsingRules(Graph graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
+def ingestDataUsingRules(JanusGraph graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
 
     def jsonSlurper = new JsonSlurper()
     def rules = jsonSlurper.parseText(jsonRules)
@@ -1023,7 +1015,7 @@ def ingestDataUsingRules(Graph graph, g, Map<String, String> bindings, String js
 }
 
 
-def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, String jsonRules, StringBuffer sb = null) {
+def ingestRecordListUsingRules(JanusGraph graph, GraphTraversalSource g, List<Map<String, String>> recordList, String jsonRules, StringBuffer sb = null) {
 
     def jsonSlurper = new JsonSlurper()
     def rules = jsonSlurper.parseText(jsonRules)
