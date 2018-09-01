@@ -427,7 +427,7 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
         if (!key.startsWith('Metadata')) {
             sb.append("<tr><td class='tg-yw4l'>");
             if (key.endsWith("b64")){
-                val = val.decodeBase64()
+                val = new String(val.decodeBase64())
                 key += ' (Decoded)'
             }
             val = val.replaceAll("(\\r\\n|\\n)", "<br />");
