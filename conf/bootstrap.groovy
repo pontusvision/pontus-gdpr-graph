@@ -5,7 +5,7 @@ try {
     if (gdprModeEnv != null && Boolean.parseBoolean(gdprModeEnv)) {
        createIndicesPropsAndLabels();
     }
-    loadSchema('/tmp/graphSchema_full.json', '/tmp/graphSchema_ext.json')
+    loadSchema(graph,'/tmp/graphSchema_full.json', '/tmp/graphSchema_ext.json')
 
 } catch (e) {
     e.printStackTrace()
