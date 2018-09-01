@@ -118,8 +118,8 @@ def addEdgeLabels(JanusGraphManagement mgmt, def json, StringBuffer sb = null) {
     }
 }
 
-def addpropertyKeys(JanusGraphManagement mgmt, def json, StringBuffer sb = null) {
-    def map = [:]
+Map<String, PropertyKey>  addpropertyKeys(JanusGraphManagement mgmt, def json, StringBuffer sb = null) {
+    Map<String, PropertyKey> map = [:]
     json['propertyKeys'].each {
         String name = it.name
         Class<?> typeClass = Class.forName(getClass(it.dataType))
