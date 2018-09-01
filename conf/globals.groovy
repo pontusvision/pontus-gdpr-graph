@@ -22,7 +22,7 @@ globals << [g: ((JanusGraph) graph).traversal() as GraphTraversalSource]
 globals << [mgmt: ((JanusGraph) graph ).openManagement() as JanusGraphManagement]
 
 @CompileStatic
-def loadSchema(JanusGraph graph = graph, String... files) {
+def loadSchema(JanusGraph graph , String... files) {
     StringBuffer sb = new StringBuffer()
 
     JanusGraphManagement mgmt = graph.openManagement();
