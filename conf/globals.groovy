@@ -446,7 +446,7 @@ def getPropsNonMetadataAsHTMLTableRows(JanusGraph g, Long vid, String origLabel)
 }
 
 
-/*
+
 @CompileStatic
 def describeSchema(JanusGraph graph = graph, StringBuffer sb = new StringBuffer()) {
     def schema = new Schema(graph, sb)
@@ -648,7 +648,7 @@ class Schema {
     }
 }
 
-*/
+
 
 def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraversalSource g = g) {
 
