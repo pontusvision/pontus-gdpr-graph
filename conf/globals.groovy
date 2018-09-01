@@ -442,7 +442,7 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
     }
 
 
-    return sb.toString().replaceAll('["]', '\\\\"');
+    return sb.toString().replaceAll('["]', '\\\\"').bytes.encodeBase64();
 }
 
 
