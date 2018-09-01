@@ -417,7 +417,7 @@ def createEdgeLabel(JanusGraphManagement mgmt, String labelName) {
     }
 }
 
-def getPropsNonMetadataAsHTMLTableRows(JanusGraph g, Long vid, String origLabel) {
+def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String origLabel) {
     StringBuilder sb = new StringBuilder();
 
 
