@@ -426,6 +426,11 @@ def getPropsNonMetadataAsHTMLTableRows(JanusGraph g, Long vid, String origLabel)
         String key = origKey.replaceAll('[_.]', ' ')
         if (!key.startsWith('Metadata')) {
             sb.append("<tr><td class='tg-yw4l'>");
+            if (key.endsWith("b64")){
+                val = val.decodeBase64()
+                key += ' (Decoded)'
+            }
+            val = val.replaceAll("(\\r\\n|\\n)", "<br />");
             if (origKey.startsWith(origLabel)) {
                 sb.append(key.substring(origLabel.length() + 1))
             } else {
