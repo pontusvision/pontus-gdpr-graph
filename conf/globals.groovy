@@ -463,7 +463,7 @@ def describeSchema( StringBuffer sb = new StringBuffer()) {
 @CompileStatic
 class Schema {
     JanusGraph graph;
-    StringBuilder sb;
+    StringBuffer sb;
 
     public Schema() {}
 
