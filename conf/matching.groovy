@@ -5,8 +5,11 @@ import com.pontusvision.utils.PostCode
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
 import org.apache.tinkerpop.gremlin.process.traversal.P
+import org.apache.tinkerpop.gremlin.structure.Graph
 import org.codehaus.groovy.runtime.StringGroovyMethods
 
 import java.util.concurrent.ConcurrentHashMap
@@ -21,27 +24,32 @@ def benchmark = { closure ->
 */
 
 
+@CompileStatic
 class Convert<T> {
     private from
     private to
 
 
+    @CompileDynamic
     public Convert(clazz) {
         from = clazz
 
 
     }
 
+    @CompileDynamic
     static def from(clazz) {
         new Convert(clazz)
     }
 
 
+    @CompileDynamic
     def to(clazz) {
         to = clazz
         return this
     }
 
+    @CompileDynamic
     def using(closure) {
         def originalAsType = from.metaClass.getMetaMethod('asType', [] as Class[])
         from.metaClass.asType = { Class clazz ->
@@ -58,7 +66,7 @@ class Convert<T> {
     T fromString(String data, Class<T> requiredType, StringBuffer sb = null) {
 
         if (requiredType == Date.class) {
-            return data as Date
+            return data as Date as T
 
         } else if (requiredType == String.class) {
             return data as T
@@ -85,7 +93,7 @@ class Convert<T> {
 class PVConvMixin {
 
 
-    static final def convert = StringGroovyMethods.&asType
+    static final def Closure<T> convert = StringGroovyMethods.&asType
 
     static Date invalidDate = new Date("01/01/1666")
     static Parser parser = new Parser();
@@ -94,6 +102,7 @@ class PVConvMixin {
         String.mixin(PVConvMixin)
     }
 
+    @CompileStatic
     static def asType(String self, Class cls, StringBuffer sb = null) {
         if (cls == Date) {
 
@@ -133,7 +142,7 @@ class PVConvMixin {
 
         } else if (cls == PostCode) {
             return new PostCode(self)
-        } else return convert(self, cls)
+        } else return convert(self, cls) as Object
     }
 
 
@@ -143,6 +152,7 @@ PVConvMixin dummy = null
 String.mixin(PVConvMixin)
 
 
+@CompileStatic
 def class PVValTemplate {
     private static GStringTemplateEngine engine = new GStringTemplateEngine(PVValTemplate.class.getClassLoader())
 
@@ -155,6 +165,7 @@ def class PVValTemplate {
 }
 
 
+@CompileStatic
 class MatchReq<T> {
 
     private T attribNativeVal;
@@ -172,6 +183,7 @@ class MatchReq<T> {
     private boolean excludeFromSubsequenceSearch
     private boolean excludeFromUpdate;
 
+    @CompileDynamic
     static Closure convertPredicateFromStr(String predicateStr) {
         if ("eq".equals(predicateStr)) {
             return P.&eq
@@ -232,7 +244,7 @@ class MatchReq<T> {
 //        Convert.fromString("asdf", this.attribType);
 
         if (this.attribType == String) {
-            this.attribNativeVal = this.attribVal;
+            this.attribNativeVal = this.attribVal as T;
         } else {
             this.attribNativeVal = conv.fromString(this.attribVal, this.attribType, this.sb)
 
@@ -446,6 +458,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 }
 
 
+@CompileStatic
 def getTopHits(HashMap<String, List<Long>> vertexListsByVertexName, String targetType, int countThreshold, StringBuffer sb = null) {
     def ids = vertexListsByVertexName.get(targetType) as Long[];
 
@@ -454,6 +467,7 @@ def getTopHits(HashMap<String, List<Long>> vertexListsByVertexName, String targe
 }
 
 
+@CompileStatic
 def getTopHits(Long[] ids, int countThreshold, StringBuffer sb = null) {
 
     Map<Long, Integer> counts = ids.countBy { it }
@@ -474,6 +488,7 @@ def getTopHits(Long[] ids, int countThreshold, StringBuffer sb = null) {
 }
 
 
+@CompileStatic
 def getOtherTopHits(Map<String, List<Long>> vertexListsByVertexName, String targetType, int countThreshold, StringBuffer sb = null) {
 
     Set<Long> otherIdsSet = new HashSet<>();
@@ -521,6 +536,7 @@ def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> other
 
  */
 
+@CompileStatic
 void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String predicate, boolean excludeFromSearch, boolean excludeFromSubsequenceSearch, boolean excludeFromUpdate, boolean mandatoryInSearch, String postProcessor, String postProcessorVar, StringBuffer sb = null) {
 
     MatchReq mreq = null;
@@ -814,6 +830,7 @@ def updateExistingVertexWithMatchReqs(g, Long vertexId, List<MatchReq> matchReqs
 }
 
 
+@CompileStatic
 class EdgeRequest {
 
     String label;
@@ -850,6 +867,7 @@ class EdgeRequest {
         this.toVertexLabel = toVertexLabel
     }
 
+    @CompileDynamic
     boolean equals(o) {
         if (this.is(o)) return true
         if (!(o instanceof EdgeRequest)) return false
@@ -877,7 +895,7 @@ class EdgeRequest {
 }
 
 
-def parseEdges(def rules) {
+List<Cloneable> parseEdges(def rules) {
 
     Map<String, List<EdgeRequest>> edgeReqsByVertexName = new HashMap<>()
     Set<EdgeRequest> edgeReqs = new HashSet<>()
@@ -940,7 +958,7 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
     }
 }
 
-def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
+def ingestDataUsingRules(Graph graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
 
     def jsonSlurper = new JsonSlurper()
     def rules = jsonSlurper.parseText(jsonRules)
