@@ -5,6 +5,7 @@ import com.pontusvision.utils.PostCode
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
+import groovy.transform.TypeChecked
 import org.apache.tinkerpop.gremlin.process.traversal.P
 import org.codehaus.groovy.runtime.StringGroovyMethods
 

@@ -28,7 +28,7 @@ def createIndicesPropsAndLabels() {
 
 
 
-    mgmt = graph.openManagement();
+    def mgmt = graph.openManagement();
 
 
     metadataController = createProp(mgmt, "Metadata.Controller", String.class, org.janusgraph.core.Cardinality.SET)
