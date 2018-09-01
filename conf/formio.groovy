@@ -1,6 +1,8 @@
 import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 
-
+@TypeChecked(extensions = ['globals.groovy','gdpr.groovy'])
 //
 //// describeSchema()
 //// g.V().has('Metadata.Type.Object.Credential','Object.Credential')
@@ -76,6 +78,7 @@ def getOrCreateOwnerVid(gtran, String submissionOwner, StringBuffer sb = new Str
 
 }
 
+@CompileStatic
 enum IngestionOperation {
 
     CREATE,

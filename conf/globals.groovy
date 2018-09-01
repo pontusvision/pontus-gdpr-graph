@@ -1,4 +1,6 @@
 import groovy.json.JsonSlurper
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
@@ -11,11 +13,12 @@ import org.janusgraph.core.schema.Mapping
 import org.janusgraph.core.schema.RelationTypeIndex
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
 
-def globals = [:]
+LinkedHashMap globals = [:]
 globals << [g: graph.traversal()]
 globals << [mgmt: graph.openManagement()]
 
 // Thanks to yudong.cai@homeoffice.gsi.gov.uk for the load Schema options.
+
 def loadSchema(String... files) {
     StringBuilder sb = new StringBuilder()
 
@@ -51,7 +54,7 @@ def loadSchema(String... files) {
     return sb.toString()
 }
 
-def addIndexes(def mgmt, def json, boolean isEdge, def propsMap, sb) {
+Object addIndexes(def mgmt, def json, boolean isEdge, def propsMap, sb) {
     if (!json) {
         return
     }
@@ -87,7 +90,7 @@ def addIndexes(def mgmt, def json, boolean isEdge, def propsMap, sb) {
         def idxCreated
         if (mixedIndex) {
             if (!mapping) {
-                idxCreated = createMixedIdx(mgmt, name, isEdge, props as org.janusgraph.core.PropertyKey[])
+                idxCreated = createMixedIdx(mgmt, name, isEdge, props as PropertyKey[] as Pair<PropertyKey, Mapping>[] as PropertyKey[] as Pair<PropertyKey, Mapping>[] as PropertyKey[] as Pair<PropertyKey, Mapping>[])
             } else {
                 idxCreated = createMixedIdx(mgmt, name, isEdge, propertyKeys, mapping)
             }
@@ -101,7 +104,7 @@ def addIndexes(def mgmt, def json, boolean isEdge, def propsMap, sb) {
     }
 }
 
-def addVertexLabels(def mgmt, def json, def sb) {
+Object addVertexLabels(def mgmt, def json, def sb) {
     json['vertexLabels'].each {
         def name = it.name
         createVertexLabel(mgmt, name)
@@ -109,7 +112,7 @@ def addVertexLabels(def mgmt, def json, def sb) {
     }
 }
 
-def addEdgeLabels(def mgmt, def json, def sb) {
+Object addEdgeLabels(def mgmt, def json, def sb) {
     json['edgeLabels'].each {
         def name = it.name
         createEdgeLabel(mgmt, name)
@@ -117,7 +120,7 @@ def addEdgeLabels(def mgmt, def json, def sb) {
     }
 }
 
-def addpropertyKeys(def mgmt, def json, def sb) {
+LinkedHashMap addpropertyKeys(def mgmt, def json, def sb) {
     def map = [:]
     json['propertyKeys'].each {
         def name = it.name
@@ -131,7 +134,7 @@ def addpropertyKeys(def mgmt, def json, def sb) {
     return map
 }
 
-def getClass(def type) {
+String getClass(def type) {
     return (type == 'Date') ? "java.util.Date" : "java.lang.$type"
 }
 
@@ -163,7 +166,7 @@ def createCompIdx(def mgmt, String idxName, boolean isUnique, PropertyKey... pro
     return createCompIdx(mgmt, idxName, false, isUnique, props)
 }
 
-def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique, PropertyKey... props) {
+JanusGraphIndex createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique, PropertyKey... props) {
 
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
@@ -191,7 +194,7 @@ def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique, Pr
 }
 
 
-def createCompIdx(mgmt, idxName, boolean isEdge, PropertyKey... props) {
+JanusGraphIndex createCompIdx(mgmt, idxName, boolean isEdge, PropertyKey... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
             def clazz = isEdge ? Edge.class : Vertex.class
@@ -219,7 +222,7 @@ def createCompIdx(def mgmt, def idxName, PropertyKey... props) {
     return createCompIdx(mgmt, idxName, false, props)
 }
 
-def createMixedIdx(def mgmt, String idxName, boolean isEdge, Pair<PropertyKey, Mapping>... props) {
+JanusGraphIndex createMixedIdx(def mgmt, String idxName, boolean isEdge, Pair<PropertyKey, Mapping>... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
             def clazz = isEdge ? Edge.class : Vertex.class
@@ -290,7 +293,7 @@ def createMixedIdx(def mgmt, String idxName, PropertyKey... props) {
 }
 
 
-def createMixedIdx(def mgmt, String idxName, boolean isEdge, PropertyKey... props) {
+JanusGraphIndex createMixedIdx(def mgmt, String idxName, boolean isEdge, PropertyKey... props) {
     try {
         if (!mgmt.containsGraphIndex(idxName)) {
             def clazz = isEdge ? Edge.class : Vertex.class
@@ -381,12 +384,14 @@ def describeSchema() {
     sb.toString()
 }
 
+@CompileStatic
 class Schema {
     def graph
     StringBuilder sb
 
     public Schema() {}
 
+    @CompileDynamic
     public Schema(def graph, def sb) {
         this.graph = graph
         this.sb = sb
@@ -404,6 +409,7 @@ class Schema {
         }
     }
 
+    @CompileDynamic
     public Object getVertex(Object args) {
         if (args) {
             def result = getManagement().getVertexLabels().findAll {
@@ -417,6 +423,7 @@ class Schema {
         }
     }
 
+    @CompileDynamic
     public void printVertex(Object args) {
         def pattern = "%-30s  | %11s | %6s\n"
         this.sb.append(String.format(pattern, '\nVertex Label', 'Partitioned', 'Static'))
@@ -428,6 +435,7 @@ class Schema {
         this.sb.append('\n')
     }
 
+    @CompileDynamic
     public Object getIndex(Object args) {
         def result = []
         result.addAll(getManagement().getGraphIndexes(Vertex.class))
@@ -445,6 +453,7 @@ class Schema {
         return result
     }
 
+    @CompileDynamic
     public void printIndex(Object args) {
         def pattern = "%-50s | %9s | %16s | %6s | %15s | %40s | %20s\n"
         this.sb.append(String.format(pattern, 'Graph Index', 'Type', 'Element', 'Unique', 'Backing/Mapping', 'PropertyKey [dataType]', 'Status'))
@@ -488,6 +497,7 @@ class Schema {
         return getRelation(EdgeLabel.class, args)
     }
 
+    @CompileDynamic
     public Object getRelation(Object type, Object args) {
         def result = []
         result.addAll(getManagement().getRelationTypes(type))
@@ -501,6 +511,7 @@ class Schema {
         return result
     }
 
+    @CompileDynamic
     public void printEdge(Object args) {
         def pattern = "%-50s | %15s | %15s | %15s | %15s\n"
         this.sb.append(String.format(pattern, 'Edge Name', 'Type', 'Directed', 'Unidirected', 'Multiplicity'))
@@ -519,6 +530,7 @@ class Schema {
         this.sb.append('\n')
     }
 
+    @CompileDynamic
     public void printPropertyKey(Object args) {
         def pattern = "%-50s | %15s | %15s | %20s\n"
         this.sb.append(String.format(pattern, 'PropertyKey Name', 'Type', 'Cardinality', 'Data Type'))
@@ -537,6 +549,7 @@ class Schema {
         this.sb.append('\n')
     }
 
+    @CompileDynamic
     private void ensureMgmtOpen() {
         def mgmt = getManagement()
         if (!mgmt.isOpen()) {
@@ -544,6 +557,7 @@ class Schema {
         }
     }
 
+    @CompileDynamic
     private void ensureMgmtClosed() {
         def mgmt = getManagement()
         if (mgmt.isOpen()) {
@@ -551,15 +565,17 @@ class Schema {
         }
     }
 
-    public def getManagement() {
+    public Object getManagement() {
         return openManagement()
     }
 
-    public def openManagement() {
+    @CompileDynamic
+    public Object openManagement() {
         graph.tx().rollback()
         return graph.openManagement()
     }
 
+    @CompileDynamic
     public Object getGraph() {
         return this.graph
     }
