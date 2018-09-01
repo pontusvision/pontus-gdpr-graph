@@ -448,8 +448,13 @@ def getPropsNonMetadataAsHTMLTableRows(JanusGraph g, Long vid, String origLabel)
 
 
 @CompileStatic
-def describeSchema(JanusGraph graph = graph, StringBuffer sb = new StringBuffer()) {
+def describeSchema(JanusGraph graph , StringBuffer sb = new StringBuffer()) {
     def schema = new Schema(graph, sb)
+    schema.describeAll()
+    sb.toString()
+}
+def describeSchema( StringBuffer sb = new StringBuffer()) {
+    def schema = new Schema(globals['graph'], sb)
     schema.describeAll()
     sb.toString()
 }
