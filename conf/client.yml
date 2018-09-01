@@ -16,7 +16,7 @@ connectionPool: {
   #keyPassword: changeit,
   trustCertChainFile: /etc/pki/java/root-ca.crt,
   keyCertChainFile: /etc/pki/java/localhost.crt,
-  keyFile: /etc/pki/java/localhost.pem,
+  keyFile: /etc/pki/java/localhost.pem.pk8,
 
   # The maximum length in bytes that a message can be sent to the server. This number can be no greater than the
   # setting of the same name in the server configuration.
@@ -28,7 +28,7 @@ connectionPool: {
   # The maximum size of a connection pool for a host.
   maxSize: 1,
   # The amount of time in milliseconds to wait for a new connection before timing out.
-  maxWaitForConnection: 3000,
+  maxWaitForConnection: 60000,
   # The amount of time in milliseconds to wait for a session to close before timing out (does not apply to
   # sessionless connections).
   maxWaitForSessionClose: 3000,
