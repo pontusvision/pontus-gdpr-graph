@@ -2,6 +2,7 @@ import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
 import com.pontusvision.utils.LocationAddress
 import com.pontusvision.utils.PostCode
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
@@ -598,11 +599,11 @@ void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, S
 def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String rulesJsonStr, StringBuffer sb = null) {
     def binding = currRecord
 
-    binding.put("original_request", rulesJsonStr)
+    binding.put("original_request", JsonOutput.toJson(currRecord.toString()));
 
     def rules = parsedRules
 
-    List<MatchReq> matchReqs = new ArrayList<>(rules.vertices.size())
+    List<MatchReq> matchReqs = new ArrayList<>(rules.vertices.size() as int)
 
     JsonSlurper slurper = new JsonSlurper()
 
@@ -644,10 +645,10 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
                                 , (String) propName
                                 , (String) vertexName
                                 , (String) predicate
-                                , (boolean) prop.excludeFromSearch ? true : false
-                                , (boolean) prop.excludeFromSubsequenceSearch ? true : false
-                                , (boolean) prop.excludeFromUpdate ? true : false
-                                , (boolean) prop.mandatoryInSearch ? true : false
+                                , (boolean) prop.excludeFromSearch
+                                , (boolean) prop.excludeFromSubsequenceSearch
+                                , (boolean) prop.excludeFromUpdate
+                                , (boolean) prop.mandatoryInSearch
                                 , (String) prop.postProcessor ?: null
                                 , (String) prop.postProcessorVar ?: null
                                 , sb
@@ -666,10 +667,10 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
                             , (String) propName
                             , (String) vertexName
                             , (String) predicate
-                            , (boolean) prop.excludeFromSearch ? true : false
-                            , (boolean) prop.excludeFromSubsequenceSearch ? true : false
-                            , (boolean) prop.excludeFromUpdate ? true : false
-                            , (boolean) prop.mandatoryInSearch ? true : false
+                            , (boolean) prop.excludeFromSearch
+                            , (boolean) prop.excludeFromSubsequenceSearch
+                            , (boolean) prop.excludeFromUpdate
+                            , (boolean) prop.mandatoryInSearch
                             , (String) prop.postProcessor ?: null
                             , (String) prop.postProcessorVar ?: null
                             , sb
