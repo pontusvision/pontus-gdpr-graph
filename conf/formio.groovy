@@ -91,17 +91,17 @@ def createIngestionEventId(gtrans, String eventGUID, String eventType, Ingestion
     def localgTrav = gtrans.clone()
     def localgTrav2 = gtrans.clone()
 
-    def ingestionEvent = gtrans.addV("Event.Ingestion")
+    def ingestionEvent = gtrans.addV("Event.Form_Ingestion")
 
     sb.append("\nIn createIngestionEventId; added Event Ingestion; before setting props; ")
 
-    ingestionEvent.property("Event.Ingestion.Metadata_Create_Date", now)
-            .property("Metadata.Type.Event.Ingestion", "Event.Ingestion")
-            .property("Metadata.Type", "Event.Ingestion")
-            .property("Event.Ingestion.Metadata_GUID", eventGUID)
-            .property("Event.Ingestion.Type", eventType)
-            .property("Event.Ingestion.Operation", operation.toString())
-            .property("Event.Ingestion.Domain_b64", origDataClearNonB64.bytes.encodeBase64().toString())
+    ingestionEvent.property("Event.Form_Ingestion.Metadata_Create_Date", now)
+            .property("Metadata.Type.Event.Form_Ingestion", "Event.Form_Ingestion")
+            .property("Metadata.Type", "Event.Form_Ingestion")
+            .property("Event.Form_Ingestion.Metadata_GUID", eventGUID)
+            .property("Event.Form_Ingestion.Type", eventType)
+            .property("Event.Form_Ingestion.Operation", operation.toString())
+            .property("Event.Form_Ingestion.Domain_b64", origDataClearNonB64.bytes.encodeBase64().toString())
     // .iterate()
 
     sb.append("\nIn createIngestionEventId; added Event Ingestion; before getting id; ")
@@ -131,8 +131,8 @@ def createIngestionEventId(gtrans, String eventGUID, String eventType, Ingestion
     }
     if (formDataId != null) {
 
-        localgTrav.addE('Has_Ingestion_Event').from(g.V(ingestionEventId)).to(g.V(formDataId)).next()
-        sb.append("\nIn createIngestionEventId; after creating edge Has_Ingestion_Event between ingestionEventId ")
+        localgTrav.addE('Has__Form_Ingestion_Event').from(g.V(ingestionEventId)).to(g.V(formDataId)).next()
+        sb.append("\nIn createIngestionEventId; after creating edge Has__Form_Ingestion_Event between ingestionEventId ")
                 .append(ingestionEventId).append(" and formDataId ").append(formDataId)
 
     }
