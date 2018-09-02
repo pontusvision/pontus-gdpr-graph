@@ -637,6 +637,7 @@ world_region: currently only used for appending “West Indies” after the coun
     edgeLabel = createEdgeLabel(mgmt, "Has_Privacy_Notice")
     edgeLabel = createEdgeLabel(mgmt, "Has_Server")
     edgeLabel = createEdgeLabel(mgmt, "Has_Ingestion_Event")
+    edgeLabel = createEdgeLabel(mgmt, "Has_Form_Ingestion_Event")
     edgeLabel = createEdgeLabel(mgmt, "Has_Security_Group")
     edgeLabel = createEdgeLabel(mgmt, "Has_Security_Group_Connectivity")
     edgeLabel = createEdgeLabel(mgmt, "Has_Ingress_Peering")

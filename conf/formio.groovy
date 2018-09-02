@@ -123,16 +123,16 @@ def createIngestionEventId(gtrans, String eventGUID, String eventType, Ingestion
         def fromV = g.V(ownerVid).next()
         def toV = g.V(ingestionEventId).next()
 
-        localgTrav2.addE('Has_Ingestion_Event').from(fromV).to(toV).next()
-        sb.append("\nIn createIngestionEventId; after creating edge Has_Ingestion_Event between ownerVid ")
+        localgTrav2.addE('Has_Form_Ingestion_Event').from(fromV).to(toV).next()
+        sb.append("\nIn createIngestionEventId; after creating edge Has_Form_Ingestion_Event between ownerVid ")
                 .append(ownerVid).append(" and ingestionEventId ").append(ingestionEventId)
 
 
     }
     if (formDataId != null) {
 
-        localgTrav.addE('Has__Form_Ingestion_Event').from(g.V(ingestionEventId)).to(g.V(formDataId)).next()
-        sb.append("\nIn createIngestionEventId; after creating edge Has__Form_Ingestion_Event between ingestionEventId ")
+        localgTrav.addE('Has_Form_Ingestion_Event').from(g.V(ingestionEventId)).to(g.V(formDataId)).next()
+        sb.append("\nIn createIngestionEventId; after creating edge Has_Form_Ingestion_Event between ingestionEventId ")
                 .append(ingestionEventId).append(" and formDataId ").append(formDataId)
 
     }
