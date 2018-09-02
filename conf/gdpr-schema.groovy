@@ -89,6 +89,24 @@ O.Form.Vertex_Label
 
 
 
+
+    eventFormIngestionLabel = createVertexLabel(mgmt, "Event.Form_Ingestion");
+
+    eventFormIngestionProp01 = createProp(mgmt, "Event.Form_Ingestion.Metadata_Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventFormIngestionProp02 = createProp(mgmt, "Event.Form_Ingestion.Metadata_GUID", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventFormIngestionProp03 = createProp(mgmt, "Event.Form_Ingestion.Type", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventFormIngestionProp04 = createProp(mgmt, "Event.Form_Ingestion.Operation", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventFormIngestionProp05 = createProp(mgmt, "Event.Form_Ingestion.Domain_b64", String.class, org.janusgraph.core.Cardinality.SINGLE);
+
+    eventFormIngestionIdx01 = createMixedIdx(mgmt, "eventFormIngestionIdx01"
+            ,eventFormIngestionLabel
+            ,eventFormIngestionProp01
+            ,eventFormIngestionProp02
+            ,eventFormIngestionProp03
+            ,eventFormIngestionProp04
+    );
+
+
     objectFormLabel = createVertexLabel(mgmt, "Object.Form");
 
     objectFormProp00 = createProp(mgmt, "Object.Form.Metadata_Owner", String.class, org.janusgraph.core.Cardinality.SINGLE);
