@@ -70,14 +70,32 @@ O.Form.Vertex_Label
 
 
 
+    eventIngestionGroupLabel = createVertexLabel(mgmt, "Event.Ingestion.Group");
+
+    eventIngestionGroupProp01 = createProp(mgmt, "Event.Ingestion.Group.Metadata_Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionGroupProp01 = createProp(mgmt, "Event.Ingestion.Group.Metadata_End_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionGroupProp03 = createProp(mgmt, "Event.Ingestion.Group.Type", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionGroupProp04 = createProp(mgmt, "Event.Ingestion.Group.Operation", String.class, org.janusgraph.core.Cardinality.SINGLE);
+
+    eventIngestionIdx01 = createMixedIdx(mgmt, "eventIngestionGroupIdx01"
+            ,eventIngestionGroupLabel
+            ,eventIngestionGroupProp01
+            ,eventIngestionGroupProp02
+            ,eventIngestionGroupProp03
+            ,eventIngestionGroupProp04
+    );
+
+
+
 
     eventIngestionLabel = createVertexLabel(mgmt, "Event.Ingestion");
 
-    eventIngestionProp01 = createProp(mgmt, "Event.Ingestion.Metadata_Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionProp01 = createProp(mgmt, "Event.Ingestion.Metadata_Create_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
     eventIngestionProp02 = createProp(mgmt, "Event.Ingestion.Metadata_GUID", String.class, org.janusgraph.core.Cardinality.SINGLE);
     eventIngestionProp03 = createProp(mgmt, "Event.Ingestion.Type", String.class, org.janusgraph.core.Cardinality.SINGLE);
     eventIngestionProp04 = createProp(mgmt, "Event.Ingestion.Operation", String.class, org.janusgraph.core.Cardinality.SINGLE);
     eventIngestionProp05 = createProp(mgmt, "Event.Ingestion.Domain_b64", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionProp06 = createProp(mgmt, "Event.Ingestion.Domain_Unstructured_Data_b64", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
     eventIngestionIdx01 = createMixedIdx(mgmt, "eventIngestionIdx01"
             ,eventIngestionLabel
