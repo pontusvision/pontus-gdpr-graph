@@ -431,7 +431,7 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
                 key += ' (Decoded)'
             }
             val = val.replaceAll("(\\r\\n|\\n)", "<br />");
-//            val = val.replaceAll("\\p{C}", "?");
+            val = val.replaceAll("\\p{C}", "?");
             if (origKey.startsWith(origLabel)) {
                 sb.append(key.substring(origLabel.length() + 1))
             } else {
