@@ -447,6 +447,7 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
 
                 val = val.replaceAll('\\\\"','"')
                 val = val.replaceAll('\"','"')
+                val = val.replaceAll('\\\\','');
                 key += ' (Decoded)'
             }
             if (!isASCII(val) ){
