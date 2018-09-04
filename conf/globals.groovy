@@ -436,8 +436,8 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
             } else {
                 sb.append(key);
             }
-            sb.append("</td><td class='tg-yw4l'>");
-            sb.append(val).append("</td></tr>");
+            sb.append("</td><td class='tg-yw4l'><![CDATA[");
+            sb.append(val).append("]]></td></tr>");
         }
     }
 
