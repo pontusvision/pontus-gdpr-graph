@@ -1,3 +1,4 @@
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -5,6 +6,7 @@ import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
+import org.codehaus.jackson.annotate.JsonSubTypes
 import org.janusgraph.core.EdgeLabel
 import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.PropertyKey
@@ -428,9 +430,19 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
             sb.append("<tr><td class='tg-yw4l'>");
             if (key.endsWith("b64")){
                 val = new String(val.decodeBase64())
+                try{
+                    val = new JsonBuilder(val).toPrettyString();
+
+                }catch (Throwable t){
+
+                }
+
                 key += ' (Decoded)'
             }
-            val = val.replaceAll("(\\r\\n|\\n)", "<br />");
+//            else{
+                val = val.replaceAll("(\\r\\n|\\n)", "<br />");
+
+//            }
 //            val = val.replaceAll("\\p{C}", "?");
             if (origKey.startsWith(origLabel)) {
                 sb.append(key.substring(origLabel.length() + 1))
