@@ -418,6 +418,14 @@ def createEdgeLabel(JanusGraphManagement mgmt, String labelName) {
         t.printStackTrace();
     }
 }
+boolean isASCII(String s)
+{
+    for (int i = 0; i < s.length(); i++)
+        if (s.charAt(i) > 127)
+            return false;
+    return true;
+}
+
 
 def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String origLabel) {
     StringBuilder sb = new StringBuilder();
@@ -439,18 +447,21 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
 
                 key += ' (Decoded)'
             }
+            if (!isASCII(val) ){
+                val = val.replaceAll("\\p{C}", "?");
+            }
 //            else{
                 val = val.replaceAll("(\\r\\n|\\n)", "<br />");
 
 //            }
-//            val = val.replaceAll("\\p{C}", "?");
             if (origKey.startsWith(origLabel)) {
                 sb.append(key.substring(origLabel.length() + 1))
             } else {
                 sb.append(key);
             }
-            sb.append("</td><td class='tg-yw4l'><![CDATA[");
-            sb.append(val).append("]]></td></tr>");
+            sb.append("</td><td class='tg-yw4l'>") //.append("<![CDATA[");
+//              .append(val).append("]]>")
+              .append("</td></tr>");
         }
     }
 
