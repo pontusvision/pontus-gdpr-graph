@@ -438,13 +438,15 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
             sb.append("<tr><td class='tg-yw4l'>");
             if (key.endsWith("b64")){
                 val = new String(val.decodeBase64())
-                try{
-                    val = new JsonBuilder(val).toPrettyString();
+//                try{
+//                    val = new JsonBuilder(val).toPrettyString();
+//
+//                }catch (Throwable t){
+//
+//                }
 
-                }catch (Throwable t){
-
-                }
-
+                val = val.replaceAll('\\\\"','"')
+                val = val.replaceAll('\"','"')
                 key += ' (Decoded)'
             }
             if (!isASCII(val) ){
