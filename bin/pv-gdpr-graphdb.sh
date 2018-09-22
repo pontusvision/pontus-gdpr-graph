@@ -59,6 +59,11 @@ if [[ -z "$PVGDPR_CONF_DIR" ]]; then
    PVGDPR_CONF_DIR=${PVGDPR_HOME}/conf
 fi
 
+if [[ ! -d "$PVGDPR_HOME/datadir" ]]; then
+   cd $PVGDPR_HOME/
+   cat datadir.tar.gz-* | tar xvzf -
+fi
+
 cygwin=false
 case "`uname`" in
 CYGWIN*) cygwin=true;;
