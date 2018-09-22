@@ -29,6 +29,11 @@ cd ..
 unlink current
 ln -s pv-gdpr-$VERSION current
 
+cd current
+split -b 50M $DIR/datadir.tar.gz datadir.tar.gz-
+
 cd $CURDIR
 
 echo docker cp $DISTDIR/lib/pontus-gdpr-graph-${VERSION}.jar d:/opt/pontus/pontus-graph/current/lib
+
+
