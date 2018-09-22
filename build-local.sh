@@ -30,7 +30,7 @@ unlink current
 ln -s pv-gdpr-$VERSION current
 
 cd current
-split -b 50M $DIR/datadir.tar.gz datadir.tar.gz-
+cp $DIR/datadir.tar.gz-* .
 
 cd $CURDIR
 
