@@ -599,7 +599,7 @@ void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, S
 def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String rulesJsonStr, StringBuffer sb = null) {
     def binding = currRecord
 
-    binding.put("original_request", JsonOutput.toJson(currRecord.toString()));
+    binding.put("original_request", JsonOutput.prettyPrint(JsonOutput.toJson(currRecord)));
 
     def rules = parsedRules
 
