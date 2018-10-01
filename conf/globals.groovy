@@ -1,4 +1,3 @@
-import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -6,29 +5,23 @@ import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
-import org.codehaus.jackson.annotate.JsonSubTypes
 import org.janusgraph.core.EdgeLabel
 import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.PropertyKey
 import org.janusgraph.core.RelationType
-import org.janusgraph.core.schema.JanusGraphIndex
-import org.janusgraph.core.schema.JanusGraphManagement
-import org.janusgraph.core.schema.Mapping
-import org.janusgraph.core.schema.Parameter
-import org.janusgraph.core.schema.RelationTypeIndex
+import org.janusgraph.core.schema.*
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
-
 
 LinkedHashMap globals = [:]
 globals << [g: ((JanusGraph) graph).traversal() as GraphTraversalSource]
-globals << [mgmt: ((JanusGraph) graph ).openManagement() as JanusGraphManagement]
+globals << [mgmt: ((JanusGraph) graph).openManagement() as JanusGraphManagement]
 
 @CompileStatic
-def loadSchema(JanusGraph graph , String... files) {
+def loadSchema(JanusGraph graph, String... files) {
     StringBuffer sb = new StringBuffer()
 
     JanusGraphManagement mgmt = graph.openManagement();
-    Map<String,PropertyKey> propsMap = [:]
+    Map<String, PropertyKey> propsMap = [:]
     for (f in files) {
         try {
 
@@ -59,7 +52,7 @@ def loadSchema(JanusGraph graph , String... files) {
     return sb.toString()
 }
 
-def addIndexes(JanusGraphManagement mgmt, def json, boolean isEdge, Map<String,PropertyKey> propsMap, StringBuffer sb = null) {
+def addIndexes(JanusGraphManagement mgmt, def json, boolean isEdge, Map<String, PropertyKey> propsMap, StringBuffer sb = null) {
     if (!json) {
         return
     }
@@ -94,7 +87,7 @@ def addIndexes(JanusGraphManagement mgmt, def json, boolean isEdge, Map<String,P
 
         def idxCreated
         if (mixedIndex) {
-            idxCreated = createMixedIdx(mgmt, name, isEdge, propertyKeys, mapping, (Map<String,Object>)it.propertyKeysMappings)
+            idxCreated = createMixedIdx(mgmt, name, isEdge, propertyKeys, mapping, (Map<String, Object>) it.propertyKeysMappings)
         } else {
             idxCreated = createCompIdx(mgmt, name, isEdge, unique, props as PropertyKey[])
         }
@@ -120,7 +113,7 @@ def addEdgeLabels(JanusGraphManagement mgmt, def json, StringBuffer sb = null) {
     }
 }
 
-Map<String, PropertyKey>  addpropertyKeys(JanusGraphManagement mgmt, def json, StringBuffer sb = null) {
+Map<String, PropertyKey> addpropertyKeys(JanusGraphManagement mgmt, def json, StringBuffer sb = null) {
     Map<String, PropertyKey> map = [:]
     json['propertyKeys'].each {
         String name = it.name
@@ -195,7 +188,6 @@ JanusGraphIndex createCompIdx(JanusGraphManagement mgmt, String idxName, boolean
     }
     return null
 }
-
 
 //JanusGraphIndex createCompIdx(JanusGraphManagement mgmt, String idxName, boolean isEdge, PropertyKey... props) {
 //    try {
@@ -315,7 +307,7 @@ JanusGraphIndex createMixedIdx(JanusGraphManagement mgmt, String idxName, boolea
                         throw new RuntimeException("Cannot get mapping from $mappingVal for $property")
                     }
 
-                    Map<String,String> analyzer = (Map<String,String>) keyMapping['analyzer']
+                    Map<String, String> analyzer = (Map<String, String>) keyMapping['analyzer']
                     if (analyzer) {
                         ib.addKey(propKey, mappingParam, Parameter.of(analyzer['name'], analyzer['value']))
                     } else {
@@ -418,8 +410,8 @@ def createEdgeLabel(JanusGraphManagement mgmt, String labelName) {
         t.printStackTrace();
     }
 }
-boolean isASCII(String s)
-{
+
+boolean isASCII(String s) {
     for (int i = 0; i < s.length(); i++)
         if (s.charAt(i) > 127)
             return false;
@@ -436,41 +428,31 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
         String key = origKey.replaceAll('[_.]', ' ')
         if (!key.startsWith('Metadata')) {
             sb.append("<tr><td class='tg-yw4l'>");
-            if (key.endsWith("b64")){
+            if (key.endsWith("b64")) {
                 val = new String(val.decodeBase64())
-//                try{
-//                    val = new JsonBuilder(val).toPrettyString();
-//
-//                }catch (Throwable t){
-//
-//                }
-
-                val = val.replaceAll('\\\\"','"')
-                val = val.replaceAll('\"','"')
-
-                val =  org.apache.commons.lang.StringEscapeUtils.escapeHtml(val);
-                val = val.replaceAll("(\\r\\n|\\n)", "<br />");
-
-                val = val.replaceAll('\\\\','');
-
                 key += ' (Decoded)'
             }
-            if (!isASCII(val) ){
+            val = val.replaceAll('\\\\"', '"')
+            val = val.replaceAll('\"', '"')
+
+            val = org.apache.commons.lang.StringEscapeUtils.escapeHtml(val);
+            val = val.replaceAll("(\\r\\n|\\n)", "<br />");
+
+            val = val.replaceAll('\\\\', '');
+
+            if (!isASCII(val)) {
                 val = val.replaceAll("\\p{C}", "?");
             }
-//            else{
-                val = val.replaceAll("(\\r\\n|\\n)", "<br />");
-
-//            }
+            
             if (origKey.startsWith(origLabel)) {
                 sb.append(key.substring(origLabel.length() + 1))
             } else {
                 sb.append(key);
             }
             sb.append("</td><td class='tg-yw4l'>") //.append("<![CDATA[");
-              .append(val)
+                    .append(val)
 //                    .append("]]>")
-              .append("</td></tr>");
+                    .append("</td></tr>");
         }
     }
 
@@ -479,14 +461,14 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
 }
 
 
-
 @CompileStatic
-def describeSchema(JanusGraph graph , StringBuffer sb = new StringBuffer()) {
+def describeSchema(JanusGraph graph, StringBuffer sb = new StringBuffer()) {
     def schema = new Schema(graph, sb)
     schema.describeAll()
     sb.toString()
 }
-def describeSchema( StringBuffer sb = new StringBuffer()) {
+
+def describeSchema(StringBuffer sb = new StringBuffer()) {
     def schema = new Schema(globals['graph'], sb)
     schema.describeAll()
     sb.toString()
@@ -685,7 +667,6 @@ class Schema {
         return this.graph
     }
 }
-
 
 
 def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraversalSource g = g) {
