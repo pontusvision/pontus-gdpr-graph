@@ -12,6 +12,8 @@ import org.janusgraph.core.RelationType
 import org.janusgraph.core.schema.*
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
 
+import java.util.concurrent.atomic.AtomicInteger
+
 LinkedHashMap globals = [:]
 globals << [g: ((JanusGraph) graph).traversal() as GraphTraversalSource]
 globals << [mgmt: ((JanusGraph) graph).openManagement() as JanusGraphManagement]
@@ -19,8 +21,7 @@ globals << [mgmt: ((JanusGraph) graph).openManagement() as JanusGraphManagement]
 
 @CompileStatic
 
-class HtmlManipulator
-{
+class HtmlManipulator {
     /**
      * Table of HTML entities obtained from http://www.w3.org/TR/html401/sgml/entities.html
      * - Formatted as a series of space-delimited triplets (entity_name,entity_value,Unicode_value),
@@ -77,11 +78,10 @@ class HtmlManipulator
     private static final int RAW_HTML_ENTITY_TABLE_HASHCODE = -301953893;
 
     /** mapping: HTML entity ---> Unicode character */
-    private static final Map<String,Character> HTML_ENTITY_TO_UNICODE_MAP = new HashMap<String,Character>();
+    private static final Map<String, Character> HTML_ENTITY_TO_UNICODE_MAP = new HashMap<String, Character>();
 
     /** mapping: Unicode character ---> HTML entity */
-    private static final Map<Character,String> UNICODE_TO_HTML_ENTITY_MAP = new HashMap<Character,String>();
-
+    private static final Map<Character, String> UNICODE_TO_HTML_ENTITY_MAP = new HashMap<Character, String>();
 
     /**
      * Static initialization block.
@@ -90,16 +90,14 @@ class HtmlManipulator
     static
     {
         /* check hash code of RAW_HTML_ENTITY_TABLE */
-        if (RAW_HTML_ENTITY_TABLE.hashCode() != RAW_HTML_ENTITY_TABLE_HASHCODE)
-        {
+        if (RAW_HTML_ENTITY_TABLE.hashCode() != RAW_HTML_ENTITY_TABLE_HASHCODE) {
             throw new RuntimeException("(INTERNAL) Malformed HtmlManipulator.RAW_HTML_ENTITY_TABLE.");
         }
 
         /* populate HTML entity <---> Unicode character maps */
         final String[] elements = RAW_HTML_ENTITY_TABLE.split("[\\s]++");
 
-        for (int i = 0; i < elements.length; i += 3)
-        {
+        for (int i = 0; i < elements.length; i += 3) {
             final char unicode = (char) Integer.parseInt(elements[i + 2], 16);
             HTML_ENTITY_TO_UNICODE_MAP.put(elements[i], unicode);
             HTML_ENTITY_TO_UNICODE_MAP.put(elements[i + 1], unicode);
@@ -107,13 +105,10 @@ class HtmlManipulator
         }
     }
 
-
     /**
      * Private constructor that should never be called.
      */
-    private HtmlManipulator()
-    {}
-
+    private HtmlManipulator() {}
 
     /**
      * Replace HTML entities in a given string with their Unicode character representations.
@@ -121,29 +116,24 @@ class HtmlManipulator
      * @param s
      *     input string
      * @return
-     *     string with HTML entities replaced
+     * string with HTML entities replaced
      */
     public static String replaceHtmlEntities(
-            final String s)
-    {
+            final String s) {
         final StringBuilder t = new StringBuilder();
 
         int i = 0, n = s.length();
-        for (; i < n; i++)
-        {
+        for (; i < n; i++) {
             final char c = s.charAt(i);
 
-            if (c == (char)'&')
-            {
+            if (c == (char) '&') {
                 /* candidate HTML entity */
                 final int j = s.indexOf(';', i);
 
-                if (j >= 0)
-                {
+                if (j >= 0) {
                     final Character unicode = HTML_ENTITY_TO_UNICODE_MAP.get(s.substring(i + 1, j));
 
-                    if (unicode != null)
-                    {
+                    if (unicode != null) {
                         /* insert Unicode representation */
                         t.append((char) unicode);
                         i = j; /* advance index */
@@ -159,7 +149,6 @@ class HtmlManipulator
         return t.toString();
     }
 
-
     /**
      * Quote a specified string as HTML, by replacing all special characters with their
      * equivalent HTML entities.
@@ -167,23 +156,18 @@ class HtmlManipulator
      * @param s
      *     input string
      * @return
-     *     string with special characters replaced
+     * string with special characters replaced
      */
     public static String quoteHtml(
-            final String s)
-    {
+            final String s) {
         final StringBuilder t = new StringBuilder();
 
-        for (char c : s.toCharArray())
-        {
+        for (char c : s.toCharArray()) {
             final String entity = UNICODE_TO_HTML_ENTITY_MAP.get(c);
 
-            if (entity == null)
-            {
+            if (entity == null) {
                 t.append(c);
-            }
-            else
-            {
+            } else {
                 t.append('&');
                 t.append(entity);
                 t.append(';');
@@ -193,7 +177,6 @@ class HtmlManipulator
         return t.toString();
     }
 }
-
 
 
 @CompileStatic
@@ -868,6 +851,298 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 
     com.hubspot.jinjava.Jinjava jinJava = new com.hubspot.jinjava.Jinjava();
     return jinJava.render(new String(pg_templateTextInBase64.decodeBase64()), allData).bytes.encodeBase64().toString();
+
+}
+def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int counter, Set <Long> nodeIds,AtomicInteger depth) {
+
+    if (depth.intValue() == 0)
+    {
+        return;
+    }
+    depth.decrementAndGet();
+
+    g.V(pg_vid)
+            .repeat(both()).times(depth.intValue())
+            .each {
+        String groupStr = it.values('Metadata.Type').next();
+        String labelStr = it.label().toString().replaceAll('[_.]', ' ');
+        Long vid = it.id() as Long;
+        if (nodeIds.add(vid)){
+            sb.append(counter == 0 ? '{' : ',{')
+                    .append('"id":').append(vid)
+                    .append(',"group":"').append(groupStr)
+                    .append('","label":"').append(labelStr)
+                    .append('","shape":"').append('image')
+                    .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
+                    .append('"');
+            if (vid.equals(pg_vid)) {
+                sb.append(',"fixed":true');
+            }
+            sb.append('}')
+
+            counter++;
+            getVisJsGraphImmediateNeighbourNodes(vid,sb,counter,nodeIds,depth);
+
+        }
+
+    };
+
+
+
+    if (nodeIds.add(pg_vid)){
+        g.V(pg_vid)  // Also get the original node
+                .each {
+            String groupStr = it.values('Metadata.Type').next();
+            String labelStr = it.label().toString().replaceAll('[_.]', ' ');
+            Long vid = it.id();
+            sb.append(counter == 0 ? '{' : ',{')
+                    .append('"id":').append(vid)
+                    .append(',"group":"').append(groupStr)
+                    .append('","label":"').append(labelStr)
+                    .append('","shape":"').append('image')
+                    .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
+                    .append('"');
+            if (vid.equals(pg_vid)) {
+                sb.append(',"fixed":true');
+            }
+            sb.append('}')
+
+            counter++;
+
+        };
+    }
+
+    return counter;
+}
+
+def getVisJsGraphImmediateNeighbourEdges(long pg_vid, StringBuffer sb, int counter, Set<String> currEdges) {
+
+
+
+    StringBuffer localEntry = new StringBuffer();
+
+    g.V(pg_vid)
+            .bothE()
+            .dedup()
+            .each {
+        long from = it.inVertex().id() as long;
+        long to = it.outVertex().id() as long;
+        localEntry.setLength(0);
+
+        localEntry.append(counter == 0 ? '{' : ',{')
+                .append('"from": ').append(from)
+                .append(' ,"to": "').append(to)
+                .append('","label": "').append(it.label().toString().replaceAll('[_.]', ' '))
+                .append('"}')
+        String localEntryStr = localEntry.toString();
+
+        if (currEdges.add(localEntryStr)){
+            sb.append(localEntryStr);
+            counter++;
+
+        }
+
+
+    }
+    return counter;
+
+}
+
+def getVisJsGraph(long pg_vid, int depth = 1) {
+    StringBuffer sb = new StringBuffer()
+    StringBuffer sb2 = new StringBuffer()
+
+    Long numEdges = g.V(pg_vid).bothE().count().next();
+    String origLabel = g.V(pg_vid).label().next().replaceAll('[_.]', ' ');
+    AtomicInteger nodeDepth = new AtomicInteger(depth);
+
+    if (numEdges > 15) {
+
+        HashSet nodesSet = new HashSet()
+        HashSet edgesSet = new HashSet()
+
+
+        g.V(pg_vid).as('orig')
+                .outE().match(
+                __.as('e').inV().label().as('vLabel')
+                // ,  __.as('e').outV().label().as('inVLabel')
+                , __.as('e').label().as('edgeLabel')
+        )
+                .select('edgeLabel', 'vLabel')
+                .groupCount().each {
+            def entry = it;
+
+
+
+            entry.each {
+                key, val ->
+
+
+                    if (key instanceof Map) {
+
+                        String edgeLabel = key.get('edgeLabel').replaceAll('[_.]', ' ');
+                        String toNodeLabel = key.get('vLabel').replaceAll('[_.]', ' ') +
+                                ' -> (' + edgeLabel + ')';
+
+                        String edgeId = key.get('edgeLabel');
+                        String toNodeId = key.get('vLabel') +
+                                ' -> (' + edgeId + ')';
+
+                        sb.setLength(0);
+
+                        sb.append('{ "id":"').append(toNodeId)
+                                .append('","label":"').append(toNodeLabel)
+                                .append('","group":"').append(toNodeLabel)
+                                .append('","shape":"').append('box')
+                                .append('"}\\n')
+
+
+                        nodesSet.add(sb.toString());
+
+
+                        sb.setLength(0);
+
+                        sb.append('{ "from":"')
+                                .append(pg_vid).append('","to":"')
+                                .append(toNodeId).append('","label":"')
+                                .append(edgeLabel).append(' (')
+                                .append(val).append(')","value":')
+                                .append(val).append('}\\n')
+
+                        edgesSet.add(sb.toString());
+                        sb.setLength(0);
+
+                    }
+
+
+            }
+
+
+        }
+
+
+
+        g.V(pg_vid).as('orig')
+                .inE().match(
+                __.as('e').outV().label().as('vLabel')
+                // ,  __.as('e').outV().label().as('inVLabel')
+                , __.as('e').label().as('edgeLabel')
+        )
+                .select('edgeLabel', 'vLabel')
+                .groupCount().each {
+            it.each {
+                key, val ->
+                    if (key instanceof Map) {
+
+                        String edgeLabel = key.get('edgeLabel').replaceAll('[_.]', ' ');
+
+                        String fromNodeLabel = key.get('vLabel').replaceAll('[_.]', ' ') +
+                                ' <- (' + edgeLabel + ')';
+                        String edgeId = key.get('edgeLabel');
+
+                        String fromNodeId = key.get('vLabel') +
+                                ' <- (' + edgeId + ')';
+                        sb.setLength(0);
+
+                        sb.append('{ "id":"').append(fromNodeId)
+                                .append('","label":"').append(fromNodeLabel)
+                                .append('","group":"').append(fromNodeLabel)
+                                .append('","shape":"').append('box')
+                                .append('"}')
+
+                        nodesSet.add(sb.toString());
+
+
+                        sb.setLength(0);
+
+                        sb.append('{ "from":"')
+                                .append(fromNodeId).append('","to":"')
+                                .append(pg_vid).append('","label":"')
+                                .append(edgeLabel).append(' (')
+                                .append(val).append(')","value":')
+                                .append(val).append('}')
+                        edgesSet.add(sb.toString());
+                        sb.setLength(0);
+                    }
+
+
+            }
+
+
+        }
+        sb.setLength(0)
+        sb.append('{ "id":"').append(pg_vid)
+                .append('","label":"').append(origLabel)
+                .append('","group":"').append(origLabel)
+                .append('","fixed":').append(true)
+                .append(',"shape":"').append('image')
+                .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, pg_vid, origLabel).toString())
+                .append('"}')
+
+        nodesSet.add(sb.toString())
+        sb.setLength(0)
+
+        sb.append('{ "nodes":')
+                .append(nodesSet.toString()).append(', "edges":').append(edgesSet.toString())
+                .append('}')
+    } else {
+        int counter = 0;
+
+        try {
+            Set <Long> nodeIds = new HashSet<>();
+
+            sb.append('{ "nodes":[');
+
+            getVisJsGraphImmediateNeighbourNodes(pg_vid, sb, counter, nodeIds, nodeDepth);
+
+            sb.append('], "edges":[')
+
+
+            counter = 0;
+
+            Set <String> currEdges = new HashSet<>();
+            nodeIds.each {
+                counter = getVisJsGraphImmediateNeighbourEdges(it,sb,counter,currEdges);
+
+            }
+
+            sb.append(']');
+
+
+        } catch (Throwable t) {
+            sb.append(t.toString());
+        }
+
+        sb.toString()
+    }
+    sb.append(', "origLabel":"').append(origLabel).append('"');
+    int counter = 0;
+    sb.append(', "reportButtons": [');
+    try {
+        g.V()
+                .has('Object.Notification_Templates.Types'
+                , eq(g.V(pg_vid).values('Metadata.Type').next()))
+                .valueMap('Object.Notification_Templates.Label', 'Object.Notification_Templates.Text')
+                .each {
+            sb.append(counter > 0 ? ',{' : '{');
+            counter++;
+            sb.append('"text":"');
+            if (it.get('Object.Notification_Templates.Text') != null)
+                sb.append(it.get('Object.Notification_Templates.Text')[0].toString());
+            sb.append('","label":"');
+            if (it.get('Object.Notification_Templates.Label') != null)
+                sb.append(it.get('Object.Notification_Templates.Label')[0]);
+            sb.append('", "vid": ').append(pg_vid);
+
+            sb.append("}")
+
+        }
+    } catch (e) {
+    }
+
+    sb.append('] }');
+    return sb.toString();
+
 
 }
 
