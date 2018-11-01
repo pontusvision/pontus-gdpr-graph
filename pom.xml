@@ -41,6 +41,11 @@
     </properties>
     <dependencies>
         <dependency>
+	  <groupId>com.pontusvision</groupId>
+	  <artifactId>dynamodb-janusgraph-storage-backend</artifactId>
+	  <version>100-3.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-core</artifactId>
             <version>${keycloak.version}</version>
