@@ -870,6 +870,7 @@ def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int count
         if (nodeIds.add(vid)){
             sb.append(counter == 0 ? '{' : ',{')
                     .append('"id":').append(vid)
+                    .append(',"level":').append(getLevel(labelStr))
                     .append(',"group":"').append(groupStr)
                     .append('","label":"').append(labelStr)
                     .append('","shape":"').append('image')
@@ -897,6 +898,7 @@ def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int count
             Long vid = it.id();
             sb.append(counter == 0 ? '{' : ',{')
                     .append('"id":').append(vid)
+                    .append(',"level":').append(getLevel(labelStr))
                     .append(',"group":"').append(groupStr)
                     .append('","label":"').append(labelStr)
                     .append('","shape":"').append('image')
@@ -923,7 +925,6 @@ def getVisJsGraphImmediateNeighbourEdges(long pg_vid, StringBuffer sb, int count
 
     g.V(pg_vid)
             .bothE()
-            .dedup()
             .each {
         long from = it.inVertex().id() as long;
         long to = it.outVertex().id() as long;
@@ -945,6 +946,159 @@ def getVisJsGraphImmediateNeighbourEdges(long pg_vid, StringBuffer sb, int count
 
     }
     return counter;
+}
+/*
+Event.Ingestion.Group
+Event.Ingestion
+
+Person
+
+Object.Email_Address
+Object.Credential
+Event.Form_Ingestion
+Object.Identity_Card
+Location.Address
+Object.Insurance_Policy
+
+
+Event.Consent
+Object.Privacy_Notice
+Object.Privacy_Impact_Assessment
+Object.Lawful_Basis
+
+
+
+
+Event.Subject_Access_Request
+Person.Employee
+Object.Awareness_Campaign
+Event.Training
+Event.Data_Breach
+
+Person.Organisation
+
+Object.Data_Procedures
+Object.MoU
+Object.Form
+Object.Notification_Templates
+Object.AWS_Instance
+Object.AWS_Security_Group
+Object.AWS_Network_Interface
+
+ */
+
+
+
+def getLevel(String label){
+    int counter = 0;
+
+    if ((counter ++ > 0 ) && label.equals('Event Ingestion Group')){
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Event Ingestion'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Person'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Email Address'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Credential'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Event Form Ingestion'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Identity Card'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Location Address'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Insurance Policy'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Event Consent'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Privacy Notice'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Privacy Impact Assessment'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Lawful Basis'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Event Subject Access Request'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Person Employee'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Awareness Campaign'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Event Training'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Event Data_Breach'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Person Organisation'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Data Procedures'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object MoU'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Form'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object Notification Templates'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object AWS Instance'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object AWS Security Group'))
+    {
+        return counter;
+    }
+    else if ((counter ++ > 0 ) && label.equals('Object AWS Network Interface'))
+    {
+        return counter;
+    }
+    else
+    {
+        return label.hashCode()%10;
+    }
 
 }
 
