@@ -1,8 +1,8 @@
+import com.pontusvision.utils.LocationAddress
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.structure.Vertex
-import com.pontusvision.utils.LocationAddress;
-import com.pontusvision.utils.PostCode;
+
 import java.text.SimpleDateFormat
 
 def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProcessor, pg_metadataLineage, pg_metadataRedaction, pg_metadataVersion, pg_metadataStatus, pg_metadataGDPRStatus, pg_metadataLineageServerTag, pg_metadataLineageLocationTag, pg_login_username, pg_login_sha256, pg_id_name, pg_id_value, pg_name_first, pg_name_last, pg_gender, pg_nat, pg_name_title, pg_email, pg_location_street, pg_location_city, pg_location_state, pg_location_postcode) {
@@ -13,11 +13,11 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
     try {
         dob = new SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
     } catch (Throwable t) {
-        try{
+        try {
             dob = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String) item.get("pg_dob"))
 
         }
-        catch(Throwable t2) {
+        catch (Throwable t2) {
             dob = new Date("01/01/1666")
 
         }
@@ -257,11 +257,11 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
             try {
                 dob = new SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
             } catch (Throwable t) {
-                try{
+                try {
                     dob = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String) item.get("pg_dob"))
 
                 }
-                catch(Throwable t2) {
+                catch (Throwable t2) {
                     dob = new Date("01/01/1666")
 
                 }
@@ -388,11 +388,11 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
             try {
                 dob = new SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
             } catch (Throwable t) {
-                try{
+                try {
                     dob = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String) item.get("pg_dob"))
 
                 }
-                catch(Throwable t2) {
+                catch (Throwable t2) {
                     dob = new Date("01/01/1666")
 
                 }
@@ -514,9 +514,6 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
     }
 }
 
-
-
-
 /*
 {
         "Customer ID": "1010100110"
@@ -543,10 +540,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
  */
 
 
-
-
-
-def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb = null) {
+def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps, StringBuffer sb = null) {
 
     metadataCreateDate = new Date()
     metadataUpdateDate = new Date()
@@ -568,11 +562,11 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
             try {
                 dob = dobRawStr as Date //; new SimpleDateFormat("yyyy-MM-dd").parse((String) dobRawStr)
             } catch (Throwable t) {
-                try{
+                try {
                     dob = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse((String) item.get("pg_dob"))
 
                 }
-                catch(Throwable t2) {
+                catch (Throwable t2) {
                     dob = new Date("01/01/1666")
 
                 }
@@ -582,10 +576,10 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
 
             String renewalDateRawStr = item.get("pg_RenewalDate")
             Date renewalDate
-            try{
+            try {
                 renewalDate = renewalDateRawStr as Date
             }
-            catch (Throwable t2){
+            catch (Throwable t2) {
                 try {
 
                     renewalDate = new SimpleDateFormat("dd/MM/yyyy").parse((String) renewalDateRawStr)
@@ -594,8 +588,8 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
                 }
             }
 
-            def gender = item.get("pg_Sex")?.toUpperCase() ?:"MALE";
-            def title = item.get("pg_name_title")  ?: (gender.startsWith("M")?"MR":"MS")
+            def gender = item.get("pg_Sex")?.toUpperCase() ?: "MALE";
+            def title = item.get("pg_name_title") ?: (gender.startsWith("M") ? "MR" : "MS")
             def nationality = (item.get("pg_nat"))?.toUpperCase() ?: "GB"
 
             def emailStr = item.get("pg_Email_address")?.toLowerCase()
@@ -606,16 +600,14 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
 
             sb?.append("\n Looking for  existing person based on the $customerId ")
 
-            def personTrav = g.V().has("Person.Customer_ID",customerId )
+            def personTrav = g.V().has("Person.Customer_ID", customerId)
 
             def person = null;
-            if (personTrav.hasNext()){
+            if (personTrav.hasNext()) {
                 person = personTrav.next()
                 sb?.append("\n Found  existing person based on the $customerId ")
 
-            }
-
-            else{
+            } else {
                 person = g.addV("Person").
                         property("Metadata.Controller", item.get("pg_metadataController")).
                         property("Metadata.Processor", item.get("pg_metadataProcessor")).
@@ -643,14 +635,13 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
 
             def email = null
 
-            if (emailStr){
+            if (emailStr) {
 
                 def emailTrav = g.V().has("Object.Email_Address.Email")
 
-                if (emailTrav.hasNext()){
+                if (emailTrav.hasNext()) {
                     email = emailTrav.next()
-                }
-                else {
+                } else {
                     email = g.addV("Object.Email_Address").
                             property("Metadata.Controller", item.get("pg_metadataController")).
                             property("Metadata.Processor", item.get("pg_metadataProcessor")).
@@ -693,8 +684,7 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
             if (locationTrav.hasNext()) {
                 sb?.append("\n found existing location based on the $postCode and $address")
                 location = locationTrav.next()
-            }
-            else{
+            } else {
                 sb?.append("\n DID NOT FIND an existing location based on the $postCode and $address")
 
 
@@ -717,7 +707,7 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
 
 
 
-                locationTrav = addr.addPropsToGraphTraverser(locationTrav, "Location.Address.parser.",sb)
+                locationTrav = addr.addPropsToGraphTraverser(locationTrav, "Location.Address.parser.", sb)
                 location = locationTrav.next()
 
                 // property("Location.Address.Street", item.get("pg_location_street")).
@@ -728,12 +718,12 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps,StringBuffer sb
             }
 
 
-            if (person && email ){
+            if (person && email) {
                 sb?.append("\nadding email to person link ")
                 g.addE("Uses_Email").from(person).to(email).next()
 
             }
-            if (person && location){
+            if (person && location) {
                 sb?.append("\nadding person to location link ")
 
                 g.addE("Lives").from(person).to(location).next()
@@ -855,7 +845,7 @@ def addRandomDataBreachEvents(graph, g) {
     try {
 
         def randVal = new Random()
-        def randVal1 = randVal.nextInt(300)
+        def randVal1 = randVal.nextInt(30)
 
         def oneWeekInMs = 3600000 * 24 * 7
         def eighteenWeeks = oneWeekInMs * 18
@@ -1701,10 +1691,6 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
 }
 
 
-
-
-
-
 def createForms() {
 
 //    objectFormLabel = createVertexLabel(mgmt, "Object.Form");
@@ -2425,8 +2411,6 @@ def createNotificationTemplates() {
 }
 
 
-
-
 def __addVPCEdgesFromUserIdGroupPairs(
         graph, g,
         Long origVpcVid,
@@ -2895,22 +2879,58 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 
 
 def addRandomDataInit(graph, g) {
-    def listOfMaps = new LinkedList<HashMap<String,String>>()
+    def listOfMaps = new LinkedList<HashMap<String, String>>()
 
-    def map1 = [pg_metadataProcessor: '',pg_metadataLineage:'', pg_metadataRedaction:'', pg_metadataVersion: 1, pg_metadataStatus:'' , pg_metadataGDPRStatus:'', pg_metadataLineageServerTag:'', pg_metadataLineageLocationTag:'',pg_metadataController:'controller123', "pg_gender":"male","pg_name_title":"mr","pg_name_first":"quoc","pg_name_last":"bastiaansen","pg_location_street":"7247 lucasbolwerk","pg_location_city":"epe","pg_location_state":"flevoland","pg_location_postcode":"92775","pg_email":"quoc.bastiaansen@example.com","pg_login_username":"heavybear983","pg_login_password":"writer","pg_login_salt":"avKgfb4e","pg_login_md5":"d918e55da9d17937c718b9f7688821cb","pg_login_sha1":"2cb2bba91deef25c64f15a6ac96d84c21c1189e3","pg_login_sha256":"2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df","pg_dob":"1955-12-01 16:58:49","pg_registered":"2012-07-15 09:50:59","pg_phone":"(668)-056-6802","pg_cell":"(859)-113-0976","pg_id_name":"BSN","pg_id_value":"94173707","pg_picture_large":"https://randomuser.me/api/portraits/men/63.jpg","pg_picture_medium":"https://randomuser.me/api/portraits/med/men/63.jpg","pg_picture_thumbnail":"https://randomuser.me/api/portraits/thumb/men/63.jpg","pg_nat":"NL"]
-    def map2 = [pg_metadataProcessor: '',pg_metadataLineage:'', pg_metadataRedaction:'', pg_metadataVersion: 1, pg_metadataStatus:'' , pg_metadataGDPRStatus:'', pg_metadataLineageServerTag:'', pg_metadataLineageLocationTag:'',pg_metadataController:'controller123', "pg_gender":"male","pg_name_title":"mr","pg_name_first":"leo","pg_name_last":"martins","pg_location_street":"123 street name","pg_location_city":"London","pg_location_state":"London","pg_location_postcode":"e145hq","pg_email":"leo.martins@example.com","pg_login_username":"lmartins123","pg_login_password":"writer","pg_login_salt":"avKgfb4e","pg_login_md5":"d918e55da9d17937c718b9f7688821cb","pg_login_sha1":"2cb2bba91deef25c64f15a6ac96d84c21c1189e3","pg_login_sha256":"2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df","pg_dob":"1959-12-01 16:58:49","pg_registered":"2016-07-15 09:50:59","pg_phone":"(668)-056-6802","pg_cell":"(859)-113-0976","pg_id_name":"BSN","pg_id_value":"94173707","pg_picture_large":"https://randomuser.me/api/portraits/men/61.jpg","pg_picture_medium":"https://randomuser.me/api/portraits/med/men/61.jpg","pg_picture_thumbnail":"https://randomuser.me/api/portraits/thumb/men/61.jpg","pg_nat":"NL"]
+    def map1 = [pg_metadataProcessor: '', pg_metadataLineage: '', pg_metadataRedaction: '', pg_metadataVersion: 1, pg_metadataStatus: '', pg_metadataGDPRStatus: '', pg_metadataLineageServerTag: '', pg_metadataLineageLocationTag: '', pg_metadataController: 'controller123', "pg_gender": "male", "pg_name_title": "mr", "pg_name_first": "quoc", "pg_name_last": "bastiaansen", "pg_location_street": "7247 lucasbolwerk", "pg_location_city": "epe", "pg_location_state": "flevoland", "pg_location_postcode": "92775", "pg_email": "quoc.bastiaansen@example.com", "pg_login_username": "heavybear983", "pg_login_password": "writer", "pg_login_salt": "avKgfb4e", "pg_login_md5": "d918e55da9d17937c718b9f7688821cb", "pg_login_sha1": "2cb2bba91deef25c64f15a6ac96d84c21c1189e3", "pg_login_sha256": "2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df", "pg_dob": "1955-12-01 16:58:49", "pg_registered": "2012-07-15 09:50:59", "pg_phone": "(668)-056-6802", "pg_cell": "(859)-113-0976", "pg_id_name": "BSN", "pg_id_value": "94173707", "pg_picture_large": "https://randomuser.me/api/portraits/men/63.jpg", "pg_picture_medium": "https://randomuser.me/api/portraits/med/men/63.jpg", "pg_picture_thumbnail": "https://randomuser.me/api/portraits/thumb/men/63.jpg", "pg_nat": "NL"]
+    def map2 = [pg_metadataProcessor: '', pg_metadataLineage: '', pg_metadataRedaction: '', pg_metadataVersion: 1, pg_metadataStatus: '', pg_metadataGDPRStatus: '', pg_metadataLineageServerTag: '', pg_metadataLineageLocationTag: '', pg_metadataController: 'controller123', "pg_gender": "male", "pg_name_title": "mr", "pg_name_first": "leo", "pg_name_last": "martins", "pg_location_street": "123 street name", "pg_location_city": "London", "pg_location_state": "London", "pg_location_postcode": "e145hq", "pg_email": "leo.martins@example.com", "pg_login_username": "lmartins123", "pg_login_password": "writer", "pg_login_salt": "avKgfb4e", "pg_login_md5": "d918e55da9d17937c718b9f7688821cb", "pg_login_sha1": "2cb2bba91deef25c64f15a6ac96d84c21c1189e3", "pg_login_sha256": "2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df", "pg_dob": "1959-12-01 16:58:49", "pg_registered": "2016-07-15 09:50:59", "pg_phone": "(668)-056-6802", "pg_cell": "(859)-113-0976", "pg_id_name": "BSN", "pg_id_value": "94173707", "pg_picture_large": "https://randomuser.me/api/portraits/men/61.jpg", "pg_picture_medium": "https://randomuser.me/api/portraits/med/men/61.jpg", "pg_picture_thumbnail": "https://randomuser.me/api/portraits/thumb/men/61.jpg", "pg_nat": "NL"]
+    def map3 = [pg_metadataProcessor: '', pg_metadataLineage: '', pg_metadataRedaction: '', pg_metadataVersion: 1, pg_metadataStatus: '', pg_metadataGDPRStatus: '', pg_metadataLineageServerTag: '', pg_metadataLineageLocationTag: '', pg_metadataController: 'controller123', "pg_gender": "male", "pg_name_title": "mr", "pg_name_first": "marcus", "pg_name_last": "martins", "pg_location_street": "123 street name", "pg_location_city": "London", "pg_location_state": "London", "pg_location_postcode": "e145hq", "pg_email": "marcus.martins@example.com", "pg_login_username": "mmartins123", "pg_login_password": "writer", "pg_login_salt": "avKgfb4e", "pg_login_md5": "d918e55da9d17937c718b9f7688821cb", "pg_login_sha1": "2cb2bba91deef25c64f15a6ac96d84c21c1189e3", "pg_login_sha256": "2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df", "pg_dob": "1967-12-01 16:58:49", "pg_registered": "2016-07-19 09:50:59", "pg_phone": "(668)-056-3334", "pg_cell": "(859)-113-7776", "pg_id_name": "BS2", "pg_id_value": "94173999", "pg_picture_large": "https://randomuser.me/api/portraits/men/13.jpg", "pg_picture_medium": "https://randomuser.me/api/portraits/med/men/13.jpg", "pg_picture_thumbnail": "https://randomuser.me/api/portraits/thumb/men/13.jpg", "pg_nat": "BR"]
+    def map4 = [pg_metadataProcessor: '', pg_metadataLineage: '', pg_metadataRedaction: '', pg_metadataVersion: 1, pg_metadataStatus: '', pg_metadataGDPRStatus: '', pg_metadataLineageServerTag: '', pg_metadataLineageLocationTag: '', pg_metadataController: 'controller123', "pg_gender": "female", "pg_name_title": "ms", "pg_name_first": "ada", "pg_name_last": "algebra", "pg_location_street": "123 street name", "pg_location_city": "London", "pg_location_state": "London", "pg_location_postcode": "e145hq", "pg_email": "marcus.martins@example.com", "pg_login_username": "aalgebra", "pg_login_password": "writer", "pg_login_salt": "avKgfb4e", "pg_login_md5": "d918e55da9d17937c718b9f7688821cb", "pg_login_sha1": "2cb2bba91deef25c64f15a6ac96d84c21c1189e3", "pg_login_sha256": "2945552ed13c3cf2a845d2f6af78ad7bbb161569af8e08dc3bfa36a3fa09b6df", "pg_dob": "1989-12-01 16:58:49", "pg_registered": "2016-07-19 09:50:59", "pg_phone": "(668)-056-3342", "pg_cell": "(859)-113-1122", "pg_id_name": "BS2", "pg_id_value": "94173900", "pg_picture_large": "https://randomuser.me/api/portraits/women/13.jpg", "pg_picture_medium": "https://randomuser.me/api/portraits/med/women/13.jpg", "pg_picture_thumbnail": "https://randomuser.me/api/portraits/thumb/women/13.jpg", "pg_nat": "BR"]
 
     listOfMaps.add(map1);
     listOfMaps.add(map2);
+    listOfMaps.add(map3);
+    listOfMaps.add(map4);
 
-    addCampaignAwarenessBulk(graph,g, listOfMaps)
+    StringBuffer sb = new StringBuffer();
 
-    addRandomSARs(graph, g);
-    addLawfulBasisAndPrivacyNotices(graph, g);
-    addRandomDataProcedures(graph, g);
-    createDataProtectionAuthorities();
-    addRandomAWSGraph(graph, g, null, null);
-    addRandomDataBreachEvents(graph, g);
-    createNotificationTemplates();
-    createForms();
+    try {
+
+
+        addCampaignAwarenessBulk(graph, g, listOfMaps)
+        sb.append("\n called addCampaignAwarenessBulk(graph, g, listOfMaps)");
+
+        addRandomSARs(graph, g);
+        sb.append("\n called addRandomSARs(graph, g)");
+
+        addLawfulBasisAndPrivacyNotices(graph, g);
+        sb.append("\n called addLawfulBasisAndPrivacyNotices(graph, g)");
+
+        addRandomDataProcedures(graph, g);
+        sb.append("\n called addRandomDataProcedures(graph, g)");
+
+        createDataProtectionAuthorities();
+        sb.append("\n called createDataProtectionAuthorities()");
+
+
+        addRandomAWSGraph(graph, g, null, null);
+        sb.append("\n called addRandomAWSGraph(graph, g, null, null)");
+
+        addRandomDataBreachEvents(graph, g)
+        sb.append("\n called addRandomDataBreachEvents(graph, g)");
+
+        createNotificationTemplates();
+        sb.append("\n called createNotificationTemplates()");
+
+//        createForms();
+
+
+    } catch (e) {
+        e.printStackTrace()
+        sb.append('\nFailed to load schema!\n').append(e);
+
+    }
+
+    return sb.toString()
+
+
 }
