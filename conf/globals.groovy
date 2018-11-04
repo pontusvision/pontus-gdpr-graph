@@ -1291,7 +1291,8 @@ def getVisJsGraph(long pg_vid, int depth = 1) {
             sb.append("}")
 
         }
-    } catch (e) {
+    } catch (Throwable e) {
+
     }
 
     sb.append('] }');
