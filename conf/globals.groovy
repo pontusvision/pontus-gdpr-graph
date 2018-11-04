@@ -862,7 +862,7 @@ def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int count
     depth.decrementAndGet();
 
     g.V(pg_vid)
-            .repeat(both()).times(depth.intValue())
+            .repeat(both()).times(depth.intValue()).emit()
             .each {
         String groupStr = it.values('Metadata.Type').next();
         String labelStr = it.label().toString().replaceAll('[_.]', ' ');
@@ -882,7 +882,7 @@ def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int count
             sb.append('}')
 
             counter++;
-            getVisJsGraphImmediateNeighbourNodes(vid,sb,counter,nodeIds,depth);
+//            getVisJsGraphImmediateNeighbourNodes(vid,sb,counter,nodeIds,depth);
 
         }
 
