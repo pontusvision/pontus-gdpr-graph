@@ -853,69 +853,103 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
     return jinJava.render(new String(pg_templateTextInBase64.decodeBase64()), allData).bytes.encodeBase64().toString();
 
 }
+//def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int counter, Set <Long> nodeIds,AtomicInteger depth) {
+//
+//    if (depth.intValue() == 0)
+//    {
+//        return;
+//    }
+//    depth.decrementAndGet();
+//
+//    g.V(pg_vid)
+//            .repeat(both()).times(depth.intValue()).emit()
+//            .each {
+//        String groupStr = it.values('Metadata.Type').next();
+//        String labelStr = it.label().toString().replaceAll('[_.]', ' ');
+//        Long vid = it.id() as Long;
+//        if (nodeIds.add(vid)){
+//            sb.append(counter == 0 ? '{' : ',{')
+//                    .append('"id":').append(vid)
+//                    .append(',"level":').append(getLevel(labelStr))
+//                    .append(',"group":"').append(groupStr)
+//                    .append('","label":"').append(labelStr)
+//                    .append('","shape":"').append('image')
+//                    .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
+//                    .append('"');
+//            if (vid.equals(pg_vid)) {
+//                sb.append(',"fixed":true');
+//            }
+//            sb.append('}')
+//
+//            counter++;
+////            getVisJsGraphImmediateNeighbourNodes(vid,sb,counter,nodeIds,depth);
+//
+//        }
+//
+//    };
+//
+//
+//
+//    if (nodeIds.add(pg_vid)){
+//        g.V(pg_vid)  // Also get the original node
+//                .each {
+//            String groupStr = it.values('Metadata.Type').next();
+//            String labelStr = it.label().toString().replaceAll('[_.]', ' ');
+//            Long vid = it.id();
+//            sb.append(counter == 0 ? '{' : ',{')
+//                    .append('"id":').append(vid)
+//                    .append(',"level":').append(getLevel(labelStr))
+//                    .append(',"group":"').append(groupStr)
+//                    .append('","label":"').append(labelStr)
+//                    .append('","shape":"').append('image')
+//                    .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
+//                    .append('"');
+//            if (vid.equals(pg_vid)) {
+//                sb.append(',"fixed":true');
+//            }
+//            sb.append('}')
+//
+//            counter++;
+//
+//        };
+//    }
+//
+//    return counter;
+//}
+
 def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int counter, Set <Long> nodeIds,AtomicInteger depth) {
 
-    if (depth.intValue() == 0)
-    {
-        return;
-    }
-    depth.decrementAndGet();
+    def types =  getMetadataTypes(depth.intValue());
 
-    g.V(pg_vid)
-            .repeat(both()).times(depth.intValue()).emit()
-            .each {
-        String groupStr = it.values('Metadata.Type').next();
-        String labelStr = it.label().toString().replaceAll('[_.]', ' ');
-        Long vid = it.id() as Long;
-        if (nodeIds.add(vid)){
-            sb.append(counter == 0 ? '{' : ',{')
-                    .append('"id":').append(vid)
-                    .append(',"level":').append(getLevel(labelStr))
-                    .append(',"group":"').append(groupStr)
-                    .append('","label":"').append(labelStr)
-                    .append('","shape":"').append('image')
-                    .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
-                    .append('"');
-            if (vid.equals(pg_vid)) {
-                sb.append(',"fixed":true');
+    types.each { type ->
+        g.V().has("Metadata.Type.${type}", eq("${type}")).each {
+            String groupStr = it.values('Metadata.Type').next();
+            String labelStr = it.label().toString().replaceAll('[_.]', ' ');
+            Long vid = it.id() as Long;
+            if (nodeIds.add(vid)) {
+                sb.append(counter == 0 ? '{' : ',{')
+                        .append('"id":').append(vid)
+                        .append(',"level":').append(getLevel(labelStr))
+                        .append(',"group":"').append(groupStr)
+                        .append('","label":"').append(labelStr)
+                        .append('","shape":"').append('image')
+                        .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
+                        .append('"');
+                if (vid.equals(pg_vid)) {
+                    sb.append(',"fixed":true');
+                }
+                sb.append('}')
+
+                counter++;
+
             }
-            sb.append('}')
-
-            counter++;
-//            getVisJsGraphImmediateNeighbourNodes(vid,sb,counter,nodeIds,depth);
-
         }
-
     };
 
 
-
-    if (nodeIds.add(pg_vid)){
-        g.V(pg_vid)  // Also get the original node
-                .each {
-            String groupStr = it.values('Metadata.Type').next();
-            String labelStr = it.label().toString().replaceAll('[_.]', ' ');
-            Long vid = it.id();
-            sb.append(counter == 0 ? '{' : ',{')
-                    .append('"id":').append(vid)
-                    .append(',"level":').append(getLevel(labelStr))
-                    .append(',"group":"').append(groupStr)
-                    .append('","label":"').append(labelStr)
-                    .append('","shape":"').append('image')
-                    .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
-                    .append('"');
-            if (vid.equals(pg_vid)) {
-                sb.append(',"fixed":true');
-            }
-            sb.append('}')
-
-            counter++;
-
-        };
-    }
-
     return counter;
 }
+
 
 def getVisJsGraphImmediateNeighbourEdges(long pg_vid, StringBuffer sb, int counter, Set<String> currEdges) {
 
@@ -986,120 +1020,77 @@ Object.AWS_Security_Group
 Object.AWS_Network_Interface
 
  */
-
+def getMetadataTypes (int level){
+    def metadataTypes = [
+            'Event.Ingestion.Group'
+           ,'Event.Ingestion'
+           ,'Person'
+           ,'Object.Email_Address'
+           ,'Object.Credential'
+           ,'Event.Form_Ingestion'
+           ,'Object.Identity_Card'
+           ,'Location.Address'
+           ,'Object.Insurance_Policy'
+           ,'Event.Consent'
+           ,'Object.Privacy_Notice'
+           ,'Object.Privacy_Impact_Assessment'
+           ,'Object.Lawful_Basis'
+           ,'Event.Subject_Access_Request'
+           ,'Person.Employee'
+           ,'Object.Awareness_Campaign'
+           ,'Event.Training'
+           ,'Event.Data_Breach'
+           ,'Person.Organisation'
+           ,'Object.Data_Procedures'
+           ,'Object.MoU'
+           ,'Object.Form'
+           ,'Object.Notification_Templates'
+           ,'Object.AWS_Instance'
+           ,'Object.AWS_Security_Group'
+           ,'Object.AWS_Network_Interface'
+    ]
+    return metadataTypes.subList(0,level);
+}
 
 
 def getLevel(String label){
-    int counter = 0;
+    def levels = [
+            'Event Ingestion Group',
+            'Event Ingestion',
+            'Person',
+            'Object Email Address',
+            'Object Credential',
+            'Event Form Ingestion',
+            'Object Identity Card',
+            'Location Address',
+            'Object Insurance Policy',
+            'Event Consent',
+            'Object Privacy Notice',
+            'Object Privacy Impact Assessment',
+            'Object Lawful Basis',
+            'Event Subject Access Request',
+            'Person Employee',
+            'Object Awareness Campaign',
+            'Event Training',
+            'Event Data_Breach',
+            'Person Organisation',
+            'Object Data Procedures',
+            'Object MoU',
+            'Object Form',
+            'Object Notification Templates',
+            'Object AWS Instance',
+            'Object AWS Security Group',
+            'Object AWS Network Interface'
+    ];
+    int index =  levels.findIndexOf {
+        (label.equals(it))
+    };
 
-    if ((counter ++ > 0 ) && label.equals('Event Ingestion Group')){
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Event Ingestion'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Person'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Email Address'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Credential'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Event Form Ingestion'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Identity Card'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Location Address'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Insurance Policy'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Event Consent'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Privacy Notice'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Privacy Impact Assessment'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Lawful Basis'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Event Subject Access Request'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Person Employee'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Awareness Campaign'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Event Training'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Event Data_Breach'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Person Organisation'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Data Procedures'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object MoU'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Form'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object Notification Templates'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object AWS Instance'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object AWS Security Group'))
-    {
-        return counter;
-    }
-    else if ((counter ++ > 0 ) && label.equals('Object AWS Network Interface'))
-    {
-        return counter;
-    }
-    else
-    {
+    if (index == -1){
         return label.hashCode()%10;
     }
 
+    return index;
 }
 
 def getVisJsGraph(long pg_vid, int depth = 1) {
