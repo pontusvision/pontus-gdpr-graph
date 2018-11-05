@@ -2877,7 +2877,6 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 
 }
 
-
 def addRandomDataInit(graph, g) {
     def listOfMaps = new LinkedList<HashMap<String, String>>()
 
@@ -2934,3 +2933,4 @@ def addRandomDataInit(graph, g) {
 
 
 }
+
