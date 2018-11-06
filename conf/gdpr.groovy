@@ -1043,8 +1043,14 @@ def addRandomSARs(graph, g) {
             def person = g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1).tryNext()
 
 
-            g.addE("Made_SAR_Request").from(person.get()).to(sar).next()
-            g.addE("Assigned_SAR_Request").from(employee.get()).to(sar).next()
+            if (person.isPresent()){
+                g.addE("Made_SAR_Request").from(person.get()).to(sar).next()
+
+            }
+            if (employee.isPresent()){
+                g.addE("Assigned_SAR_Request").from(employee.get()).to(sar).next()
+
+            }
 
 
         }
