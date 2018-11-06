@@ -989,7 +989,7 @@ def addRandomSARs(graph, g) {
         }
 
         def randVal = new Random()
-        def randVal1 = randVal.nextInt(3000)
+        def randVal1 = randVal.nextInt(30)
 
         def oneWeekInMs = 3600000 * 24 * 7
         def eighteenWeeks = oneWeekInMs * 18
@@ -1260,7 +1260,7 @@ def addDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
 
     def randVal = new Random()
-    def randVal1 = randVal.nextInt(3000)
+    def randVal1 = randVal.nextInt(30)
 
     def oneWeekInMs = 3600000 * 24 * 7
     def eighteenWeeks = oneWeekInMs * 18
@@ -1677,12 +1677,12 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
         g.addE("Has_Lawful_Basis_On").from(g.V(pnId1).next()).to(lawfulBasisVertices[3]).next()
 
 
-        __addConsentForPrivacyNotice(graph, g, g.V(pnId0).next())
-        __addConsentForPrivacyNotice(graph, g, g.V(pnId1).next())
+//        __addConsentForPrivacyNotice(graph, g, g.V(pnId0).next())
+//        __addConsentForPrivacyNotice(graph, g, g.V(pnId1).next())
 
-
-        __addPrivacyImpactAssessment(graph, g, g.V(pnId0).next())
-        __addPrivacyImpactAssessment(graph, g, g.V(pnId1).next())
+//
+//        __addPrivacyImpactAssessment(graph, g, g.V(pnId0).next())
+//        __addPrivacyImpactAssessment(graph, g, g.V(pnId1).next())
 
 
 
@@ -2647,7 +2647,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 
 
     def randVal = new Random()
-    def randVal1 = randVal.nextInt(3000)
+    def randVal1 = randVal.nextInt(30)
 
     long oneWeekInMs = 3600000L * 24L * 7L
     long eighteenWeeks = oneWeekInMs * 18L

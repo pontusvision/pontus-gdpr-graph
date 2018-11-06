@@ -226,17 +226,17 @@ O.Form.Vertex_Label
     objectAWSProp02 = createProp(mgmt, "Object.AWS_Security_Group.Ip_Perms_Ingress_IpRanges", String.class, org.janusgraph.core.Cardinality.SET)
     objectAWSProp03 = createProp(mgmt, "Object.AWS_Security_Group.Ip_Perms_Egress_IpRanges", String.class, org.janusgraph.core.Cardinality.SET)
 
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Security_GroupIdx00", objectAWSSecurityGroupLabel, objectAWSProp00, objectAWSProp01, objectAWSProp02, objectAWSProp03)
+    objectAWSIdx00 = createMixedIdx(mgmt, "objectAWS_Security_GroupIdx00", objectAWSSecurityGroupLabel, objectAWSProp00, objectAWSProp01, objectAWSProp02, objectAWSProp03)
 
 //    objectAWSIdx01 = createMixedIdx(mgmt, "objectAWS_Security_GroupMixedIdx01", objectAWSSecurityGroupLabel,objectAWSProp01)
 
     objectAWSVPCLabel = createVertexLabel(mgmt, "Object.AWS_VPC");
 
     objectAWSProp00 = createProp(mgmt, "Object.AWS_VPC.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_VPCIdx01", objectAWSProp00)
+//    objectAWSIdx00 = createMixedIdx(mgmt, "objectAWS_VPCIdx01", objectAWSProp00)
 
 
-    createMixedIdx(mgmt, 'awsMixedLabelIdx', objectAWSVPCLabel, objectAWSSecurityGroupLabel, objectAWSInstanceLabel);
+    createMixedIdx(mgmt, 'objectAWS_VPCIdx01', objectAWSVPCLabel, objectAWSProp00);
 
     /*
         NetworkInterfaces=[
