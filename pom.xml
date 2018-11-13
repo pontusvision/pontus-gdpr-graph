@@ -22,6 +22,7 @@
         <slf4j.version>1.7.21</slf4j.version>
         <jackson2.version>[2.8.11.1,)</jackson2.version>
         <hadoop2.version>2.7.2</hadoop2.version>
+        <hbase-version>1.4.4</hbase-version>
 
 
         <guice.version>4.0</guice.version>
@@ -80,7 +81,7 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
                 </exclusion>
-                
+
 
             </exclusions>
 
@@ -212,78 +213,12 @@
             <version>${jersey-version}</version>
         </dependency>
 
-        <!--<dependency>-->
-        <!--<groupId>javax.ws.rs</groupId>-->
-        <!--<artifactId>javax.ws.rs-api</artifactId>-->
-        <!--<version>2.1</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.apache.hadoop</groupId>-->
-        <!--<artifactId>hadoop-common</artifactId>-->
-        <!--<version>${hadoop2.version}</version>-->
-        <!--<exclusions>-->
 
-        <!--<exclusion>-->
-        <!--<groupId>org.codehaus.jackson</groupId>-->
-        <!--<artifactId>jackson-core-asl</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.codehaus.jackson</groupId>-->
-        <!--<artifactId>jackson-jaxrs</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.codehaus.jackson</groupId>-->
-        <!--<artifactId>jackson-xc</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.slf4j</groupId>-->
-        <!--<artifactId>slf4j-api</artifactId>-->
-        <!--</exclusion>-->
-
-        <!--<exclusion>-->
-        <!--<groupId>org.apache.httpcomponents</groupId>-->
-        <!--<artifactId>httpclient</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.slf4j</groupId>-->
-        <!--<artifactId>slf4j-log4j12</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.codehaus.jackson</groupId>-->
-        <!--<artifactId>jackson-mapper-asl</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>commons-logging</groupId>-->
-        <!--<artifactId>commons-logging</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>commons-codec</groupId>-->
-        <!--<artifactId>commons-codec</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>org.apache.httpcomponents</groupId>-->
-        <!--<artifactId>httpcore</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>commons-configuration</groupId>-->
-        <!--<artifactId>commons-configuration</artifactId>-->
-        <!--</exclusion>-->
-        <!--<exclusion>-->
-        <!--<groupId>com.google.guava</groupId>-->
-        <!--<artifactId>guava</artifactId>-->
-        <!--</exclusion>-->
-
-        <!--</exclusions>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.janusgraph</groupId>
             <artifactId>janusgraph-hadoop</artifactId>
             <version>${janusgraph.version}</version>
             <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-yarn-api</artifactId>
@@ -458,34 +393,6 @@
             <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>commons-configuration</groupId>
-                    <artifactId>commons-configuration</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.glassfish</groupId>
-                    <artifactId>javax.json</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-io</groupId>
-                    <artifactId>commons-io</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-codec</groupId>
-                    <artifactId>commons-codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.codahale.metrics</groupId>
-                    <artifactId>metrics-core</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
@@ -534,18 +441,6 @@
             <version>${janusgraph.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-io</groupId>
-                    <artifactId>commons-io</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-codec</groupId>
-                    <artifactId>commons-codec</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
                 </exclusion>
@@ -589,22 +484,85 @@
             <groupId>org.janusgraph</groupId>
             <artifactId>janusgraph-hbase</artifactId>
             <version>${janusgraph.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-shaded-client</artifactId>
+            <version>${hbase-version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>commons-io</groupId>
-                    <artifactId>commons-io</artifactId>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-core-asl</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-auth</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-common</artifactId>
+
+                </exclusion>
+
+
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
+        <!-- LPPM - needed for the OLAP jobs -->
         <dependency>
             <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-shaded-client</artifactId>
-            <version>1.4.4</version>
+            <artifactId>hbase-shaded-server</artifactId>
+            <version>${hbase-version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-hdfs</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-mapper-asl</artifactId>
@@ -729,36 +687,12 @@
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-jetty-http</artifactId>
             <version>${jersey-version}</version>
-            <!--<exclusions>-->
-            <!--<exclusion>-->
-            <!--<groupId>org.eclipse.jetty</groupId>-->
-            <!--<artifactId>jetty-server</artifactId>-->
-            <!--</exclusion>-->
-            <!--<exclusion>-->
-            <!--<groupId>org.eclipse.jetty</groupId>-->
-
-            <!--<artifactId>jetty-util</artifactId>-->
-
-            <!--</exclusion>-->
-            <!--</exclusions>-->
         </dependency>
         <dependency>
             <groupId>pontus-redaction</groupId>
             <artifactId>pontus-redaction-common</artifactId>
             <version>0.99.0</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.apache.nifi</groupId>-->
-        <!--<artifactId>nifi-pontus-jwt-processor</artifactId>-->
-        <!--<version>1.0</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.glassfish.jersey.inject</groupId>-->
-        <!--<artifactId>jersey-hk2</artifactId>-->
-        <!--<version>${jersey-version}</version>-->
-
-        <!--</dependency>-->
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -864,6 +798,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.4.3</version>
+
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -873,6 +808,36 @@
                         <configuration>
                             <filters>
                                 <filter>
+                                    <artifact>pv-gdpr:pontus-gdpr-graph</artifact>
+                                    <includes>
+                                        <include>org/**</include>
+                                        <include>org/apache/hadoop/conf/Configuratio*</include>
+                                        <include>org/apache/hadoop/conf/Configuration**</include>
+                                        <include>org/apache/hadoop/conf/Configuration</include>
+                                        <include>org/apache/hadoop/conf/Configuratio.class</include>
+                                        <include>org/apache/hadoop/conf/**</include>
+                                        <include>com/**</include>
+                                        <include>uk/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.janusgraph:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <!--<exclude>org/slf4j/**</exclude>-->
+                                        <!--<exclude>ch/qos/**</exclude>-->
+                                        <!-- LPPM - WARNING: THE OLAP jobs NEED our own custom version of this class: -->
+                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration*</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration**</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
+                                    </excludes>
+                                </filter>
+                                <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
                                         <exclude>META-INF/*.SF</exclude>
@@ -880,9 +845,77 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                         <!--<exclude>org/slf4j/**</exclude>-->
                                         <!--<exclude>ch/qos/**</exclude>-->
-                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
+                                       
+
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>org.apache.hbase:hbase-shaded-client</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <!--<exclude>org/slf4j/**</exclude>-->
+                                        <!--<exclude>ch/qos/**</exclude>-->
+                                        <!-- LPPM - WARNING: THE OLAP jobs NEED our own custom version of this class: -->
+                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration*</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration**</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
+
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.hbase:hbase-shaded-client</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <!--<exclude>org/slf4j/**</exclude>-->
+                                        <!--<exclude>ch/qos/**</exclude>-->
+                                        <!-- LPPM - WARNING: THE OLAP jobs NEED our own custom version of this class: -->
+                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration*</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration**</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
+
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.hbase:hbase-shaded-server</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <!--<exclude>org/slf4j/**</exclude>-->
+                                        <!--<exclude>ch/qos/**</exclude>-->
+                                        <!-- LPPM - WARNING: THE OLAP jobs NEED our own custom version of this class: -->
+                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration*</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration**</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>pv-gdpr:pontus-gdpr-graph</artifact>
+                                    <includes>
+                                        <include>org/**</include>
+                                        <include>org/apache/hadoop/conf/Configuratio*</include>
+                                        <include>org/apache/hadoop/conf/Configuration**</include>
+                                        <include>org/apache/hadoop/conf/Configuration</include>
+                                        <include>org/apache/hadoop/conf/Configuratio.class</include>
+                                        <include>org/apache/hadoop/conf/**</include>
+                                        <include>com/**</include>
+                                        <include>uk/**</include>
+                                    </includes>
+                                </filter>
+
                             </filters>
                             <transformers>
                                 <transformer
