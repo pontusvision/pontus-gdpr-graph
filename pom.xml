@@ -813,7 +813,7 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                         <!--<exclude>org/slf4j/**</exclude>-->
                                         <!--<exclude>ch/qos/**</exclude>-->
-                                        <!--<exclude>org/apache/logging/**</exclude>-->
+                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
