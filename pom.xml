@@ -42,9 +42,9 @@
     </properties>
     <dependencies>
         <dependency>
-	  <groupId>com.pontusvision</groupId>
-	  <artifactId>dynamodb-janusgraph-storage-backend</artifactId>
-	  <version>100-3.0</version>
+            <groupId>com.pontusvision</groupId>
+            <artifactId>dynamodb-janusgraph-storage-backend</artifactId>
+            <version>100-3.0</version>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
@@ -68,7 +68,7 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
                 </exclusion>
-                
+
 
             </exclusions>
 
@@ -542,8 +542,14 @@
             <artifactId>hbase-shaded-server</artifactId>
             <version>${hbase-version}</version>
             <exclusions>
-                <exclusion><groupId>org.apache.hadoop</groupId><artifactId>hadoop-client</artifactId></exclusion>
-                <exclusion><groupId>org.apache.hadoop</groupId><artifactId>hadoop-hdfs</artifactId></exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-hdfs</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-mapper-asl</artifactId>
@@ -779,6 +785,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.4.3</version>
+
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -788,7 +795,20 @@
                         <configuration>
                             <filters>
                                 <filter>
-                                    <artifact>*:*</artifact>
+                                    <artifact>pv-gdpr:pontus-gdpr-graph</artifact>
+                                    <includes>
+                                        <include>org/**</include>
+                                        <include>org/apache/hadoop/conf/Configuratio*</include>
+                                        <include>org/apache/hadoop/conf/Configuration**</include>
+                                        <include>org/apache/hadoop/conf/Configuration</include>
+                                        <include>org/apache/hadoop/conf/Configuratio.class</include>
+                                        <include>org/apache/hadoop/conf/**</include>
+                                        <include>com/**</include>
+                                        <include>uk/**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.janusgraph:*</artifact>
                                     <excludes>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
@@ -801,6 +821,36 @@
                                         <exclude>org/apache/hadoop/conf/Configuration*</exclude>
                                         <exclude>org/apache/hadoop/conf/Configuration**</exclude>
                                         <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <!--<exclude>org/slf4j/**</exclude>-->
+                                        <!--<exclude>ch/qos/**</exclude>-->
+                                       
+
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.hbase:hbase-shaded-client</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <!--<exclude>org/slf4j/**</exclude>-->
+                                        <!--<exclude>ch/qos/**</exclude>-->
+                                        <!-- LPPM - WARNING: THE OLAP jobs NEED our own custom version of this class: -->
+                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration*</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration**</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
 
                                     </excludes>
                                 </filter>
@@ -838,6 +888,19 @@
                                         <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
 
                                     </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>pv-gdpr:pontus-gdpr-graph</artifact>
+                                    <includes>
+                                        <include>org/**</include>
+                                        <include>org/apache/hadoop/conf/Configuratio*</include>
+                                        <include>org/apache/hadoop/conf/Configuration**</include>
+                                        <include>org/apache/hadoop/conf/Configuration</include>
+                                        <include>org/apache/hadoop/conf/Configuratio.class</include>
+                                        <include>org/apache/hadoop/conf/**</include>
+                                        <include>com/**</include>
+                                        <include>uk/**</include>
+                                    </includes>
                                 </filter>
 
                             </filters>
