@@ -749,8 +749,8 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
     addDefaultResource("core-site.xml");
   }
 
-  private Properties properties;
-  private Properties overlay;
+  private ConcurrentProperties properties;
+  private ConcurrentProperties overlay;
   private ClassLoader classLoader;
   {
     classLoader = Thread.currentThread().getContextClassLoader();
@@ -789,11 +789,11 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
     this.resources = (ArrayList<Resource>) other.resources.clone();
     synchronized(other) {
       if (other.properties != null) {
-        this.properties = (Properties)other.properties.clone();
+        this.properties = (ConcurrentProperties)other.properties.clone();
       }
 
       if (other.overlay!=null) {
-        this.overlay = (Properties)other.overlay.clone();
+        this.overlay = (ConcurrentProperties)other.overlay.clone();
       }
 
       this.updatingResource = new ConcurrentHashMap<String, String[]>(
@@ -1294,7 +1294,7 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
 
   private synchronized Properties getOverlay() {
     if (overlay==null){
-      overlay=new Properties();
+      overlay=new ConcurrentProperties();
     }
     return overlay;
   }
@@ -2485,7 +2485,7 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
 
   protected synchronized Properties getProps() {
     if (properties == null) {
-      properties = new Properties();
+      properties = new ConcurrentProperties();
       Map<String, String[]> backup =
           new ConcurrentHashMap<String, String[]>(updatingResource);
       loadResources(properties, resources, quietmode);
@@ -2527,8 +2527,10 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
    *
    * @return an iterator over the entries.
    */
+
+  // LPPM - added synchronization here to prevent a concurrent exception
   @Override
-  public Iterator<Map.Entry<String, String>> iterator() {
+  public synchronized  Iterator<Map.Entry<String, String>> iterator() {
     // Get a copy of just the string to string pairs. After the old object
     // methods that allow non-strings to be put into configurations are removed,
     // we could replace properties with a Map<String,String> and get rid of this
