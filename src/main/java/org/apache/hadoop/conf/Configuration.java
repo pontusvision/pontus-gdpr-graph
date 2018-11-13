@@ -120,23 +120,8 @@ import java.io.Writer;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -158,6 +143,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import com.google.common.base.Charsets;
 import org.apache.commons.collections.map.UnmodifiableMap;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -749,8 +735,8 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
     addDefaultResource("core-site.xml");
   }
 
-  private ConcurrentProperties properties;
-  private ConcurrentProperties overlay;
+  private Properties properties;
+  private Properties overlay;
   private ClassLoader classLoader;
   {
     classLoader = Thread.currentThread().getContextClassLoader();
@@ -789,11 +775,11 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
     this.resources = (ArrayList<Resource>) other.resources.clone();
     synchronized(other) {
       if (other.properties != null) {
-        this.properties = (ConcurrentProperties)other.properties.clone();
+        this.properties = (Properties)other.properties.clone();
       }
 
       if (other.overlay!=null) {
-        this.overlay = (ConcurrentProperties)other.overlay.clone();
+        this.overlay = (Properties)other.overlay.clone();
       }
 
       this.updatingResource = new ConcurrentHashMap<String, String[]>(
@@ -1294,7 +1280,7 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
 
   private synchronized Properties getOverlay() {
     if (overlay==null){
-      overlay=new ConcurrentProperties();
+      overlay=new Properties();
     }
     return overlay;
   }
@@ -2485,7 +2471,7 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
 
   protected synchronized Properties getProps() {
     if (properties == null) {
-      properties = new ConcurrentProperties();
+      properties = new Properties();
       Map<String, String[]> backup =
           new ConcurrentHashMap<String, String[]>(updatingResource);
       loadResources(properties, resources, quietmode);
@@ -2551,9 +2537,22 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
 
     Map<Object,Object> entryMap = new HashMap<>(getProps());
 
-    Set<Map.Entry<Object,Object>> entrySet = new HashSet<>(entryMap.entrySet());
+    Set<Map.Entry<Object,Object>> entrySet = null;
 
-    for(Map.Entry<Object,Object> item: entrySet) {
+    while (entrySet == null){
+      try
+      {
+        entrySet = new HashSet<>(entryMap.entrySet());
+      }
+      catch (ConcurrentModificationException e)
+      {
+        // ignore
+      }
+    }
+
+
+    for(Map.Entry<Object,Object> item: entrySet)
+    {
       if (item.getKey() instanceof String &&
           item.getValue() instanceof String) {
         result.put((String) item.getKey(), (String) item.getValue());
