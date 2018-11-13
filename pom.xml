@@ -799,8 +799,47 @@
                                         <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
                                         <exclude>org/apache/hadoop/conf/Configuration</exclude>
                                         <exclude>org/apache/hadoop/conf/Configuration*</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration**</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>org.apache.hbase:hbase-shaded-client</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <!--<exclude>org/slf4j/**</exclude>-->
+                                        <!--<exclude>ch/qos/**</exclude>-->
+                                        <!-- LPPM - WARNING: THE OLAP jobs NEED our own custom version of this class: -->
+                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration*</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration**</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
+
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.hbase:hbase-shaded-server</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <!--<exclude>org/slf4j/**</exclude>-->
+                                        <!--<exclude>ch/qos/**</exclude>-->
+                                        <!-- LPPM - WARNING: THE OLAP jobs NEED our own custom version of this class: -->
+                                        <exclude>org/apache/hadoop/conf/Configuration.class</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration*</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuration**</exclude>
+                                        <exclude>org/apache/hadoop/conf/Configuratio*</exclude>
+
+                                    </excludes>
+                                </filter>
+
                             </filters>
                             <transformers>
                                 <transformer
