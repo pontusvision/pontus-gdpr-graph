@@ -37,12 +37,25 @@
         <keycloak.version>4.1.0.Final</keycloak.version>
         <pontus-jpostal.version>1.0.0</pontus-jpostal.version>
         <pontus-natty.version>100.14</pontus-natty.version>
+        <netty-version>4.0.56.Final</netty-version>
         <!--<apache.directory-api-version>
             1.0.0
         </apache.directory-api-version>-->
 
     </properties>
     <dependencies>
+        <!-- LPPM - adding additional dependencies to enable epoll on Linux -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+            <version>${netty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <version>${netty-version}</version>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -219,6 +232,18 @@
             <artifactId>janusgraph-hadoop</artifactId>
             <version>${janusgraph.version}</version>
             <exclusions>
+
+
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
+                </exclusion>
+
                 <exclusion>
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-yarn-api</artifactId>
@@ -392,6 +417,16 @@
             <artifactId>janusgraph-core</artifactId>
             <version>${janusgraph.version}</version>
             <exclusions>
+
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
+                </exclusion>
+
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
@@ -440,6 +475,16 @@
             <artifactId>janusgraph-es</artifactId>
             <version>${janusgraph.version}</version>
             <exclusions>
+
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
+                </exclusion>
+
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
@@ -490,6 +535,16 @@
             <artifactId>hbase-shaded-client</artifactId>
             <version>${hbase-version}</version>
             <exclusions>
+
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
+                </exclusion>
+
                 <exclusion>
                     <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-mapper-asl</artifactId>
@@ -555,6 +610,16 @@
             <artifactId>hbase-shaded-server</artifactId>
             <version>${hbase-version}</version>
             <exclusions>
+
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
+                </exclusion>
+
                 <exclusion>
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-client</artifactId>
