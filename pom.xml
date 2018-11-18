@@ -35,6 +35,9 @@
         <mockito-all.version>1.10.19</mockito-all.version>
         <jukito.version>1.5</jukito.version>
         <keycloak.version>4.1.0.Final</keycloak.version>
+        <pontus-jpostal.version>1.0.0</pontus-jpostal.version>
+        <pontus-natty.version>100.14</pontus-natty.version>
+        <netty-version>4.0.56.Final</netty-version>
         <!--<apache.directory-api-version>
             1.0.0
         </apache.directory-api-version>-->
@@ -45,12 +48,12 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport</artifactId>
-            <version>4.1.15.Final</version>
+            <version>${netty-version}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport-native-epoll</artifactId>
-            <version>4.1.15.Final</version>
+            <version>${netty-version}</version>
             <classifier>linux-x86_64</classifier>
         </dependency>
         <dependency>
