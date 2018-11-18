@@ -554,7 +554,7 @@ world_region: currently only used for appending “West Indies” after the coun
     objectLawfulBasis0 = createProp(mgmt, "Object.Lawful_Basis.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectLawfulBasis1 = createProp(mgmt, "Object.Lawful_Basis.Description", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-//    createMixedIdx(mgmt, "objectLawfulBasis0MixedIdx", objectLawfulBasisLabel, objectLawfulBasis0, objectLawfulBasis1)
+    createMixedIdx(mgmt, "objectLawfulBasis0MixedIdx", objectLawfulBasisLabel, objectLawfulBasis0, objectLawfulBasis1)
 //    createMixedIdx(mgmt, "objectLawfulBasis1MixedIdx", objectLawfulBasis1)
 
     objectPrivacyNoticeLabel = createVertexLabel(mgmt, "Object.Privacy_Notice")
