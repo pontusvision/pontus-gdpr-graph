@@ -147,8 +147,8 @@ O.Form.Vertex_Label
     objectNotificationTemplatesProp03 = createProp(mgmt, "Object.Notification_Templates.Text", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectNotificationTemplatesProp04 = createProp(mgmt, "Object.Notification_Templates.Label", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-//    objectNotificationTemplatesIdx00 = createCompIdx(mgmt, "objectNotificationTemplatesIdx00", objectNotificationTemplatesProp00);
-    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectNotificationTemplatesIdx01", objectAWSInstanceLabel,objectNotificationTemplatesProp00 ,objectNotificationTemplatesProp01);
+    objectNotificationTemplatesIdx00 = createCompIdx(mgmt, "objectNotificationTemplatesIdx00", objectNotificationTemplatesProp00);
+    objectNotificationTemplatesIdx01 = createMixedIdx(mgmt, "objectNotificationTemplatesIdx01", objectAWSInstanceLabel, objectNotificationTemplatesProp01);
 //    objectNotificationTemplatesIdx02 = createCompIdx(mgmt, "objectNotificationTemplatesIdx02", objectNotificationTemplatesProp02);
 //    objectNotificationTemplatesIdx03 = createCompIdx(mgmt, "objectNotificationTemplatesIdx03", objectNotificationTemplatesProp03);
 
@@ -265,7 +265,7 @@ O.Form.Vertex_Label
     objectAWSProp04 = createProp(mgmt, "Object.AWS_Network_Interface.PrivateDnsName", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectAWSProp05 = createProp(mgmt, "Object.AWS_Network_Interface.AttachTime", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx00", objectAWSNetworkInterfaceLabel, objectAWSProp00, objectAWSProp01, objectAWSProp02, objectAWSProp03, objectAWSProp04,objectAWSProp05)
+    objectAWSIdx00 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx00", objectAWSNetworkInterfaceLabel, objectAWSProp00, objectAWSProp01, objectAWSProp02, objectAWSProp03, objectAWSProp04)
 //    objectAWSIdx01 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx01", objectAWSProp01)
 //    objectAWSIdx02 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx02", objectAWSProp02)
 //    objectAWSIdx03 = createCompIdx(mgmt, "objectAWS_Network_InterfaceIdx03", objectAWSProp03)
@@ -485,7 +485,7 @@ world_region: currently only used for appending “West Indies” after the coun
     objectPrivacyImpactAssessment11 = createProp(mgmt, "Object.Privacy_Impact_Assessment.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
 //    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx0", objectPrivacyImpactAssessment0)
-    createMixedIdx(mgmt, "Object_Privacy_Impact_Assessment_Idx", objectPrivacyImpactAssessmentLabel, objectPrivacyImpactAssessment1, objectPrivacyImpactAssessment2, objectPrivacyImpactAssessment3, objectPrivacyImpactAssessment4, objectPrivacyImpactAssessment5, objectPrivacyImpactAssessment6, objectPrivacyImpactAssessment7, objectPrivacyImpactAssessment8, objectPrivacyImpactAssessment9, objectPrivacyImpactAssessment10, objectPrivacyImpactAssessment11)
+    createMixedIdx(mgmt, "Object_Privacy_Impact_Assessment_Start_Date", objectPrivacyImpactAssessmentLabel, objectPrivacyImpactAssessment1, objectPrivacyImpactAssessment2, objectPrivacyImpactAssessment3, objectPrivacyImpactAssessment4, objectPrivacyImpactAssessment5, objectPrivacyImpactAssessment6, objectPrivacyImpactAssessment7, objectPrivacyImpactAssessment8, objectPrivacyImpactAssessment9, objectPrivacyImpactAssessment10, objectPrivacyImpactAssessment11)
 
 //    createCompIdx(mgmt, "Object_Privacy_Impact_Assessment_Delivery_Date", objectPrivacyImpactAssessment2)
 //    createMixedIdx(mgmt, "objectPrivacyImpactAssessmentMixedIdx3", metadataType, objectPrivacyImpactAssessment3)
@@ -554,7 +554,7 @@ world_region: currently only used for appending “West Indies” after the coun
     objectLawfulBasis0 = createProp(mgmt, "Object.Lawful_Basis.Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectLawfulBasis1 = createProp(mgmt, "Object.Lawful_Basis.Description", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    createMixedIdx(mgmt, "objectLawfulBasis0MixedIdx", objectLawfulBasisLabel, objectLawfulBasis0, objectLawfulBasis1)
+//    createMixedIdx(mgmt, "objectLawfulBasis0MixedIdx", objectLawfulBasisLabel, objectLawfulBasis0, objectLawfulBasis1)
 //    createMixedIdx(mgmt, "objectLawfulBasis1MixedIdx", objectLawfulBasis1)
 
     objectPrivacyNoticeLabel = createVertexLabel(mgmt, "Object.Privacy_Notice")
