@@ -239,6 +239,11 @@
                 </exclusion>
 
                 <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
+                </exclusion>
+
+                <exclusion>
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-yarn-api</artifactId>
                 </exclusion>
@@ -416,6 +421,10 @@
                     <groupId>io.netty</groupId>
                     <artifactId>netty-transport</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
+                </exclusion>
 
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -469,6 +478,10 @@
                 <exclusion>
                     <groupId>io.netty</groupId>
                     <artifactId>netty-transport</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
                 </exclusion>
 
                 <exclusion>
@@ -525,6 +538,10 @@
                 <exclusion>
                     <groupId>io.netty</groupId>
                     <artifactId>netty-transport</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
                 </exclusion>
 
                 <exclusion>
@@ -596,6 +613,10 @@
                 <exclusion>
                     <groupId>io.netty</groupId>
                     <artifactId>netty-transport</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
                 </exclusion>
 
                 <exclusion>
