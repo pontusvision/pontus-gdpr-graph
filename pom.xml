@@ -253,6 +253,12 @@
                     <artifactId>netty-all</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+
+
+                <exclusion>
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-yarn-api</artifactId>
                 </exclusion>
@@ -368,14 +374,7 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
                 </exclusion>
-
-
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-all</artifactId>
-                </exclusion>
-
-
+                
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
@@ -443,6 +442,11 @@
                     <artifactId>netty-all</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+
+                <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
@@ -507,6 +511,11 @@
                     <groupId>io.netty</groupId>
                     <artifactId>netty-all</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
@@ -575,6 +584,11 @@
                     <artifactId>netty-all</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+
+                <exclusion>
                     <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-mapper-asl</artifactId>
                 </exclusion>
@@ -607,10 +621,6 @@
                 </exclusion>
 
 
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-all</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -657,6 +667,11 @@
                     <artifactId>netty-all</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+
+                <exclusion>
                     <groupId>org.apache.hadoop</groupId>
                     <artifactId>hadoop-client</artifactId>
                 </exclusion>
@@ -697,10 +712,6 @@
                 </exclusion>
 
 
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-all</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -796,10 +807,10 @@
             <exclusions>
 
 
-            <exclusion>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-transport</artifactId>
-            </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport</artifactId>
+                </exclusion>
 
                 <exclusion>
                     <groupId>io.netty</groupId>
@@ -821,6 +832,11 @@
                     <groupId>io.netty</groupId>
                     <artifactId>netty-all</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+
             </exclusions>
         </dependency>
         <dependency>
@@ -975,7 +991,7 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                         <!--<exclude>org/slf4j/**</exclude>-->
                                         <!--<exclude>ch/qos/**</exclude>-->
-                                       
+
 
                                     </excludes>
                                 </filter>
