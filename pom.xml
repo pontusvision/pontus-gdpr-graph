@@ -37,7 +37,7 @@
         <keycloak.version>4.1.0.Final</keycloak.version>
         <pontus-jpostal.version>1.0.0</pontus-jpostal.version>
         <pontus-natty.version>100.14</pontus-natty.version>
-        <netty-version>4.0.47.Final</netty-version>
+        <netty-version>4.0.56.Final</netty-version>
         <!--<apache.directory-api-version>
             1.0.0
         </apache.directory-api-version>-->
