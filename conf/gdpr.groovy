@@ -911,8 +911,8 @@ def addRandomDataBreachEvents(graph, g) {
                     property("Metadata.Lineage", "Random generator").
                     property("Metadata.Redaction", "/data/protection/officer").
                     property("Metadata.Version", "1").
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
+                    property("Event.Data_Breach.Metadata.Create_Date", metadataCreateDate).
+                    property("Event.Data_Breach.Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.GDPR_Status", "Data Breach").
                     property("Metadata.Type", "Event.Data_Breach").
                     property("Metadata.Type.Event.Data_Breach", "Event.Data_Breach").
@@ -1025,8 +1025,8 @@ def addRandomSARs(graph, g) {
                     property("Metadata.Lineage", "Random generator").
                     property("Metadata.Redaction", "/dataprotectionofficer/aaa").
                     property("Metadata.Version", "1").
-                    property("Metadata.Create_Date", metadataCreateDate).
-                    property("Metadata.Update_Date", metadataUpdateDate).
+                    property("Event.Subject_Access_Request.Metadata.Create_Date", metadataCreateDate).
+                    property("Event.Subject_Access_Request.Metadata.Update_Date", metadataUpdateDate).
                     property("Metadata.Status", stat).
                     property("Metadata.GDPR_Status", "SAR").
                     property("Metadata.Lineage_Server_Tag", "AWS EUR1").
@@ -1298,8 +1298,8 @@ def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
                 property("Metadata.Lineage", "Random generator").
                 property("Metadata.Redaction", "/dataprotectionofficer/aaa").
                 property("Metadata.Version", "1").
-                property("Metadata.Create_Date", metadataCreateDate).
-                property("Metadata.Update_Date", metadataUpdateDate).
+                property("Event.Consent.Metadata.Create_Date", metadataCreateDate).
+                property("Event.Consent.Metadata.Update_Date", metadataUpdateDate).
                 property("Metadata.Status", stat).
                 property("Metadata.GDPR_Status", "SAR").
                 property("Metadata.Lineage_Server_Tag", "AWS EUR1").
