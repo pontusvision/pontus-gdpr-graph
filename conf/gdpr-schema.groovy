@@ -159,8 +159,10 @@ O.Form.Vertex_Label
     eventDataBreachProp02 = createProp(mgmt, "Event.Data_Breach.Status", String.class, org.janusgraph.core.Cardinality.SINGLE);
     eventDataBreachProp03 = createProp(mgmt, "Event.Data_Breach.Source", String.class, org.janusgraph.core.Cardinality.SINGLE);
     eventDataBreachProp04 = createProp(mgmt, "Event.Data_Breach.Impact", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventDataBreachProp05 = createProp(mgmt, "Event.Data_Breach.Metadata.Create_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventDataBreachProp06 = createProp(mgmt, "Event.Data_Breach.Metadata.Update_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
 
-    eventDataBreachIdx00 = createMixedIdx(mgmt, "eventDataBreachIdx00", eventDataBreachLabel, eventDataBreachProp00, eventDataBreachProp02, eventDataBreachProp03, eventDataBreachProp04);
+    eventDataBreachIdx00 = createMixedIdx(mgmt, "eventDataBreachIdx00", eventDataBreachLabel, eventDataBreachProp00, eventDataBreachProp02, eventDataBreachProp03, eventDataBreachProp04,eventDataBreachProp05,eventDataBreachProp06);
 //    eventDataBreachIdx01 = createCompIdx(mgmt, "eventDataBreachIdx01", eventDataBreachProp01);
 //    eventDataBreachIdx02 = createMixedIdx(mgmt, "eventDataBreachIdx02", metadataType, eventDataBreachProp02);
 //    eventDataBreachIdx03 = createMixedIdx(mgmt, "eventDataBreachIdx03", metadataType, eventDataBreachProp03);
@@ -305,9 +307,11 @@ O.Form.Vertex_Label
 //    eventSARStatusIdx = createCompIdx(mgmt, "eventSARStatusIdx", eventSARStatus)
 
     eventSARRequestType = createProp(mgmt, "Event.Subject_Access_Request.Request_Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
-//    eventSARRequestTypeIdx = createMixedIdx(mgmt, "eventSARRequestTypeMixedIdx", eventSARRequestType)
+    eventSARMetadataCreateDate = createProp(mgmt, "Event.Subject_Access_Request.Metadata.Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    eventSARMetadataUpdateDate = createProp(mgmt, "Event.Subject_Access_Request.Metadata.Update_Date", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
-    eventSARStatusIdx = createMixedIdx(mgmt, "eventSARStatusMixedIdx", eventSubjAccessReq, eventSARStatus, eventSARRequestType)
+    eventSARStatusIdx = createMixedIdx(mgmt, "eventSARStatusMixedIdx", eventSARMetadataUpdateDate,eventSARMetadataCreateDate,eventSubjAccessReq, eventSARStatus, eventSARRequestType)
+
 
 //    eventSARRequestTypeIdx = createCompIdx(mgmt, "eventSARRequestTypeIdx", eventSARRequestType)
 
@@ -572,12 +576,14 @@ world_region: currently only used for appending “West Indies” after the coun
     objectPrivacyNotice11 = createProp(mgmt, "Object.Privacy_Notice.Who_Will_It_Be_Shared", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice12 = createProp(mgmt, "Object.Privacy_Notice.Effect_On_Individuals", String.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNotice13 = createProp(mgmt, "Object.Privacy_Notice.Likely_To_Complain", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectPrivacyNotice14 = createProp(mgmt, "Object.Privacy_Notice.Metadata.Create_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    objectPrivacyNotice15 = createProp(mgmt, "Object.Privacy_Notice.Metadata.Update_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     objectPrivacyNoticeFormProp01 = createProp(mgmt, "Object.Privacy_Notice.Form_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectPrivacyNoticeFormProp02 = createProp(mgmt, "Object.Privacy_Notice.Form_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectPrivacyNoticeFormProp03 = createProp(mgmt, "Object.Privacy_Notice.Form_Submission_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
     objectPrivacyNoticeFormProp04 = createProp(mgmt, "Object.Privacy_Notice.Form_Submission_Owner_Id", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
-    createMixedIdx(mgmt, "objectPrivacyNotice00MixedIdx", objectPrivacyNoticeLabel, objectPrivacyNotice00, objectPrivacyNotice05, objectPrivacyNotice06, objectPrivacyNotice07, objectPrivacyNotice08, objectPrivacyNotice09, objectPrivacyNotice10, objectPrivacyNotice11, objectPrivacyNotice12, objectPrivacyNotice13
+    createMixedIdx(mgmt, "objectPrivacyNotice00MixedIdx", objectPrivacyNoticeLabel, objectPrivacyNotice00, objectPrivacyNotice05, objectPrivacyNotice06, objectPrivacyNotice07, objectPrivacyNotice08, objectPrivacyNotice09, objectPrivacyNotice10, objectPrivacyNotice11, objectPrivacyNotice12, objectPrivacyNotice13, objectPrivacyNotice14, objectPrivacyNotice15
             , objectPrivacyNoticeFormProp01
             , objectPrivacyNoticeFormProp02
             , objectPrivacyNoticeFormProp03
@@ -693,7 +699,9 @@ world_region: currently only used for appending “West Indies” after the coun
 
     eventConsentDate = createProp(mgmt, "Event.Consent.Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
     eventConsentStatus = createProp(mgmt, "Event.Consent.Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    createMixedIdx(mgmt, "eventConsentStatusMtdMixedIdx", orgLabel, eventConsentStatus, eventConsentDate)
+    eventConsentMetadataCreateDate = createProp(mgmt, "Event.Consent.Metadata.Create_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    eventConsentMetadataUpdateDate = createProp(mgmt, "Event.Consent.Metadata.Update_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    createMixedIdx(mgmt, "eventConsentStatusMtdMixedIdx", orgLabel, eventConsentStatus, eventConsentMetadataUpdateDate, eventConsentMetadataCreateDate, eventConsentDate)
 //    createCompIdx(mgmt, "eventConsentDateCompIdx",  eventConsentDate)
     mgmt.commit();
 
