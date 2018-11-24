@@ -118,7 +118,7 @@ class PVConvMixin {
                         calendar.set(Calendar.HOUR_OF_DAY, 1);
                         calendar.set(Calendar.MINUTE, 1);
                         calendar.set(Calendar.SECOND, 1);
-                        calendar.set(Calendar.MILLISECOND, 1);
+                        calendar.set(Calendar.MILLISECOND, 0);
                         retVal = calendar.getTime();
 
                     }
