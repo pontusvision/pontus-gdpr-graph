@@ -307,8 +307,8 @@ O.Form.Vertex_Label
 //    eventSARStatusIdx = createCompIdx(mgmt, "eventSARStatusIdx", eventSARStatus)
 
     eventSARRequestType = createProp(mgmt, "Event.Subject_Access_Request.Request_Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    eventSARMetadataCreateDate = createProp(mgmt, "Event.Subject_Access_Request.Metadata.Create_Date", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    eventSARMetadataUpdateDate = createProp(mgmt, "Event.Subject_Access_Request.Metadata.Update_Date", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    eventSARMetadataCreateDate = createProp(mgmt, "Event.Subject_Access_Request.Metadata.Create_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    eventSARMetadataUpdateDate = createProp(mgmt, "Event.Subject_Access_Request.Metadata.Update_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
 
     eventSARStatusIdx = createMixedIdx(mgmt, "eventSARStatusMixedIdx", eventSARMetadataUpdateDate,eventSARMetadataCreateDate,eventSubjAccessReq, eventSARStatus, eventSARRequestType)
 

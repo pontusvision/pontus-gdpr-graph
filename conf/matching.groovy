@@ -942,6 +942,7 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
 }
 
 def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
+    Map<String, Long> finalVertexIdByVertexName = new HashMap<>();
 
     def jsonSlurper = new JsonSlurper()
     def rules = jsonSlurper.parseText(jsonRules)
@@ -956,7 +957,6 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
         def matchReqs = getMatchRequests(bindings, rules.updatereq, jsonRules, sb)
         def (matchIdsByVertexType, vertexListsByVertexName) = matchVertices(g, matchReqs, 10, sb);
 
-        Map<String, Long> finalVertexIdByVertexName = new HashMap<>();
         matchIdsByVertexType.each { vertexTypeStr, potentialHitIDs ->
 
             List<MatchReq> matchReqsForThisVertexType = vertexListsByVertexName.get(vertexTypeStr)
@@ -992,10 +992,6 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
         createEdges(g, (Set<EdgeRequest>) edgeReqs, (Map<String, Long>) finalVertexIdByVertexName, sb)
 
 
-
-
-
-
         trans.commit()
     } catch (Throwable t) {
         trans.rollback()
@@ -1003,6 +999,8 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
     } finally {
         trans.close()
     }
+
+    return finalVertexIdByVertexName;
 }
 
 
