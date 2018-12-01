@@ -4,6 +4,7 @@ import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.janusgraph.core.PropertyKey
+import org.janusgraph.core.schema.ConsistencyModifier
 import org.janusgraph.core.schema.JanusGraphManagement
 import org.janusgraph.core.schema.Mapping
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
@@ -35,8 +36,7 @@ def loadSchema(String... files) {
                 addIndexes(mgmt, json['edgeIndexes'], true, propsMap, sb)
                 sb.append("Loading File ${f}\n")
 
-            }
-            else {
+            } else {
                 sb.append("NOT LOADING FILE ${f}\n")
             }
 
@@ -1617,7 +1617,11 @@ def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique, Pr
 
             }
 
-            return ib.buildCompositeIndex();
+            def idx = ib.buildCompositeIndex();
+            if (isUnique){
+                mgmt.setConsistency(idx, ConsistencyModifier.LOCK)
+            }
+            return idx;
         } else {
             return mgmt.getGraphIndex(idxName);
         }
