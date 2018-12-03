@@ -1618,9 +1618,9 @@ def createCompIdx(def mgmt, String idxName, boolean isEdge, boolean isUnique, Pr
             }
 
             def idx = ib.buildCompositeIndex();
-            if (isUnique){
-                mgmt.setConsistency(idx, ConsistencyModifier.LOCK)
-            }
+//            if (isUnique){
+//                mgmt.setConsistency(idx, ConsistencyModifier.LOCK)
+//            }
             return idx;
         } else {
             return mgmt.getGraphIndex(idxName);
