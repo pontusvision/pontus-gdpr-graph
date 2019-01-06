@@ -8,9 +8,15 @@ import groovy.text.GStringTemplateEngine
 import groovy.text.Template
 import groovy.transform.TypeChecked
 import org.apache.tinkerpop.gremlin.process.traversal.P
+import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.codehaus.groovy.runtime.StringGroovyMethods
+import org.janusgraph.core.JanusGraph
+import org.janusgraph.core.JanusGraphIndexQuery
+import org.janusgraph.core.JanusGraphVertex
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.function.ToLongFunction
+import java.util.stream.Collectors
 
 /*
 def benchmark = { closure ->
@@ -164,6 +170,7 @@ class MatchReq<T> {
     private String propName;
     private String vertexName;
 
+    private String predicateStr;
     private Closure predicate;
     private Convert<T> conv;
     private StringBuffer sb = null;
@@ -211,6 +218,7 @@ class MatchReq<T> {
         this.propName = propName
         this.vertexName = vertexName
         this.conv = new Convert<>(attribType)
+        this.predicateStr = predicateStr;
         this.predicate = convertPredicateFromStr(predicateStr)
 
         this.sb = sb;
@@ -314,6 +322,10 @@ class MatchReq<T> {
         this.vertexName = vertexName
     }
 
+    String getPredicateStr() {
+        return predicateStr;
+    }
+
     Closure getPredicate() {
         return predicate
     }
@@ -412,18 +424,56 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
                     def searchableItems = it.findAll { it2 -> (!(currSize < maxExpectedSizeOfQueries && it2.excludeFromSubsequenceSearch)) }
 
+                    List<Long> indexQueryResults = new LinkedList<>();
                     if (searchableItems.size() > 0) {
                         sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
                         gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
 
                         searchableItems.each { it2 ->
-                            gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
-                            sb?.append("\n     .has('")?.append(it2.propName)?.append("',")
-                                    ?.append(it2.predicate)?.append(",'")?.append(it2.attribNativeVal)?.append("')")
+
+                            String predicateStr = it2.predicateStr as String;
+                            if (predicateStr.startsWith ("idx:"))
+                            {
+                                String[] idxQuery = (predicateStr).split(':');
+                                String idx = idxQuery[1];
+
+                                String value = "v.\"${it2.propName}\":${it2.attribNativeVal}"
+
+//                                indexQueryResults.addAll((graph as JanusGraph).indexQuery(idx, value).vertexStream().mapToLong({ result -> result.getElement().longId()}).collect(Collectors.toList()));
+                                for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
+                                    indexQueryResults.add(result.getElement().longId());
+                                }
+                            }
+                            else if (predicateStr.startsWith ("idxRaw:"))
+                            {
+                                String[] idxQuery = (predicateStr).split(':');
+                                String idx = idxQuery[1];
+
+                                String value = it2.attribNativeVal.toString();
+
+//                                indexQueryResults.addAll((graph as JanusGraph).indexQuery(idx, value).vertexStream().mapToLong({ result -> result.getElement().longId()}).collect(Collectors.toList()));
+                                for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
+                                    indexQueryResults.add(result.getElement().longId());
+                                }
+                            }
+
+                            else
+                            {
+                                gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
+                                sb?.append("\n     .has('")?.append(it2.propName)?.append("',")
+                                        ?.append(it2.predicate)?.append(",'")?.append(it2.attribNativeVal)?.append("')")
+
+                            }
+
+
 
 
                         }
                         vertexListsByVertexName.get(k).addAll(gtrav.range(0, maxHitsPerType).id().toList() as Long[])
+                        if (indexQueryResults.size() > 0){
+                            vertexListsByVertexName.get(k).addAll(indexQueryResults.subList(0,maxHitsPerType))
+
+                        }
                         sb?.append("\n $it")
 
                     }
