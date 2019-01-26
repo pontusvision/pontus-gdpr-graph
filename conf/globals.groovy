@@ -5,10 +5,7 @@ import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
-import org.janusgraph.core.EdgeLabel
-import org.janusgraph.core.JanusGraph
-import org.janusgraph.core.PropertyKey
-import org.janusgraph.core.RelationType
+import org.janusgraph.core.*
 import org.janusgraph.core.schema.*
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
 
@@ -352,29 +349,6 @@ JanusGraphIndex createCompIdx(JanusGraphManagement mgmt, String idxName, boolean
     return null
 }
 
-//JanusGraphIndex createCompIdx(JanusGraphManagement mgmt, String idxName, boolean isEdge, PropertyKey... props) {
-//    try {
-//        if (!mgmt.containsGraphIndex(idxName)) {
-//            def clazz = isEdge ? Edge.class : Vertex.class
-//            JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
-//            for (PropertyKey prop in props) {
-//                ib.addKey(prop);
-////            ib.addKey(prop,Mapping.STRING.asParameter());
-//                System.out.println("creating Comp IDX ${idxName} for key ${prop}");
-//
-//            }
-//
-//            return ib.buildCompositeIndex();
-//        } else {
-//            return mgmt.getGraphIndex(idxName);
-//        }
-//    }
-//    catch (Throwable t) {
-//        t.printStackTrace();
-//    }
-//    return null
-//
-//}
 
 @CompileStatic
 JanusGraphIndex createCompIdx(JanusGraphManagement mgmt, String idxName, PropertyKey... props) {
@@ -624,19 +598,37 @@ def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String 
 }
 
 
-@CompileStatic
+@CompileDynamic
 def describeSchema(JanusGraph graph, StringBuffer sb = new StringBuffer()) {
-    def schema = new Schema(graph, sb)
+    Schema schema = new Schema(graph, sb)
     schema.describeAll()
     sb.toString()
 }
+
+@CompileDynamic
 
 def describeSchema(StringBuffer sb = new StringBuffer()) {
-    def schema = new Schema(globals['graph'], sb)
+    Schema schema = new Schema((JanusGraph) globals['graph'], sb)
     schema.describeAll()
     sb.toString()
 }
 
+@CompileDynamic
+
+def dumpJsonSchema(StringBuffer sb = new StringBuffer()) {
+    Schema schema = new Schema((JanusGraph) globals['graph'], sb)
+    schema.dumpJsonSchema()
+    sb.toString()
+
+}
+
+@CompileStatic
+String dumpJsonSchema(JanusGraph graph, StringBuffer sb = new StringBuffer()) {
+    Schema schema = new Schema(graph, sb)
+    schema.dumpJsonSchema()
+    return sb.toString()
+
+}
 
 @CompileStatic
 class Schema {
@@ -645,12 +637,14 @@ class Schema {
 
     public Schema() {}
 
-    @CompileDynamic
-    public Schema(def graph, def sb) {
+    @CompileStatic
+    public Schema(JanusGraph graph, StringBuffer sb) {
         this.graph = graph
         this.sb = sb
     }
 
+
+    @CompileDynamic
     public void describeAll() {
         try {
             ensureMgmtOpen()
@@ -664,7 +658,26 @@ class Schema {
     }
 
     @CompileDynamic
-    public Object getVertex(Object args) {
+    public void dumpJsonSchema() {
+        try {
+            ensureMgmtOpen()
+
+            this.sb.setLength(0)
+            this.sb.append('{\n')
+            printPropertyKeyJson(getPropertyKey([]));
+            printVertexLabelJson(getVertex([]));
+            printEdgeLabelJson(getEdge([]));
+            printVertexIndicesJson(getManagement().getGraphIndexes(Vertex.class));
+
+            this.sb.append('\n}\n')
+
+        } finally {
+            ensureMgmtClosed()
+        }
+    }
+
+    @CompileDynamic
+    public Iterable<VertexLabel> getVertex(Object args) {
         if (args) {
             def result = getManagement().getVertexLabels().findAll {
                 args.contains(it.name())
@@ -678,7 +691,7 @@ class Schema {
     }
 
     @CompileDynamic
-    public void printVertex(Object args) {
+    public void printVertex(Iterable<VertexLabel> args) {
         def pattern = "%-30s  | %11s | %6s\n"
         this.sb.append(String.format(pattern, '\nVertex Label', 'Partitioned', 'Static'))
         this.sb.append(String.format(pattern, '------------', '-----------', '------'))
@@ -690,8 +703,25 @@ class Schema {
     }
 
     @CompileDynamic
-    public Object getIndex(Object args) {
-        def result = []
+    public void printVertexLabelJson(Iterable<VertexLabel> args) {
+        String pattern = '{ "name": "%s", "partition": %s , "useStatic": %s }'
+        this.sb.append(', "vertexLabels": [')
+        boolean isFirst = true;
+        args.each {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                this.sb.append('\n  ,');
+            }
+            this.sb.append(String.format(pattern, it.name(), it.isPartitioned(), it.isStatic()));
+        }
+        this.sb.append(']')
+        this.sb.append('\n')
+    }
+
+    @CompileDynamic
+    public Collection<JanusGraphIndex> getIndex(Object args) {
+        Collection<JanusGraphIndex> result = []
         result.addAll(getManagement().getGraphIndexes(Vertex.class))
         result.addAll(getManagement().getGraphIndexes(Edge.class))
         result.addAll(getManagement().getGraphIndexes(PropertyKey.class))
@@ -705,6 +735,97 @@ class Schema {
         }
         result = result.toSorted { a, b -> a.name() <=> b.name() }
         return result
+    }
+
+    public void printVertexIndicesJson(Iterable<JanusGraphIndex> args) {
+        String pattern = '{ "name": "%s", "composite": %s, "unique": %s, "indexOnly": null, "mixedIndex": %s, "propertyKeys": %s %s }';
+        this.sb.append(', "vertexIndexes": [') // sic plural should have been indices
+        boolean isFirst = true;
+        args.each {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                this.sb.append('\n  ,');
+            }
+            Set<String> props = new HashSet<>();
+            it.fieldKeys.each { PropertyKey fk ->
+                props.add((String) fk.name());
+            }
+
+            String propertyKeysJsonStr = groovy.json.JsonOutput.toJson(props);
+
+            String propertyKeyMappingsJsonStr = getPropertyKeysMappingJsonStr(it);
+
+            this.sb.append(String.format(pattern, it.name(), it.compositeIndex.toString()
+                    , it.unique.toString(), it.mixedIndex ? '"search"' : 'null', propertyKeysJsonStr, propertyKeyMappingsJsonStr));
+
+        }
+        this.sb.append(']')
+        this.sb.append('\n')
+    }
+
+    static String getPropertyKeysMappingJsonStr(JanusGraphIndex it) {
+        StringBuffer propKeysMappingsSb = new StringBuffer();
+        boolean isFirstPropKeysMapping = false;
+        StringBuffer sb1 = new StringBuffer();
+        boolean isFirstPropMapping = false;
+
+        it.fieldKeys.each { PropertyKey fk ->
+            if (!isFirstPropKeysMapping) {
+                isFirstPropKeysMapping = true;
+                propKeysMappingsSb.append(',"propertyKeysMappings": {')
+            }
+
+            Parameter[] params = it.getParametersFor(fk);
+
+
+            String mappingJsonStr = null;
+            String analyzerJsonStr = null;
+
+            params.each { Parameter param ->
+
+                String paramKey = param.key();
+                if ("mapping".equalsIgnoreCase(paramKey)) {
+                    sb1.setLength(0);
+                    sb1.append('"mapping": "').append(param.value()).append('"');
+                    mappingJsonStr = sb1.toString();
+                } else if (!"mapped-name".equalsIgnoreCase(paramKey) &&
+                        !"status".equalsIgnoreCase(paramKey)) {
+                    sb1.setLength(0);
+                    sb1.append(', "analyzer": { "name": "').append(param.key())
+                            .append('", "value": "').append(param.value().toString()).append('" }');
+                    analyzerJsonStr = sb1.toString();
+
+                }
+            }
+
+
+            if (mappingJsonStr || analyzerJsonStr) {
+
+                if (!isFirstPropMapping) {
+                    isFirstPropMapping = true
+                } else {
+                    propKeysMappingsSb.append(',')
+                }
+                propKeysMappingsSb.append('"').append(fk.name()).append('": { ').append(mappingJsonStr)
+
+                if (analyzerJsonStr) {
+                    propKeysMappingsSb.append(analyzerJsonStr);
+                }
+                propKeysMappingsSb.append('}')
+            }
+
+        }
+
+
+        if (isFirstPropKeysMapping) {
+            propKeysMappingsSb.append('}')
+        }
+
+        String emptyVal = ',"propertyKeysMappings": {}'
+        String retVal = propKeysMappingsSb.toString();
+        return emptyVal.equalsIgnoreCase(retVal)? '' : retVal;
+
     }
 
     @CompileDynamic
@@ -743,12 +864,35 @@ class Schema {
         this.sb.append('\n')
     }
 
-    public Object getPropertyKey(Object args) {
-        return getRelation(PropertyKey.class, args)
+    @CompileDynamic
+    public Collection<PropertyKey> getPropertyKey(Object args) {
+        Collection<PropertyKey> result = []
+        result.addAll(getManagement().getRelationTypes(PropertyKey.class))
+
+        if (args) {
+            return result.findAll {
+                args.contains(it.name())
+            }
+        }
+        result = result.toSorted { a, b -> a.name() <=> b.name() }
+        return result
+
     }
 
-    public Object getEdge(Object args) {
-        return getRelation(EdgeLabel.class, args)
+    @CompileDynamic
+    public Collection<EdgeLabel> getEdge(Object args) {
+
+        Collection<EdgeLabel> result = []
+        result.addAll(getManagement().getRelationTypes(EdgeLabel.class))
+
+        if (args) {
+            return result.findAll {
+                args.contains(it.name())
+            }
+        }
+        result = result.toSorted { a, b -> a.name() <=> b.name() }
+        return result
+
     }
 
     @CompileDynamic
@@ -766,7 +910,7 @@ class Schema {
     }
 
     @CompileDynamic
-    void printEdge(Object args) {
+    void printEdge(Collection<EdgeLabel> args) {
         def pattern = "%-50s | %15s | %15s | %15s | %15s\n"
         this.sb.append(String.format(pattern, 'Edge Name', 'Type', 'Directed', 'Unidirected', 'Multiplicity'))
         this.sb.append(String.format(pattern, '---------', '----', '--------', '-----------', '------------'))
@@ -781,6 +925,23 @@ class Schema {
             this.sb.append(String.format(pattern, it.name().take(50), relType, it.isDirected(), it.isUnidirected(), it.multiplicity()))
         }
         this.sb.append(String.format(pattern, '---------', '----', '--------', '-----------', '------------'))
+        this.sb.append('\n')
+    }
+
+    @CompileDynamic
+    public void printEdgeLabelJson(Collection<EdgeLabel> args) {
+        String pattern = '{ "name": "%s", "multiplicity": "%s" , "unidirected":  %s }'
+        this.sb.append(', "edgeLabels": [')
+        boolean isFirst = true;
+        args.each {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                this.sb.append('\n  ,');
+            }
+            this.sb.append(String.format(pattern, it.name(), it.multiplicity().toString(), it.isUnidirected().toString()));
+        }
+        this.sb.append(']')
         this.sb.append('\n')
     }
 
@@ -800,6 +961,22 @@ class Schema {
             this.sb.append(String.format(pattern, it.name().take(50), relType, it.cardinality(), it.dataType()))
         }
         this.sb.append(String.format(pattern, '----------------', '----', '-----------', '---------'))
+        this.sb.append('\n')
+    }
+
+    public void printPropertyKeyJson(Collection<PropertyKey> args) {
+        String pattern = '{ "name": "%s", "dataType": "%s" , "cardinality": "%s" }';
+        this.sb.append('"propertyKeys": [')
+        boolean isFirst = true;
+        args.each {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                this.sb.append('\n  ,');
+            }
+            this.sb.append(String.format(pattern, it.name(), it.dataType().getSimpleName(), it.cardinality().toString()));
+        }
+        this.sb.append(']')
         this.sb.append('\n')
     }
 
@@ -829,12 +1006,14 @@ class Schema {
     JanusGraph getGraph() {
         return this.graph
     }
+
 }
+
 def renderReportInText(long pg_id, String reportType = 'SAR Read', GraphTraversalSource g = g) {
-    def template = g.V().has('Object.Notification_Templates.Types',eq('Person'))
-            .has('Object.Notification_Templates.Label',eq(reportType))
+    def template = g.V().has('Object.Notification_Templates.Types', eq('Person'))
+            .has('Object.Notification_Templates.Label', eq(reportType))
             .values('Object.Notification_Templates.Text').next() as String
-    if (template){
+    if (template) {
 
         // def template = g.V().has('Object.Notification_Templates.Types',eq(label)).next() as String
         def context = g.V(pg_id).valueMap()[0].collectEntries { key, val ->
@@ -943,9 +1122,9 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 //    return counter;
 //}
 
-def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int counter, Set <Long> nodeIds,AtomicInteger depth) {
+def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int counter, Set<Long> nodeIds, AtomicInteger depth) {
 
-    def types =  getMetadataTypes(depth.intValue());
+    def types = getMetadataTypes(depth.intValue());
 
     types.each { type ->
         g.V().has("Metadata.Type.${type}", eq("${type}")).each {
@@ -980,7 +1159,6 @@ def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int count
 def getVisJsGraphImmediateNeighbourEdges(long pg_vid, StringBuffer sb, int counter, Set<String> currEdges) {
 
 
-
     StringBuffer localEntry = new StringBuffer();
 
     g.V(pg_vid)
@@ -997,7 +1175,7 @@ def getVisJsGraphImmediateNeighbourEdges(long pg_vid, StringBuffer sb, int count
                 .append('"}')
         String localEntryStr = localEntry.toString();
 
-        if (currEdges.add(localEntryStr)){
+        if (currEdges.add(localEntryStr)) {
             sb.append(localEntryStr);
             counter++;
 
@@ -1046,40 +1224,41 @@ Object.AWS_Security_Group
 Object.AWS_Network_Interface
 
  */
-def getMetadataTypes (int level){
+
+def getMetadataTypes(int level) {
     def metadataTypes = [
             'Event.Ingestion.Group'
-           ,'Event.Ingestion'
-           ,'Person'
-           ,'Object.Email_Address'
-           ,'Object.Credential'
-           ,'Event.Form_Ingestion'
-           ,'Object.Identity_Card'
-           ,'Location.Address'
-           ,'Object.Insurance_Policy'
-           ,'Event.Consent'
-           ,'Object.Privacy_Notice'
-           ,'Object.Privacy_Impact_Assessment'
-           ,'Object.Lawful_Basis'
-           ,'Event.Subject_Access_Request'
-           ,'Person.Employee'
-           ,'Object.Awareness_Campaign'
-           ,'Event.Training'
-           ,'Event.Data_Breach'
-           ,'Person.Organisation'
-           ,'Object.Data_Procedures'
-           ,'Object.MoU'
-           ,'Object.Form'
-           ,'Object.Notification_Templates'
-           ,'Object.AWS_Instance'
-           ,'Object.AWS_Security_Group'
-           ,'Object.AWS_Network_Interface'
+            , 'Event.Ingestion'
+            , 'Person'
+            , 'Object.Email_Address'
+            , 'Object.Credential'
+            , 'Event.Form_Ingestion'
+            , 'Object.Identity_Card'
+            , 'Location.Address'
+            , 'Object.Insurance_Policy'
+            , 'Event.Consent'
+            , 'Object.Privacy_Notice'
+            , 'Object.Privacy_Impact_Assessment'
+            , 'Object.Lawful_Basis'
+            , 'Event.Subject_Access_Request'
+            , 'Person.Employee'
+            , 'Object.Awareness_Campaign'
+            , 'Event.Training'
+            , 'Event.Data_Breach'
+            , 'Person.Organisation'
+            , 'Object.Data_Procedures'
+            , 'Object.MoU'
+            , 'Object.Form'
+            , 'Object.Notification_Templates'
+            , 'Object.AWS_Instance'
+            , 'Object.AWS_Security_Group'
+            , 'Object.AWS_Network_Interface'
     ]
-    return metadataTypes.subList(0,level);
+    return metadataTypes.subList(0, level);
 }
 
 
-def getLevel(String label){
+def getLevel(String label) {
     def levels = [
             'Event Ingestion Group',
             'Event Ingestion',
@@ -1108,12 +1287,12 @@ def getLevel(String label){
             'Object AWS Security Group',
             'Object AWS Network Interface'
     ];
-    int index =  levels.findIndexOf {
+    int index = levels.findIndexOf {
         (label.equals(it))
     };
 
-    if (index == -1){
-        return label.hashCode()%10;
+    if (index == -1) {
+        return label.hashCode() % 10;
     }
 
     return index;
@@ -1260,7 +1439,7 @@ def getVisJsGraph(long pg_vid, int depth = 1) {
         int counter = 0;
 
         try {
-            Set <Long> nodeIds = new HashSet<>();
+            Set<Long> nodeIds = new HashSet<>();
 
             sb.append('{ "nodes":[');
 
@@ -1271,9 +1450,9 @@ def getVisJsGraph(long pg_vid, int depth = 1) {
 
             counter = 0;
 
-            Set <String> currEdges = new HashSet<>();
+            Set<String> currEdges = new HashSet<>();
             nodeIds.each {
-                counter = getVisJsGraphImmediateNeighbourEdges(it,sb,counter,currEdges);
+                counter = getVisJsGraphImmediateNeighbourEdges(it, sb, counter, currEdges);
 
             }
 

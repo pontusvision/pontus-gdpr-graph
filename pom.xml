@@ -270,6 +270,11 @@
             <version>${jersey-version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-es</artifactId>
+            <version>${janusgraph.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.janusgraph</groupId>

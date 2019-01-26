@@ -1,0 +1,2039 @@
+
+//metadataController = createProp(mgmt, "Metadata.Controller", String.class, org.janusgraph.core.Cardinality.SET)
+//metadataProcessor = createProp(mgmt, "Metadata.Processor", String.class, org.janusgraph.core.Cardinality.SET)
+//metadataLineage = createProp(mgmt, "Metadata.Lineage", String.class, org.janusgraph.core.Cardinality.SET)
+//metadataRedaction = createProp(mgmt, "Metadata.Redaction", String.class, org.janusgraph.core.Cardinality.SINGLE)
+//metadataVersion = createProp(mgmt, "Metadata.Version", Integer.class, org.janusgraph.core.Cardinality.SINGLE)
+//metadataCreateDate = createProp(mgmt, "Metadata.Create_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+//metadataUpdateDate = createProp(mgmt, "Metadata.Update_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+//metadataStatus = createProp(mgmt, "Metadata.Status", String.class, org.janusgraph.core.Cardinality.SET)
+//metadataOrigId = createProp(mgmt, "Metadata.Orig_Id", String.class, org.janusgraph.core.Cardinality.SINGLE)
+//metadataGDPRStatus = createProp(mgmt, "Metadata.GDPR_Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
+//metadataLineageServerTag = createProp(mgmt, "Metadata.Lineage_Server_Tag", String.class, org.janusgraph.core.Cardinality.SINGLE)
+//metadataLineageLocationTag = createProp(mgmt, "Metadata.Lineage_Location_Tag", String.class, org.janusgraph.core.Cardinality.SINGLE)
+//metadataType = createProp(mgmt, "Metadata.Type", String.class, org.janusgraph.core.Cardinality.SINGLE)
+
+{
+  "propertyKeys": [
+    {
+      "name": "T.message.health.check",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.domain.carrier",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.domain.flightItinerary.locationFunctionCode",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.booking.domain.itinerary.arrivalAirport",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.booking.domain.itinerary.departureAirport",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.booking.domain.pnrLocator",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.domain.portOfDisembark",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.domain.portOfEmbark",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.domain.travelAgent",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.domain.itinerary.numInParty",
+      "dataType": "Integer",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.booking.domain.contacts.contactText",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.booking.domain.contacts.countryCode",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.booking.domain.bookingIndicators.numberOfBaggageItems",
+      "dataType": "Integer",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.domain.bookingIndicators.bookingIntentHours",
+      "dataType": "Integer",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.domain.formOfPayment.cardNumber",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "P.identity.domain.passengerType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.domain.identityIndicators.age",
+      "dataType": "Integer",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.domain.checkedInCount",
+      "dataType": "Integer",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.domain.checkedInWeight",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.domain.carryOnCount",
+      "dataType": "Integer",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.domain.seatNumber",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.domain.pnrLocator",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.domain.portOfDisembark",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.domain.portOfEmbark",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_updateBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.core.eventStatus",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.core.eventStatus",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.core.eventStatus",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.core.eventStatus",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.core.eventStatus",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.core.eventStatus",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.make",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.model",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.vin",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.year",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.colour",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.dateOfBirth.dayOfBirth",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.dateOfBirth.monthOfBirth",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.dateOfBirth.yearOfBirth",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.core.description",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.core.geometry",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "core.rts",
+      "dataType": "Long",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "meta.m_type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_subtype",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "O.document.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "domain.portOfDisembark",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.documentType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "L.place.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.surname",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.dateOfIssue",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.core.placeCode",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.core.eventDate",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.core.eventType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.registrationNumber",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.fullName",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "domain.eventCode",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.apiMessage.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "L.place.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.dateOfExpiry",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.dateOfBirth",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.dcsMessage.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.vehicleType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "domain.noBaggage",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.core.departureDate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "P.identity.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_targetType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_matchSet",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.persons",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "L.place.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_identityId",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "P.person.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.fullName",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.core.eventType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.cityOfIssue",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.core.eventDate",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.registrationCountry",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "P.identity.domain.b64",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.domain.b64",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.domain.registrationNumber",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.domain.transportType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.domain.vesselName",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.domain.b64",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "P.identity.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.core.eventType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.givenNames",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "O.vehicle.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_targetSubType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.core.flightCode",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.journey.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.surname",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Metadata.Type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "O.document.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_identityId",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.journey.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.apiMessage.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.core.objectType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.domain.b64",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.core.eventType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.core.arrivalDateTime",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.core.eventDate",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.countryOfIssue",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.givenNames",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.core.identities",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "domain.passengerType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_identityId",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.objectType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.domain.b64",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.gender",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.core.departureDateTime",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.domain.b64",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.domain.b64",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.core.objectType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.core.locationType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_identityId",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.journey.core.arrivalAirport",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_matchSet",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.nationality",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "domain.lastReportedStatus",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.nationality",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "O.vehicle.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.journey.core.eventDate",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_type",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.dateOfBirth.DoB",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.core.placeOfBirth",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.core.departureAirport",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_sourceType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_correlationID",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "P.person.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_identityId",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "P.identity.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.booking.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "domain.portOfEmbark",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_create",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "E.pnrMessage.domain.b64",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.core.eventDate",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_subtype",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.core.eventType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "meta.m_sourceSubType",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.core.gender",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_owner",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_update",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_version",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_use",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
+      "name": "O.document.core.documentNumber",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_createBy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.apiMessage.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.dcsMessage.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.pnrMessage.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.journey.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "E.booking.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "L.place.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.document.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.vehicle.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "O.craft.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.person.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "P.identity.meta.m_createSource",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Pole.metrics.type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Pole.count.json",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Pole.metrics.start.timestamp",
+      "dataType": "Long",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Pole.metrics.end.timestamp",
+      "dataType": "Long",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Pole.metrics.start.date",
+      "dataType": "Long",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Pole.metrics.end.date",
+      "dataType": "Long",
+      "cardinality": "SINGLE"
+    }
+  ],
+  "vertexLabels": [
+    {
+      "name": "T.message",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "E.journey",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "O.vehicle",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "O.craft",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "P.identity",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "E.apiMessage",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "E.booking",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "P.person",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "E.dcsMessage",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "O.document",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "E.pnrMessage",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "L.place",
+      "partition": true,
+      "useStatic": false
+    },
+    {
+      "name": "Pole.metrics",
+      "partition": true,
+      "useStatic": false
+    }
+  ],
+  "edgeLabels": [
+    {
+      "name": "Booking for",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Disembark at",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Leg",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Travelled with",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Booked on",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Holds",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Identifies",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "API drop",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Depart from",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Leg to",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Booked",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Matched",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Travelled",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "PNR drop",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "On",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "DCS drop",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Leg from",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Booking message",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Arrive at",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    },
+    {
+      "name": "Embark at",
+      "multiplicity": "MULTI",
+      "unidirected": true
+    }
+
+  ],
+  "vertexIndexes": [
+    {
+      "name": "by_T.message.health.check_MixedIdx",
+      "propertyKeys": [
+        "T.message.health.check"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_E.pnrMessage_MixedIdx",
+      "propertyKeys": [
+        "E.pnrMessage.core.eventDate",
+        "E.pnrMessage.core.eventType",
+        "E.pnrMessage.meta.m_update",
+        "E.pnrMessage.meta.m_subtype",
+        "E.pnrMessage.meta.m_type",
+        "E.pnrMessage.meta.m_use",
+        "E.pnrMessage.meta.m_createBy",
+        "E.pnrMessage.meta.m_identityId",
+        "E.pnrMessage.meta.m_source",
+        "E.pnrMessage.meta.m_create",
+        "E.pnrMessage.meta.m_version",
+        "E.pnrMessage.meta.m_correlationID",
+        "E.pnrMessage.meta.m_owner",
+        "E.pnrMessage.meta.m_createSource"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_L.place_MixedIdx",
+      "propertyKeys": [
+        "L.place.meta.m_version",
+        "L.place.meta.m_create",
+        "L.place.core.placeCode",
+        "L.place.meta.m_subtype",
+        "L.place.meta.m_update",
+        "L.place.meta.m_type",
+        "L.place.core.locationType",
+        "L.place.meta.m_createBy",
+        "L.place.meta.m_createSource"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_O.craft_MixedIdx",
+      "propertyKeys": [
+        "O.craft.meta.m_type",
+        "O.craft.meta.m_version",
+        "O.craft.meta.m_update",
+        "O.craft.meta.m_source",
+        "O.craft.meta.m_correlationID",
+        "O.craft.meta.m_createBy",
+        "O.craft.core.objectType",
+        "O.craft.meta.m_owner",
+        "O.craft.meta.m_subtype",
+        "O.craft.meta.m_create",
+        "O.craft.meta.m_use",
+        "O.craft.meta.m_createSource",
+        "O.craft.domain.registrationNumber",
+        "O.craft.domain.transportType",
+        "O.craft.domain.vesselName"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_E.booking_MixedIdx",
+      "propertyKeys": [
+        "E.booking.meta.m_update",
+        "E.booking.meta.m_use",
+        "E.booking.meta.m_create",
+        "E.booking.meta.m_source",
+        "E.booking.core.eventDate",
+        "E.booking.meta.m_subtype",
+        "E.booking.meta.m_correlationID",
+        "E.booking.meta.m_version",
+        "E.booking.meta.m_type",
+        "E.booking.meta.m_owner",
+        "E.booking.core.eventType",
+        "E.booking.meta.m_createBy",
+        "E.booking.domain.pnrLocator",
+        "E.booking.domain.portOfDisembark",
+        "E.booking.domain.portOfEmbark",
+        "E.booking.domain.travelAgent",
+        "E.booking.domain.itinerary.numInParty",
+        "E.booking.domain.contacts.contactText",
+        "E.booking.domain.contacts.countryCode",
+        "E.booking.domain.bookingIndicators.numberOfBaggageItems",
+        "E.booking.domain.bookingIndicators.bookingIntentHours",
+        "E.booking.domain.formOfPayment.cardNumber",
+        "E.booking.domain.pnrLocator",
+        "E.booking.domain.portOfDisembark",
+        "E.booking.domain.portOfEmbark",
+        "E.booking.domain.travelAgent",
+        "E.booking.domain.itinerary.numInParty",
+        "E.booking.domain.contacts.contactText",
+        "E.booking.domain.contacts.countryCode",
+        "E.booking.domain.bookingIndicators.numberOfBaggageItems",
+        "E.booking.domain.bookingIndicators.bookingIntentHours",
+        "E.booking.domain.formOfPayment.cardNumber",
+        "E.booking.meta.m_createSource",
+        "E.booking.domain.itinerary.arrivalAirport",
+        "E.booking.domain.itinerary.departureAirport"
+      ],
+      "propertyKeysMappings": {
+        "E.booking.domain.contacts.contactText": {
+          "mapping": "TEXT"
+        },
+        "E.booking.domain.formOfPayment.cardNumber": {
+          "mapping": "TEXT"
+        }
+      },
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_P.person_MixedIdx",
+      "propertyKeys": [
+        "P.person.meta.m_use",
+        "P.person.meta.m_source",
+        "P.person.meta.m_create",
+        "P.person.meta.m_subtype",
+        "P.person.meta.m_owner",
+        "P.person.meta.m_matchSet",
+        "P.person.meta.m_type",
+        "P.person.meta.m_correlationID",
+        "P.person.meta.m_createBy",
+        "P.person.meta.m_update",
+        "P.person.meta.m_version",
+        "P.person.meta.m_createSource"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_E.dcsMessage_MixedIdx",
+      "propertyKeys": [
+        "E.dcsMessage.core.eventType",
+        "E.dcsMessage.core.eventDate",
+        "E.dcsMessage.meta.m_version",
+        "E.dcsMessage.meta.m_subtype",
+        "E.dcsMessage.meta.m_use",
+        "E.dcsMessage.meta.m_create",
+        "E.dcsMessage.meta.m_createBy",
+        "E.dcsMessage.meta.m_correlationID",
+        "E.dcsMessage.meta.m_type",
+        "E.dcsMessage.meta.m_owner",
+        "E.dcsMessage.meta.m_identityId",
+        "E.dcsMessage.meta.m_source",
+        "E.dcsMessage.meta.m_update",
+        "E.dcsMessage.meta.m_createSource"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_O.document_MixedIdx",
+      "propertyKeys": [
+        "O.document.meta.m_version",
+        "O.document.core.documentType",
+        "O.document.meta.m_correlationID",
+        "O.document.core.surname",
+        "O.document.core.dateOfIssue",
+        "O.document.meta.m_subtype",
+        "O.document.core.fullName",
+        "O.document.core.dateOfExpiry",
+        "O.document.core.dateOfBirth",
+        "O.document.meta.m_identityId",
+        "O.document.meta.m_update",
+        "O.document.core.cityOfIssue",
+        "O.document.meta.m_owner",
+        "O.document.meta.m_type",
+        "O.document.meta.m_source",
+        "O.document.core.countryOfIssue",
+        "O.document.core.givenNames",
+        "O.document.core.objectType",
+        "O.document.meta.m_createBy",
+        "O.document.core.nationality",
+        "O.document.meta.m_create",
+        "O.document.meta.m_use",
+        "O.document.core.gender",
+        "O.document.core.documentNumber",
+        "O.document.meta.m_createSource"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_O.vehicle_MixedIdx",
+      "propertyKeys": [
+        "O.vehicle.meta.m_create",
+        "O.vehicle.meta.m_subtype",
+        "O.vehicle.meta.m_owner",
+        "O.vehicle.core.registrationNumber",
+        "O.vehicle.meta.m_update",
+        "O.vehicle.meta.m_source",
+        "O.vehicle.core.vehicleType",
+        "O.vehicle.meta.m_version",
+        "O.vehicle.core.registrationCountry",
+        "O.vehicle.meta.m_createBy",
+        "O.vehicle.meta.m_use",
+        "O.vehicle.core.objectType",
+        "O.vehicle.meta.m_type",
+        "O.vehicle.meta.m_correlationID",
+        "O.vehicle.meta.m_identityId",
+        "O.vehicle.meta.m_createSource"
+      ],
+      "propertyKeysMappings": {
+        "O.vehicle.core.registrationNumber": {
+          "mapping": "TEXT"
+        }
+      },
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_E.journey_MixedIdx",
+      "propertyKeys": [
+        "E.journey.meta.m_use",
+        "E.journey.meta.m_type",
+        "E.journey.meta.m_owner",
+        "E.journey.meta.m_source",
+        "E.journey.meta.m_update",
+        "E.journey.meta.m_create",
+        "E.journey.meta.m_version",
+        "E.journey.meta.m_subtype",
+        "E.journey.meta.m_createBy",
+        "E.journey.meta.m_createSource",
+        "E.journey.meta.m_correlationID",
+        "E.journey.core.departureDate",
+        "E.journey.core.eventType",
+        "E.journey.core.flightCode",
+        "E.journey.core.arrivalDateTime",
+        "E.journey.core.departureDateTime",
+        "E.journey.core.arrivalAirport",
+        "E.journey.core.eventDate",
+        "E.journey.core.departureAirport",
+        "E.journey.domain.carrier",
+        "E.journey.domain.flightItinerary.locationFunctionCode",
+        "E.journey.domain.carrier",
+        "E.journey.domain.flightItinerary.locationFunctionCode"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_P.identity_MixedIdx",
+      "propertyKeys": [
+        "P.identity.core.dateOfBirth.DoB",
+        "P.identity.core.dateOfBirth.dayOfBirth",
+        "P.identity.core.dateOfBirth.monthOfBirth",
+        "P.identity.core.dateOfBirth.yearOfBirth",
+        "P.identity.core.placeOfBirth",
+        "P.identity.core.fullName",
+        "P.identity.core.gender",
+        "P.identity.core.givenNames",
+        "P.identity.core.nationality",
+        "P.identity.core.persons",
+        "P.identity.core.surname",
+        "P.identity.meta.m_correlationID",
+        "P.identity.meta.m_create",
+        "P.identity.meta.m_createBy",
+        "P.identity.meta.m_matchSet",
+        "P.identity.meta.m_owner",
+        "P.identity.meta.m_source",
+        "P.identity.meta.m_subtype",
+        "P.identity.meta.m_type",
+        "P.identity.meta.m_update",
+        "P.identity.meta.m_updateBy",
+        "P.identity.meta.m_use",
+        "P.identity.meta.m_version",
+        "P.identity.domain.passengerType",
+        "P.identity.domain.identityIndicators.age",
+        "P.identity.domain.checkedInCount",
+        "P.identity.domain.checkedInWeight",
+        "P.identity.domain.carryOnCount",
+        "P.identity.domain.seatNumber",
+        "P.identity.domain.pnrLocator",
+        "P.identity.domain.portOfDisembark",
+        "P.identity.domain.portOfEmbark",
+        "P.identity.meta.m_createSource"
+      ],
+      "propertyKeysMappings": {
+        "P.identity.core.surname": {
+          "mapping": "TEXTSTRING",
+          "analyzer": {
+            "name": "text-analyzer",
+            "value": "cdp_word_delimiter"
+          }
+        },
+
+        "P.identity.core.fullName": {
+          "mapping": "TEXTSTRING",
+          "analyzer": {
+            "name": "text-analyzer",
+            "value": "cdp_word_delimiter"
+          }
+        },
+        "P.identity.core.givenNames": {
+          "mapping": "TEXTSTRING",
+          "analyzer": {
+            "name": "text-analyzer",
+            "value": "cdp_word_delimiter"
+          }
+        }
+      },
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_E.apiMessage_MixedIdx",
+      "propertyKeys": [
+        "E.apiMessage.core.eventType",
+        "E.apiMessage.core.eventDate",
+        "E.apiMessage.meta.m_create",
+        "E.apiMessage.meta.m_source",
+        "E.apiMessage.meta.m_version",
+        "E.apiMessage.meta.m_use",
+        "E.apiMessage.meta.m_correlationID",
+        "E.apiMessage.meta.m_type",
+        "E.apiMessage.meta.m_identityId",
+        "E.apiMessage.meta.m_createBy",
+        "E.apiMessage.meta.m_owner",
+        "E.apiMessage.meta.m_update",
+        "E.apiMessage.meta.m_subtype",
+        "E.apiMessage.meta.m_createSource"
+      ],
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "mapping": null
+    },
+    {
+      "name": "by_E.journey.id_CompositeIdx",
+      "propertyKeys": [
+        "E.journey.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_O.vehicle.id_CompositeIdx",
+      "propertyKeys": [
+        "O.vehicle.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_O.craft.id_CompositeIdx",
+      "propertyKeys": [
+        "O.craft.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_P.identity.id_CompositeIdx",
+      "propertyKeys": [
+        "P.identity.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_E.apiMessage.id_CompositeIdx",
+      "propertyKeys": [
+        "E.apiMessage.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_E.booking.id_CompositeIdx",
+      "propertyKeys": [
+        "E.booking.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_P.person.id_CompositeIdx",
+      "propertyKeys": [
+        "P.person.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_E.dcsMessage.id_CompositeIdx",
+      "propertyKeys": [
+        "E.dcsMessage.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_O.document.id_CompositeIdx",
+      "propertyKeys": [
+        "O.document.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_E.pnrMessage.id_CompositeIdx",
+      "propertyKeys": [
+        "E.pnrMessage.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_L.place.id_CompositeIdx",
+      "propertyKeys": [
+        "L.place.id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_id_CompositeIdx",
+      "propertyKeys": [
+        "id"
+      ],
+      "composite": true,
+      "unique": true,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    },
+    {
+      "name": "by_Pole.metrics.type_CompositeIdx",
+      "propertyKeys": [
+        "Pole.metrics.type"
+      ],
+      "composite": true,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": null,
+      "mapping": null
+    }
+  ],
+  "edgeIndexes": [],
+  "vertexCentricIndexes": []
+}
