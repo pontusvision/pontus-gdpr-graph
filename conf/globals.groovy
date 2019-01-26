@@ -1,3 +1,4 @@
+import com.pontusvision.utils.ElasticSearchHelper
 import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -190,6 +191,8 @@ def loadSchema(JanusGraph graph, String... files) {
             if (jsonFile.exists()) {
                 def jsonStr = jsonFile.text
                 def json = new JsonSlurper().parseText(jsonStr)
+                createElasticTemplates(json, sb);
+
                 addVertexLabels(mgmt, json, sb)
                 addEdgeLabels(mgmt, json, sb)
                 propsMap << addpropertyKeys(mgmt, json, sb)
@@ -210,6 +213,53 @@ def loadSchema(JanusGraph graph, String... files) {
 
     sb.append('Done!\n')
     return sb.toString()
+}
+
+
+/*
+{
+"elasticSearchTemplates": [
+    {
+      "index_patterns": [
+        "janusgraph*personDataMixedIdx"
+      ],
+      "template": "personDataMixedIdx",
+      "order": 0,
+      "settings": {
+        "analysis": {
+          "filter": {
+            "pg_word_delimiter_filter": {
+              "type": "word_delimiter",
+              "catenate_words": true,
+              "preserve_original": true,
+              "generate_word_parts": false,
+              "generate_number_parts": false
+            }
+          },
+          "analyzer": {
+            "pg_word_delimiter": {
+              "filter": [
+                "lowercase",
+                "pg_word_delimiter_filter"
+              ],
+              "tokenizer": "whitespace"
+            }
+          }
+        }
+      }
+    }
+  ],
+  ...
+}
+ */
+def createElasticTemplates (def json, StringBuffer sb){
+
+    if (json['elasticSearchTemplates']){
+        json['elasticSearchTemplates'].each {
+            String resp = ElasticSearchHelper.createTemplate((String)it.template, it.toString())
+            sb.append("\n  Adding elasticSearchTemplate for ${it.template}; result = ${resp}\n")
+        }
+    }
 }
 
 def addIndexes(JanusGraphManagement mgmt, def json, boolean isEdge, Map<String, PropertyKey> propsMap, StringBuffer sb = null) {
