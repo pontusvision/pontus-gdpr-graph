@@ -1,6 +1,7 @@
 package com.pontusvision.gdpr;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -51,6 +52,7 @@ import uk.gov.cdp.shadow.user.auth.AuthenticationServiceImpl;
 import uk.gov.cdp.shadow.user.auth.CDPShadowUserPasswordGeneratorImpl;
 import uk.gov.homeoffice.pontus.JWTClaim;
 
+import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileInputStream;
@@ -342,14 +344,10 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
     final CountDownLatch connectedSignal = new CountDownLatch(1);
     ZooKeeper zoo = null;
 
-    zoo = new ZooKeeper(host, 5000, new Watcher()
-    {
-      public void process(WatchedEvent we)
+    zoo = new ZooKeeper(host, 3600000*24 * 7, we -> {
+      if (we.getState() == Watcher.Event.KeeperState.SyncConnected)
       {
-        if (we.getState() == Event.KeeperState.SyncConnected)
-        {
-          connectedSignal.countDown();
-        }
+        connectedSignal.countDown();
       }
     });
 
@@ -461,7 +459,14 @@ public class WsAndHttpJWTAuthenticationHandler extends AbstractAuthenticationHan
               + ")");
 
       final Iterator<String> keysToMangle = Iterators
-          .filter(configuration.getKeys(), key -> null != key && p.matcher(key).matches());
+          .filter(configuration.getKeys(), new Predicate<String>()
+              {
+                @Override public boolean apply(@Nullable String key)
+                {
+                  return ((null != key) && p.matcher((CharSequence) key).matches());
+                }
+              });
+
 
       while (keysToMangle.hasNext())
       {

@@ -59,6 +59,11 @@ if [[ -z "$PVGDPR_CONF_DIR" ]]; then
    PVGDPR_CONF_DIR=${PVGDPR_HOME}/conf
 fi
 
+if [[ ! -d "$PVGDPR_HOME/datadir" ]]; then
+   cd $PVGDPR_HOME/
+   cat datadir.tar.gz-* | tar xvzf -
+fi
+
 cygwin=false
 case "`uname`" in
 CYGWIN*) cygwin=true;;
@@ -85,7 +90,6 @@ EOF
 
 # get arguments
 COMMAND=graph
-shift
 
 JAVA=$JAVA_HOME/bin/java
 
@@ -247,8 +251,8 @@ cd ${PVGDPR_HOME}
 if [ "${PVGDPR_NOEXEC}" != "" ]; then
   "$JAVA" -Dproc_$COMMAND -XX:OnOutOfMemoryError="kill -9 %p" -cp $CLASSPATH $HEAP_SETTINGS $PVGDPR_OPTS $CLASS "$@"
 else
+    #-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006 \
   exec "$JAVA" \
-    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006 \
     -Dcom.pontusvision.gdpr.log.class=org.eclipse.jetty.util.log.StrErrLog \
     -Dorg.eclipse.jetty.LEVEL=INFO \
     -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StrErrLog \
