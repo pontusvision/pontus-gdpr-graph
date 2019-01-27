@@ -1,29 +1,31 @@
 {
   "elasticSearchTemplates": [
     {
-      "index_patterns": [
-        "janusgraph*personDataMixedIdx"
-      ],
-      "template": "personDataMixedIdx",
-      "order": 0,
-      "settings": {
-        "analysis": {
-          "filter": {
-            "pg_word_delimiter_filter": {
-              "type": "word_delimiter",
-              "catenate_words": true,
-              "preserve_original": true,
-              "generate_word_parts": false,
-              "generate_number_parts": false
-            }
-          },
-          "analyzer": {
-            "pg_word_delimiter": {
-              "filter": [
-                "lowercase",
-                "pg_word_delimiter_filter"
-              ],
-              "tokenizer": "whitespace"
+      "name": "persondatamixedidx",
+      "body": {
+        "index_patterns": [
+          "janusgraph*persondatamixedidx"
+        ],
+        "order": 0,
+        "settings": {
+          "analysis": {
+            "filter": {
+              "pg_word_delimiter_filter": {
+                "type": "word_delimiter",
+                "catenate_words": true,
+                "preserve_original": true,
+                "generate_word_parts": false,
+                "generate_number_parts": false
+              }
+            },
+            "analyzer": {
+              "pg_word_delimiter": {
+                "filter": [
+                  "lowercase",
+                  "pg_word_delimiter_filter"
+                ],
+                "tokenizer": "whitespace"
+              }
             }
           }
         }
