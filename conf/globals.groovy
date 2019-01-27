@@ -1,4 +1,5 @@
 import com.pontusvision.utils.ElasticSearchHelper
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -191,73 +192,96 @@ def loadSchema(JanusGraph graph, String... files) {
             if (jsonFile.exists()) {
                 def jsonStr = jsonFile.text
                 def json = new JsonSlurper().parseText(jsonStr)
+                sb?.append("\nLoading File ${f}\n")
+
+
+                sb?.append("\nAbout to create elastic search templates\n")
+
                 createElasticTemplates(json, sb);
 
+                sb?.append("\nAbout to create vertex labels\n")
+
                 addVertexLabels(mgmt, json, sb)
+                sb?.append("\nAbout to create edge labels\n")
+
                 addEdgeLabels(mgmt, json, sb)
+
+                sb?.append("\nAbout to create Property Keys\n")
+                System.out.println("\n\n\nAbout to create Property Keys\n\n\n\n")
+
                 propsMap << addpropertyKeys(mgmt, json, sb)
+
+                sb?.append("\nAbout to load vertex Indices\n")
+
+                System.out.println("\n\n\nAbout to load vertex Indices\n\n\n\n")
                 addIndexes(mgmt, json['vertexIndexes'], false, propsMap, sb)
+
+                sb?.append("\nAbout to load edge Indices\n")
+                System.out.println("\n\n\nAbout to load edge Indices\n\n\n\n")
                 addIndexes(mgmt, json['edgeIndexes'], true, propsMap, sb)
-                sb.append("Loading File ${f}\n")
+                sb?.append("Loaded File ${f}\n")
 
             } else {
-                sb.append("NOT LOADING FILE ${f}\n")
+                sb?.append("NOT LOADING FILE ${f}\n")
             }
 
         } catch (Throwable t) {
-            sb.append('Failed to load schema!\n').append(t);
+            sb?.append('Failed to load schema!\n').append(t);
+            t.printStackTrace()
 
         }
     }
     mgmt.commit()
 
-    sb.append('Done!\n')
-    return sb.toString()
+    sb?.append('Done!\n')
+    return sb?.toString()
 }
 
 
 /*
 {
-"elasticSearchTemplates": [
+ "elasticSearchTemplates": [
     {
-      "index_patterns": [
-        "janusgraph*personDataMixedIdx"
-      ],
-      "template": "personDataMixedIdx",
-      "order": 0,
-      "settings": {
-        "analysis": {
-          "filter": {
-            "pg_word_delimiter_filter": {
-              "type": "word_delimiter",
-              "catenate_words": true,
-              "preserve_original": true,
-              "generate_word_parts": false,
-              "generate_number_parts": false
-            }
-          },
-          "analyzer": {
-            "pg_word_delimiter": {
-              "filter": [
-                "lowercase",
-                "pg_word_delimiter_filter"
-              ],
-              "tokenizer": "whitespace"
+      "name": "persondatamixedidx",
+      "body": {
+        "index_patterns": [
+          "janusgraph*persondatamixedidx"
+        ],
+        "order": 0,
+        "settings": {
+          "analysis": {
+            "filter": {
+              "pg_word_delimiter_filter": {
+                "type": "word_delimiter",
+                "catenate_words": true,
+                "preserve_original": true,
+                "generate_word_parts": false,
+                "generate_number_parts": false
+              }
+            },
+            "analyzer": {
+              "pg_word_delimiter": {
+                "filter": [
+                  "lowercase",
+                  "pg_word_delimiter_filter"
+                ],
+                "tokenizer": "whitespace"
+              }
             }
           }
         }
       }
     }
   ],
-  ...
+    ...
 }
  */
 def createElasticTemplates (def json, StringBuffer sb){
 
     if (json['elasticSearchTemplates']){
         json['elasticSearchTemplates'].each {
-            String resp = ElasticSearchHelper.createTemplate((String)it.template, it.toString())
-            sb.append("\n  Adding elasticSearchTemplate for ${it.template}; result = ${resp}\n")
+            String resp = ElasticSearchHelper.createTemplate((String)it.name, (String) JsonOutput.toJson(it.body).toString())
+            sb?.append("\n  Adding elasticSearchTemplate for ${it.name}; result = ${resp}\n")
         }
     }
 }
@@ -273,7 +297,8 @@ def addIndexes(JanusGraphManagement mgmt, def json, boolean isEdge, Map<String, 
         }
 
         String name = it.name
-        PropertyKey props = []
+
+        def props = []
         propertyKeys.each { key ->
             def prop = propsMap[key]
             if (!prop) {
@@ -287,6 +312,8 @@ def addIndexes(JanusGraphManagement mgmt, def json, boolean isEdge, Map<String, 
         def mixedIndex = it.mixedIndex
         String mapping = it.mapping
 
+        sb?.append("\nin AddIndexes() - creating ${isEdge?'Edge':'Vertex'} index ${name}; composite = ${composite}; unique = ${unique}; mixedIndex = ${mixedIndex}; mapping = ${mapping}\n\n")
+
         if (mixedIndex && composite) {
             throw new RuntimeException("Failed to create index - $name, because it can't be both MixedIndex and CompositeIndex")
         }
@@ -297,7 +324,7 @@ def addIndexes(JanusGraphManagement mgmt, def json, boolean isEdge, Map<String, 
 
         def idxCreated
         if (mixedIndex) {
-            idxCreated = createMixedIdx(mgmt, name, isEdge, propertyKeys, mapping, (Map<String, Object>) it.propertyKeysMappings)
+            idxCreated = createMixedIdx(mgmt, name, isEdge, propertyKeys, mapping, (Map<String, Object>) it.propertyKeysMappings,sb)
         } else {
             idxCreated = createCompIdx(mgmt, name, isEdge, unique, props as PropertyKey[])
         }
@@ -473,11 +500,14 @@ JanusGraphIndex createMixedIdx(JanusGraphManagement mgmt, String idxName, Pair<P
  */
 //(PropertyKey vs String representing a Mapping
 @CompileStatic
-JanusGraphIndex createMixedIdx(JanusGraphManagement mgmt, String idxName, boolean isEdge, List<String> props, String mappingStr, Map<String, Object> propertyKeysMappings) {
+JanusGraphIndex createMixedIdx(JanusGraphManagement mgmt, String idxName, boolean isEdge, List<String> props, String mappingStr, Map<String, Object> propertyKeysMappings, StringBuffer sb = null) {
     try {
+
         if (!mgmt.containsGraphIndex(idxName)) {
             def clazz = isEdge ? Edge.class : Vertex.class
             JanusGraphManagement.IndexBuilder ib = mgmt.buildIndex(idxName, clazz)
+
+            sb?.append("\nin createMixedIdx() - creating ${idxName} with props ${props} and propertyKeysMappings ${propertyKeysMappings}\n\n")
 
             props.each { property ->
                 PropertyKey propKey = mgmt.getPropertyKey(property)
