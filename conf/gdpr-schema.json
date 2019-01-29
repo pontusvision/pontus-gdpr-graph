@@ -1791,21 +1791,21 @@
         },
         "Person.Full_Name": {
           "mapping": "TEXTSTRING",
-          "analyzers": {
+          "analyzer": {
             "name": "text-analyzer",
             "value": "pg_word_delimiter"
           }
         },
         "Person.Full_Name_fuzzy": {
           "mapping": "TEXTSTRING",
-          "analyzers": {
+          "analyzer": {
             "name": "text-analyzer",
             "value": "pg_word_delimiter"
           }
         },
         "Person.Last_Name": {
           "mapping": "TEXTSTRING",
-          "analyzers": {
+          "analyzer": {
             "name": "text-analyzer",
             "value": "pg_word_delimiter"
           }

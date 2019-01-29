@@ -526,6 +526,7 @@ JanusGraphIndex createMixedIdx(JanusGraphManagement mgmt, String idxName, boolea
 
                     Map<String, String> analyzer = (Map<String, String>) keyMapping['analyzer']
                     if (analyzer) {
+                        sb?.append("\nAdding analyzer details to IDX ${idxName}: ${analyzer.name} = ${analyzer.value} ")
                         ib.addKey(propKey, mappingParam, Parameter.of(analyzer['name'], analyzer['value']))
                     } else {
                         ib.addKey(propKey, mappingParam)
