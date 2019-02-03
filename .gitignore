@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .idea/*
 nifi-pontus-hbase-processor-bundle/nifi-pontus-hbase-processor-nar/target/
 nifi-pontus-hbase-processor-bundle/nifi-pontus-hbase-processor/target/
@@ -18,3 +19,23 @@ nifi-pontus-services/nifi-pontus-service-api-nar/target
 */*/*/*.iml
 nifi-pontus-elastic-2.x-processor-bundle/nifi-pontus-elastic-2.x-processor/dependency-reduced-pom.xml
 
+=======
+target
+.project
+.settings
+.classpath
+nbactions.xml
+nb-configuration.xml
+.DS_Store
+.metadata
+dependency-reduced-pom.xml
+.recommenders
+# Intellij
+.idea/
+*.iml
+*.iws
+*~
+
+node_modules/
+package-lock.json
+>>>>>>> 510b593c5adb2159d77a18a423aca367fa3d4c5b
