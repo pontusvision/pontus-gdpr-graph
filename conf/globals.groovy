@@ -226,7 +226,7 @@ def loadSchema(JanusGraph graph, String... files) {
             }
 
         } catch (Throwable t) {
-            sb?.append('Failed to load schema!\n').append(t);
+            sb?.append('Failed to load schema!\n')?.append(t);
             t.printStackTrace()
 
         }
