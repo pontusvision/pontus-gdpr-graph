@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class LocationAddress {
-  static final String ADDRESS_PARSER_DIR = "/opt/pontus/pontus-graph/current/datadir/libpostal";
-  static final String ADDRESS_PARSER_DIR_OPT = "pg.jpostal.datadir";
+  public static final String ADDRESS_PARSER_DIR = "/opt/pontus/pontus-graph/current/datadir/libpostal";
+  public static final String ADDRESS_PARSER_DIR_OPT = "pg.jpostal.datadir";
 
 
   static AddressParser parser = AddressParser.getInstanceDataDir(System.getProperty(ADDRESS_PARSER_DIR_OPT,ADDRESS_PARSER_DIR ));
