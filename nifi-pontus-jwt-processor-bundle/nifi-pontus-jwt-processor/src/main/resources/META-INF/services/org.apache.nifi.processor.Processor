@@ -1,0 +1,6 @@
+com.pontusvision.nifi.processors.JWTCreatorProcessor
+com.pontusvision.nifi.processors.JWTDecoderProcessor
+com.pontusvision.nifi.processors.SecurityHashProcessor
+com.pontusvision.nifi.processors.JWTStoreClientProcessor
+com.pontusvision.nifi.processors.SecurityCreateADUserProcessor
+

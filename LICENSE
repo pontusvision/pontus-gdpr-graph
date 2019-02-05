@@ -178,7 +178,11 @@
    APPENDIX: How to apply the Apache License to your work.
 
       To apply the Apache License to your work, attach the following
+<<<<<<< HEAD
+      boilerplate notice, with the fields enclosed by brackets "{}"
+=======
       boilerplate notice, with the fields enclosed by brackets "[]"
+>>>>>>> 510b593c5adb2159d77a18a423aca367fa3d4c5b
       replaced with your own identifying information. (Don't include
       the brackets!)  The text should be enclosed in the appropriate
       comment syntax for the file format. We also recommend that a
@@ -186,7 +190,11 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
+<<<<<<< HEAD
+   Copyright 2017 Created by Pontus for the Home Office
+=======
    Copyright [yyyy] [name of copyright owner]
+>>>>>>> 510b593c5adb2159d77a18a423aca367fa3d4c5b
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
