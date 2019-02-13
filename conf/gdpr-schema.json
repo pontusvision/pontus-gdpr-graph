@@ -34,6 +34,36 @@
   ],
   "propertyKeys": [
     {
+      "name": "maxFromScore",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "fromScore",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "fromScorePercent",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "maxToScore",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "toScore",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "toScorePercent",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Event.Consent.Date",
       "dataType": "Date",
       "cardinality": "SINGLE"
