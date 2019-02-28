@@ -393,13 +393,11 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
   Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName = new HashMap<>();
 
   Map<String, List<MatchReq>> matchReqByVertexName = new HashMap<>();
-  Map<String, AtomicDouble> maxScoresByVertexName = new HashMap<>();
 
   matchReqs.each {
     List<MatchReq> matchReqList = matchReqByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() });
     matchReqList.push(it)
     vertexScoreMapByVertexName.computeIfAbsent(it.vertexName, { k -> new HashMap<>() })
-    maxScoresByVertexName.computeIfAbsent(it.vertexName, { k -> new AtomicDouble(0) })
   }
 
 
@@ -430,7 +428,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
     }
 
 
-    def subs = subsequencesUniqueTypes(vFiltered)
+    Set<List<MatchReq>> subs = subsequencesUniqueTypes(vFiltered)
     // LPPM - 08/02/2019 - subsequences was creating way too many entries;
     // the alternative above only gives subsequences with unique types.
     // here is the original:
@@ -447,7 +445,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
     // for the sequences with the full number of props, and then, for subsequences with smaller values, we
     // only include entries that have excludeFromSubsequenceSearch set to false.
 
-    double maxScore = 0;
+//    double maxScore = 0;
 
     subs.each { it ->
 
@@ -459,6 +457,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
       int currSize = it.size();
 
       if (currSize == it.unique { entry -> entry.propName }.size()) {
+
 
         boolean checkForMandatoryFields = mandatoryFieldPropNames.size() > 0;
 
@@ -537,25 +536,25 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
             (gtrav.range(0, maxHitsPerType).id().toList() as Long[]).each { vId ->
               AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
-              totalScore.addAndGet(standardScore);
+              totalScore.set(Math.max(totalScore.get(), standardScore))
             }
             if (indexQueryResults.size() > 0) {
               indexQueryResults.sort { it.value }
 
-              double  maxScoreWithinResults = -1;
-              indexQueryResults.each { vId,  score ->
-                if (maxScoreWithinResults < 0){
+              double maxScoreWithinResults = -1;
+              indexQueryResults.each { vId, score ->
+                if (maxScoreWithinResults < 0) {
                   maxScoreWithinResults = score.get();
                 }
                 AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
-                totalScore.addAndGet(idxQueryScore * (score.get()/maxScoreWithinResults));
+                totalScore.set(Math.max(totalScore.get(), idxQueryScore * (score.get() / maxScoreWithinResults)))
               }
 
             }
             sb?.append("\n $it")
 
-            maxScore += standardScore;
-            maxScore += idxQueryScore;
+//            maxScore += standardScore;
+//            maxScore += idxQueryScore;
           }
         }
 
@@ -564,7 +563,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
     }
 
-    maxScoresByVertexName.get(k).addAndGet(maxScore)
+//    maxScoresByVertexName.get(k).addAndGet(maxScore)
 
     sb?.append('\n')?.append(vertexScoreMapByVertexName)?.append("\n")
 
@@ -572,12 +571,12 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
   }
 
 
-  return [vertexScoreMapByVertexName, matchReqByVertexName, maxScoresByVertexName];
+  return [vertexScoreMapByVertexName, matchReqByVertexName];
 
 }
 
 
-def getTopHits(Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName, String targetType, long scoreThreshold, StringBuffer sb = null) {
+def getTopHits(Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName, String targetType, double scoreThreshold, StringBuffer sb = null) {
   def ids = vertexScoreMapByVertexName.get(targetType) as Map<Long, AtomicDouble>;
 
   return getTopHits(ids, scoreThreshold, sb)
@@ -585,7 +584,7 @@ def getTopHits(Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName, 
 }
 
 
-def getTopHits(Map<Long, AtomicDouble> counts, final long scoreThreshold, StringBuffer sb = null) {
+def getTopHits(Map<Long, AtomicDouble> counts, final double scoreThreshold, StringBuffer sb = null) {
 
 //    Map<Long, Integer> counts = ids.countBy { it }
   Map<Long, AtomicDouble> countList = counts.findAll { entry -> entry.value.get() >= scoreThreshold }
@@ -604,7 +603,7 @@ def getTopHits(Map<Long, AtomicDouble> counts, final long scoreThreshold, String
 }
 
 
-Map<Long, AtomicDouble> getOtherTopHits(Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName, String targetType, long scoreThreshold, StringBuffer sb = null) {
+Map<Long, AtomicDouble> getOtherTopHits(Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName, String targetType, double scoreThreshold, StringBuffer sb = null) {
 
   Map<Long, AtomicDouble> otherIds = new HashMap<>();
 
@@ -733,6 +732,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
   binding.put("original_request", JsonOutput.prettyPrint(JsonOutput.toJson(currRecord)));
 
   def rules = parsedRules
+  Map<String, AtomicDouble> maxScoresByVertexName = new HashMap<>();
 
   List<MatchReq> matchReqs = new ArrayList<>(rules.vertices.size() as int)
 
@@ -741,6 +741,8 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
   rules.vertices.each { vtx ->
 
     String vertexName = vtx.label
+    AtomicDouble maxScore = maxScoresByVertexName.computeIfAbsent(vertexName, { k -> new AtomicDouble(0) })
+
 //        int minSizeSubsequences = vtx.minSizeSubsequences ?: -1;
     vtx.props.each { prop ->
 
@@ -753,6 +755,12 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
       }
 
       String propName = prop.name
+
+      double weight = ((prop.matchWeight == null)? 1.0 : prop.matchWeight);
+      if (!prop.excludeFromSearch){
+        maxScore.addAndGet(weight);
+
+      }
 
       String propVal = PVValTemplate.getTemplate((String) prop.val).make(binding)
       if (propVal != null && !"null".equals(propVal)) {
@@ -782,7 +790,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
               , (boolean) prop.mandatoryInSearch
               , (String) prop.postProcessor ?: null
               , (String) prop.postProcessorVar ?: null
-              , (double) prop.matchWeight ?: 1
+              , (double) weight
               , sb
             );
 
@@ -805,7 +813,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
             , (boolean) prop.mandatoryInSearch
             , (String) prop.postProcessor ?: null
             , (String) prop.postProcessorVar ?: null
-            , (double) prop.matchWeight ?: 1
+            , (double) ((prop.matchWeight == null) ? 1.0 : prop.matchWeight)
             , sb
           );
         }
@@ -818,20 +826,20 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
 
   }
-  return matchReqs;
+  return [matchReqs,     maxScoresByVertexName];
 
 }
 
 
 def getTopHitsWithEdgeCheck(g,
                             Map<Long, AtomicDouble> potentialHitIDs,
-                            long scoreThreshold,
+                            double scoreThreshold,
                             HashMap<String, Map<Long, AtomicDouble>> matchIdsByVertexType,
                             String vertexTypeStr,
                             Map<String, List<EdgeRequest>> edgeReqsByVertexType,
                             StringBuffer sb = null) {
 
-  sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; potentialHitIDs = ${potentialHitIDs} ")
+  sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; potentialHitIDs = ${potentialHitIDs} scoreThreshold = ${scoreThreshold}")
   Map<Long, AtomicDouble> topHits = getTopHits(potentialHitIDs, scoreThreshold, sb)
 
   sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; topHits = ${topHits} ")
@@ -898,15 +906,15 @@ def static addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> mat
 }
 
 
-def updateExistingVertexWithMatchReqs(g, Map<Long, AtomicDouble> vertices, List<MatchReq> matchReqsForThisVertexType, long scoreThreshold, StringBuffer sb = null) {
+def updateExistingVertexWithMatchReqs(g, Map<Long, AtomicDouble> vertices, List<MatchReq> matchReqsForThisVertexType, double scoreThreshold, StringBuffer sb = null) {
 
   def localTrav = g
   def deletionTrav = g
-  sb?.append("\n in updateExistingVertexWithMatchReqs() - about to start Updating vertex of id ${vertexId}; ${matchReqsForThisVertexType}")
+  sb?.append("\n in updateExistingVertexWithMatchReqs() - about to start Updating vertex of id ${vertices}; ${matchReqsForThisVertexType}")
 
   vertices.each { vertexId, score ->
 
-    if (score >= scoreThreshold) {
+    if (score.get() >= scoreThreshold) {
 
 
       localTrav = localTrav.V(vertexId)
@@ -1044,55 +1052,58 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Map<Long, AtomicDo
 
     sb?.append("\n in createEdges; edgeReq = $it ")
 
-    sb?.append("\n in createEdges; finalVertexIdByVertexName = $finalVertexIdByVertexName ")
+    sb?.append("\n in createEdges; finalVertexIdByVertexName = $finalVertexIdByVertexName; \nmaxScoresByVertexName = $maxScoresByVertexName ")
 
-    double maxFromScore = maxScoresByVertexName.get(it.fromVertexLabel).get();
-    double maxToScore = maxScoresByVertexName.get(it.toVertexLabel).get();
+    Double maxFromScore = maxScoresByVertexName.get(it.fromVertexLabel)?.get();
+    Double maxToScore = maxScoresByVertexName.get(it.toVertexLabel)?.get();
 
-    Map<Long, AtomicDouble> fromIds = finalVertexIdByVertexName.get(it.fromVertexLabel)
-    Map<Long, AtomicDouble> toIds = finalVertexIdByVertexName.get(it.toVertexLabel)
-
-    fromIds.forEach { fromId, fromScore ->
-
-      toIds.forEach { toId, toScore ->
-        sb?.append("\n in createEdges; from=$fromId; to=$toId ")
-
-        if (fromId != null && toId != null) {
-
-          Long[] foundIds = gTrav.V(toId)
-            .both()
-            .hasId(within(fromId)).id()
-            .toSet() as Long[]
-
-          sb?.append("\n in createEdges $foundIds")
-
-          if (foundIds.size() == 0) {
-            def fromV = gTrav.V(fromId)
-            def toV = gTrav.V(toId)
-            sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId")
-            gTrav.addE(it.label)
-              .from(fromV).to(toV)
-              .property('maxFromScore', maxFromScore)
-              .property('fromScore', fromScore.get())
-              .property('fromScorePercent', fromScore.get()/maxFromScore * 100.0)
-              .property('maxToScore', maxToScore)
-              .property('toScore', toScore.get())
-              .property('toScorePercent', toScore.get()/maxToScore*100.0)
-              .next();
+    if (maxFromScore != null && maxToScore != null) {
 
 
+      Map<Long, AtomicDouble> fromIds = finalVertexIdByVertexName?.get(it.fromVertexLabel)
+      Map<Long, AtomicDouble> toIds = finalVertexIdByVertexName?.get(it.toVertexLabel)
+
+      fromIds.forEach { fromId, fromScore ->
+
+        toIds.forEach { toId, toScore ->
+          sb?.append("\n in createEdges; from=$fromId; to=$toId ")
+
+          if (fromId != null && toId != null) {
+
+            Long[] foundIds = gTrav.V(toId)
+              .both()
+              .hasId(within(fromId)).id()
+              .toSet() as Long[]
+
+            sb?.append("\n in createEdges $foundIds")
+
+            if (foundIds.size() == 0) {
+              def fromV = gTrav.V(fromId)
+              def toV = gTrav.V(toId)
+              sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId; maxFromScore = $maxFromScore; fromScore = $fromScore; maxToScore = $maxToScore; toScore: $toScore")
+              gTrav.addE(it.label)
+                .from(fromV).to(toV)
+                .property('maxFromScore', maxFromScore)
+                .property('fromScore', fromScore.get())
+                .property('fromScorePercent', fromScore.get() / maxFromScore * 100.0)
+                .property('maxToScore', maxToScore)
+                .property('toScore', toScore.get())
+                .property('toScorePercent', toScore.get() / maxToScore * 100.0)
+                .next();
+
+
+            } else {
+              sb?.append("\n in createEdges SKIPPING Edge creations")
+
+            }
           } else {
             sb?.append("\n in createEdges SKIPPING Edge creations")
 
           }
-        } else {
-          sb?.append("\n in createEdges SKIPPING Edge creations")
+
 
         }
-
-
       }
-
 
     }
 
@@ -1104,6 +1115,7 @@ def processMatchRequests(g,
                          List<MatchReq> matchReqs,
                          int maxHitsPerType,
                          double percentageThreshold,
+                         Map<String, AtomicDouble> maxScoresByVertexName,
                          Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName,
                          Map<String, List<EdgeRequest>> edgeReqsByVertexType,
                          Set<EdgeRequest> edgeReqs,
@@ -1111,16 +1123,15 @@ def processMatchRequests(g,
 
   def (
   Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName,
-  Map<String, List<MatchReq>>        matchReqByVertexName,
-  Map<String, AtomicDouble>            maxScoresByVertexName
+  Map<String, List<MatchReq>>          matchReqByVertexName
   ) = matchVertices(g, matchReqs, maxHitsPerType, sb);
   vertexScoreMapByVertexName.each { vertexTypeStr, potentialHitIDs ->
 
     List<MatchReq> matchReqsForThisVertexType = matchReqByVertexName.get(vertexTypeStr)
 
-    long maxScore = maxScoresByVertexName.get(vertexTypeStr).get();
+    double maxScore = maxScoresByVertexName.get(vertexTypeStr).get();
 
-    long scoreThreshold = (long) (maxScore * 100 * (percentageThreshold / 100) / 100);
+    double scoreThreshold = (double) (maxScore * 100 * (percentageThreshold / 100) / 100);
 
     Map<Long, AtomicDouble> topHits = getTopHitsWithEdgeCheck(g, potentialHitIDs, scoreThreshold, vertexScoreMapByVertexName, vertexTypeStr, edgeReqsByVertexType, sb)
 
@@ -1150,8 +1161,8 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
   def jsonSlurper = new JsonSlurper()
   def rules = jsonSlurper.parseText(jsonRules)
 
-  double percentageThreshold = (double) rules.percentageThreshold ?: 95.0;
-  int maxHitsPerType = (int) rules.maxHitsPerType ?: 1000;
+  double percentageThreshold = (rules.percentageThreshold == null) ? 95.0 : (double) (rules.percentageThreshold);
+  int maxHitsPerType = (rules.maxHitsPerType == null) ? 1000 : (int) rules.maxHitsPerType;
 
   def (Map<String, List<EdgeRequest>> edgeReqsByVertexName, Set<EdgeRequest> edgeReqs) = parseEdges(rules.updatereq)
   trans = graph.tx()
@@ -1160,12 +1171,13 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
       trans.open()
     }
 
-    List<MatchReq> matchReqs = getMatchRequests(bindings, rules.updatereq, jsonRules, sb)
+   def (List<MatchReq> matchReqs,  Map<String, AtomicDouble> maxScoresByVertexName) = getMatchRequests(bindings, rules.updatereq, jsonRules, sb)
 
     processMatchRequests(g,
       matchReqs,
       maxHitsPerType,
       percentageThreshold,
+      maxScoresByVertexName,
       finalVertexIdByVertexName,
       edgeReqsByVertexName,
       edgeReqs,
@@ -1189,8 +1201,10 @@ def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, S
 
   def jsonSlurper = new JsonSlurper()
   def rules = jsonSlurper.parseText(jsonRules)
-  double percentageThreshold = (double) rules.percentageThreshold ?: 95.0;
-  int maxHitsPerType = (int) rules.maxHitsPerType ?: 1000;
+
+
+  double percentageThreshold = (rules.percentageThreshold == null) ? 95.0 : (double) (rules.percentageThreshold);
+  int maxHitsPerType = (rules.maxHitsPerType == null) ? 1000 : (int) rules.maxHitsPerType;
 
   def (Map<String, List<EdgeRequest>> edgeReqsByVertexName, Set<EdgeRequest> edgeReqs) = parseEdges(rules.updatereq)
   trans = graph.tx()
@@ -1201,13 +1215,15 @@ def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, S
 
     for (Map<String, String> item in recordList) {
 
-      def matchReqs = getMatchRequests(item, rules.updatereq, jsonRules, sb)
+      def ( List<MatchReq> matchReqs,   Map<String, AtomicDouble> maxScoresByVertexName ) =
+        getMatchRequests(item, rules.updatereq, jsonRules, sb);
 
 
       processMatchRequests(g,
         matchReqs,
         maxHitsPerType,
         percentageThreshold,
+        maxScoresByVertexName,
         finalVertexIdByVertexName,
         edgeReqsByVertexName,
         edgeReqs,
