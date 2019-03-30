@@ -11,11 +11,9 @@ import org.apache.tinkerpop.gremlin.process.traversal.P
 import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.JanusGraphIndexQuery
-import org.janusgraph.core.JanusGraphVertex
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.stream.Collectors
-
+import java.util.regex.Pattern
 /*
 def benchmark = { closure ->
     start = System.nanoTime()
@@ -207,7 +205,7 @@ class MatchReq<T> {
       return org.janusgraph.core.attribute.Text.&textRegex
     } else if ("textFuzzy".equals(predicateStr)) {
       return org.janusgraph.core.attribute.Text.&textFuzzy
-    } else return P.eq;
+    } else return P.&eq;
 
   }
 
@@ -387,6 +385,51 @@ static Set<List<MatchReq>> subsequencesUniqueTypes(List<MatchReq> items) {
   return ans;
 }
 
+
+def runIndexQuery (String idx,String value,int maxHitsPerType, MatchReq matchReq, Map<Long,AtomicDouble> indexQueryResults,StringBuffer sb){
+
+
+  JanusGraphIndexQuery query = (graph as JanusGraph)?.
+    indexQuery(idx, value);
+
+  double maxScoreForRawIdx = 0;
+  Map<Long, Double> idxQueryRes = new HashMap<>();
+
+  query?.limit(maxHitsPerType)?.vertexStream()?.forEach { result ->
+    double score = result.score
+    idxQueryRes.put((Long)result.element.id(), score);
+    maxScoreForRawIdx = Math.max(maxScoreForRawIdx, score);
+  }
+  Long total = query.vertexTotals();
+  sb?.append("\n\nIn runIndexQuery: About to call idxRaw: idx: ${idx}; value = ${value}; total=${total} maxHitsPerType=${maxHitsPerType}; idxQueryRes = ${idxQueryRes}, maxScoreForRawIdx = $maxScoreForRawIdx")
+
+  idxQueryRes.forEach { vId, score ->
+    sb?.append("\nIn runIndexQuery:")?.append(vId)?.append(": ")?.append(score);
+    AtomicDouble totalScore = indexQueryResults.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
+    totalScore.addAndGet(matchReq.matchWeight * (score / maxScoreForRawIdx))
+
+  }
+
+//  OptionalDouble  optionalDoubleMaxScoreForRawIdx = resultStream.mapToDouble{val -> val.score}.max();
+//
+//  optionalDoubleMaxScoreForRawIdx.ifPresent({  maxScore ->
+//    sb?.append("\nmax Score for ${value} is $maxScore")
+//
+//    resultStream.forEach { JanusGraphIndexQuery.Result<JanusGraphVertex> result ->
+//      Long vId = (Long) result.element.id();
+//      double score = result.score
+//      sb?.append("\n")?.append(result.getElement().id())?.append(": ")?.append(result.getScore());
+//      AtomicDouble totalScore = indexQueryResults.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
+//      totalScore.addAndGet(matchReq.matchWeight * (score / maxScore))
+//
+//    }
+//  })
+
+
+
+
+}
+
 def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
 
 
@@ -481,51 +524,37 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
             gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
 
             double standardScore = 0;
-            double idxQueryScore = 0;
-            searchableItems.each { it2 ->
+            searchableItems.each {  matchReq ->
 
-              String predicateStr = it2.predicateStr as String;
+              String predicateStr = matchReq.predicateStr as String;
               if (predicateStr.startsWith("idx:")) {
-                idxQueryScore += it2.matchWeight;
                 String[] idxQuery = (predicateStr).split(':');
                 String idx = idxQuery[1];
 
-                String value = "v.\"${it2.propName}\":${it2.attribNativeVal}"
+                String value = "v.\"${matchReq.propName}\":${matchReq.attribNativeVal}"
 
-//                                indexQueryResults.addAll((graph as JanusGraph).indexQuery(idx, value).vertexStream().mapToLong({ result -> result.getElement().longId()}).collect(Collectors.toList()));
-                for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
-//                  indexQueryResults.add(result.getElement().longId());
-                  Long vId = result.element.longId();
-                  double score = result.score
-                  AtomicDouble totalScore = indexQueryResults.computeIfAbsent(vId, { key -> new AtomicDouble(0.0) });
-                  totalScore.addAndGet(score)
+                runIndexQuery(idx,value,maxHitsPerType,matchReq,indexQueryResults,sb);
 
-                }
+
               } else if (predicateStr.startsWith("idxRaw:")) {
-                idxQueryScore += it2.matchWeight;
 
                 String[] idxQuery = (predicateStr).split(':');
                 String idx = idxQuery[1];
 
-                String value = it2.attribNativeVal.toString();
+                String value = matchReq.attribNativeVal.toString();
+                value = value?.replaceAll(Pattern.quote("v.'"), 'v."');
+                value = value?.replaceAll(Pattern.quote("':"), '":');
 
-//                                indexQueryResults.addAll((graph as JanusGraph).indexQuery(idx, value).vertexStream().mapToLong({ result -> result.getElement().longId()}).collect(Collectors.toList()));
-                for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
-//                  indexQueryResults.add(result.getElement().longId());
+                runIndexQuery(idx,value,maxHitsPerType,matchReq,indexQueryResults,sb);
 
-                  Long vId = result.element.longId();
-                  double score = result.score
-                  AtomicDouble totalScore = indexQueryResults.computeIfAbsent(vId, { key -> new AtomicDouble(0.0) });
-                  totalScore.addAndGet(score)
 
-                }
               } else {
-                standardScore += it2.matchWeight;
+                standardScore += matchReq.matchWeight;
 
-                gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
+                gtrav = gtrav.has(matchReq.propName, matchReq.predicate(matchReq.attribNativeVal)).clone()
                 sb?.append("\n     .has('")
-                  ?.append(it2.propName)?.append("',")
-                  ?.append(it2.predicate)?.append(",'")?.append(it2.attribNativeVal)?.append("')")
+                  ?.append(matchReq.propName)?.append("',")
+                  ?.append(matchReq.predicate)?.append(",'")?.append(matchReq.attribNativeVal)?.append("')")
 
               }
 
@@ -534,23 +563,27 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
             // Vertex ID vs Score
             Map<Long, AtomicDouble> vertexScoreMap = vertexScoreMapByVertexName.get(k);
 
+
             (gtrav.range(0, maxHitsPerType).id().toList() as Long[]).each { vId ->
               AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
-              totalScore.set(Math.max(totalScore.get(), standardScore))
-            }
-            if (indexQueryResults.size() > 0) {
-              indexQueryResults.sort { it.value }
 
-              double maxScoreWithinResults = -1;
+              // Get rid of any index scores here in case we have any mixed entries;
+              AtomicDouble idxScores = indexQueryResults.remove(vId);
+              double idxScore = idxScores == null ? 0 : idxScores.get();
+              totalScore.set(Math.max(totalScore.get(), standardScore + idxScore ))
+            }
+
+            // Look for any entries where the only matches were index scores;
+
+            if (indexQueryResults.size() > 0) {
+
               indexQueryResults.each { vId, score ->
-                if (maxScoreWithinResults < 0) {
-                  maxScoreWithinResults = score.get();
-                }
                 AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
-                totalScore.set(Math.max(totalScore.get(), idxQueryScore * (score.get() / maxScoreWithinResults)))
+                totalScore.set(Math.max(totalScore.get(), score.get()))
               }
 
             }
+
             sb?.append("\n $it")
 
 //            maxScore += standardScore;
@@ -726,13 +759,14 @@ void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, S
 
 }
 
-def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String rulesJsonStr, StringBuffer sb = null) {
+def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String rulesJsonStr, Double percentageThreshold, StringBuffer sb = null) {
   def binding = currRecord
 
   binding.put("original_request", JsonOutput.prettyPrint(JsonOutput.toJson(currRecord)));
 
   def rules = parsedRules
   Map<String, AtomicDouble> maxScoresByVertexName = new HashMap<>();
+  Map<String, Double> percentageThresholdByVertexName = new HashMap<>();
 
   List<MatchReq> matchReqs = new ArrayList<>(rules.vertices.size() as int)
 
@@ -742,7 +776,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
     String vertexName = vtx.label
     AtomicDouble maxScore = maxScoresByVertexName.computeIfAbsent(vertexName, { k -> new AtomicDouble(0) })
-
+    percentageThresholdByVertexName.computeIfAbsent(vertexName, { k -> new Double((double) (vtx.percentageThreshold == null ? percentageThreshold : vtx.percentageThreshold)) })
 //        int minSizeSubsequences = vtx.minSizeSubsequences ?: -1;
     vtx.props.each { prop ->
 
@@ -756,8 +790,8 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
       String propName = prop.name
 
-      double weight = ((prop.matchWeight == null)? 1.0 : prop.matchWeight);
-      if (!prop.excludeFromSearch){
+      double weight = ((prop.matchWeight == null) ? 1.0 : prop.matchWeight);
+      if (!prop.excludeFromSearch) {
         maxScore.addAndGet(weight);
 
       }
@@ -826,7 +860,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
 
   }
-  return [matchReqs,     maxScoresByVertexName];
+  return [matchReqs, maxScoresByVertexName, percentageThresholdByVertexName];
 
 }
 
@@ -1078,6 +1112,9 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Map<Long, AtomicDo
             sb?.append("\n in createEdges $foundIds")
 
             if (foundIds.size() == 0) {
+
+              Double fromScorePercent = (maxFromScore > 0 ? (fromScore.get() / maxFromScore) : (double) 1.0) * (double) 100.0;
+              Double toScorePercent = (maxToScore > 0 ? (toScore.get() / maxToScore) : (double) 1.0) * (double) 100.0;
               def fromV = gTrav.V(fromId)
               def toV = gTrav.V(toId)
               sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId; maxFromScore = $maxFromScore; fromScore = $fromScore; maxToScore = $maxToScore; toScore: $toScore")
@@ -1085,10 +1122,10 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Map<Long, AtomicDo
                 .from(fromV).to(toV)
                 .property('maxFromScore', maxFromScore)
                 .property('fromScore', fromScore.get())
-                .property('fromScorePercent', fromScore.get() / maxFromScore * 100.0)
+                .property('fromScorePercent', fromScorePercent)
                 .property('maxToScore', maxToScore)
                 .property('toScore', toScore.get())
-                .property('toScorePercent', toScore.get() / maxToScore * 100.0)
+                .property('toScorePercent', toScorePercent)
                 .next();
 
 
@@ -1114,7 +1151,7 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Map<Long, AtomicDo
 def processMatchRequests(g,
                          List<MatchReq> matchReqs,
                          int maxHitsPerType,
-                         double percentageThreshold,
+                         Map<String, Double> percentageThresholdByVertexName,
                          Map<String, AtomicDouble> maxScoresByVertexName,
                          Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName,
                          Map<String, List<EdgeRequest>> edgeReqsByVertexType,
@@ -1130,7 +1167,7 @@ def processMatchRequests(g,
     List<MatchReq> matchReqsForThisVertexType = matchReqByVertexName.get(vertexTypeStr)
 
     double maxScore = maxScoresByVertexName.get(vertexTypeStr).get();
-
+    double percentageThreshold = percentageThresholdByVertexName.get(vertexTypeStr)
     double scoreThreshold = (double) (maxScore * 100 * (percentageThreshold / 100) / 100);
 
     Map<Long, AtomicDouble> topHits = getTopHitsWithEdgeCheck(g, potentialHitIDs, scoreThreshold, vertexScoreMapByVertexName, vertexTypeStr, edgeReqsByVertexType, sb)
@@ -1171,12 +1208,13 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
       trans.open()
     }
 
-   def (List<MatchReq> matchReqs,  Map<String, AtomicDouble> maxScoresByVertexName) = getMatchRequests(bindings, rules.updatereq, jsonRules, sb)
+    def (List<MatchReq> matchReqs, Map<String, AtomicDouble> maxScoresByVertexName, Map<String, Double> percentageThresholdByVertexName) =
+    getMatchRequests(bindings, rules.updatereq, jsonRules, percentageThreshold, sb)
 
     processMatchRequests(g,
       matchReqs,
       maxHitsPerType,
-      percentageThreshold,
+      percentageThresholdByVertexName,
       maxScoresByVertexName,
       finalVertexIdByVertexName,
       edgeReqsByVertexName,
@@ -1215,14 +1253,14 @@ def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, S
 
     for (Map<String, String> item in recordList) {
 
-      def ( List<MatchReq> matchReqs,   Map<String, AtomicDouble> maxScoresByVertexName ) =
-        getMatchRequests(item, rules.updatereq, jsonRules, sb);
+      def (List<MatchReq> matchReqs, Map<String, AtomicDouble> maxScoresByVertexName, Map<String, Double> percentageThresholdByVertexName) =
+      getMatchRequests(item, rules.updatereq, jsonRules, percentageThreshold, sb);
 
 
       processMatchRequests(g,
         matchReqs,
         maxHitsPerType,
-        percentageThreshold,
+        percentageThresholdByVertexName,
         maxScoresByVertexName,
         finalVertexIdByVertexName,
         edgeReqsByVertexName,
