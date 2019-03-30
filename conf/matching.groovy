@@ -14,6 +14,7 @@ import org.janusgraph.core.JanusGraphIndexQuery
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
+
 /*
 def benchmark = { closure ->
     start = System.nanoTime()
@@ -386,7 +387,7 @@ static Set<List<MatchReq>> subsequencesUniqueTypes(List<MatchReq> items) {
 }
 
 
-def runIndexQuery (String idx,String value,int maxHitsPerType, MatchReq matchReq, Map<Long,AtomicDouble> indexQueryResults,StringBuffer sb){
+def runIndexQuery(String idx, String value, int maxHitsPerType, MatchReq matchReq, Map<Long, AtomicDouble> indexQueryResults, StringBuffer sb) {
 
 
   JanusGraphIndexQuery query = (graph as JanusGraph)?.
@@ -397,7 +398,7 @@ def runIndexQuery (String idx,String value,int maxHitsPerType, MatchReq matchReq
 
   query?.limit(maxHitsPerType)?.vertexStream()?.forEach { result ->
     double score = result.score
-    idxQueryRes.put((Long)result.element.id(), score);
+    idxQueryRes.put((Long) result.element.id(), score);
     maxScoreForRawIdx = Math.max(maxScoreForRawIdx, score);
   }
   Long total = query.vertexTotals();
@@ -424,8 +425,6 @@ def runIndexQuery (String idx,String value,int maxHitsPerType, MatchReq matchReq
 //
 //    }
 //  })
-
-
 
 
 }
@@ -520,11 +519,9 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
           Map<Long, AtomicDouble> indexQueryResults = new HashMap<>();
           if (searchableItems.size() > 0) {
-            sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
-            gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
-
+            boolean atLeastOneTraversal = false;
             double standardScore = 0;
-            searchableItems.each {  matchReq ->
+            searchableItems.each { matchReq ->
 
               String predicateStr = matchReq.predicateStr as String;
               if (predicateStr.startsWith("idx:")) {
@@ -533,7 +530,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
                 String value = "v.\"${matchReq.propName}\":${matchReq.attribNativeVal}"
 
-                runIndexQuery(idx,value,maxHitsPerType,matchReq,indexQueryResults,sb);
+                runIndexQuery(idx, value, maxHitsPerType, matchReq, indexQueryResults, sb);
 
 
               } else if (predicateStr.startsWith("idxRaw:")) {
@@ -545,10 +542,16 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
                 value = value?.replaceAll(Pattern.quote("v.'"), 'v."');
                 value = value?.replaceAll(Pattern.quote("':"), '":');
 
-                runIndexQuery(idx,value,maxHitsPerType,matchReq,indexQueryResults,sb);
+                runIndexQuery(idx, value, maxHitsPerType, matchReq, indexQueryResults, sb);
 
 
               } else {
+                if (!atLeastOneTraversal) {
+
+                  sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
+                  gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
+                  atLeastOneTraversal = true;
+                }
                 standardScore += matchReq.matchWeight;
 
                 gtrav = gtrav.has(matchReq.propName, matchReq.predicate(matchReq.attribNativeVal)).clone()
@@ -563,16 +566,17 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
             // Vertex ID vs Score
             Map<Long, AtomicDouble> vertexScoreMap = vertexScoreMapByVertexName.get(k);
 
+            if (atLeastOneTraversal) {
 
-            (gtrav.range(0, maxHitsPerType).id().toList() as Long[]).each { vId ->
-              AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
+              (gtrav.range(0, maxHitsPerType).id().toList() as Long[]).each { vId ->
+                AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
 
-              // Get rid of any index scores here in case we have any mixed entries;
-              AtomicDouble idxScores = indexQueryResults.remove(vId);
-              double idxScore = idxScores == null ? 0 : idxScores.get();
-              totalScore.set(Math.max(totalScore.get(), standardScore + idxScore ))
+                // Get rid of any index scores here in case we have any mixed entries;
+                AtomicDouble idxScores = indexQueryResults.remove(vId);
+                double idxScore = idxScores == null ? 0 : idxScores.get();
+                totalScore.set(Math.max(totalScore.get(), standardScore + idxScore))
+              }
             }
-
             // Look for any entries where the only matches were index scores;
 
             if (indexQueryResults.size() > 0) {
@@ -1115,16 +1119,18 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Map<Long, AtomicDo
 
               Double fromScorePercent = (maxFromScore > 0 ? (fromScore.get() / maxFromScore) : (double) 1.0) * (double) 100.0;
               Double toScorePercent = (maxToScore > 0 ? (toScore.get() / maxToScore) : (double) 1.0) * (double) 100.0;
+              Double fromScoreDouble = fromScore.get();
+              Double toScoreDouble = toScore.get();
               def fromV = gTrav.V(fromId)
               def toV = gTrav.V(toId)
-              sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId; maxFromScore = $maxFromScore; fromScore = $fromScore; maxToScore = $maxToScore; toScore: $toScore")
+              sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId (fromV = ${fromV}; toV= ${toV}; maxFromScore = $maxFromScore; fromScore = $fromScoreDouble; maxToScore = $maxToScore; toScore: $toScoreDouble")
               gTrav.addE(it.label)
                 .from(fromV).to(toV)
                 .property('maxFromScore', maxFromScore)
-                .property('fromScore', fromScore.get())
+                .property('fromScore', fromScoreDouble)
                 .property('fromScorePercent', fromScorePercent)
                 .property('maxToScore', maxToScore)
-                .property('toScore', toScore.get())
+                .property('toScore', toScoreDouble)
                 .property('toScorePercent', toScorePercent)
                 .next();
 

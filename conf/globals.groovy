@@ -356,8 +356,7 @@ Map<String, PropertyKey> addpropertyKeys(JanusGraphManagement mgmt, def json, St
         String name = it.name
         Class<?> typeClass = Class.forName(getClass(it.dataType))
         String cardinality = it.cardinality
-//        org.janusgraph.core.Cardinality card = cardinality == 'SET' ? org.janusgraph.core.Cardinality.SET : org.janusgraph.core.Cardinality.SINGLE
-        Cardinality card = Enum.valueOf(Cardinality,cardinality);
+        org.janusgraph.core.Cardinality card = Enum.valueOf(org.janusgraph.core.Cardinality,cardinality); //cardinality == 'SET' ? org.janusgraph.core.Cardinality.SET : org.janusgraph.core.Cardinality.SINGLE
         def prop = createProp(mgmt, name, typeClass, card);
         sb?.append("Success added property key - $name\n")
         map[name] = prop
@@ -371,7 +370,7 @@ String getClass(def type) {
 
 
 @CompileStatic
-PropertyKey createProp(JanusGraphManagement mgmt, String keyName, Class<?> classType, Cardinality card) {
+PropertyKey createProp(JanusGraphManagement mgmt, String keyName, Class<?> classType, org.janusgraph.core.Cardinality card) {
 
     try {
         PropertyKey key;
