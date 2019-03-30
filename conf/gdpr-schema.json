@@ -1797,12 +1797,12 @@
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
+        "Metadata.Type.Person",
         "Person.Place_Of_Birth",
         "Person.Full_Name",
         "Person.Gender",
         "Person.Customer_ID",
         "Person.Title",
-        "Metadata.Type.Person",
         "Person.Nationality",
         "Person.Full_Name_fuzzy",
         "Person.Ethnicity",
