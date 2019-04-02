@@ -1254,6 +1254,11 @@
       "cardinality": "SET"
     },
     {
+      "name": "Person.Organisation.Department",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
       "name": "Person.Place_Of_Birth",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -2359,7 +2364,8 @@
         "Metadata.Type.Person.Organisation",
         "Person.Organisation.Registration_Number",
         "Person.Organisation.Name",
-        "Person.Organisation.orgCountrySet"
+        "Person.Organisation.orgCountrySet",
+        "Person.Organisation.Department"
       ],
       "propertyKeysMappings": {
         "Metadata.Type.Person.Organisation": {
