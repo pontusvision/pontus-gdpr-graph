@@ -34,6 +34,36 @@
   ],
   "propertyKeys": [
     {
+      "name": "maxFromScore",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "fromScore",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "fromScorePercent",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "maxToScore",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "toScore",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "toScorePercent",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Event.Consent.Date",
       "dataType": "Date",
       "cardinality": "SINGLE"
@@ -141,6 +171,21 @@
     {
       "name": "Event.Ingestion.Group.Type",
       "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Event.Ingestion.Group.Has_Controller",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Event.Ingestion.Group.Has_Processor",
+      "dataType": "Boolean",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Event.Ingestion.Group.Has_Data_Owner",
+      "dataType": "Boolean",
       "cardinality": "SINGLE"
     },
     {
@@ -1224,6 +1269,11 @@
       "cardinality": "SET"
     },
     {
+      "name": "Person.Organisation.Department",
+      "dataType": "String",
+      "cardinality": "SET"
+    },
+    {
       "name": "Person.Place_Of_Birth",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -1767,12 +1817,12 @@
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
+        "Metadata.Type.Person",
         "Person.Place_Of_Birth",
         "Person.Full_Name",
         "Person.Gender",
         "Person.Customer_ID",
         "Person.Title",
-        "Metadata.Type.Person",
         "Person.Nationality",
         "Person.Full_Name_fuzzy",
         "Person.Ethnicity",
@@ -1791,21 +1841,21 @@
         },
         "Person.Full_Name": {
           "mapping": "TEXTSTRING",
-          "analyzers": {
+          "analyzer": {
             "name": "text-analyzer",
             "value": "pg_word_delimiter"
           }
         },
         "Person.Full_Name_fuzzy": {
           "mapping": "TEXTSTRING",
-          "analyzers": {
+          "analyzer": {
             "name": "text-analyzer",
             "value": "pg_word_delimiter"
           }
         },
         "Person.Last_Name": {
           "mapping": "TEXTSTRING",
-          "analyzers": {
+          "analyzer": {
             "name": "text-analyzer",
             "value": "pg_word_delimiter"
           }
@@ -2329,7 +2379,8 @@
         "Metadata.Type.Person.Organisation",
         "Person.Organisation.Registration_Number",
         "Person.Organisation.Name",
-        "Person.Organisation.orgCountrySet"
+        "Person.Organisation.orgCountrySet",
+        "Person.Organisation.Department"
       ],
       "propertyKeysMappings": {
         "Metadata.Type.Person.Organisation": {
@@ -2405,6 +2456,9 @@
         "Event.Ingestion.Group.Metadata_End_Date",
         "Event.Ingestion.Group.Type",
         "Event.Ingestion.Group.Metadata_Start_Date",
+        "Event.Ingestion.Group.Has_Controller",
+        "Event.Ingestion.Group.Has_Processor",
+        "Event.Ingestion.Group.Has_Data_Owner",
         "Metadata.Type.Event.Ingestion.Group"
       ],
       "propertyKeysMappings": {
