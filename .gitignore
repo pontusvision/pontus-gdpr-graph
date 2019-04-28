@@ -1,25 +1,3 @@
-<<<<<<< HEAD
-.idea/*
-nifi-pontus-hbase-processor-bundle/nifi-pontus-hbase-processor-nar/target/
-nifi-pontus-hbase-processor-bundle/nifi-pontus-hbase-processor/target/
-pluggable-ingestion-pipeline.iml
-nifi-pontus-elastic-2.x-processor-bundle/nifi-pontus-elastic-2.x-processor-nar/target
-nifi-pontus-elastic-2.x-processor-bundle/nifi-pontus-elastic-2.x-processor/target
-nifi-pontus-services/nifi-pontus-service-api/nifi-pontus-service-api.iml
-nifi-pontus-services/nifi-pontus-service-api/target
-nifi-pontus-services/nifi-pontus-service-nar/target
-nifi-pontus-services/nifi-pontus-services.iml
-nifi-pontus-services/nifi-pontus-service-nar/nifi-pontus-service-nar.iml
-nifi-pontus-services/nifi-pontus-service/target
-nifi-pontus-services/nifi-pontus-service-api-nar/target
-*/*/target/*
-*/*/*.iml
-*.iml
-*/*.iml
-*/*/*/*.iml
-nifi-pontus-elastic-2.x-processor-bundle/nifi-pontus-elastic-2.x-processor/dependency-reduced-pom.xml
-
-=======
 target
 .project
 .settings
@@ -38,4 +16,3 @@ dependency-reduced-pom.xml
 
 node_modules/
 package-lock.json
->>>>>>> 510b593c5adb2159d77a18a423aca367fa3d4c5b
