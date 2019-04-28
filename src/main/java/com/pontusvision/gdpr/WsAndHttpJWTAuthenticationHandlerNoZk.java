@@ -34,7 +34,7 @@ import org.janusgraph.core.JanusGraphFactory;
 import org.janusgraph.diskstorage.configuration.backend.CommonsConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.homeoffice.pontus.JWTClaim;
+//import uk.gov.homeoffice.pontus.JWTClaim;
 
 import javax.crypto.SecretKey;
 import java.io.File;

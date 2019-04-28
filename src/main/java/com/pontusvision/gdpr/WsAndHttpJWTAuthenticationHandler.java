@@ -50,7 +50,7 @@ import uk.gov.cdp.ldap.LdapServiceSambaImpl;
 import uk.gov.cdp.shadow.user.auth.AuthenticationService;
 import uk.gov.cdp.shadow.user.auth.AuthenticationServiceImpl;
 import uk.gov.cdp.shadow.user.auth.CDPShadowUserPasswordGeneratorImpl;
-import uk.gov.homeoffice.pontus.JWTClaim;
+//import uk.gov.homeoffice.pontus.JWTClaim;
 
 import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
