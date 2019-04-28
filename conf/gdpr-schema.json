@@ -1538,6 +1538,21 @@
       "unidirected": false
     },
     {
+      "name": "Is_Data_Owner",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
+      "name": "Is_Data_Controller",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
+      "name": "Is_Data_Processor",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
       "name": "Lives",
       "multiplicity": "MULTI",
       "unidirected": false
