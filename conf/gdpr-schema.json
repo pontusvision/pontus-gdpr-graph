@@ -1855,11 +1855,7 @@
           "mapping": "DEFAULT"
         },
         "Person.Full_Name": {
-          "mapping": "TEXTSTRING",
-          "analyzer": {
-            "name": "text-analyzer",
-            "value": "pg_word_delimiter"
-          }
+          "mapping": "STRING"
         },
         "Person.Full_Name_fuzzy": {
           "mapping": "TEXTSTRING",
@@ -1869,11 +1865,7 @@
           }
         },
         "Person.Last_Name": {
-          "mapping": "TEXTSTRING",
-          "analyzer": {
-            "name": "text-analyzer",
-            "value": "pg_word_delimiter"
-          }
+          "mapping": "STRING"
         },
         "Person.Gender": {
           "mapping": "STRING"

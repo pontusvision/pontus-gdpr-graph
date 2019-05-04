@@ -226,7 +226,7 @@ def loadSchema(JanusGraph graph, String... files) {
             }
 
         } catch (Throwable t) {
-            sb?.append('Failed to load schema!\n')?.append(t);
+            sb?.append('Failed to load schema!\n').append(t);
             t.printStackTrace()
 
         }
@@ -356,7 +356,7 @@ Map<String, PropertyKey> addpropertyKeys(JanusGraphManagement mgmt, def json, St
         String name = it.name
         Class<?> typeClass = Class.forName(getClass(it.dataType))
         String cardinality = it.cardinality
-        org.janusgraph.core.Cardinality card = Enum.valueOf(org.janusgraph.core.Cardinality,cardinality); //cardinality == 'SET' ? org.janusgraph.core.Cardinality.SET : org.janusgraph.core.Cardinality.SINGLE
+        org.janusgraph.core.Cardinality card = cardinality == 'SET' ? org.janusgraph.core.Cardinality.SET : org.janusgraph.core.Cardinality.SINGLE
         def prop = createProp(mgmt, name, typeClass, card);
         sb?.append("Success added property key - $name\n")
         map[name] = prop
@@ -1576,5 +1576,6 @@ def getVisJsGraph(long pg_vid, int depth = 1) {
 
 
 }
+
 
 
