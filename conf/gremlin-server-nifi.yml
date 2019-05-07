@@ -9,7 +9,7 @@ channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
 #channelizer: com.pontusvision.gdpr.WsAndHttpJWTChannelizer
 graphs: {
   #graph: /opt/pontus/pontus-graph/current/conf/janusgraph-hbase-es-nifi.properties
-  graph: /opt/pontus/pontus-graph/current/conf/janusgraph-embedded-cassandra-es-nifi.properties
+  graph: conf/janusgraph-embedded-cassandra-es-nifi.properties
 }
 scriptEngines: {
   gremlin-groovy: {
