@@ -1,4 +1,3 @@
-import com.google.common.util.concurrent.AtomicDouble
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
 import com.pontusvision.utils.LocationAddress
@@ -7,13 +6,17 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
+import groovy.transform.TypeChecked
 import org.apache.tinkerpop.gremlin.process.traversal.P
+import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.JanusGraphIndexQuery
+import org.janusgraph.core.JanusGraphVertex
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.regex.Pattern
+import java.util.function.ToLongFunction
+import java.util.stream.Collectors
 
 /*
 def benchmark = { closure ->
@@ -26,119 +29,119 @@ def benchmark = { closure ->
 
 
 class Convert<T> {
-  private from
-  private to
+    private from
+    private to
 
 
-  public Convert(clazz) {
-    from = clazz
+    public Convert(clazz) {
+        from = clazz
 
 
-  }
-
-  static def from(clazz) {
-    new Convert(clazz)
-  }
-
-
-  def to(clazz) {
-    to = clazz
-    return this
-  }
-
-  def using(closure) {
-    def originalAsType = from.metaClass.getMetaMethod('asType', [] as Class[])
-    from.metaClass.asType = { Class clazz ->
-      if (clazz == to) {
-        closure.setProperty('value', delegate)
-        closure(delegate)
-      } else {
-        originalAsType.doMethodInvoke(delegate, clazz)
-      }
     }
-  }
 
-
-  T fromString(String data, Class<T> requiredType, StringBuffer sb = null) {
-
-    if (requiredType == Date.class) {
-      return data as Date
-
-    } else if (requiredType == String.class) {
-      return data as T
-    } else if (requiredType == Boolean.class) {
-      return Boolean.valueOf(data) as T
-    } else if (requiredType == Integer.class) {
-      return Integer.valueOf(data) as T
-    } else if (requiredType == Long.class) {
-      return Long.valueOf(data) as T
-    } else if (requiredType == Float.class) {
-      return Float.valueOf(data) as T
-    } else if (requiredType == Double.class) {
-      return Double.valueOf(data) as T
-    } else if (requiredType == Short.class) {
-      return Short.valueOf(data) as T
-    } else {
-      return data as T
+    static def from(clazz) {
+        new Convert(clazz)
     }
 
 
-  }
+    def to(clazz) {
+        to = clazz
+        return this
+    }
+
+    def using(closure) {
+        def originalAsType = from.metaClass.getMetaMethod('asType', [] as Class[])
+        from.metaClass.asType = { Class clazz ->
+            if (clazz == to) {
+                closure.setProperty('value', delegate)
+                closure(delegate)
+            } else {
+                originalAsType.doMethodInvoke(delegate, clazz)
+            }
+        }
+    }
+
+
+    T fromString(String data, Class<T> requiredType, StringBuffer sb = null) {
+
+        if (requiredType == Date.class) {
+            return data as Date
+
+        } else if (requiredType == String.class) {
+            return data as T
+        } else if (requiredType == Boolean.class) {
+            return Boolean.valueOf(data) as T
+        } else if (requiredType == Integer.class) {
+            return Integer.valueOf(data) as T
+        } else if (requiredType == Long.class) {
+            return Long.valueOf(data) as T
+        } else if (requiredType == Float.class) {
+            return Float.valueOf(data) as T
+        } else if (requiredType == Double.class) {
+            return Double.valueOf(data) as T
+        } else if (requiredType == Short.class) {
+            return Short.valueOf(data) as T
+        } else {
+            return data as T
+        }
+
+
+    }
 }
 
 class PVConvMixin {
 
 
-  static final def convert = StringGroovyMethods.&asType
+    static final def convert = StringGroovyMethods.&asType
 
-  static Date invalidDate = new Date("01/01/1666")
-  static Parser parser = new Parser();
-  static {
+    static Date invalidDate = new Date("01/01/1666")
+    static Parser parser = new Parser();
+    static {
 
-    String.mixin(PVConvMixin)
-  }
+        String.mixin(PVConvMixin)
+    }
 
-  static def asType(String self, Class cls, StringBuffer sb = null) {
-    if (cls == Date) {
+    static def asType(String self, Class cls, StringBuffer sb = null) {
+        if (cls == Date) {
 
-      List<DateGroup> dateGroup = parser.parse(self as String)
-      Date retVal = null;
+            List<DateGroup> dateGroup = parser.parse(self as String)
+            Date retVal = null;
 
-      if (!dateGroup.isEmpty()) {
-        DateGroup dg = dateGroup.get(0)
+            if (!dateGroup.isEmpty()) {
+                DateGroup dg = dateGroup.get(0)
 
-        boolean isTimeInferred = dg.isTimeInferred();
+                boolean isTimeInferred = dg.isTimeInferred();
 
-        List<Date> dates = dg.getDates()
+                List<Date> dates = dg.getDates()
 
-        sb?.append("\n\nConverting data $self; found $dates")
-        dates.each {
+                sb?.append("\n\nConverting data $self; found $dates")
+                dates.each {
 
-          retVal = it
-          if (isTimeInferred) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(retVal);
-            calendar.set(Calendar.HOUR_OF_DAY, 1);
-            calendar.set(Calendar.MINUTE, 1);
-            calendar.set(Calendar.SECOND, 1);
-            calendar.set(Calendar.MILLISECOND, 0);
-            retVal = calendar.getTime();
+                    retVal = it
+                    if (isTimeInferred) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(retVal);
+                        calendar.set(Calendar.HOUR_OF_DAY, 1);
+                        calendar.set(Calendar.MINUTE, 1);
+                        calendar.set(Calendar.SECOND, 1);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        retVal = calendar.getTime();
 
-          }
-        }
-        if (retVal == null) {
-          sb?.append("\nCould not find a conversion for this date $self")
+                    }
+                }
+                if (retVal == null) {
+                    sb?.append("\nCould not find a conversion for this date $self")
 
-          return null;
-        }
-      }
-      return retVal;
+                    return null;
+                }
+            }
+            return retVal;
 
 
-    } else if (cls == PostCode) {
-      return new PostCode(self)
-    } else return convert(self, cls)
-  }
+        } else if (cls == PostCode) {
+            return new PostCode(self)
+        } else return convert(self, cls)
+    }
 
 
 }
@@ -148,538 +151,420 @@ String.mixin(PVConvMixin)
 
 
 def class PVValTemplate {
-  private static GStringTemplateEngine engine = new GStringTemplateEngine(PVValTemplate.class.getClassLoader())
+    private static GStringTemplateEngine engine = new GStringTemplateEngine(PVValTemplate.class.getClassLoader())
 
-  private static Map<String, Template> templateMap = new ConcurrentHashMap<>();
+    private static Map<String, Template> templateMap = new ConcurrentHashMap<>();
 
-  static Template getTemplate(String templateName) {
-    return templateMap.computeIfAbsent(templateName, { key -> engine.createTemplate(key) })
-  }
+    static Template getTemplate(String templateName) {
+        return templateMap.computeIfAbsent(templateName, { key -> engine.createTemplate(key) })
+    }
 
 }
 
 
 class MatchReq<T> {
 
+    private T attribNativeVal;
+    private String attribVal;
+    private Class attribType;
+    private String propName;
+    private String vertexName;
 
-  private double matchWeight;
-  private T attribNativeVal;
-  private String attribVal;
-  private Class attribType;
-  private String propName;
-  private String vertexName;
+    private String predicateStr;
+    private Closure predicate;
+    private Convert<T> conv;
+    private StringBuffer sb = null;
 
-  private String predicateStr;
-  private Closure predicate;
-  private Convert<T> conv;
-  private StringBuffer sb = null;
+    private boolean mandatoryInSearch;
+    private boolean excludeFromSearch;
+    private boolean excludeFromSubsequenceSearch
+    private boolean excludeFromUpdate;
 
-  private boolean mandatoryInSearch;
-  private boolean excludeFromSearch;
-  private boolean excludeFromSubsequenceSearch
-  private boolean excludeFromUpdate;
+    static Closure convertPredicateFromStr(String predicateStr) {
+        if ("eq".equals(predicateStr)) {
+            return P.&eq
+        } else if ("neq".equals(predicateStr)) {
+            return P.&neq
+        } else if ("gt".equals(predicateStr)) {
+            return P.&gt
+        } else if ("lt".equals(predicateStr)) {
+            return P.&lt
+        } else if ("gte".equals(predicateStr)) {
+            return P.&gte
+        } else if ("lte".equals(predicateStr)) {
+            return P.&lte
+        } else if ("textContains".equals(predicateStr)) {
+            return org.janusgraph.core.attribute.Text.&textContains
+        } else if ("textContainsPrefix".equals(predicateStr)) {
+            return org.janusgraph.core.attribute.Text.&textContainsPrefix
+        } else if ("textContainsRegex".equals(predicateStr)) {
+            return org.janusgraph.core.attribute.Text.&textContainsRegex
+        } else if ("textContainsFuzzy".equals(predicateStr)) {
+            return org.janusgraph.core.attribute.Text.&textContainsFuzzy
+        } else if ("textPrefix".equals(predicateStr)) {
+            return org.janusgraph.core.attribute.Text.&textPrefix
+        } else if ("textRegex".equals(predicateStr)) {
+            return org.janusgraph.core.attribute.Text.&textRegex
+        } else if ("textFuzzy".equals(predicateStr)) {
+            return org.janusgraph.core.attribute.Text.&textFuzzy
+        } else return P.eq;
 
-  static Closure convertPredicateFromStr(String predicateStr) {
-    if ("eq".equals(predicateStr)) {
-      return P.&eq
-    } else if ("neq".equals(predicateStr)) {
-      return P.&neq
-    } else if ("gt".equals(predicateStr)) {
-      return P.&gt
-    } else if ("lt".equals(predicateStr)) {
-      return P.&lt
-    } else if ("gte".equals(predicateStr)) {
-      return P.&gte
-    } else if ("lte".equals(predicateStr)) {
-      return P.&lte
-    } else if ("textContains".equals(predicateStr)) {
-      return org.janusgraph.core.attribute.Text.&textContains
-    } else if ("textContainsPrefix".equals(predicateStr)) {
-      return org.janusgraph.core.attribute.Text.&textContainsPrefix
-    } else if ("textContainsRegex".equals(predicateStr)) {
-      return org.janusgraph.core.attribute.Text.&textContainsRegex
-    } else if ("textContainsFuzzy".equals(predicateStr)) {
-      return org.janusgraph.core.attribute.Text.&textContainsFuzzy
-    } else if ("textPrefix".equals(predicateStr)) {
-      return org.janusgraph.core.attribute.Text.&textPrefix
-    } else if ("textRegex".equals(predicateStr)) {
-      return org.janusgraph.core.attribute.Text.&textRegex
-    } else if ("textFuzzy".equals(predicateStr)) {
-      return org.janusgraph.core.attribute.Text.&textFuzzy
-    } else return P.&eq;
+    }
 
-  }
+    MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromSubsequenceSearch = false, boolean excludeFromUpdate = false, boolean mandatoryInSearch = false, StringBuffer sb = null) {
+        this.attribVal = attribVals
+        this.attribType = attribType
 
-  MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromSubsequenceSearch = false, boolean excludeFromUpdate = false, boolean mandatoryInSearch = false, double matchWeight, StringBuffer sb = null) {
-    this.attribVal = attribVals
-    this.attribType = attribType
+        this.propName = propName
+        this.vertexName = vertexName
+        this.conv = new Convert<>(attribType)
+        this.predicateStr = predicateStr;
+        this.predicate = convertPredicateFromStr(predicateStr)
 
-    this.propName = propName
-    this.vertexName = vertexName
-    this.conv = new Convert<>(attribType)
-    this.predicateStr = predicateStr;
-    this.predicate = convertPredicateFromStr(predicateStr)
+        this.sb = sb;
 
-    this.sb = sb;
+        this.excludeFromSearch = excludeFromSearch
+        this.excludeFromSubsequenceSearch = excludeFromSubsequenceSearch
+        this.excludeFromUpdate = excludeFromUpdate
+        this.mandatoryInSearch = mandatoryInSearch
 
-    this.excludeFromSearch = excludeFromSearch
-    this.excludeFromSubsequenceSearch = excludeFromSubsequenceSearch
-    this.excludeFromUpdate = excludeFromUpdate
-    this.mandatoryInSearch = mandatoryInSearch
-    this.matchWeight = matchWeight
+        sb?.append("\n In MatchReq($attribVals, $attribType, $propName, $vertexName, $predicateStr)")
+        convertToNativeFormat()
+    }
 
-    sb?.append("\n In MatchReq($attribVals, $attribType, $propName, $vertexName, $predicateStr)")
-    convertToNativeFormat()
-  }
+    // int compareTo(Object other) {
+    //     this.propName <=> other.propName
+    // }
 
-  // int compareTo(Object other) {
-  //     this.propName <=> other.propName
-  // }
-
-  protected void convertToNativeFormat() {
+    protected void convertToNativeFormat() {
 
 //        Convert.fromString("asdf", this.attribType);
 
-    if (this.attribType == String) {
-      this.attribNativeVal = this.attribVal;
-    } else {
-      this.attribNativeVal = conv.fromString(this.attribVal, this.attribType, this.sb)
+        if (this.attribType == String) {
+            this.attribNativeVal = this.attribVal;
+        } else {
+            this.attribNativeVal = conv.fromString(this.attribVal, this.attribType, this.sb)
 
 
-    }
-  }
-
-  boolean getMandatoryInSearch() {
-    return mandatoryInSearch
-  }
-
-  void setMandatoryInSearch(boolean mandatoryInSearch) {
-    this.mandatoryInSearch = mandatoryInSearch
-  }
-
-  boolean getExcludeFromSubsequenceSearch() {
-    return excludeFromSubsequenceSearch
-  }
-
-  void setExcludeFromSubsequenceSearch(boolean excludeFromSubsequenceSearch) {
-    this.excludeFromSubsequenceSearch = excludeFromSubsequenceSearch
-  }
-
-  boolean getExcludeFromSearch() {
-    return excludeFromSearch
-  }
-
-  void setExcludeFromSearch(boolean excludeFromSearch) {
-    this.excludeFromSearch = excludeFromSearch
-  }
-
-
-  boolean getExcludeFromUpdate() {
-    return excludeFromUpdate
-  }
-
-  void setExcludeFromUpdate(boolean excludeFromUpdate) {
-    this.excludeFromUpdate = excludeFromUpdate
-  }
-
-  T getAttribNativeVal() {
-    return attribNativeVal
-  }
-
-  void setAttribNativeVal(T attribNativeVal) {
-    this.attribNativeVal = attribNativeVal
-  }
-
-  String getAttribVal() {
-    return attribVal
-  }
-
-  void setAttribVal(String attribVal) {
-    this.attribVal = attribVal
-  }
-
-  Class getAttribType() {
-    return attribType
-  }
-
-  void setAttribType(Class attribType) {
-    this.attribType = attribType
-  }
-
-  String getPropName() {
-    return propName
-  }
-
-  void setPropName(String propName) {
-    this.propName = propName
-  }
-
-  String getVertexName() {
-    return vertexName
-  }
-
-  void setVertexName(String vertexName) {
-    this.vertexName = vertexName
-  }
-
-  String getPredicateStr() {
-    return predicateStr;
-  }
-
-  Closure getPredicate() {
-    return predicate
-  }
-
-  void setPredicate(Closure predicate) {
-    this.predicate = predicate
-  }
-
-  double getMatchWeight() {
-    return matchWeight
-  }
-
-  void setMatchWeight(double matchWeight) {
-    this.matchWeight = matchWeight
-  }
-
-  @Override
-  String toString() {
-    return propName + '=' + attribNativeVal
-  }
-}
-
-static Set<List<MatchReq>> subsequencesUniqueTypes(List<MatchReq> items) {
-  Set<List<MatchReq>> ans = new HashSet<>();
-
-  HashSet next;
-  for (Iterator iter = items.iterator(); iter.hasNext(); ans = next) {
-    MatchReq h = iter.next();
-    next = new HashSet();
-    Iterator answerIterator = ans.iterator();
-
-    while (answerIterator.hasNext()) {
-      List<MatchReq> it = (List) answerIterator.next();
-      List<MatchReq> sublist = new ArrayList<>(it);
-      sublist.add(h);
-
-      Set<String> types = new HashSet<>()
-      boolean hasDups = false;
-      int ilen = sublist.size();
-      for (int i = 0; i < ilen; i++) {
-        MatchReq req = sublist.get(i);
-        if (!types.add(req.propName)) {
-          hasDups = true;
-          break;
         }
-      }
-      if (!hasDups) {
-        next.add(sublist);
-      }
     }
 
-    next.addAll(ans);
-    List<MatchReq> hlist = new ArrayList<>();
-    hlist.add(h);
-    next.add(hlist);
-  }
+    boolean getMandatoryInSearch() {
+        return mandatoryInSearch
+    }
 
-  return ans;
+    void setMandatoryInSearch(boolean mandatoryInSearch) {
+        this.mandatoryInSearch = mandatoryInSearch
+    }
+
+    boolean getExcludeFromSubsequenceSearch() {
+        return excludeFromSubsequenceSearch
+    }
+
+    void setExcludeFromSubsequenceSearch(boolean excludeFromSubsequenceSearch) {
+        this.excludeFromSubsequenceSearch = excludeFromSubsequenceSearch
+    };
+
+    boolean getExcludeFromSearch() {
+        return excludeFromSearch
+    }
+
+    void setExcludeFromSearch(boolean excludeFromSearch) {
+        this.excludeFromSearch = excludeFromSearch
+    }
+
+
+    boolean getExcludeFromUpdate() {
+        return excludeFromUpdate
+    }
+
+    void setExcludeFromUpdate(boolean excludeFromUpdate) {
+        this.excludeFromUpdate = excludeFromUpdate
+    }
+
+    T getAttribNativeVal() {
+        return attribNativeVal
+    }
+
+    void setAttribNativeVal(T attribNativeVal) {
+        this.attribNativeVal = attribNativeVal
+    }
+
+    String getAttribVal() {
+        return attribVal
+    }
+
+    void setAttribVal(String attribVal) {
+        this.attribVal = attribVal
+    }
+
+    Class getAttribType() {
+        return attribType
+    }
+
+    void setAttribType(Class attribType) {
+        this.attribType = attribType
+    }
+
+    String getPropName() {
+        return propName
+    }
+
+    void setPropName(String propName) {
+        this.propName = propName
+    }
+
+    String getVertexName() {
+        return vertexName
+    }
+
+    void setVertexName(String vertexName) {
+        this.vertexName = vertexName
+    }
+
+    String getPredicateStr() {
+        return predicateStr;
+    }
+
+    Closure getPredicate() {
+        return predicate
+    }
+
+    void setPredicate(Closure predicate) {
+        this.predicate = predicate
+    }
+
+    @Override
+    String toString() {
+        return propName + '=' + attribNativeVal
+    }
 }
 
-
-def runIndexQuery(String idx, String value, int maxHitsPerType, MatchReq matchReq, Map<Long, AtomicDouble> indexQueryResults, StringBuffer sb) {
-
-
-  JanusGraphIndexQuery query = (graph as JanusGraph)?.
-    indexQuery(idx, value);
-
-  double maxScoreForRawIdx = 0;
-  Map<Long, Double> idxQueryRes = new HashMap<>();
-
-  query?.limit(maxHitsPerType)?.vertexStream()?.forEach { result ->
-    double score = result.score
-    idxQueryRes.put((Long) result.element.id(), score);
-    maxScoreForRawIdx = Math.max(maxScoreForRawIdx, score);
-  }
-  Long total = query.vertexTotals();
-  sb?.append("\n\nIn runIndexQuery: About to call idxRaw: idx: ${idx}; value = ${value}; total=${total} maxHitsPerType=${maxHitsPerType}; idxQueryRes = ${idxQueryRes}, maxScoreForRawIdx = $maxScoreForRawIdx")
-
-  idxQueryRes.forEach { vId, score ->
-    sb?.append("\nIn runIndexQuery:")?.append(vId)?.append(": ")?.append(score);
-    AtomicDouble totalScore = indexQueryResults.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
-    totalScore.addAndGet(matchReq.matchWeight * (score / maxScoreForRawIdx))
-
-  }
-
-//  OptionalDouble  optionalDoubleMaxScoreForRawIdx = resultStream.mapToDouble{val -> val.score}.max();
-//
-//  optionalDoubleMaxScoreForRawIdx.ifPresent({  maxScore ->
-//    sb?.append("\nmax Score for ${value} is $maxScore")
-//
-//    resultStream.forEach { JanusGraphIndexQuery.Result<JanusGraphVertex> result ->
-//      Long vId = (Long) result.element.id();
-//      double score = result.score
-//      sb?.append("\n")?.append(result.getElement().id())?.append(": ")?.append(result.getScore());
-//      AtomicDouble totalScore = indexQueryResults.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
-//      totalScore.addAndGet(matchReq.matchWeight * (score / maxScore))
-//
-//    }
-//  })
-
-
-}
 
 def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
 
 
-  Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName = new HashMap<>();
+    HashMap<String, List<Long>> vertexListsByVertexName = new HashMap();
 
-  Map<String, List<MatchReq>> matchReqByVertexName = new HashMap<>();
+    HashMap<String, List<MatchReq>> matchReqByVertexName = new HashMap<>();
 
-  matchReqs.each {
-    List<MatchReq> matchReqList = matchReqByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() });
-    matchReqList.push(it)
-    vertexScoreMapByVertexName.computeIfAbsent(it.vertexName, { k -> new HashMap<>() })
-  }
+    matchReqs.each {
+        List<MatchReq> matchReqList = matchReqByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() });
+        matchReqList.push(it)
+        vertexListsByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() })
 
-
-  matchReqByVertexName.each { k, v ->
-
-    def gtrav = gTrav
-
-    // LPPM - must do a deep copy here, because unique is a bit nasty and actually changes the
-    // original record.
-    def vFiltered = [];
-
-    vFiltered.addAll(v.findAll { it2 -> !(it2.excludeFromSearch) });
-
-    def vCopy2 = [];
-    vCopy2.addAll(vFiltered);
-
-
-    def uniqueProps = vCopy2.unique { a, b -> a.propName <=> b.propName }
-
-    int maxExpectedSizeOfQueries = uniqueProps.size()
-
-
-    def mandatoryFields = uniqueProps.findAll { it2 -> it2.mandatoryInSearch }
-
-    def mandatoryFieldPropNames = []
-    mandatoryFields.each { it2 ->
-      mandatoryFieldPropNames << it2.propName
     }
 
 
-    Set<List<MatchReq>> subs = subsequencesUniqueTypes(vFiltered)
-    // LPPM - 08/02/2019 - subsequences was creating way too many entries;
-    // the alternative above only gives subsequences with unique types.
-    // here is the original:
-    // vFiltered.subsequences()
+    matchReqByVertexName.each { k, v ->
+
+        def gtrav = gTrav
+
+        // LPPM - must do a deep copy here, because unique is a bit nasty and actually changes the
+        // original record.
+        def vFiltered = [];
+
+        vFiltered.addAll(v.findAll { it2 -> !(it2.excludeFromSearch) });
+
+        def vCopy2 = [];
+        vCopy2.addAll(vFiltered);
+
+
+        def uniqueProps = vCopy2.unique { a, b -> a.propName <=> b.propName }
+
+        int maxExpectedSizeOfQueries = uniqueProps.size()
+
+
+        def mandatoryFields = uniqueProps.findAll { it2 -> it2.mandatoryInSearch }
+
+        def mandatoryFieldPropNames = []
+        mandatoryFields.each { it2 ->
+            mandatoryFieldPropNames << it2.propName
+        }
+
+
+
+        def subs = vFiltered.subsequences()
 
 //        expectedSizeOfQueries = expectedSizeOfQueries > 2? expectedSizeOfQueries - 1: expectedSizeOfQueries
 
-    // LPPM - 23/08/2018
-    // NOTICE: To get an accurate answer, we need to get this to only do a  match across properties with
-    // relatively few hits; otherwise, with large datasets, the other subsequences of smaller
-    // sizes may return loads of false positives, and many false negatives (e.g. if a person lives
-    // in London, we may end up with loads of hits for London, and with the cap, we may exclude the real
-    // match).  To achieve this, we get all the match requests that have a excludeFromSearch set to false,
-    // for the sequences with the full number of props, and then, for subsequences with smaller values, we
-    // only include entries that have excludeFromSubsequenceSearch set to false.
-
-//    double maxScore = 0;
-
-    subs.each { it ->
-
-      // WARNING: it.unique changes the list; DONT call it as the first arg in the if statement below, as it
-      // will taint the list !
-      // Also, we should always use this lambda
-      // comparator here rather than at the class so
-      // the subsequences can do its job without repetition
-      int currSize = it.size();
-
-      if (currSize == it.unique { entry -> entry.propName }.size()) {
+        // LPPM - 23/08/2018
+        // NOTICE: To get an accurate answer, we need to get this to only do a  match across properties with
+        // relatively few hits; otherwise, with large datasets, the other subsequences of smaller
+        // sizes may return loads of false positives, and many false negatives (e.g. if a person lives
+        // in London, we may end up with loads of hits for London, and with the cap, we may exclude the real
+        // match).  To achieve this, we get all the match requests that have a excludeFromSearch set to false,
+        // for the sequences with the full number of props, and then, for subsequences with smaller values, we
+        // only include entries that have excludeFromSubsequenceSearch set to false.
 
 
-        boolean checkForMandatoryFields = mandatoryFieldPropNames.size() > 0;
+        subs.each { it ->
 
-        boolean mandatoryFieldChecksOK = true;
-        if (checkForMandatoryFields) {
-          def currFieldPropNames = []
-          it.each { it2 ->
-            currFieldPropNames << it2.propName
-          }
+            // WARNING: it.unique changes the list; DONT call it as the first arg!
+            // Also, we should always this lambda
+            // comparator here rather than at the class so
+            // the subsequences can do its job without repetition
+            int currSize = it.size();
 
-          mandatoryFieldChecksOK = currFieldPropNames.containsAll(mandatoryFieldPropNames);
+            if (currSize == it.unique { entry -> entry.propName }.size()) {
 
-        }
-        if (mandatoryFieldChecksOK) {
+                boolean checkForMandatoryFields = mandatoryFieldPropNames.size() > 0;
 
-          def searchableItems = it.findAll { it2 -> (!(currSize < maxExpectedSizeOfQueries && it2.excludeFromSubsequenceSearch)) }
+                boolean mandatoryFieldChecksOK = true;
+                if (checkForMandatoryFields) {
+                    def currFieldPropNames = []
+                    it.each { it2 ->
+                        currFieldPropNames << it2.propName
+                    }
 
-          Map<Long, AtomicDouble> indexQueryResults = new HashMap<>();
-          if (searchableItems.size() > 0) {
-            boolean atLeastOneTraversal = false;
-            double standardScore = 0;
-            searchableItems.each { matchReq ->
+                    mandatoryFieldChecksOK = currFieldPropNames.containsAll(mandatoryFieldPropNames);
 
-              String predicateStr = matchReq.predicateStr as String;
-              if (predicateStr.startsWith("idx:")) {
-                String[] idxQuery = (predicateStr).split(':');
-                String idx = idxQuery[1];
-
-                String value = "v.\"${matchReq.propName}\":${matchReq.attribNativeVal}"
-
-                runIndexQuery(idx, value, maxHitsPerType, matchReq, indexQueryResults, sb);
-
-
-              } else if (predicateStr.startsWith("idxRaw:")) {
-
-                String[] idxQuery = (predicateStr).split(':');
-                String idx = idxQuery[1];
-
-                String value = matchReq.attribNativeVal.toString();
-                value = value?.replaceAll(Pattern.quote("v.'"), 'v."');
-                value = value?.replaceAll(Pattern.quote("':"), '":');
-
-                runIndexQuery(idx, value, maxHitsPerType, matchReq, indexQueryResults, sb);
-
-
-              } else {
-                if (!atLeastOneTraversal) {
-
-                  sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
-                  gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
-                  atLeastOneTraversal = true;
                 }
-                standardScore += matchReq.matchWeight;
+                if (mandatoryFieldChecksOK) {
 
-                gtrav = gtrav.has(matchReq.propName, matchReq.predicate(matchReq.attribNativeVal)).clone()
-                sb?.append("\n     .has('")
-                  ?.append(matchReq.propName)?.append("',")
-                  ?.append(matchReq.predicate)?.append(",'")?.append(matchReq.attribNativeVal)?.append("')")
+                    def searchableItems = it.findAll { it2 -> (!(currSize < maxExpectedSizeOfQueries && it2.excludeFromSubsequenceSearch)) }
 
-              }
+                    List<Long> indexQueryResults = new LinkedList<>();
+                    if (searchableItems.size() > 0) {
+                        sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
+                        gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
+
+                        searchableItems.each { it2 ->
+
+                            String predicateStr = it2.predicateStr as String;
+                            if (predicateStr.startsWith ("idx:"))
+                            {
+                                String[] idxQuery = (predicateStr).split(':');
+                                String idx = idxQuery[1];
+
+                                String value = "v.\"${it2.propName}\":${it2.attribNativeVal}"
+
+//                                indexQueryResults.addAll((graph as JanusGraph).indexQuery(idx, value).vertexStream().mapToLong({ result -> result.getElement().longId()}).collect(Collectors.toList()));
+                                for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
+                                    indexQueryResults.add(result.getElement().longId());
+                                }
+                            }
+                            else if (predicateStr.startsWith ("idxRaw:"))
+                            {
+                                String[] idxQuery = (predicateStr).split(':');
+                                String idx = idxQuery[1];
+
+                                String value = it2.attribNativeVal.toString();
+
+//                                indexQueryResults.addAll((graph as JanusGraph).indexQuery(idx, value).vertexStream().mapToLong({ result -> result.getElement().longId()}).collect(Collectors.toList()));
+                                for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
+                                    indexQueryResults.add(result.getElement().longId());
+                                }
+                            }
+
+                            else
+                            {
+                                gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
+                                sb?.append("\n     .has('")?.append(it2.propName)?.append("',")
+                                        ?.append(it2.predicate)?.append(",'")?.append(it2.attribNativeVal)?.append("')")
+
+                            }
+
+
+
+
+                        }
+                        vertexListsByVertexName.get(k).addAll(gtrav.range(0, maxHitsPerType).id().toList() as Long[])
+                        if (indexQueryResults.size() > 0){
+                            vertexListsByVertexName.get(k).addAll(indexQueryResults.subList(0,maxHitsPerType))
+
+                        }
+                        sb?.append("\n $it")
+
+                    }
+                }
 
 
             }
-            // Vertex ID vs Score
-            Map<Long, AtomicDouble> vertexScoreMap = vertexScoreMapByVertexName.get(k);
 
-            if (atLeastOneTraversal) {
-
-              (gtrav.range(0, maxHitsPerType).id().toList() as Long[]).each { vId ->
-                AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
-
-                // Get rid of any index scores here in case we have any mixed entries;
-                AtomicDouble idxScores = indexQueryResults.remove(vId);
-                double idxScore = idxScores == null ? 0 : idxScores.get();
-                totalScore.set(Math.max(totalScore.get(), standardScore + idxScore))
-              }
-            }
-            // Look for any entries where the only matches were index scores;
-
-            if (indexQueryResults.size() > 0) {
-
-              indexQueryResults.each { vId, score ->
-                AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
-                totalScore.set(Math.max(totalScore.get(), score.get()))
-              }
-
-            }
-
-            sb?.append("\n $it")
-
-//            maxScore += standardScore;
-//            maxScore += idxQueryScore;
-          }
         }
 
+        sb?.append('\n')?.append(vertexListsByVertexName)?.append("\n")
 
-      }
 
     }
 
-//    maxScoresByVertexName.get(k).addAndGet(maxScore)
-
-    sb?.append('\n')?.append(vertexScoreMapByVertexName)?.append("\n")
 
 
-  }
 
-
-  return [vertexScoreMapByVertexName, matchReqByVertexName];
+    return [vertexListsByVertexName, matchReqByVertexName];
 
 }
 
 
-def getTopHits(Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName, String targetType, double scoreThreshold, StringBuffer sb = null) {
-  def ids = vertexScoreMapByVertexName.get(targetType) as Map<Long, AtomicDouble>;
+def getTopHits(HashMap<String, List<Long>> vertexListsByVertexName, String targetType, int countThreshold, StringBuffer sb = null) {
+    def ids = vertexListsByVertexName.get(targetType) as Long[];
 
-  return getTopHits(ids, scoreThreshold, sb)
-
-}
-
-
-def getTopHits(Map<Long, AtomicDouble> counts, final double scoreThreshold, StringBuffer sb = null) {
-
-//    Map<Long, Integer> counts = ids.countBy { it }
-  Map<Long, AtomicDouble> countList = counts.findAll { entry -> entry.value.get() >= scoreThreshold }
-//
-//    List<Long> retVal = new ArrayList<>()
-//    counts.each { k, v ->
-//        if (v >= scoreThreshold) {
-//            retVal.add(k)
-//        }
-//
-//    }
-
-
-  return countList
+    return getTopHits(ids, countThreshold, sb)
 
 }
 
 
-Map<Long, AtomicDouble> getOtherTopHits(Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName, String targetType, double scoreThreshold, StringBuffer sb = null) {
+def getTopHits(Long[] ids, int countThreshold, StringBuffer sb = null) {
 
-  Map<Long, AtomicDouble> otherIds = new HashMap<>();
+    Map<Long, Integer> counts = ids.countBy { it }
 
-  vertexScoreMapByVertexName.each { k, v ->
-    if (k != targetType) {
-      otherIds.putAll(getTopHits(v, scoreThreshold, sb))
+    counts = counts.sort { a, b -> b.value <=> a.value }
+
+    List<Long> retVal = new ArrayList<>()
+    counts.each { k, v ->
+        if (v >= countThreshold) {
+            retVal.add(k)
+        }
+
     }
-  }
 
-  return otherIds;
+
+    return retVal
 
 }
 
 
-def findMatchingNeighboursFromSingleRequired(gTrav = g, Long requiredTypeId, Map<Long, AtomicDouble> otherIds, StringBuffer sb = null) {
+def getOtherTopHits(Map<String, List<Long>> vertexListsByVertexName, String targetType, int countThreshold, StringBuffer sb = null) {
+
+    Set<Long> otherIdsSet = new HashSet<>();
+
+    vertexListsByVertexName.each { k, v ->
+        if (k != targetType) {
+            otherIdsSet.addAll(getTopHits(v as Long[], countThreshold, sb))
+        }
+    }
+
+    return otherIdsSet;
+
+}
 
 
-  def foundIds = gTrav.V(otherIds.keySet())
-    .both()
-    .hasId(requiredTypeId).id()
-    .toSet() as Long[]
+def findMatchingNeighboursFromSingleRequired(gTrav = g, Long requiredTypeId, Set<Long> otherIds, StringBuffer sb = null) {
 
-  sb?.append("\n in findMatchingNeighboursFromSingleRequired() - foundIds = $foundIds")
 
-  return foundIds
+    def foundIds = gTrav.V(otherIds)
+            .both()
+            .hasId(requiredTypeId).id()
+            .toSet() as Long[]
+
+    sb?.append("\n in findMatchingNeighboursFromSingleRequired() - foundIds = $foundIds")
+
+    return foundIds
 
 }
 
 def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> otherIds, StringBuffer sb = null) {
 
 
-  def foundIds = gTrav.V(otherIds)
-    .both()
-    .hasId(within(requiredTypeIds)).id()
-    .toSet() as Long[]
+    def foundIds = gTrav.V(otherIds)
+            .both()
+            .hasId(within(requiredTypeIds)).id()
+            .toSet() as Long[]
 
-  sb?.append("\n$foundIds")
+    sb?.append("\n$foundIds")
 
-  return foundIds
+    return foundIds
 
 }
 
@@ -687,312 +572,294 @@ def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> other
 
  */
 
-void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String predicate, boolean excludeFromSearch, boolean excludeFromSubsequenceSearch, boolean excludeFromUpdate, boolean mandatoryInSearch, String postProcessor, String postProcessorVar, double matchWeight, StringBuffer sb = null) {
+void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String predicate, boolean excludeFromSearch, boolean excludeFromSubsequenceSearch, boolean excludeFromUpdate, boolean mandatoryInSearch, String postProcessor, String postProcessorVar, StringBuffer sb = null) {
 
-  MatchReq mreq = null;
+    MatchReq mreq = null;
 
-  if (nativeType == LocationAddress) {
+    if (nativeType == LocationAddress) {
 
-    LocationAddress addr = LocationAddress.fromString(propValItem as String);
+        LocationAddress addr = LocationAddress.fromString(propValItem as String);
 
-    Class nativeTypeAddrParts = String.class;
+        Class nativeTypeAddrParts = String.class;
 
-    addr.tokens.each { key, val ->
+        addr.tokens.each { key, val ->
 
-      val.each { it ->
+            val.each { it ->
 
 
-        binding.put(postProcessorVar ?: "it", it);
+                binding.put(postProcessorVar ?: "it", it);
+                String processedVal = (postProcessor != null) ?
+                        PVValTemplate.getTemplate((String) postProcessor).make(binding) :
+                        it;
+
+
+                mreq = new MatchReq(
+                        (String) processedVal as String
+                        , nativeTypeAddrParts
+                        , (String) "${propName}.${key}" as String
+                        , (String) vertexName
+                        , (String) predicate
+                        , (boolean) excludeFromSearch
+                        , (boolean) excludeFromSubsequenceSearch
+                        , (boolean) excludeFromUpdate
+                        , (boolean) mandatoryInSearch
+                        , sb
+                );
+
+                if (mreq?.attribNativeVal != null) {
+                    matchReqs.add(mreq)
+
+                }
+            }
+
+        }
+
+
+    } else {
+
+        binding.put(postProcessorVar ?: "it", propValItem);
+
         String processedVal = (postProcessor != null) ?
-          PVValTemplate.getTemplate((String) postProcessor).make(binding) :
-          it;
-
+                PVValTemplate.getTemplate((String) postProcessor).make(binding) :
+                propValItem;
 
         mreq = new MatchReq(
-          (String) processedVal as String
-          , nativeTypeAddrParts
-          , (String) "${propName}.${key}" as String
-          , (String) vertexName
-          , (String) predicate
-          , (boolean) excludeFromSearch
-          , (boolean) excludeFromSubsequenceSearch
-          , (boolean) excludeFromUpdate
-          , (boolean) mandatoryInSearch
-          , (double) matchWeight
-          , sb
+                (String) processedVal as String
+                , nativeType
+                , (String) propName
+                , (String) vertexName
+                , (String) predicate
+                , (boolean) excludeFromSearch
+                , (boolean) excludeFromSubsequenceSearch
+                , (boolean) excludeFromUpdate
+                , (boolean) mandatoryInSearch
+                , sb
+
         );
 
         if (mreq?.attribNativeVal != null) {
-          matchReqs.add(mreq)
+            matchReqs.add(mreq)
 
         }
-      }
-
     }
-
-
-  } else {
-
-    binding.put(postProcessorVar ?: "it", propValItem);
-
-    String processedVal = (postProcessor != null) ?
-      PVValTemplate.getTemplate((String) postProcessor).make(binding) :
-      propValItem;
-
-    mreq = new MatchReq(
-      (String) processedVal as String
-      , nativeType
-      , (String) propName
-      , (String) vertexName
-      , (String) predicate
-      , (boolean) excludeFromSearch
-      , (boolean) excludeFromSubsequenceSearch
-      , (boolean) excludeFromUpdate
-      , (boolean) mandatoryInSearch
-      , (double) matchWeight
-      , sb
-
-    );
-
-    if (mreq?.attribNativeVal != null) {
-      matchReqs.add(mreq)
-
-    }
-  }
 
 
 }
 
-def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String rulesJsonStr, Double percentageThreshold, StringBuffer sb = null) {
-  def binding = currRecord
+def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String rulesJsonStr, StringBuffer sb = null) {
+    def binding = currRecord
 
-  binding.put("original_request", JsonOutput.prettyPrint(JsonOutput.toJson(currRecord)));
+    binding.put("original_request", JsonOutput.prettyPrint(JsonOutput.toJson(currRecord)));
 
-  def rules = parsedRules
-  Map<String, AtomicDouble> maxScoresByVertexName = new HashMap<>();
-  Map<String, Double> percentageThresholdByVertexName = new HashMap<>();
+    def rules = parsedRules
 
-  List<MatchReq> matchReqs = new ArrayList<>(rules.vertices.size() as int)
+    List<MatchReq> matchReqs = new ArrayList<>(rules.vertices.size() as int)
 
-  JsonSlurper slurper = new JsonSlurper()
+    JsonSlurper slurper = new JsonSlurper()
 
-  rules.vertices.each { vtx ->
+    rules.vertices.each { vtx ->
 
-    String vertexName = vtx.label
-    AtomicDouble maxScore = maxScoresByVertexName.computeIfAbsent(vertexName, { k -> new AtomicDouble(0) })
-    percentageThresholdByVertexName.computeIfAbsent(vertexName, { k -> new Double((double) (vtx.percentageThreshold == null ? percentageThreshold : vtx.percentageThreshold)) })
-//        int minSizeSubsequences = vtx.minSizeSubsequences ?: -1;
-    vtx.props.each { prop ->
+        String vertexName = vtx.label
+        int minSizeSubsequences = vtx.minSizeSubsequences ?: -1;
+        vtx.props.each { prop ->
 
-      Class nativeType;
+            Class nativeType;
 
-      if (prop.type == null) {
-        nativeType = String.class
-      } else {
-        nativeType = Class.forName((String) prop.type)
-      }
+            if (prop.type == null) {
+                nativeType = String.class
+            } else {
+                nativeType = Class.forName((String) prop.type)
+            }
 
-      String propName = prop.name
+            String propName = prop.name
 
-      double weight = ((prop.matchWeight == null) ? 1.0 : prop.matchWeight);
-      if (!prop.excludeFromSearch) {
-        maxScore.addAndGet(weight);
-
-      }
-
-      String propVal = PVValTemplate.getTemplate((String) prop.val).make(binding)
-      if (propVal != null && !"null".equals(propVal)) {
-        String predicate = prop.predicate ?: "eq"
+            String propVal = PVValTemplate.getTemplate((String) prop.val).make(binding)
+            if (propVal != null && !"null".equals(propVal)) {
+                String predicate = prop.predicate ?: "eq"
 
 
-        if (nativeType.isArray()) {
+                if (nativeType.isArray()) {
 
-          nativeType = nativeType.getComponentType();
+                    nativeType = nativeType.getComponentType();
 
-          def propVals = slurper.parseText(propVal)
-
-
-          propVals.each { propValItem ->
-
-            addNewMatchRequest(
-              binding
-              , matchReqs
-              , (String) propValItem as String
-              , nativeType
-              , (String) propName
-              , (String) vertexName
-              , (String) predicate
-              , (boolean) prop.excludeFromSearch
-              , (boolean) prop.excludeFromSubsequenceSearch
-              , (boolean) prop.excludeFromUpdate
-              , (boolean) prop.mandatoryInSearch
-              , (String) prop.postProcessor ?: null
-              , (String) prop.postProcessorVar ?: null
-              , (double) weight
-              , sb
-            );
+                    def propVals = slurper.parseText(propVal)
 
 
-          }
+                    propVals.each { propValItem ->
+
+                        addNewMatchRequest(
+                                binding
+                                , matchReqs
+                                , (String) propValItem as String
+                                , nativeType
+                                , (String) propName
+                                , (String) vertexName
+                                , (String) predicate
+                                , (boolean) prop.excludeFromSearch
+                                , (boolean) prop.excludeFromSubsequenceSearch
+                                , (boolean) prop.excludeFromUpdate
+                                , (boolean) prop.mandatoryInSearch
+                                , (String) prop.postProcessor ?: null
+                                , (String) prop.postProcessorVar ?: null
+                                , sb
+                        );
 
 
-        } else {
-          addNewMatchRequest(
-            binding
-            , matchReqs
-            , (String) propVal
-            , nativeType
-            , (String) propName
-            , (String) vertexName
-            , (String) predicate
-            , (boolean) prop.excludeFromSearch
-            , (boolean) prop.excludeFromSubsequenceSearch
-            , (boolean) prop.excludeFromUpdate
-            , (boolean) prop.mandatoryInSearch
-            , (String) prop.postProcessor ?: null
-            , (String) prop.postProcessorVar ?: null
-            , (double) ((prop.matchWeight == null) ? 1.0 : prop.matchWeight)
-            , sb
-          );
+                    }
+
+
+                } else {
+                    addNewMatchRequest(
+                            binding
+                            , matchReqs
+                            , (String) propVal
+                            , nativeType
+                            , (String) propName
+                            , (String) vertexName
+                            , (String) predicate
+                            , (boolean) prop.excludeFromSearch
+                            , (boolean) prop.excludeFromSubsequenceSearch
+                            , (boolean) prop.excludeFromUpdate
+                            , (boolean) prop.mandatoryInSearch
+                            , (String) prop.postProcessor ?: null
+                            , (String) prop.postProcessorVar ?: null
+                            , sb
+                    );
+                }
+
+
+            }
+
+
         }
 
 
-      }
+    }
+    return matchReqs;
+
+}
+
+
+def getTopHit(g, Long[] potentialHitIDs, int numHitsRequiredForMatch, HashMap<String, List<Long>> matchIdsByVertexType, String vertexTypeStr, Map<String, List<EdgeRequest>> edgeReqsByVertexType, StringBuffer sb = null) {
+
+    sb?.append("\nIn getTopHit() -- vertType = ${vertexTypeStr} ; potentialHitIDs = ${potentialHitIDs} ")
+    Long[] topHits = getTopHits(potentialHitIDs as Long[], numHitsRequiredForMatch, sb)
+
+    sb?.append("\nIn getTopHit() -- vertType = ${vertexTypeStr} ; topHits = ${topHits} ")
+
+    Long topHit = null
+    Integer numEdgesRequired = edgeReqsByVertexType.get(vertexTypeStr)?.size()
+
+    if (numEdgesRequired != null && numEdgesRequired > 0 && topHits.size() > 1) {
+        // Sanity check: we now have one or more candidates, so let's check
+        // if this has conns to other vertices in our little world
+        def otherTopHits = getOtherTopHits(matchIdsByVertexType, vertexTypeStr, 1, sb)
+
+        int ilen = topHits.size()
+
+        for (int i = 0; i < ilen; i++) {
+
+            Long[] tempTopHits = findMatchingNeighboursFromSingleRequired(g, topHits[i] as Long, otherTopHits as Set<Long>, sb)
+            if (tempTopHits?.size() > 0) {
+                topHit = tempTopHits[0]
+                break
+            }
+        }
 
 
     }
+    else {
+        if (topHits.size() > 0) {
+            topHit = topHits[0]
+        }
 
-
-  }
-  return [matchReqs, maxScoresByVertexName, percentageThresholdByVertexName];
-
-}
-
-
-def getTopHitsWithEdgeCheck(g,
-                            Map<Long, AtomicDouble> potentialHitIDs,
-                            double scoreThreshold,
-                            HashMap<String, Map<Long, AtomicDouble>> matchIdsByVertexType,
-                            String vertexTypeStr,
-                            Map<String, List<EdgeRequest>> edgeReqsByVertexType,
-                            StringBuffer sb = null) {
-
-  sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; potentialHitIDs = ${potentialHitIDs} scoreThreshold = ${scoreThreshold}")
-  Map<Long, AtomicDouble> topHits = getTopHits(potentialHitIDs, scoreThreshold, sb)
-
-  sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; topHits = ${topHits} ")
-
-  Integer numEdgesRequired = edgeReqsByVertexType.get(vertexTypeStr)?.size()
-
-  if (numEdgesRequired != null && numEdgesRequired > 0 && topHits.size() > 1) {
-    // Sanity check: we now have one or more candidates, so let's check
-    // if this has conns to other vertices in our little world
-    Map<Long, AtomicDouble> otherTopHits = getOtherTopHits(matchIdsByVertexType, vertexTypeStr, scoreThreshold, sb)
-
-
-    Map<Long, AtomicDouble> topHitsFiltered = new HashMap<Long, AtomicDouble>();
-
-    topHitsFiltered.putAll(topHits.findAll { topHitVid, topHitScore ->
-      Long[] tempTopHits = findMatchingNeighboursFromSingleRequired(g, topHitVid as Long, otherTopHits, sb);
-      return (tempTopHits?.size() > 0);
-    });
-    sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; topHits  = ${topHitsFiltered} ")
-
-    return topHitsFiltered;
-
-  }
-
-
-  sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; topHits  = ${topHits} ")
-
-  return topHits;
-
-}
-
-def static addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
-
-  def localTrav = g
-
-  def matchesForUpdate = [];
-
-  matchesForUpdate.addAll(matchReqsForThisVertexType.findAll { it2 -> !(it2.excludeFromUpdate) })
-
-  boolean atLeastOneUpdate = matchesForUpdate.size() > 0
-
-  if (atLeastOneUpdate) {
-
-    localTrav = localTrav.addV(vertexTypeStr)
-      .property('Metadata.Type.' + vertexTypeStr, vertexTypeStr)
-      .property('Metadata.Type', vertexTypeStr)
-
-    matchesForUpdate.each { it ->
-      if (!it.excludeFromUpdate && it.attribNativeVal != null) {
-        localTrav = localTrav.property(it.getPropName(), it.attribNativeVal);
-      }
     }
 
-    Long retVal = localTrav.next().id() as Long
+    sb?.append("\nIn getTopHit() -- vertType = ${vertexTypeStr} ; topHit  = ${topHit} ")
 
-    sb?.append("\n in addNewVertexFromMatchReqs() - added new vertex of type ${vertexTypeStr}; id = ${retVal}")
-    return retVal
-  }
-  sb?.append("\n in addNewVertexFromMatchReqs() - could not add ${vertexTypeStr}; no match requests marked for update");
+    return topHit;
 
-  return null;
+}
+
+def addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
+
+    def localTrav = g
+
+    def matchesForUpdate = [];
+
+    matchesForUpdate.addAll(matchReqsForThisVertexType.findAll {it2 -> !(it2.excludeFromUpdate)})
+
+    boolean atLeastOneUpdate = matchesForUpdate.size() > 0
+
+    if (atLeastOneUpdate){
+
+        localTrav = localTrav.addV(vertexTypeStr)
+                .property('Metadata.Type.' + vertexTypeStr, vertexTypeStr)
+                .property('Metadata.Type', vertexTypeStr)
+
+        matchesForUpdate.each { it ->
+            if (!it.excludeFromUpdate && it.attribNativeVal != null) {
+                localTrav = localTrav.property(it.getPropName(), it.attribNativeVal);
+            }
+        }
+
+        Long retVal = localTrav.next().id() as Long
+
+        sb?.append("\n in addNewVertexFromMatchReqs() - added new vertex of type ${vertexTypeStr}; id = ${retVal}")
+        return retVal
+    }
+    sb?.append("\n in addNewVertexFromMatchReqs() - could not add ${vertexTypeStr}; no match requests marked for update");
+
+    return null;
+
 
 
 }
 
 
-def updateExistingVertexWithMatchReqs(g, Map<Long, AtomicDouble> vertices, List<MatchReq> matchReqsForThisVertexType, double scoreThreshold, StringBuffer sb = null) {
+def updateExistingVertexWithMatchReqs(g, Long vertexId, List<MatchReq> matchReqsForThisVertexType, StringBuffer sb = null) {
 
-  def localTrav = g
-  def deletionTrav = g
-  sb?.append("\n in updateExistingVertexWithMatchReqs() - about to start Updating vertex of id ${vertices}; ${matchReqsForThisVertexType}")
+    def localTrav = g
+    def deletionTrav = g
+    sb?.append("\n in updateExistingVertexWithMatchReqs() - about to start Updating vertex of id ${vertexId}; ${matchReqsForThisVertexType}")
 
-  vertices.each { vertexId, score ->
+    localTrav = localTrav.V(vertexId)
 
-    if (score.get() >= scoreThreshold) {
-
-
-      localTrav = localTrav.V(vertexId)
-
-      boolean atLeastOneUpdate = false;
-      matchReqsForThisVertexType.each { it ->
+    boolean atLeastOneUpdate = false;
+    matchReqsForThisVertexType.each { it ->
         if (!it.excludeFromUpdate && it.attribNativeVal != null) {
 
-          String propName = it.getPropName();
-          sb?.append("\n in updateExistingVertexWithMatchReqs() - updating new vertex of id = ${vertexId} prop=${propName} val = ${it.attribNativeVal}")
+            String propName = it.getPropName();
+            sb?.append("\n in updateExistingVertexWithMatchReqs() - updating new vertex of id = ${vertexId} prop=${propName} val = ${it.attribNativeVal}")
 
-          try {
-            deletionTrav.V(vertexId).properties(it.getPropName()).drop().iterate()
+            try {
+                deletionTrav.V(vertexId).properties(it.getPropName()).drop().iterate()
 
-          }
-          catch (Throwable t) {
-            sb?.append("\n in updateExistingVertexWithMatchReqs() - FAILED TO DELETE  = ${vertexId} prop=${propName} val = ${it.attribNativeVal}; err = $t")
-          }
-          localTrav = localTrav.property(propName, it.attribNativeVal)
-          atLeastOneUpdate = true
+            }
+            catch (Throwable t) {
+                sb?.append("\n in updateExistingVertexWithMatchReqs() - FAILED TO DELETE  = ${vertexId} prop=${propName} val = ${it.attribNativeVal}; err = $t")
+            }
+            localTrav = localTrav.property(propName, it.attribNativeVal)
+            atLeastOneUpdate = true
 
         } else {
-          sb?.append("\n in updateExistingVertexWithMatchReqs() - SKIPPING UPDATE either due to null value or excludeFromUpdate == ${it.excludeFromUpdate} ; vertexId = ${vertexId} prop=${it.propName} val = ${it.attribNativeVal} ")
+            sb?.append("\n in updateExistingVertexWithMatchReqs() - SKIPPING UPDATE either due to null value or excludeFromUpdate == ${it.excludeFromUpdate} ; vertexId = ${vertexId} prop=${it.propName} val = ${it.attribNativeVal} ")
 
         }
-      }
+    }
 
-      if (atLeastOneUpdate) {
+    if (atLeastOneUpdate) {
         localTrav.iterate()
         sb?.append("\n in updateExistingVertexWithMatchReqs() - updated vertex with  id ${vertexId}")
 
-      } else {
+    } else {
         sb?.append("\n in updateExistingVertexWithMatchReqs() - SKIPPED UPDATES for  vertex with id ${vertexId}")
 
-      }
     }
-  }
-  // Long retVal = localTrav.next().id() as Long
 
-  // return retVal
+    // Long retVal = localTrav.next().id() as Long
+
+    // return retVal
 
 
 }
@@ -1000,289 +867,256 @@ def updateExistingVertexWithMatchReqs(g, Map<Long, AtomicDouble> vertices, List<
 
 class EdgeRequest {
 
-  String label;
-  String fromVertexLabel;
-  String toVertexLabel;
+    String label;
+    String fromVertexLabel;
+    String toVertexLabel;
 
-  EdgeRequest(String label, String fromVertexLabel, String toVertexLabel) {
-    this.label = label
-    this.fromVertexLabel = fromVertexLabel
-    this.toVertexLabel = toVertexLabel
-  }
+    EdgeRequest(String label, String fromVertexLabel, String toVertexLabel) {
+        this.label = label
+        this.fromVertexLabel = fromVertexLabel
+        this.toVertexLabel = toVertexLabel
+    }
 
-  String getLabel() {
-    return label
-  }
+    String getLabel() {
+        return label
+    }
 
-  void setLabel(String label) {
-    this.label = label
-  }
+    void setLabel(String label) {
+        this.label = label
+    }
 
-  String getFromVertexLabel() {
-    return fromVertexLabel
-  }
+    String getFromVertexLabel() {
+        return fromVertexLabel
+    }
 
-  void setFromVertexLabel(String fromVertexLabel) {
-    this.fromVertexLabel = fromVertexLabel
-  }
+    void setFromVertexLabel(String fromVertexLabel) {
+        this.fromVertexLabel = fromVertexLabel
+    }
 
-  String getToVertexLabel() {
-    return toVertexLabel
-  }
+    String getToVertexLabel() {
+        return toVertexLabel
+    }
 
-  void setToVertexLabel(String toVertexLabel) {
-    this.toVertexLabel = toVertexLabel
-  }
+    void setToVertexLabel(String toVertexLabel) {
+        this.toVertexLabel = toVertexLabel
+    }
 
-  boolean equals(o) {
-    if (this.is(o)) return true
-    if (!(o instanceof EdgeRequest)) return false
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof EdgeRequest)) return false
 
-    EdgeRequest that = (EdgeRequest) o
+        EdgeRequest that = (EdgeRequest) o
 
-    if (fromVertexLabel != that.fromVertexLabel) return false
-    if (label != that.label) return false
-    if (toVertexLabel != that.toVertexLabel) return false
+        if (fromVertexLabel != that.fromVertexLabel) return false
+        if (label != that.label) return false
+        if (toVertexLabel != that.toVertexLabel) return false
 
-    return true
-  }
+        return true
+    }
 
-  int hashCode() {
-    int result
-    result = (label != null ? label.hashCode() : 0)
-    result = 31 * result + (fromVertexLabel != null ? fromVertexLabel.hashCode() : 0)
-    result = 31 * result + (toVertexLabel != null ? toVertexLabel.hashCode() : 0)
-    return result
-  }
+    int hashCode() {
+        int result
+        result = (label != null ? label.hashCode() : 0)
+        result = 31 * result + (fromVertexLabel != null ? fromVertexLabel.hashCode() : 0)
+        result = 31 * result + (toVertexLabel != null ? toVertexLabel.hashCode() : 0)
+        return result
+    }
 
-  String toString() {
-    return "${label} = ($fromVertexLabel)->($toVertexLabel)"
-  }
+    String toString() {
+        return "${label} = ($fromVertexLabel)->($toVertexLabel)"
+    }
 }
 
 
 def parseEdges(def rules) {
 
-  Map<String, List<EdgeRequest>> edgeReqsByVertexName = new HashMap<>()
-  Set<EdgeRequest> edgeReqs = new HashSet<>()
+    Map<String, List<EdgeRequest>> edgeReqsByVertexName = new HashMap<>()
+    Set<EdgeRequest> edgeReqs = new HashSet<>()
 
-  rules.edges.each { it ->
-    String fromVertexLabel = it.fromVertexLabel
-    String toVertexLabel = it.toVertexLabel
-    String label = it.label
+    rules.edges.each { it ->
+        String fromVertexLabel = it.fromVertexLabel
+        String toVertexLabel = it.toVertexLabel
+        String label = it.label
 
-    EdgeRequest req = new EdgeRequest(label, fromVertexLabel, toVertexLabel);
+        EdgeRequest req = new EdgeRequest(label, fromVertexLabel, toVertexLabel);
 
-    edgeReqs.add(req)
-    fromEdgeList = edgeReqsByVertexName.computeIfAbsent(fromVertexLabel, { k -> new ArrayList<EdgeRequest>() })
-    fromEdgeList.add(req)
-    toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexLabel, { k -> new ArrayList<EdgeRequest>() })
-    toEdgeList.add(req)
+        edgeReqs.add(req)
+        fromEdgeList = edgeReqsByVertexName.computeIfAbsent(fromVertexLabel, { k -> new ArrayList<EdgeRequest>() })
+        fromEdgeList.add(req)
+        toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexLabel, { k -> new ArrayList<EdgeRequest>() })
+        toEdgeList.add(req)
 
-  }
+    }
 
-  return [edgeReqsByVertexName, edgeReqs]
+    return [edgeReqsByVertexName, edgeReqs]
 }
 
-def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName, Map<String, AtomicDouble> maxScoresByVertexName, StringBuffer sb = null) {
+def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexIdByVertexName, StringBuffer sb = null) {
 
-  edgeReqs.each { it ->
+    edgeReqs.each { it ->
 
-    sb?.append("\n in createEdges; edgeReq = $it ")
+        sb?.append("\n in createEdges; edgeReq = $it ")
 
-    sb?.append("\n in createEdges; finalVertexIdByVertexName = $finalVertexIdByVertexName; \nmaxScoresByVertexName = $maxScoresByVertexName ")
+        sb?.append("\n in createEdges; finalVertexIdByVertexName = $finalVertexIdByVertexName ")
 
-    Double maxFromScore = maxScoresByVertexName.get(it.fromVertexLabel)?.get();
-    Double maxToScore = maxScoresByVertexName.get(it.toVertexLabel)?.get();
+        Long fromId = finalVertexIdByVertexName.get(it.fromVertexLabel)
+        Long toId = finalVertexIdByVertexName.get(it.toVertexLabel)
 
-    if (maxFromScore != null && maxToScore != null) {
+        sb?.append("\n in createEdges; from=$fromId; to=$toId ")
 
+        if (fromId != null && toId != null) {
 
-      Map<Long, AtomicDouble> fromIds = finalVertexIdByVertexName?.get(it.fromVertexLabel)
-      Map<Long, AtomicDouble> toIds = finalVertexIdByVertexName?.get(it.toVertexLabel)
-
-      fromIds.forEach { fromId, fromScore ->
-
-        toIds.forEach { toId, toScore ->
-          sb?.append("\n in createEdges; from=$fromId; to=$toId ")
-
-          if (fromId != null && toId != null) {
-
-            Long[] foundIds = gTrav.V(toId)
-              .both()
-              .hasId(within(fromId)).id()
-              .toSet() as Long[]
+            def foundIds = gTrav.V(toId)
+                    .both()
+                    .hasId(within(fromId)).id()
+                    .toSet() as Long[]
 
             sb?.append("\n in createEdges $foundIds")
 
             if (foundIds.size() == 0) {
-
-              Double fromScorePercent = (maxFromScore > 0 ? (fromScore.get() / maxFromScore) : (double) 1.0) * (double) 100.0;
-              Double toScorePercent = (maxToScore > 0 ? (toScore.get() / maxToScore) : (double) 1.0) * (double) 100.0;
-              Double fromScoreDouble = fromScore.get();
-              Double toScoreDouble = toScore.get();
-              def fromV = gTrav.V(fromId)
-              def toV = gTrav.V(toId)
-              sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId (fromV = ${fromV}; toV= ${toV}; maxFromScore = $maxFromScore; fromScore = $fromScoreDouble; maxToScore = $maxToScore; toScore: $toScoreDouble")
-              gTrav.addE(it.label)
-                .from(fromV).to(toV)
-                .property('maxFromScore', maxFromScore)
-                .property('fromScore', fromScoreDouble)
-                .property('fromScorePercent', fromScorePercent)
-                .property('maxToScore', maxToScore)
-                .property('toScore', toScoreDouble)
-                .property('toScorePercent', toScorePercent)
-                .next();
-
-
+                def fromV = gTrav.V(fromId)
+                def toV = gTrav.V(toId)
+                sb?.append("\n in createEdges about to create new Edges from  $fromId to $toId")
+                gTrav.addE(it.label).from(fromV).to(toV).next()
             } else {
-              sb?.append("\n in createEdges SKIPPING Edge creations")
+                sb?.append("\n in createEdges SKIPPING Edge creations")
 
             }
-          } else {
+        } else {
             sb?.append("\n in createEdges SKIPPING Edge creations")
 
-          }
-
-
         }
-      }
+
 
     }
-
-
-  }
-}
-
-def processMatchRequests(g,
-                         List<MatchReq> matchReqs,
-                         int maxHitsPerType,
-                         Map<String, Double> percentageThresholdByVertexName,
-                         Map<String, AtomicDouble> maxScoresByVertexName,
-                         Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName,
-                         Map<String, List<EdgeRequest>> edgeReqsByVertexType,
-                         Set<EdgeRequest> edgeReqs,
-                         StringBuffer sb) {
-
-  def (
-  Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName,
-  Map<String, List<MatchReq>>          matchReqByVertexName
-  ) = matchVertices(g, matchReqs, maxHitsPerType, sb);
-  vertexScoreMapByVertexName.each { vertexTypeStr, potentialHitIDs ->
-
-    List<MatchReq> matchReqsForThisVertexType = matchReqByVertexName.get(vertexTypeStr)
-
-    double maxScore = maxScoresByVertexName.get(vertexTypeStr).get();
-    double percentageThreshold = percentageThresholdByVertexName.get(vertexTypeStr)
-    double scoreThreshold = (double) (maxScore * 100 * (percentageThreshold / 100) / 100);
-
-    Map<Long, AtomicDouble> topHits = getTopHitsWithEdgeCheck(g, potentialHitIDs, scoreThreshold, vertexScoreMapByVertexName, vertexTypeStr, edgeReqsByVertexType, sb)
-
-    if (topHits != null && topHits.size() > 0) {
-
-      updateExistingVertexWithMatchReqs(g, topHits, matchReqsForThisVertexType, scoreThreshold, sb)
-      finalVertexIdByVertexName.put((String) vertexTypeStr, topHits)
-    } else {
-      Map<Long, AtomicDouble> newVertices = new HashMap<>();
-      Long vId = addNewVertexFromMatchReqs(g, (String) vertexTypeStr, matchReqsForThisVertexType, sb)
-      newVertices.put(vId, new AtomicDouble(maxScore));
-      finalVertexIdByVertexName.put((String) vertexTypeStr, newVertices)
-
-    }
-
-
-  }
-
-  createEdges(g, (Set<EdgeRequest>) edgeReqs, finalVertexIdByVertexName, maxScoresByVertexName, sb)
-
-
 }
 
 def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
-  Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName = new HashMap<>();
+    Map<String, Long> finalVertexIdByVertexName = new HashMap<>();
 
-  def jsonSlurper = new JsonSlurper()
-  def rules = jsonSlurper.parseText(jsonRules)
+    def jsonSlurper = new JsonSlurper()
+    def rules = jsonSlurper.parseText(jsonRules)
 
-  double percentageThreshold = (rules.percentageThreshold == null) ? 95.0 : (double) (rules.percentageThreshold);
-  int maxHitsPerType = (rules.maxHitsPerType == null) ? 1000 : (int) rules.maxHitsPerType;
+    def (edgeReqsByVertexName, edgeReqs) = parseEdges(rules.updatereq)
+    trans = graph.tx()
+    try {
+        if (!trans.isOpen()) {
+            trans.open()
+        }
 
-  def (Map<String, List<EdgeRequest>> edgeReqsByVertexName, Set<EdgeRequest> edgeReqs) = parseEdges(rules.updatereq)
-  trans = graph.tx()
-  try {
-    if (!trans.isOpen()) {
-      trans.open()
+        def matchReqs = getMatchRequests(bindings, rules.updatereq, jsonRules, sb)
+        def (matchIdsByVertexType, vertexListsByVertexName) = matchVertices(g, matchReqs, 10, sb);
+
+        matchIdsByVertexType.each { vertexTypeStr, potentialHitIDs ->
+
+            List<MatchReq> matchReqsForThisVertexType = vertexListsByVertexName.get(vertexTypeStr)
+//            int numHitsRequiredForMatch = matchReqsForThisVertexType?.size()
+//
+//            if (numHitsRequiredForMatch > 0) {
+//                numHitsRequiredForMatch += (numHitsRequiredForMatch - 1)
+//            }
+
+            int numHitsRequiredForMatch = 1;
+
+            Long topHit = getTopHit(g
+                    , potentialHitIDs as Long[]
+                    , (int) numHitsRequiredForMatch
+                    , (HashMap<String, List<Long>>) matchIdsByVertexType
+                    , (String) vertexTypeStr
+                    , (Map<String, List<EdgeRequest>>) edgeReqsByVertexName
+                    , sb)
+
+            if (topHit != null) {
+
+                updateExistingVertexWithMatchReqs(g, topHit, matchReqsForThisVertexType, sb)
+                finalVertexIdByVertexName.put((String) vertexTypeStr, topHit)
+            } else {
+                Long newVertexId = addNewVertexFromMatchReqs(g, (String) vertexTypeStr, matchReqsForThisVertexType, sb)
+                finalVertexIdByVertexName.put((String) vertexTypeStr, newVertexId)
+
+            }
+
+
+        }
+
+        createEdges(g, (Set<EdgeRequest>) edgeReqs, (Map<String, Long>) finalVertexIdByVertexName, sb)
+
+
+        trans.commit()
+    } catch (Throwable t) {
+        trans.rollback()
+        throw t
+    } finally {
+        trans.close()
     }
 
-    def (List<MatchReq> matchReqs, Map<String, AtomicDouble> maxScoresByVertexName, Map<String, Double> percentageThresholdByVertexName) =
-    getMatchRequests(bindings, rules.updatereq, jsonRules, percentageThreshold, sb)
-
-    processMatchRequests(g,
-      matchReqs,
-      maxHitsPerType,
-      percentageThresholdByVertexName,
-      maxScoresByVertexName,
-      finalVertexIdByVertexName,
-      edgeReqsByVertexName,
-      edgeReqs,
-      sb)
-
-
-    trans.commit()
-  } catch (Throwable t) {
-    trans.rollback()
-    throw t
-  } finally {
-    trans.close()
-  }
-
-  return finalVertexIdByVertexName;
+    return finalVertexIdByVertexName;
 }
 
 
 def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, String jsonRules, StringBuffer sb = null) {
-  Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName = new HashMap<>();
 
-  def jsonSlurper = new JsonSlurper()
-  def rules = jsonSlurper.parseText(jsonRules)
+    def jsonSlurper = new JsonSlurper()
+    def rules = jsonSlurper.parseText(jsonRules)
+
+    def (edgeReqsByVertexName, edgeReqs) = parseEdges(rules.updatereq)
+    trans = graph.tx()
+    try {
+        if (!trans.isOpen()) {
+            trans.open()
+        }
+
+        for (Map<String, String> item in recordList) {
+
+            def matchReqs = getMatchRequests(item, rules.updatereq, jsonRules, sb)
+            def (matchIdsByVertexType, vertexListsByVertexName) = matchVertices(g, matchReqs, 10, sb);
+
+            Map<String, Long> finalVertexIdByVertexName = new HashMap<>();
+            matchIdsByVertexType.each { vertexTypeStr, potentialHitIDs ->
+
+                List<MatchReq> matchReqsForThisVertexType = vertexListsByVertexName.get(vertexTypeStr)
+                int numHitsRequiredForMatch = 1;
+//                        matchReqsForThisVertexType?.size()
+//
+//                if (numHitsRequiredForMatch > 0) {
+//                    numHitsRequiredForMatch += (numHitsRequiredForMatch - 1)
+//                }
+
+                Long topHit = getTopHit(g
+                        , potentialHitIDs as Long[]
+                        , (int) numHitsRequiredForMatch
+                        , (HashMap<String, List<Long>>) matchIdsByVertexType
+                        , (String) vertexTypeStr
+                        , (Map<String, List<EdgeRequest>>) edgeReqsByVertexName
+                        , sb)
+
+                if (topHit != null) {
+
+                    updateExistingVertexWithMatchReqs(g, topHit, matchReqsForThisVertexType, sb)
+                    finalVertexIdByVertexName.put((String) vertexTypeStr, topHit)
+                } else {
+                    Long newVertexId = addNewVertexFromMatchReqs(g, (String) vertexTypeStr, matchReqsForThisVertexType, sb)
+                    finalVertexIdByVertexName.put((String) vertexTypeStr, newVertexId)
+
+                }
 
 
-  double percentageThreshold = (rules.percentageThreshold == null) ? 95.0 : (double) (rules.percentageThreshold);
-  int maxHitsPerType = (rules.maxHitsPerType == null) ? 1000 : (int) rules.maxHitsPerType;
+            }
 
-  def (Map<String, List<EdgeRequest>> edgeReqsByVertexName, Set<EdgeRequest> edgeReqs) = parseEdges(rules.updatereq)
-  trans = graph.tx()
-  try {
-    if (!trans.isOpen()) {
-      trans.open()
+            createEdges(g, (Set<EdgeRequest>) edgeReqs, (Map<String, Long>) finalVertexIdByVertexName, sb)
+
+
+        }
+
+
+
+        trans.commit()
+    } catch (Throwable t) {
+        trans.rollback()
+        throw t
+    } finally {
+        trans.close()
     }
-
-    for (Map<String, String> item in recordList) {
-
-      def (List<MatchReq> matchReqs, Map<String, AtomicDouble> maxScoresByVertexName, Map<String, Double> percentageThresholdByVertexName) =
-      getMatchRequests(item, rules.updatereq, jsonRules, percentageThreshold, sb);
-
-
-      processMatchRequests(g,
-        matchReqs,
-        maxHitsPerType,
-        percentageThresholdByVertexName,
-        maxScoresByVertexName,
-        finalVertexIdByVertexName,
-        edgeReqsByVertexName,
-        edgeReqs,
-        sb)
-
-    }
-
-
-    trans.commit()
-  } catch (Throwable t) {
-    trans.rollback()
-    throw t
-  } finally {
-    trans.close()
-  }
 }
 
 /*
