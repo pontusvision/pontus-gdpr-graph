@@ -494,6 +494,11 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Metadata.Type.Object.Phone_Number",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Metadata.Type.Object.Form",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -734,6 +739,92 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Object.Data_Source.Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.CreateDate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.UpdateDate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Data_Source.Description",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Credential.Principal",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Credential.Secret",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Credential.ApiKey",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI.Config",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI.Template",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI.Control",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI.Read",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI.Delete",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI.Update",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI.Monitor",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Procedures.Type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Procedures.Update_Mechanism",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Procedures.Update_URL",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Object.Data_Procedures.Delete_URL",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -758,6 +849,28 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+    {
+      "name": "Object.Phone_Number.Type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Phone_Number.Raw",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Phone_Number.Numbers_Only",
+      "dataType": "Integer",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Phone_Number.Last_7_Digits",
+      "dataType": "Integer",
+      "cardinality": "SINGLE"
+    },
+
     {
       "name": "Object.Email_Address.Email",
       "dataType": "String",
@@ -1366,6 +1479,11 @@
       "useStatic": false
     },
     {
+      "name": "Object.Data_Source",
+      "partition": false,
+      "useStatic": false
+    },
+    {
       "name": "Object.Email_Address",
       "partition": false,
       "useStatic": false
@@ -1397,6 +1515,11 @@
     },
     {
       "name": "Object.Notification_Templates",
+      "partition": false,
+      "useStatic": false
+    },
+    {
+      "name": "Object.Phone_Number",
       "partition": false,
       "useStatic": false
     },
@@ -1451,7 +1574,7 @@
       "name": "Event.Training.Awareness_Campaign",
       "multiplicity": "MULTI",
       "unidirected": false
-    },
+    }, 
     {
       "name": "Event.Training.Person",
       "multiplicity": "MULTI",
@@ -1571,7 +1694,13 @@
       "name": "Uses_Email",
       "multiplicity": "MULTI",
       "unidirected": false
+    },
+    {
+      "name": "Has_Phone",
+      "multiplicity": "MULTI",
+      "unidirected": false
     }
+
   ],
   "vertexIndexes": [
     {
@@ -1782,6 +1911,38 @@
       }
     },
     {
+      "name": "objectDataSourceIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+
+        "Object.Data_Source.Name",
+        "Object.Data_Source.CreateDate",
+        "Object.Data_Source.UpdateDate",
+        "Object.Data_Source.Description",
+        "Metadata.Type.Object.Data_Source"
+      ],
+      "propertyKeysMappings": {
+        "Metadata.Type.Object.Data_Source": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Description": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.UpdateDate": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.CreateDate": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Name": {
+          "mapping": "STRING"
+        }
+      }
+    },
+    {
       "name": "eventTrainingStatusMixedIdx",
       "composite": false,
       "unique": false,
@@ -1901,6 +2062,38 @@
         },
         "Person.Customer_ID": {
           "mapping": "STRING"
+        }
+      }
+    },
+    {
+      "name": "objectPhoneNumberMixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Object.Phone_Number",
+        "Object.Phone_Number.Type",
+        "Object.Phone_Number.Raw",
+        "Object.Phone_Number.Numbers_Only",
+        "Object.Phone_Number.Last_8_Digits"
+
+      ],
+      "propertyKeysMappings": {
+        "Metadata.Type.Object.Phone_Number": {
+          "mapping": "STRING"
+        },
+        "Object.Phone_Number.Type": {
+          "mapping": "STRING"
+        },
+        "Object.Phone_Number.Raw": {
+          "mapping": "STRING"
+        },
+        "Object.Phone_Number.Numbers_Only": {
+          "mapping": "DEFAULT"
+        },
+        "Object.Phone_Number.Last_8_Digits": {
+          "mapping": "DEFAULT"
         }
       }
     },
