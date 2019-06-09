@@ -490,10 +490,21 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Metadata.Type.Object.Data_Source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Metadata.Type.Object.Email_Address",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+    {
+      "name": "Metadata.Type.Object.Data_Policy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
     {
       "name": "Metadata.Type.Object.Phone_Number",
       "dataType": "String",
@@ -739,6 +750,28 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+    {
+      "name": "Object.Data_Policy.Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Policy.CreateDate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Policy.UpdateDate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Data_Policy.Description",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
     {
       "name": "Object.Data_Source.Name",
       "dataType": "String",
@@ -1485,6 +1518,11 @@
       "useStatic": false
     },
     {
+      "name": "Object.Data_Policy",
+      "partition": false,
+      "useStatic": false
+    },
+    {
       "name": "Object.Email_Address",
       "partition": false,
       "useStatic": false
@@ -1911,6 +1949,39 @@
         }
       }
     },
+
+    {
+      "name": "objectDataPolicyIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+
+        "Object.Data_Policy.Name",
+        "Object.Data_Policy.CreateDate",
+        "Object.Data_Policy.UpdateDate",
+        "Object.Data_Policy.Description",
+        "Metadata.Type.Object.Data_Policy"
+      ],
+      "propertyKeysMappings": {
+        "Metadata.Type.Object.Data_Policy": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.Description": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.UpdateDate": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.CreateDate": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.Name": {
+          "mapping": "STRING"
+        }
+      }
+    },
     {
       "name": "objectDataSourceIdx",
       "composite": false,
@@ -2069,7 +2140,7 @@
         "Object.Phone_Number.Type",
         "Object.Phone_Number.Raw",
         "Object.Phone_Number.Numbers_Only",
-        "Object.Phone_Number.Last_8_Digits"
+        "Object.Phone_Number.Last_7_Digits"
 
       ],
       "propertyKeysMappings": {
@@ -2085,7 +2156,7 @@
         "Object.Phone_Number.Numbers_Only": {
           "mapping": "DEFAULT"
         },
-        "Object.Phone_Number.Last_8_Digits": {
+        "Object.Phone_Number.Last_7_Digits": {
           "mapping": "DEFAULT"
         }
       }
