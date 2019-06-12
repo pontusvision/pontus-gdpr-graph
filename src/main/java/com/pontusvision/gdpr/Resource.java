@@ -9,9 +9,10 @@ import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.janusgraph.core.JanusGraphIndexQuery;
+import org.janusgraph.core.JanusGraphVertex;
 import org.janusgraph.core.schema.JanusGraphManagement;
-//import org.json.JSONArray;
-//import org.json.JSONObject;
+import org.janusgraph.graphdb.util.StreamIterable;
 
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
@@ -20,6 +21,9 @@ import javax.ws.rs.core.MediaType;
 import java.util.*;
 
 import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
+
+//import org.json.JSONArray;
+//import org.json.JSONObject;
 
 @Path("home") public class Resource
 {
@@ -38,9 +42,8 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   GsonBuilder gsonBuilder = new GsonBuilder();
 
-
   @POST @Path("gremlin") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
-  public RecordReply gremlin( GremlinRequest req)
+  public RecordReply gremlin(GremlinRequest req)
   {
     ServerGremlinExecutor executor = App.gserver.getServerGremlinExecutor();
     try
@@ -58,16 +61,80 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   }
 
+  public static String getIndexSearchStr(RecordRequest req)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    PVGridColumn[] cols = req.search.cols;
+
+    for (int i = 0, ilen = cols.length; i < ilen; i++)
+    {
+      PVGridColumn col = cols[i];
+      if (i > 0)
+      {
+        sb.append(" OR ");
+      }
+      sb.append("v.\"").append(col.field).append("\":").append(req.search.searchStr);
+    }
+
+    return sb.toString();
+          /*
+          {
+   "search":{
+      "searchStr":"Mickey",
+      "searchExact":true,
+      "cols":[
+         {
+            "name":"Person Full_Name",
+            "resizable":true,
+            "sortable":true,
+            "minWidth":30,
+            "rerenderOnResize":false,
+            "headerCssClass":null,
+            "defaultSortAsc":true,
+            "focusable":true,
+            "selectable":true,
+            "width":624,
+            "id":"Person.Full_Name",
+            "field":"Person.Full_Name"
+         },
+         {
+            "name":"Person Nationality",
+            "resizable":true,
+            "sortable":true,
+            "minWidth":30,
+            "rerenderOnResize":false,
+            "headerCssClass":null,
+            "defaultSortAsc":true,
+            "focusable":true,
+            "selectable":true,
+            "width":623,
+            "id":"Person.Nationality",
+            "field":"Person.Nationality"
+         }
+      ],
+      "extraSearch":{
+         "label":"Person",
+         "value":"Person"
+      }
+   },
+   "from":0,
+   "to":600,
+   "sortBy":null,
+   "sortDir":"+asc"
+}
+           */
+
+  }
 
   @POST @Path("records") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
-  public RecordReply records( RecordRequest req)
+  public RecordReply records(RecordRequest req)
   {
 
     if (req.search != null && req.search.cols != null)
     {
 
       String[] vals = new String[req.search.cols.length];
-
 
       for (int i = 0, ilen = req.search.cols.length; i < ilen; i++)
       {
@@ -78,14 +145,22 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       try
       {
 
-        GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person");
-        String searchStr = req.search.getSearchStr();
-
+        GraphTraversal resSet    = App.g.V(); //.has("Metadata.Type", "Person");
+        String         searchStr = req.search.getSearchStr();
 
         if (StringUtils.isNotEmpty(searchStr))
         {
 
-          resSet.has("Person.FullName", textContainsFuzzy(searchStr));
+          int limit = req.to.intValue() - req.from.intValue();
+          List<Long> vertices = new ArrayList<>(limit);
+
+          App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req))
+                                      .limit(limit).offset(req.from.intValue())
+                                      .vertexStream().forEachOrdered(jgvr -> vertices.add(jgvr.getElement().longId()) );
+
+          App.g.V(vertices);
+
+          //          resSet.has("Person.FullName", textContainsFuzzy(searchStr));
 
         }
         else
@@ -94,12 +169,12 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
         }
 
-        resSet.valueMap(true,vals)
-            .range(req.from, req.to);
+        resSet.valueMap(true, vals)
+              .range(req.from, req.to);
 
         List<Map<String, Object>> res = resSet.toList();
 
-        String[] recs = new String[res.size()];
+        String[]     recs      = new String[res.size()];
         ObjectMapper objMapper = new ObjectMapper();
 
         for (int i = 0, ilen = res.size(); i < ilen; i++)
@@ -131,14 +206,13 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           recs[i] = objMapper.writeValueAsString(rec);
         }
 
-        Long count = StringUtils.isEmpty(searchStr)?
+        Long count = StringUtils.isEmpty(searchStr) ?
             App.g.V()
-                .has("Metadata.Type",  req.search.extraSearch[0].value).range(req.from, req.to + req.to-req.from).propertyMap(vals).count().toList()
-                .get(0)+req.from:
+                 .has("Metadata.Type", req.search.extraSearch[0].value).range(req.from, req.to + req.to - req.from)
+                 .propertyMap(vals).count().toList()
+                 .get(0) + req.from :
+            App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req)).vertexTotals();
 
-        App.g.V()
-            .has("Person.FullName", textContainsFuzzy(searchStr)).range(req.from,  req.to + req.to-req.from).propertyMap(vals).count().toList()
-            .get(0)+req.from;
 
         //        Long count = Long.parseLong(countStr);
 
@@ -159,21 +233,20 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
   }
 
   @POST @Path("graph") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
-  public GraphReply graph (GraphRequest greq)
+  public GraphReply graph(GraphRequest greq)
   {
 
     Set<Vertex> outNodes = App.g.V(Long.parseLong(greq.graphId)).to(Direction.OUT).toSet();
-    Set<Vertex> inNodes = App.g.V(Long.parseLong(greq.graphId)).to(Direction.IN).toSet();
-    Vertex v = App.g.V(Long.parseLong(greq.graphId)).next();
+    Set<Vertex> inNodes  = App.g.V(Long.parseLong(greq.graphId)).to(Direction.IN).toSet();
+    Vertex      v        = App.g.V(Long.parseLong(greq.graphId)).next();
 
     Set<Edge> outEdges = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.OUT).toSet();
-    Set<Edge> inEdges = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.IN).toSet();
+    Set<Edge> inEdges  = App.g.V(Long.parseLong(greq.graphId)).toE(Direction.IN).toSet();
 
     GraphReply retVal = new GraphReply(v, inNodes, outNodes, inEdges, outEdges);
 
     return retVal;
   }
-
 
   @POST @Path("vertex_labels") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
 
@@ -188,7 +261,8 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       mgt.commit();
       return reply;
     }
-    catch (Exception e){
+    catch (Exception e)
+    {
 
     }
     return new VertexLabelsReply();
@@ -202,29 +276,28 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
     if (req != null)
     {
 
-
       String searchStr = req.searchStr;
 
       //      GraphTraversal g =
       try
       {
-          GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person");
-          //        Boolean searchExact = req.search.getSearchExact();
+        GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person");
+        //        Boolean searchExact = req.search.getSearchExact();
 
-          CountryDataReply data = new CountryDataReply();
+        CountryDataReply data = new CountryDataReply();
 
-          List<Map<String, Long>> res =
-              StringUtils.isNotEmpty(searchStr)?
-              resSet.has("Person.FullName", textContainsFuzzy(searchStr)).values("Person.Nationality").groupCount().toList():
-              resSet.has("Person.Nationality").values("Person.Nationality").groupCount().toList();
+        List<Map<String, Long>> res =
+            StringUtils.isNotEmpty(searchStr) ?
+                resSet.has("Person.FullName", textContainsFuzzy(searchStr)).values("Person.Nationality").groupCount()
+                      .toList() :
+                resSet.has("Person.Nationality").values("Person.Nationality").groupCount().toList();
 
-          if (res.size() == 1)
-          {
-            data.countryData.putAll(res.get(0));
-          }
+        if (res.size() == 1)
+        {
+          data.countryData.putAll(res.get(0));
+        }
 
-
-          return data;
+        return data;
 
       }
       catch (Throwable t)
@@ -236,9 +309,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
     return new CountryDataReply();
 
-
   }
-
 
   @POST @Path("node_property_names") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
 
@@ -255,7 +326,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
         GraphTraversal g = App.g.V();
         for (int i = 0, ilen = req.labels.length; i < ilen; i++)
         {
-          g = g.has("Metadata.Type", req.labels[i].value).range(0,1);
+          g = g.has("Metadata.Type", req.labels[i].value).range(0, 1);
 
           //          labels[i] = (req.labels[i + 1].value);
 
@@ -265,7 +336,6 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             //            App.g.V().hasLabel(label0, labels).properties().label().toSet()
         );
         return reply;
-
 
       }
     }
@@ -291,6 +361,5 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
   {
     return "Hello, " + name + " AUTHORIZATION" + auth;
   }
-
 
 }

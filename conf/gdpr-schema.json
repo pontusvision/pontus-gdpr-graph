@@ -772,7 +772,7 @@
       "cardinality": "SINGLE"
     },
 
-	{
+    {
       "name": "Object.Data_Policy.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -799,16 +799,16 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.CreateDate",
+      "name": "Object.Data_Source.Create_Date",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.UpdateDate",
+      "name": "Object.Data_Source.Update_Date",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-	{
+    {
       "name": "Object.Data_Source.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -828,61 +828,60 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-	
-	
-	
+
+
     {
       "name": "Object.Data_Source.Description",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.Credential.Principal",
+      "name": "Object.Data_Source.Credential_Principal",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.Credential.Secret",
+      "name": "Object.Data_Source.Credential_Secret",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.Credential.ApiKey",
+      "name": "Object.Data_Source.Credential_ApiKey",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.URI.Config",
+      "name": "Object.Data_Source.URI_Config",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.URI.Template",
+      "name": "Object.Data_Source.URI_Template",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.URI.Control",
+      "name": "Object.Data_Source.URI_Control",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.URI.Read",
+      "name": "Object.Data_Source.URI_Read",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.URI.Delete",
+      "name": "Object.Data_Source.URI_Delete",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.URI.Update",
+      "name": "Object.Data_Source.URI_Update",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Data_Source.URI.Monitor",
+      "name": "Object.Data_Source.URI_Monitor",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -1463,7 +1462,7 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-	{
+    {
       "name": "Person.Organisation.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -1484,11 +1483,6 @@
       "cardinality": "SINGLE"
     },
 
-
-	
-	
-	
-	
     {
       "name": "Person.Place_Of_Birth",
       "dataType": "String",
@@ -1812,7 +1806,7 @@
   ],
   "vertexIndexes": [
     {
-      "name": "eventDataBreachIdx00",
+      "name": "Event.Data_Breach.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1845,7 +1839,7 @@
       }
     },
     {
-      "name": "objectMoUIdx00",
+      "name": "Object.MoU.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1888,7 +1882,7 @@
       }
     },
     {
-      "name": "objectAWS_InstanceIdx00",
+      "name": "Object.AWS_Instance.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1923,7 +1917,7 @@
       }
     },
     {
-      "name": "objectAWS_Security_GroupIdx00",
+      "name": "Object.AWS_Security_Group.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1954,7 +1948,7 @@
       }
     },
     {
-      "name": "objectAWS_VPCIdx01",
+      "name": "Object.AWS_VPC.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1973,7 +1967,7 @@
       }
     },
     {
-      "name": "objectAWS_Network_InterfaceIdx00",
+      "name": "Object.AWS_Network_Interface.CompositeIdx",
       "composite": true,
       "unique": false,
       "indexOnly": null,
@@ -1988,7 +1982,7 @@
       ]
     },
     {
-      "name": "objectDataProceduresIdx",
+      "name": "Object.Data_Procedures.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2020,7 +2014,7 @@
     },
 
     {
-      "name": "objectDataPolicyIdx",
+      "name": "Object.Data_Policy.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2049,7 +2043,7 @@
         "Object.Data_Policy.Name": {
           "mapping": "STRING"
         },
-		"Object.Data_Policy.Form_Id": {
+        "Object.Data_Policy.Form_Id": {
           "mapping": "STRING"
         },
         "Object.Data_Policy.Form_Owner_Id": {
@@ -2065,7 +2059,7 @@
       }
     },
     {
-      "name": "objectDataSourceIdx",
+      "name": "Object.Data_Source.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2077,7 +2071,7 @@
         "Object.Data_Source.UpdateDate",
         "Object.Data_Source.Description",
         "Metadata.Type.Object.Data_Source",
-		"Object.Data_Source.Form_Id",
+        "Object.Data_Source.Form_Id",
         "Object.Data_Source.Form_Owner_Id",
         "Object.Data_Source.Form_Submission_Id",
         "Object.Data_Source.Form_Submission_Owner_Id"
@@ -2098,8 +2092,8 @@
         },
         "Object.Data_Source.Name": {
           "mapping": "STRING"
-        }
-		"Object.Data_Source.Form_Id": {
+        },
+        "Object.Data_Source.Form_Id": {
           "mapping": "STRING"
         },
         "Object.Data_Source.Form_Owner_Id": {
@@ -2115,7 +2109,7 @@
       }
     },
     {
-      "name": "eventTrainingStatusMixedIdx",
+      "name": "Event.Training.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2134,7 +2128,7 @@
       }
     },
     {
-      "name": "eventSARStatusMixedIdx",
+      "name": "Event.Subject_Access_Request.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2159,7 +2153,7 @@
       }
     },
     {
-      "name": "personDataMixedIdx",
+      "name": "Person.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2230,7 +2224,7 @@
       }
     },
     {
-      "name": "objectPhoneNumberMixedIdx",
+      "name": "Object.Phone_Number.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2262,7 +2256,7 @@
       }
     },
     {
-      "name": "objectEmailAddressEmailMixedIdx",
+      "name": "Object.Email_Address.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2281,7 +2275,7 @@
       }
     },
     {
-      "name": "objectCredentialMixedIdx",
+      "name": "Object.Credential.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2300,7 +2294,7 @@
       }
     },
     {
-      "name": "objectIdentityCardIdNameMixedIdx",
+      "name": "Object.Identity_Card.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2319,7 +2313,7 @@
       }
     },
     {
-      "name": "locationAddressStreetMixedIdx",
+      "name": "Location.Address.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2434,7 +2428,7 @@
       }
     },
     {
-      "name": "Object_Privacy_Impact_Assessment_Start_Date",
+      "name": "Object.Privacy_Impact_Assessment.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2487,7 +2481,7 @@
       }
     },
     {
-      "name": "objectAwarenessCampaignDescriptionMixedIdx",
+      "name": "Object.Awareness_Campaign.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2528,7 +2522,7 @@
       }
     },
     {
-      "name": "objectInsurancePolicyMixedIdx",
+      "name": "Object.Insurance_Policy.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2580,7 +2574,7 @@
       }
     },
     {
-      "name": "objectLawfulBasis0MixedIdx",
+      "name": "Object.Lawful_Basis.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2603,7 +2597,7 @@
       }
     },
     {
-      "name": "objectPrivacyNotice00MixedIdx",
+      "name": "Object.Privacy_Notice.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2676,7 +2670,7 @@
       }
     },
     {
-      "name": "personEmployeeMixedIdx",
+      "name": "Person.Employee.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2740,7 +2734,7 @@
       }
     },
     {
-      "name": "personOrgShortNameMixedIdx",
+      "name": "Person.Organisation.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2753,7 +2747,7 @@
         "Person.Organisation.Name",
         "Person.Organisation.orgCountrySet",
         "Person.Organisation.Department",
-		"Person.Organisation.Form_Id",
+        "Person.Organisation.Form_Id",
         "Person.Organisation.Form_Owner_Id",
         "Person.Organisation.Form_Submission_Id",
         "Person.Organisation.Form_Submission_Owner_Id"
@@ -2777,11 +2771,8 @@
         },
         "Person.Organisation.orgCountrySet": {
           "mapping": "STRING"
-        }
-		"Object.Data_Policy.Name": {
-          "mapping": "STRING"
         },
-		"Person.Organisation.Form_Id": {
+        "Person.Organisation.Form_Id": {
           "mapping": "STRING"
         },
         "Person.Organisation.Form_Owner_Id": {
@@ -2797,7 +2788,7 @@
       }
     },
     {
-      "name": "eventConsentStatusMtdMixedIdx",
+      "name": "Event.Consent.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2819,7 +2810,7 @@
       }
     },
     {
-      "name": "metadataTypeIdx",
+      "name": "Metadata.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2839,7 +2830,7 @@
       }
     },
     {
-      "name": "eventIngestionGroupIdx01",
+      "name": "Event.Ingestion.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2867,7 +2858,7 @@
       }
     },
     {
-      "name": "eventIngestionIdx01",
+      "name": "Event.Ingestion.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2895,7 +2886,7 @@
       }
     },
     {
-      "name": "eventFormIngestionIdx01",
+      "name": "Event.Form_Ingestion.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2926,7 +2917,7 @@
       }
     },
     {
-      "name": "objectFormIdx01",
+      "name": "Object.Form.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2957,7 +2948,7 @@
       }
     },
     {
-      "name": "objectNotificationTemplatesIdx00",
+      "name": "Object.Notification_Templates.CompositeIdx",
       "composite": true,
       "unique": false,
       "indexOnly": null,
@@ -2967,7 +2958,7 @@
       ]
     },
     {
-      "name": "objectNotificationTemplatesIdx01",
+      "name": "Object.Notification_Templates.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
