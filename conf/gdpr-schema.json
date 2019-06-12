@@ -1967,11 +1967,11 @@
       }
     },
     {
-      "name": "Object.AWS_Network_Interface.CompositeIdx",
-      "composite": true,
+      "name": "Object.AWS_Network_Interface.MixedIdx",
+      "composite": false,
       "unique": false,
       "indexOnly": null,
-      "mixedIndex": null,
+      "mixedIndex": search,
       "propertyKeys": [
         "Object.AWS_Network_Interface.Description",
         "Object.AWS_Network_Interface.NetworkInterfaceId",
