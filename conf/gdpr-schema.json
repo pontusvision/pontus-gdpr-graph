@@ -5,7 +5,7 @@
       "name": "persondatamixedidx",
       "body": {
         "index_patterns": [
-          "janusgraph*persondatamixedidx"
+          "janusgraph*mixedidx"
         ],
         "order": 0,
         "settings": {
@@ -772,7 +772,7 @@
       "cardinality": "SINGLE"
     },
 
-    {
+	{
       "name": "Object.Data_Policy.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -808,7 +808,7 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-    {
+	{
       "name": "Object.Data_Source.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -828,8 +828,8 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
-
+	
+	
     {
       "name": "Object.Data_Source.Description",
       "dataType": "String",
@@ -1462,7 +1462,7 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-    {
+	{
       "name": "Person.Organisation.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -1971,7 +1971,7 @@
       "composite": false,
       "unique": false,
       "indexOnly": null,
-      "mixedIndex": search,
+      "mixedIndex": "search",
       "propertyKeys": [
         "Object.AWS_Network_Interface.Description",
         "Object.AWS_Network_Interface.NetworkInterfaceId",
@@ -2043,7 +2043,7 @@
         "Object.Data_Policy.Name": {
           "mapping": "STRING"
         },
-        "Object.Data_Policy.Form_Id": {
+		"Object.Data_Policy.Form_Id": {
           "mapping": "STRING"
         },
         "Object.Data_Policy.Form_Owner_Id": {
@@ -2067,11 +2067,11 @@
       "propertyKeys": [
 
         "Object.Data_Source.Name",
-        "Object.Data_Source.CreateDate",
-        "Object.Data_Source.UpdateDate",
+        "Object.Data_Source.Create_Date",
+        "Object.Data_Source.Update_Date",
         "Object.Data_Source.Description",
         "Metadata.Type.Object.Data_Source",
-        "Object.Data_Source.Form_Id",
+		"Object.Data_Source.Form_Id",
         "Object.Data_Source.Form_Owner_Id",
         "Object.Data_Source.Form_Submission_Id",
         "Object.Data_Source.Form_Submission_Owner_Id"
@@ -2084,16 +2084,16 @@
         "Object.Data_Source.Description": {
           "mapping": "STRING"
         },
-        "Object.Data_Source.UpdateDate": {
+        "Object.Data_Source.Update_Date": {
           "mapping": "STRING"
         },
-        "Object.Data_Source.CreateDate": {
+        "Object.Data_Source.Create_Date": {
           "mapping": "STRING"
         },
         "Object.Data_Source.Name": {
           "mapping": "STRING"
         },
-        "Object.Data_Source.Form_Id": {
+		"Object.Data_Source.Form_Id": {
           "mapping": "STRING"
         },
         "Object.Data_Source.Form_Owner_Id": {
@@ -2747,7 +2747,7 @@
         "Person.Organisation.Name",
         "Person.Organisation.orgCountrySet",
         "Person.Organisation.Department",
-        "Person.Organisation.Form_Id",
+		"Person.Organisation.Form_Id",
         "Person.Organisation.Form_Owner_Id",
         "Person.Organisation.Form_Submission_Id",
         "Person.Organisation.Form_Submission_Owner_Id"
@@ -2772,7 +2772,7 @@
         "Person.Organisation.orgCountrySet": {
           "mapping": "STRING"
         },
-        "Person.Organisation.Form_Id": {
+		"Person.Organisation.Form_Id": {
           "mapping": "STRING"
         },
         "Person.Organisation.Form_Owner_Id": {

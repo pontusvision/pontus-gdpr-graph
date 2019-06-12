@@ -74,7 +74,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       {
         sb.append(" OR ");
       }
-      sb.append("v.\"").append(col.field).append("\":").append(req.search.searchStr);
+      sb.append("v.\"").append(col.id).append("\":").append(req.search.searchStr);
     }
 
     return sb.toString();
@@ -145,67 +145,8 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       try
       {
 
-        GraphTraversal resSet    = App.g.V(); //.has("Metadata.Type", "Person");
+
         String         searchStr = req.search.getSearchStr();
-
-        if (StringUtils.isNotEmpty(searchStr))
-        {
-
-          int limit = req.to.intValue() - req.from.intValue();
-          List<Long> vertices = new ArrayList<>(limit);
-
-          App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req))
-                                      .limit(limit).offset(req.from.intValue())
-                                      .vertexStream().forEachOrdered(jgvr -> vertices.add(jgvr.getElement().longId()) );
-
-          App.g.V(vertices);
-
-          //          resSet.has("Person.FullName", textContainsFuzzy(searchStr));
-
-        }
-        else
-        {
-          resSet.has("Metadata.Type", req.search.extraSearch[0].value);
-
-        }
-
-        resSet.valueMap(true, vals)
-              .range(req.from, req.to);
-
-        List<Map<String, Object>> res = resSet.toList();
-
-        String[]     recs      = new String[res.size()];
-        ObjectMapper objMapper = new ObjectMapper();
-
-        for (int i = 0, ilen = res.size(); i < ilen; i++)
-        {
-          Map<String, Object> map = res.get(i);
-
-          //          recs[i] = new Record();
-          Map<String, String> rec = new HashMap<>();
-          for (Map.Entry<String, Object> entry : map.entrySet())
-          {
-            Object val = entry.getValue();
-            if (val instanceof ArrayList)
-            {
-              ArrayList<Object> arrayList = (ArrayList) val;
-
-              String val2 = arrayList.get(0).toString();
-
-              rec.put(entry.getKey(), val2);
-
-            }
-            else
-            {
-              rec.put(entry.getKey(), val.toString());
-
-            }
-
-          }
-
-          recs[i] = objMapper.writeValueAsString(rec);
-        }
-
         Long count = StringUtils.isEmpty(searchStr) ?
             App.g.V()
                  .has("Metadata.Type", req.search.extraSearch[0].value).range(req.from, req.to + req.to - req.from)
@@ -214,11 +155,80 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req)).vertexTotals();
 
 
+        GraphTraversal resSet   = App.g.V(); //.has("Metadata.Type", "Person");
+
+        if (count > 0)
+        {
+
+          if (StringUtils.isNotEmpty(searchStr))
+          {
+
+            int        limit    = req.to.intValue() - req.from.intValue();
+            List<Long> vertices = new ArrayList<>(limit);
+
+            App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req))
+                     .limit(limit).offset(req.from.intValue())
+                     .vertexStream().forEachOrdered(jgvr -> vertices.add(jgvr.getElement().longId()));
+
+            resSet = App.g.V(vertices);
+
+            //          resSet.has("Person.FullName", textContainsFuzzy(searchStr));
+
+          }
+          else
+          {
+            resSet.has("Metadata.Type", req.search.extraSearch[0].value);
+
+          }
+
+          resSet.valueMap(true, vals)
+                .range(req.from, req.to);
+
+          List<Map<String, Object>> res = resSet.toList();
+
+          String[]     recs      = new String[res.size()];
+          ObjectMapper objMapper = new ObjectMapper();
+
+          for (int i = 0, ilen = res.size(); i < ilen; i++)
+          {
+            Map<String, Object> map = res.get(i);
+
+            //          recs[i] = new Record();
+            Map<String, String> rec = new HashMap<>();
+            for (Map.Entry<String, Object> entry : map.entrySet())
+            {
+              Object val = entry.getValue();
+              if (val instanceof ArrayList)
+              {
+                ArrayList<Object> arrayList = (ArrayList) val;
+
+                String val2 = arrayList.get(0).toString();
+
+                rec.put(entry.getKey(), val2);
+
+              }
+              else
+              {
+                rec.put(entry.getKey(), val.toString());
+
+              }
+
+            }
+
+            recs[i] = objMapper.writeValueAsString(rec);
+          }
+          RecordReply reply = new RecordReply(req.from, req.to, count, recs);
+
+          return reply;
+
+
+        }
         //        Long count = Long.parseLong(countStr);
 
-        RecordReply reply = new RecordReply(req.from, req.to, count, recs);
+        RecordReply reply = new  RecordReply(req.from, req.to, count, null);
 
         return reply;
+
       }
       catch (Throwable t)
       {
@@ -226,7 +236,6 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       }
 
     }
-    String[] recs = new String[0];
 
     return new RecordReply(req.from, req.to, 0L, null);
 
