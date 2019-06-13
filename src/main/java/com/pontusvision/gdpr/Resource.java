@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -120,7 +121,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
    },
    "from":0,
    "to":600,
-   "sortBy":null,
+   "sortCol":null,
    "sortDir":"+asc"
 }
            */
@@ -147,9 +148,10 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
 
         String         searchStr = req.search.getSearchStr();
+        String dataType = req.search.extraSearch[0].value;
         Long count = StringUtils.isEmpty(searchStr) ?
             App.g.V()
-                 .has("Metadata.Type", req.search.extraSearch[0].value).range(req.from, req.to + req.to - req.from)
+                 .has("Metadata.Type." +dataType , dataType).range(req.from, req.to + req.to - req.from)
                  .propertyMap(vals).count().toList()
                  .get(0) + req.from :
             App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req)).vertexTotals();
@@ -167,7 +169,6 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             List<Long> vertices = new ArrayList<>(limit);
 
             App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req))
-                     .limit(limit).offset(req.from.intValue())
                      .vertexStream().forEachOrdered(jgvr -> vertices.add(jgvr.getElement().longId()));
 
             resSet = App.g.V(vertices);
@@ -177,10 +178,14 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           }
           else
           {
-            resSet.has("Metadata.Type", req.search.extraSearch[0].value);
+            resSet = resSet.has("Metadata.Type." + dataType, dataType);
 
           }
 
+          if (StringUtils.isNotEmpty(req.sortCol))
+          {
+            resSet = resSet.order().by(req.sortCol, "+asc".equalsIgnoreCase(req.sortDir)? Order.asc: Order.desc);
+          }
           resSet.valueMap(true, vals)
                 .range(req.from, req.to);
 
@@ -225,7 +230,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
         }
         //        Long count = Long.parseLong(countStr);
 
-        RecordReply reply = new  RecordReply(req.from, req.to, count, null);
+        RecordReply reply = new  RecordReply(req.from, req.to, count, new String[0]);
 
         return reply;
 
@@ -237,7 +242,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
     }
 
-    return new RecordReply(req.from, req.to, 0L, null);
+    return new RecordReply(req.from, req.to, 0L, new String[0]);
 
   }
 
