@@ -9,7 +9,7 @@ public class ReactSelectOptions {
     }
 
     public ReactSelectOptions(String label, String value) {
-        this.label = label;
+        this.label = label.replaceAll("_", " ");
         this.value = value;
     }
 
