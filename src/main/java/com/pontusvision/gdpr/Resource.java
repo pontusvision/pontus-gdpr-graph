@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -148,8 +149,8 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
         String dataType  = req.search.extraSearch[0].value;
         Long count = StringUtils.isEmpty(searchStr) ?
             App.g.V()
-                 .has("Metadata.Type." + dataType, dataType).range(req.from, req.to + req.to - req.from)
-                 .propertyMap(vals).count().toList()
+                 .has("Metadata.Type." + dataType, P.eq(dataType)).range(req.from, req.to + req.to - req.from)
+                 .count().toList()
                  .get(0) + req.from :
             App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req)).vertexTotals();
 
