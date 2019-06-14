@@ -74,31 +74,31 @@ public class App
       PropertyKey metadataGDPRStatus = mgmt.makePropertyKey("Metadata.GDPRStatus").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
 
-      VertexLabel partyPersonLabel = mgmt.makeVertexLabel("Party.Person").make();
+      VertexLabel partyPersonLabel = mgmt.makeVertexLabel("Party.Person.Natural").make();
 
-      PropertyKey partyPersonDateOfBirth = mgmt.makePropertyKey("Party.Person.DateOfBirth").dataType(Date.class)
+      PropertyKey partyPersonDateOfBirth = mgmt.makePropertyKey("Party.Person.Natural.DateOfBirth").dataType(Date.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonFullName = mgmt.makePropertyKey("Party.Person.FullName").dataType(String.class)
+      PropertyKey partyPersonFullName = mgmt.makePropertyKey("Party.Person.Natural.FullName").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonEmailAddress = mgmt.makePropertyKey("Party.Person.EmailAddress").dataType(String.class)
+      PropertyKey partyPersonEmailAddress = mgmt.makePropertyKey("Party.Person.Natural.EmailAddress").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonGender = mgmt.makePropertyKey("Party.Person.Gender").dataType(String.class)
+      PropertyKey partyPersonGender = mgmt.makePropertyKey("Party.Person.Natural.Gender").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonNationality = mgmt.makePropertyKey("Party.Person.Nationality").dataType(String.class)
+      PropertyKey partyPersonNationality = mgmt.makePropertyKey("Party.Person.Natural.Nationality").dataType(String.class)
           .cardinality(Cardinality.SET).make();
-      PropertyKey partyPersonPlaceOfBirth = mgmt.makePropertyKey("Party.Person.PlaceOfBirth").dataType(String.class)
+      PropertyKey partyPersonPlaceOfBirth = mgmt.makePropertyKey("Party.Person.Natural.PlaceOfBirth").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonReligion = mgmt.makePropertyKey("Party.Person.Religion").dataType(String.class)
+      PropertyKey partyPersonReligion = mgmt.makePropertyKey("Party.Person.Natural.Religion").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonEthnicity = mgmt.makePropertyKey("Party.Person.Ethnicity").dataType(String.class)
+      PropertyKey partyPersonEthnicity = mgmt.makePropertyKey("Party.Person.Natural.Ethnicity").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonMaritalStatus = mgmt.makePropertyKey("Party.Person.MaritalStatus").dataType(String.class)
+      PropertyKey partyPersonMaritalStatus = mgmt.makePropertyKey("Party.Person.Natural.MaritalStatus").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonHeight = mgmt.makePropertyKey("Party.Person.Height").dataType(String.class)
+      PropertyKey partyPersonHeight = mgmt.makePropertyKey("Party.Person.Natural.Height").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonNameQualifier = mgmt.makePropertyKey("Party.Person.NameQualifier").dataType(String.class)
+      PropertyKey partyPersonNameQualifier = mgmt.makePropertyKey("Party.Person.Natural.NameQualifier").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
-      PropertyKey partyPersonTitle = mgmt.makePropertyKey("Party.Person.Title").dataType(String.class)
+      PropertyKey partyPersonTitle = mgmt.makePropertyKey("Party.Person.Natural.Title").dataType(String.class)
           .cardinality(Cardinality.SINGLE).make();
 
       PropertyKey partyOrgRegNumber = mgmt.makePropertyKey("Party.Org.RegNumber").dataType(String.class)

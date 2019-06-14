@@ -551,7 +551,7 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Metadata.Type.Person",
+      "name": "Metadata.Type.Person.Natural",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -1278,12 +1278,12 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Customer_ID",
+      "name": "Person.Natural.Customer_ID",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Date_Of_Birth",
+      "name": "Person.Natural.Date_Of_Birth",
       "dataType": "Date",
       "cardinality": "SINGLE"
     },
@@ -1358,47 +1358,47 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Ethnicity",
+      "name": "Person.Natural.Ethnicity",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Full_Name",
+      "name": "Person.Natural.Full_Name",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Full_Name_fuzzy",
+      "name": "Person.Natural.Full_Name_fuzzy",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Gender",
+      "name": "Person.Natural.Gender",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Height",
+      "name": "Person.Natural.Height",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Last_Name",
+      "name": "Person.Natural.Last_Name",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Marital_Status",
+      "name": "Person.Natural.Marital_Status",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Name_Qualifier",
+      "name": "Person.Natural.Name_Qualifier",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Nationality",
+      "name": "Person.Natural.Nationality",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -1484,17 +1484,17 @@
     },
 
     {
-      "name": "Person.Place_Of_Birth",
+      "name": "Person.Natural.Place_Of_Birth",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Religion",
+      "name": "Person.Natural.Religion",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Title",
+      "name": "Person.Natural.Title",
       "dataType": "String",
       "cardinality": "SINGLE"
     }
@@ -1636,7 +1636,7 @@
       "useStatic": false
     },
     {
-      "name": "Person",
+      "name": "Person.Natural",
       "partition": false,
       "useStatic": false
     },
@@ -2153,72 +2153,72 @@
       }
     },
     {
-      "name": "Person.MixedIdx",
+      "name": "Person.Natural.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
-        "Metadata.Type.Person",
-        "Person.Place_Of_Birth",
-        "Person.Full_Name",
-        "Person.Gender",
-        "Person.Customer_ID",
-        "Person.Title",
-        "Person.Nationality",
-        "Person.Full_Name_fuzzy",
-        "Person.Ethnicity",
-        "Person.Date_Of_Birth",
-        "Person.Name_Qualifier",
-        "Person.Marital_Status",
-        "Person.Last_Name",
-        "Person.Religion"
+        "Metadata.Type.Person.Natural",
+        "Person.Natural.Place_Of_Birth",
+        "Person.Natural.Full_Name",
+        "Person.Natural.Gender",
+        "Person.Natural.Customer_ID",
+        "Person.Natural.Title",
+        "Person.Natural.Nationality",
+        "Person.Natural.Full_Name_fuzzy",
+        "Person.Natural.Ethnicity",
+        "Person.Natural.Date_Of_Birth",
+        "Person.Natural.Name_Qualifier",
+        "Person.Natural.Marital_Status",
+        "Person.Natural.Last_Name",
+        "Person.Natural.Religion"
       ],
       "propertyKeysMappings": {
-        "Metadata.Type.Person": {
+        "Metadata.Type.Person.Natural": {
           "mapping": "STRING"
         },
-        "Person.Date_Of_Birth": {
+        "Person.Natural.Date_Of_Birth": {
           "mapping": "DEFAULT"
         },
-        "Person.Full_Name": {
+        "Person.Natural.Full_Name": {
           "mapping": "STRING"
         },
-        "Person.Full_Name_fuzzy": {
+        "Person.Natural.Full_Name_fuzzy": {
           "mapping": "TEXTSTRING",
           "analyzer": {
             "name": "text-analyzer",
             "value": "pg_word_delimiter"
           }
         },
-        "Person.Last_Name": {
+        "Person.Natural.Last_Name": {
           "mapping": "STRING"
         },
-        "Person.Gender": {
+        "Person.Natural.Gender": {
           "mapping": "STRING"
         },
-        "Person.Nationality": {
+        "Person.Natural.Nationality": {
           "mapping": "STRING"
         },
-        "Person.Place_Of_Birth": {
+        "Person.Natural.Place_Of_Birth": {
           "mapping": "STRING"
         },
-        "Person.Religion": {
+        "Person.Natural.Religion": {
           "mapping": "STRING"
         },
-        "Person.Ethnicity": {
+        "Person.Natural.Ethnicity": {
           "mapping": "STRING"
         },
-        "Person.Marital_Status": {
+        "Person.Natural.Marital_Status": {
           "mapping": "STRING"
         },
-        "Person.Name_Qualifier": {
+        "Person.Natural.Name_Qualifier": {
           "mapping": "STRING"
         },
-        "Person.Title": {
+        "Person.Natural.Title": {
           "mapping": "STRING"
         },
-        "Person.Customer_ID": {
+        "Person.Natural.Customer_ID": {
           "mapping": "STRING"
         }
       }

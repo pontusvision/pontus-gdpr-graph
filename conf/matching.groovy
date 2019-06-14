@@ -1128,11 +1128,11 @@ def rulesStr = '''
     "vertices":
   [
     {
-    "label": "Person"
+    "label": "Person.Natural"
      ,"props":
     [
       {
-      "name": "Person.Full_Name"
+      "name": "Person.Natural.Full_Name"
        ,"val": "${pg_nlp_res_person}"
        ,"predicate": "eq"
        ,"type":"[Ljava.lang.String;"
@@ -1214,7 +1214,7 @@ def rulesStr = '''
   ]
    ,"edges":
     [
-      { "label": "Has_Ingestion_Event", "fromVertexLabel": "Person", "toVertexLabel": "Event.Ingestion"  }
+      { "label": "Has_Ingestion_Event", "fromVertexLabel": "Person.Natural", "toVertexLabel": "Event.Ingestion"  }
     ]
   }
 }
@@ -1552,40 +1552,40 @@ def rulesStr =  '''
     "vertices":
 	[
 	  {
-		"label": "Person"
+		"label": "Person.Natural"
 	   ,"props":
 		[
 		  {
-			"name": "Person.Full_Name"
+			"name": "Person.Natural.Full_Name"
 		   ,"val": "${pg_FirstName?.toUpperCase()?.trim()} ${pg_LastName?.toUpperCase()?.trim()}"
 		   ,"predicate": "eq"
 		   ,"mandatoryInSearch": true
 		  }
 		 ,{
-			"name": "Person.Last_Name"
+			"name": "Person.Natural.Last_Name"
 		   ,"val": "${pg_LastName?.toUpperCase()?.trim()}"
 		   ,"excludeFromSubsequenceSearch": true
 		  }
 		 ,{
-			"name": "Person.Date_Of_Birth"
+			"name": "Person.Natural.Date_Of_Birth"
 		   ,"val": "${pg_DateofBirth}"
 		   ,"type": "java.util.Date"
 		   ,"mandatoryInSearch": true
 
 		  }
 		 ,{
-			"name": "Person.Gender"
+			"name": "Person.Natural.Gender"
 		   ,"val": "${pg_Sex?.toUpperCase()}"
 		   ,"excludeFromSubsequenceSearch": true
 
 		  }
 		 ,{
-			"name": "Person.Title"
+			"name": "Person.Natural.Title"
 		   ,"val": "${'MALE' == pg_Sex?.toUpperCase()? 'MR':'MS'}"
 		   ,"excludeFromSearch": true
 		  }
 		 ,{
-			"name": "Person.Nationality"
+			"name": "Person.Natural.Nationality"
 		   ,"val": "Not Provided"
 		   ,"excludeFromSearch": true
 		  }
@@ -1678,10 +1678,10 @@ def rulesStr =  '''
 	]
    ,"edges":
     [
-      { "label": "Uses_Email", "fromVertexLabel": "Person", "toVertexLabel": "Object.Email_Address" }
-     ,{ "label": "Lives", "fromVertexLabel": "Person", "toVertexLabel": "Location.Address"  }
-     ,{ "label": "Has_Policy", "fromVertexLabel": "Person", "toVertexLabel": "Object.Insurance_Policy"  }
-     ,{ "label": "Has_Ingestion_Event", "fromVertexLabel": "Person", "toVertexLabel": "Event.Ingestion"  }
+      { "label": "Uses_Email", "fromVertexLabel": "Person.Natural", "toVertexLabel": "Object.Email_Address" }
+     ,{ "label": "Lives", "fromVertexLabel": "Person.Natural", "toVertexLabel": "Location.Address"  }
+     ,{ "label": "Has_Policy", "fromVertexLabel": "Person.Natural", "toVertexLabel": "Object.Insurance_Policy"  }
+     ,{ "label": "Has_Ingestion_Event", "fromVertexLabel": "Person.Natural", "toVertexLabel": "Event.Ingestion"  }
     ]
   }
 }

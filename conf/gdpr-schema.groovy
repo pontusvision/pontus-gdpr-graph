@@ -322,21 +322,21 @@ O.Form.Vertex_Label
 
 
 
-    personLabel = createVertexLabel(mgmt, "Person")
-    personDateOfBirth = createProp(mgmt, "Person.Date_Of_Birth", Date.class, org.janusgraph.core.Cardinality.SINGLE)
-    personFullName = createProp(mgmt, "Person.Full_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personFullNameFuzzy = createProp(mgmt, "Person.Full_Name_fuzzy", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personLastName = createProp(mgmt, "Person.Last_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personGender = createProp(mgmt, "Person.Gender", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personNationality = createProp(mgmt, "Person.Nationality", String.class, org.janusgraph.core.Cardinality.SET)
-    personPlaceOfBirth = createProp(mgmt, "Person.Place_Of_Birth", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personReligion = createProp(mgmt, "Person.Religion", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personEthnicity = createProp(mgmt, "Person.Ethnicity", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personMaritalStatus = createProp(mgmt, "Person.Marital_Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personHeight = createProp(mgmt, "Person.Height", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personNameQualifier = createProp(mgmt, "Person.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personTitle = createProp(mgmt, "Person.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
-    personCustomerId = createProp(mgmt, "Person.Customer_ID", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personLabel = createVertexLabel(mgmt, "Person.Natural")
+    personDateOfBirth = createProp(mgmt, "Person.Natural.Date_Of_Birth", Date.class, org.janusgraph.core.Cardinality.SINGLE)
+    personFullName = createProp(mgmt, "Person.Natural.Full_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personFullNameFuzzy = createProp(mgmt, "Person.Natural.Full_Name_fuzzy", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personLastName = createProp(mgmt, "Person.Natural.Last_Name", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personGender = createProp(mgmt, "Person.Natural.Gender", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personNationality = createProp(mgmt, "Person.Natural.Nationality", String.class, org.janusgraph.core.Cardinality.SET)
+    personPlaceOfBirth = createProp(mgmt, "Person.Natural.Place_Of_Birth", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personReligion = createProp(mgmt, "Person.Natural.Religion", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personEthnicity = createProp(mgmt, "Person.Natural.Ethnicity", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personMaritalStatus = createProp(mgmt, "Person.Natural.Marital_Status", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personHeight = createProp(mgmt, "Person.Natural.Height", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personNameQualifier = createProp(mgmt, "Person.Natural.Name_Qualifier", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personTitle = createProp(mgmt, "Person.Natural.Title", String.class, org.janusgraph.core.Cardinality.SINGLE)
+    personCustomerId = createProp(mgmt, "Person.Natural.Customer_ID", String.class, org.janusgraph.core.Cardinality.SINGLE)
 
 //    createMixedIdx(mgmt, "personDataOfBirthMixedIdx", personLabel, personFullName, personLastName, personGender, personNationality, personDateOfBirth,
 //            personPlaceOfBirth, personReligion, personEthnicity, personMaritalStatus, personNameQualifier, personTitle,personCustomerId);

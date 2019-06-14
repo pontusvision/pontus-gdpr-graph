@@ -13,8 +13,8 @@ import groovy.json.JsonSlurper
 ////
 ////
 ////
-////// def jsonStr = '{"reqs":[{"attribVal":"Leo","attribType":"String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"textPrefix"},{"attribVal":"Mardy","attribType":"String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVal":"Martins","attribType":"String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVal":"Zukker","attribType":"String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVal":"Silva","attribType":"String","propName":"Person.Last_Name","vertexName":"Person","predicateStr":"textFuzzy"},{"attribVal":"SW1W 9QL","attribType":"String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"},{"attribVal":"E14 4BB","attribType":"String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"},{"attribVal":"SW1W 3LL","attribType":"String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
-////// def jsonStr = '{"reqs":[{"attribVal":"Leo","attribType":"String","propName":"Person.Full_Name","vertexName":"Person","predicateStr":"textPrefix"}]}'
+////// def jsonStr = '{"reqs":[{"attribVal":"Leo","attribType":"String","propName":"Person.Natural.Full_Name","vertexName":"Person.Natural","predicateStr":"textPrefix"},{"attribVal":"Mardy","attribType":"String","propName":"Person.Natural.Full_Name","vertexName":"Person.Natural","predicateStr":"textFuzzy"},{"attribVal":"Martins","attribType":"String","propName":"Person.Natural.Last_Name","vertexName":"Person.Natural","predicateStr":"textFuzzy"},{"attribVal":"Zukker","attribType":"String","propName":"Person.Natural.Last_Name","vertexName":"Person.Natural","predicateStr":"textFuzzy"},{"attribVal":"Silva","attribType":"String","propName":"Person.Natural.Last_Name","vertexName":"Person.Natural","predicateStr":"textFuzzy"},{"attribVal":"SW1W 9QL","attribType":"String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"},{"attribVal":"E14 4BB","attribType":"String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"},{"attribVal":"SW1W 3LL","attribType":"String","propName":"Location.Address.Post_Code","vertexName":"Location.Address","predicateStr":"eq"}]}'
+////// def jsonStr = '{"reqs":[{"attribVal":"Leo","attribType":"String","propName":"Person.Natural.Full_Name","vertexName":"Person.Natural","predicateStr":"textPrefix"}]}'
 ////
 ////
 ////
@@ -24,7 +24,7 @@ import groovy.json.JsonSlurper
 ////// sb.toString()
 ////// g.V()
 ////
-////// g.V().has('Person.Full_Name',org.janusgraph.core.attribute.Text.textPrefix('Leo')).id()
+////// g.V().has('Person.Natural.Full_Name',org.janusgraph.core.attribute.Text.textPrefix('Leo')).id()
 ////
 //updateFormData(g,jsonData,"Object.Privacy_Impact_Assessment",sb)
 ////

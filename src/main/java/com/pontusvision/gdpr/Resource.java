@@ -10,10 +10,8 @@ import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.janusgraph.core.JanusGraphIndexQuery;
-import org.janusgraph.core.JanusGraphVertex;
+import org.janusgraph.core.PropertyKey;
 import org.janusgraph.core.schema.JanusGraphManagement;
-import org.janusgraph.graphdb.util.StreamIterable;
 
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
@@ -96,8 +94,8 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             "focusable":true,
             "selectable":true,
             "width":624,
-            "id":"Person.Full_Name",
-            "field":"Person.Full_Name"
+            "id":"Person.Natural.Full_Name",
+            "field":"Person.Natural.Full_Name"
          },
          {
             "name":"Person Nationality",
@@ -110,13 +108,13 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             "focusable":true,
             "selectable":true,
             "width":623,
-            "id":"Person.Nationality",
-            "field":"Person.Nationality"
+            "id":"Person.Natural.Nationality",
+            "field":"Person.Natural.Nationality"
          }
       ],
       "extraSearch":{
-         "label":"Person",
-         "value":"Person"
+         "label":"Person.Natural",
+         "value":"Person.Natural"
       }
    },
    "from":0,
@@ -146,18 +144,16 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       try
       {
 
-
-        String         searchStr = req.search.getSearchStr();
-        String dataType = req.search.extraSearch[0].value;
+        String searchStr = req.search.getSearchStr();
+        String dataType  = req.search.extraSearch[0].value;
         Long count = StringUtils.isEmpty(searchStr) ?
             App.g.V()
-                 .has("Metadata.Type." +dataType , dataType).range(req.from, req.to + req.to - req.from)
+                 .has("Metadata.Type." + dataType, dataType).range(req.from, req.to + req.to - req.from)
                  .propertyMap(vals).count().toList()
                  .get(0) + req.from :
             App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req)).vertexTotals();
 
-
-        GraphTraversal resSet   = App.g.V(); //.has("Metadata.Type", "Person");
+        GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person.Natural");
 
         if (count > 0)
         {
@@ -173,7 +169,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
             resSet = App.g.V(vertices);
 
-            //          resSet.has("Person.FullName", textContainsFuzzy(searchStr));
+            //          resSet.has("Person.Natural.FullName", textContainsFuzzy(searchStr));
 
           }
           else
@@ -184,7 +180,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
           if (StringUtils.isNotEmpty(req.sortCol))
           {
-            resSet = resSet.order().by(req.sortCol, "+asc".equalsIgnoreCase(req.sortDir)? Order.asc: Order.desc);
+            resSet = resSet.order().by(req.sortCol, "+asc".equalsIgnoreCase(req.sortDir) ? Order.incr : Order.decr);
           }
           resSet.valueMap(true, vals)
                 .range(req.from, req.to);
@@ -226,11 +222,10 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
           return reply;
 
-
         }
         //        Long count = Long.parseLong(countStr);
 
-        RecordReply reply = new  RecordReply(req.from, req.to, count, new String[0]);
+        RecordReply reply = new RecordReply(req.from, req.to, count, new String[0]);
 
         return reply;
 
@@ -295,16 +290,17 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       //      GraphTraversal g =
       try
       {
-        GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person");
+        GraphTraversal resSet = App.g.V(); //.has("Metadata.Type", "Person.Natural");
         //        Boolean searchExact = req.search.getSearchExact();
 
         CountryDataReply data = new CountryDataReply();
 
         List<Map<String, Long>> res =
             StringUtils.isNotEmpty(searchStr) ?
-                resSet.has("Person.FullName", textContainsFuzzy(searchStr)).values("Person.Nationality").groupCount()
+                resSet.has("Person.Natural.FullName", textContainsFuzzy(searchStr)).values("Person.Natural.Nationality")
+                      .groupCount()
                       .toList() :
-                resSet.has("Person.Nationality").values("Person.Nationality").groupCount().toList();
+                resSet.has("Person.Natural.Nationality").values("Person.Natural.Nationality").groupCount().toList();
 
         if (res.size() == 1)
         {
@@ -337,18 +333,32 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
         //        String[] labels = new String[req.labels.length - 1];
         //        String label0 = req.labels[0].value;
-        GraphTraversal g = App.g.V();
-        for (int i = 0, ilen = req.labels.length; i < ilen; i++)
-        {
-          g = g.has("Metadata.Type", req.labels[i].value).range(0, 1);
+//        GraphTraversal g = App.g.V();
+//        for (int i = 0, ilen = req.labels.length; i < ilen; i++)
+//        {
+//          g = g.has("Metadata.Type", req.labels[i].value).range(0, 1);
+//
+//          //          labels[i] = (req.labels[i + 1].value);
+//
+//        }
 
-          //          labels[i] = (req.labels[i + 1].value);
-
-        }
-
-        NodePropertyNamesReply reply = new NodePropertyNamesReply(g.properties().label().toSet()
-            //            App.g.V().hasLabel(label0, labels).properties().label().toSet()
+        Set<String>  props = new HashSet<>();
+        final String label = req.labels[0].value;
+        App.graph.openManagement().getRelationTypes(PropertyKey.class).forEach(
+            propertyKey ->
+            {
+              if (propertyKey.isPropertyKey())
+              {
+                String currLabel = propertyKey.name();
+                if (currLabel.startsWith(label))
+                {
+                  props.add(currLabel);
+                }
+              }
+            }
         );
+
+        NodePropertyNamesReply reply = new NodePropertyNamesReply(props);
         return reply;
 
       }

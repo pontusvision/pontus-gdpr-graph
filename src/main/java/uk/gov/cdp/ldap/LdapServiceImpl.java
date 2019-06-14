@@ -388,7 +388,7 @@ krbTicketFlags: 128
     }
     //        objClasses.add("top");
     //        objClasses.add("person");
-    //        objClasses.add("organizationalPerson");
+    //        objClasses.add("organizationalPerson.Natural");
     //        objClasses.add("user");
     return objClasses;
   }

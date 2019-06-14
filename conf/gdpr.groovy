@@ -30,7 +30,7 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
         }
 
 
-        person = g.addV("Person").
+        person = g.addV("Person.Natural").
                 property("Metadata.Controller", pg_metadataController).
                 property("Metadata.Processor", pg_metadataProcessor).
                 property("Metadata.Lineage", pg_metadataLineage).
@@ -42,14 +42,14 @@ def addRandomUserData(graph, g, pg_dob, pg_metadataController, pg_metadataProces
                 property("Metadata.GDPR_Status", pg_metadataGDPRStatus).
                 property("Metadata.Lineage_Server_Tag", pg_metadataLineageServerTag).
                 property("Metadata.Lineage_Location_Tag", pg_metadataLineageLocationTag).
-                property("Metadata.Type", "Person").
-                property("Metadata.Type.Person", "Person").
-                property("Person.Full_Name", pg_name_first + " " + pg_name_last).
-                property("Person.Last_Name", pg_name_last).
-                property("Person.Gender", pg_gender).
-                property("Person.Nationality", pg_nat).
-                property("Person.Date_Of_Birth", dob).
-                property("Person.Title", pg_name_title).next()
+                property("Metadata.Type", "Person.Natural").
+                property("Metadata.Type.Person.Natural", "Person.Natural").
+                property("Person.Natural.Full_Name", pg_name_first + " " + pg_name_last).
+                property("Person.Natural.Last_Name", pg_name_last).
+                property("Person.Natural.Gender", pg_gender).
+                property("Person.Natural.Nationality", pg_nat).
+                property("Person.Natural.Date_Of_Birth", dob).
+                property("Person.Natural.Title", pg_name_title).next()
 
         email = g.addV("Object.Email_Address").
                 property("Metadata.Controller", pg_metadataController).
@@ -401,7 +401,7 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
 
 
-            person = g.addV("Person").
+            person = g.addV("Person.Natural").
                     property("Metadata.Controller", item.get("pg_metadataController")).
                     property("Metadata.Processor", item.get("pg_metadataProcessor")).
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
@@ -413,14 +413,14 @@ def addRandomUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Person").
-                    property("Metadata.Type.Person", "Person").
-                    property("Person.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
-                    property("Person.Last_Name", item.get("pg_name_last")).
-                    property("Person.Gender", item.get("pg_gender")).
-                    property("Person.Nationality", item.get("pg_nat")).
-                    property("Person.Date_Of_Birth", dob).
-                    property("Person.Title", item.get("pg_name_title")).next()
+                    property("Metadata.Type", "Person.Natural").
+                    property("Metadata.Type.Person.Natural", "Person.Natural").
+                    property("Person.Natural.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
+                    property("Person.Natural.Last_Name", item.get("pg_name_last")).
+                    property("Person.Natural.Gender", item.get("pg_gender")).
+                    property("Person.Natural.Nationality", item.get("pg_nat")).
+                    property("Person.Natural.Date_Of_Birth", dob).
+                    property("Person.Natural.Title", item.get("pg_name_title")).next()
 
 
             email = g.addV("Object.Email_Address").
@@ -600,7 +600,7 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps, StringBuffer s
 
             sb?.append("\n Looking for  existing person based on the $customerId ")
 
-            def personTrav = g.V().has("Person.Customer_ID", customerId)
+            def personTrav = g.V().has("Person.Natural.Customer_ID", customerId)
 
             def person = null;
             if (personTrav.hasNext()) {
@@ -608,7 +608,7 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps, StringBuffer s
                 sb?.append("\n Found  existing person based on the $customerId ")
 
             } else {
-                person = g.addV("Person").
+                person = g.addV("Person.Natural").
                         property("Metadata.Controller", item.get("pg_metadataController")).
                         property("Metadata.Processor", item.get("pg_metadataProcessor")).
                         property("Metadata.Lineage", item.get("pg_metadataLineage")).
@@ -620,15 +620,15 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps, StringBuffer s
                         property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
                         property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                         property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                        property("Metadata.Type", "Person").
-                        property("Metadata.Type.Person", "Person").
-                        property("Person.Full_Name", (item.get("pg_First_Name") + " " + item.get("pg_Last_Name"))?.toUpperCase()).
-                        property("Person.Last_Name", item.get("pg_Last_Name")?.toUpperCase()).
-                        property("Person.Gender", gender).
-                        property("Person.Nationality", nationality).
-                        property("Person.Date_Of_Birth", dob).
-                        property("Person.Customer_ID", customerId).
-                        property("Person.Title", title).next()
+                        property("Metadata.Type", "Person.Natural").
+                        property("Metadata.Type.Person.Natural", "Person.Natural").
+                        property("Person.Natural.Full_Name", (item.get("pg_First_Name") + " " + item.get("pg_Last_Name"))?.toUpperCase()).
+                        property("Person.Natural.Last_Name", item.get("pg_Last_Name")?.toUpperCase()).
+                        property("Person.Natural.Gender", gender).
+                        property("Person.Natural.Nationality", nationality).
+                        property("Person.Natural.Date_Of_Birth", dob).
+                        property("Person.Natural.Customer_ID", customerId).
+                        property("Person.Natural.Title", title).next()
 
             }
 
@@ -768,7 +768,7 @@ def addRandomDataProcedures(graph, g) {
 
         def types = new String[6];
 
-        types[0] = "Person";
+        types[0] = "Person.Natural";
         types[1] = "Object.Email_Address";
         types[2] = "Object.Credential";
         types[3] = "Object.Identity_Card";
@@ -968,7 +968,7 @@ def addRandomDataBreachEvents(graph, g) {
         }
 
         for (def i = 0; i < 10000; i++) {
-            g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1)).to(event).next();
+            g.addE('Data_Impacted_By_Data_Breach').from(g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural')).order().by(shuffle).range(0, 1)).to(event).next();
         }
         tx.commit();
         tx.close();
@@ -1040,7 +1040,7 @@ def addRandomSARs(graph, g) {
 
             def employee = g.V().has('Metadata.Type.Person.Employee', eq('Person.Employee')).order().by(shuffle).range(0, 1).tryNext()
 
-            def person = g.V().has('Metadata.Type.Person', eq('Person')).order().by(shuffle).range(0, 1).tryNext()
+            def person = g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural')).order().by(shuffle).range(0, 1).tryNext()
 
 
             if (person.isPresent()){
@@ -1106,7 +1106,7 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
 
 
-            person = g.addV("Person").
+            person = g.addV("Person.Natural").
                     property("Metadata.Controller", item.get("pg_metadataController")).
                     property("Metadata.Processor", item.get("pg_metadataProcessor")).
                     property("Metadata.Lineage", item.get("pg_metadataLineage")).
@@ -1118,14 +1118,14 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
                     property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
                     property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
                     property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
-                    property("Metadata.Type", "Person").
-                    property("Metadata.Type.Person", "Person").
-                    property("Person.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
-                    property("Person.Last_Name", item.get("pg_name_last")).
-                    property("Person.Gender", item.get("pg_gender")).
-                    property("Person.Nationality", item.get("pg_nat")).
-                    property("Person.Date_Of_Birth", dob).
-                    property("Person.Title", item.get("pg_name_title")).next()
+                    property("Metadata.Type", "Person.Natural").
+                    property("Metadata.Type.Person.Natural", "Person.Natural").
+                    property("Person.Natural.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
+                    property("Person.Natural.Last_Name", item.get("pg_name_last")).
+                    property("Person.Natural.Gender", item.get("pg_gender")).
+                    property("Person.Natural.Nationality", item.get("pg_nat")).
+                    property("Person.Natural.Date_Of_Birth", dob).
+                    property("Person.Natural.Title", item.get("pg_name_title")).next()
 
 
             email = g.addV("Object.Email_Address").
@@ -1201,8 +1201,8 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
 
             parentOrGuardian = g.V()
-                    .has('Metadata.Type.Person', eq('Person'))
-                    .where(__.values('Person.Date_Of_Birth').is(lt(dateThreshold)))
+                    .has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+                    .where(__.values('Person.Natural.Date_Of_Birth').is(lt(dateThreshold)))
                     .order().by(shuffle).range(0, 1).next();
 
 
@@ -1311,7 +1311,7 @@ def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
 
 //        def employee = g.V().has('Metadata.Type',eq('Person.Employee')).order().by(shuffle).range(0,1).next()
 
-        def person = g.V().has('Metadata.Type', eq('Person')).order().by(shuffle).range(0, 1).next()
+        def person = g.V().has('Metadata.Type', eq('Person.Natural')).order().by(shuffle).range(0, 1).next()
 
 
         g.addE("Consent").from(person).to(consent).next()
@@ -1320,7 +1320,7 @@ def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
 
     }
 
-//    g.V().has("Metadata.Type", eq("Person")).as("people")
+//    g.V().has("Metadata.Type", eq("Person.Natural")).as("people")
 //            .addE("Consent").property("Consent.Date", new Date())
 //            .from("people").to(privNoticeVertex).next()
 
@@ -2125,7 +2125,7 @@ def createDataProtectionAuthorities() {
 
         def types = new String[6];
 
-        types[0] = "Person";
+        types[0] = "Person.Natural";
         types[1] = "Object.Email_Address";
         types[2] = "Object.Credential";
         types[3] = "Object.Identity_Card";
@@ -2254,7 +2254,7 @@ def createNotificationTemplates() {
                 "  {% endfor %}\n" +
                 "  {{ \"</table>\" }}\n" +
                 "  {% endfor %}").bytes.encodeBase64().toString())
-                .property("Object.Notification_Templates.Types", "Person")
+                .property("Object.Notification_Templates.Types", "Person.Natural")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
                 .property("Object.Notification_Templates.Label", "SAR Read")
                 .next();
@@ -2285,7 +2285,7 @@ def createNotificationTemplates() {
                 "  {% endfor %}\n" +
                 "  {{ \"</table>\" }}\n" +
                 "  {% endfor %}").bytes.encodeBase64().toString())
-                .property("Object.Notification_Templates.Types", "Person")
+                .property("Object.Notification_Templates.Types", "Person.Natural")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_update")
                 .property("Object.Notification_Templates.Label", "SAR Update")
                 .next();
@@ -2316,7 +2316,7 @@ def createNotificationTemplates() {
                 "  {% endfor %}\n" +
                 "  {{ \"</table>\" }}\n" +
                 "  {% endfor %}").bytes.encodeBase64().toString())
-                .property("Object.Notification_Templates.Types", "Person")
+                .property("Object.Notification_Templates.Types", "Person.Natural")
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_delete")
                 .property("Object.Notification_Templates.Label", "SAR Delete")
                 .next();
@@ -2349,7 +2349,7 @@ def createNotificationTemplates() {
                 .property("Object.Notification_Templates.Text", "Dear {{ connected_data.Person_Name }}, We regret to inform you that your data may have been stolen.".bytes.encodeBase64().toString())
                 .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
                 .property("Object.Notification_Templates.Types", "Event.Data_Breach")
-                .property("Object.Notification_Templates.Label", "Person")
+                .property("Object.Notification_Templates.Label", "Person.Natural")
                 .next();
 
         trans.commit();

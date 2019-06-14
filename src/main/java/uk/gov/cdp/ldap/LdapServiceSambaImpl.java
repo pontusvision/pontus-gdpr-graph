@@ -204,7 +204,7 @@ public class LdapServiceSambaImpl implements LdapService {
     Attribute objClasses = new BasicAttribute("objectClass");
     objClasses.add("top");
     objClasses.add("person");
-    objClasses.add("organizationalPerson");
+    objClasses.add("organizationalPerson.Natural");
     objClasses.add("user");
     return objClasses;
   }
