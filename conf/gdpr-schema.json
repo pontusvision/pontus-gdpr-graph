@@ -1288,6 +1288,11 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Person.Employee.ID",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Person.Employee.Ethnicity",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -2847,6 +2852,7 @@
         "Metadata.Type.Person.Employee",
         "Person.Employee.Gender",
         "Person.Employee.Is_GDPR_Role",
+        "Person.Employee.ID",
         "Person.Employee.Name_Qualifier",
         "Person.Employee.Religion",
         "Person.Employee.Marital_Status",
@@ -2863,6 +2869,10 @@
         "Metadata.Type.Person.Employee": {
           "mapping": "STRING"
         },
+        "Person.Employee.ID": {
+          "mapping": "STRING"
+        },
+
         "Person.Employee.Role": {
           "mapping": "STRING"
         },
