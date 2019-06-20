@@ -1267,7 +1267,7 @@ def getVisJsGraphImmediateNeighbourEdges(long pg_vid, StringBuffer sb, int count
     return counter;
 }
 /*
-Event.Ingestion.Group
+Event.Ingestion_Group
 Event.Ingestion
 
 Person
@@ -1308,7 +1308,7 @@ Object.AWS_Network_Interface
 
 def getMetadataTypes(int level) {
     def metadataTypes = [
-            'Event.Ingestion.Group'
+            'Event.Ingestion_Group'
             , 'Event.Ingestion'
             , 'Person.Natural'
             , 'Object.Email_Address'

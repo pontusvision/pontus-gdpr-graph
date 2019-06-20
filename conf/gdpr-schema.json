@@ -155,37 +155,37 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Metadata_End_Date",
+      "name": "Event.Ingestion_Group.Metadata_End_Date",
       "dataType": "Date",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Metadata_Start_Date",
+      "name": "Event.Ingestion_Group.Metadata_Start_Date",
       "dataType": "Date",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Operation",
+      "name": "Event.Ingestion_Group.Operation",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Type",
+      "name": "Event.Ingestion_Group.Type",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Has_Controller",
+      "name": "Event.Ingestion_Group.Has_Controller",
       "dataType": "Boolean",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Has_Processor",
+      "name": "Event.Ingestion_Group.Has_Processor",
       "dataType": "Boolean",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Has_Data_Owner",
+      "name": "Event.Ingestion_Group.Has_Data_Owner",
       "dataType": "Boolean",
       "cardinality": "SINGLE"
     },
@@ -435,7 +435,7 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Metadata.Type.Event.Ingestion.Group",
+      "name": "Metadata.Type.Event.Ingestion_Group",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -1591,7 +1591,7 @@
       "useStatic": false
     },
     {
-      "name": "Event.Ingestion.Group",
+      "name": "Event.Ingestion_Group",
       "partition": false,
       "useStatic": false
     },
@@ -2987,23 +2987,23 @@
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
-        "Event.Ingestion.Group.Operation",
-        "Event.Ingestion.Group.Metadata_End_Date",
-        "Event.Ingestion.Group.Type",
-        "Event.Ingestion.Group.Metadata_Start_Date",
-        "Event.Ingestion.Group.Has_Controller",
-        "Event.Ingestion.Group.Has_Processor",
-        "Event.Ingestion.Group.Has_Data_Owner",
-        "Metadata.Type.Event.Ingestion.Group"
+        "Event.Ingestion_Group.Operation",
+        "Event.Ingestion_Group.Metadata_End_Date",
+        "Event.Ingestion_Group.Type",
+        "Event.Ingestion_Group.Metadata_Start_Date",
+        "Event.Ingestion_Group.Has_Controller",
+        "Event.Ingestion_Group.Has_Processor",
+        "Event.Ingestion_Group.Has_Data_Owner",
+        "Metadata.Type.Event.Ingestion_Group"
       ],
       "propertyKeysMappings": {
-        "Metadata.Type.Event.Ingestion.Group": {
+        "Metadata.Type.Event.Ingestion_Group": {
           "mapping": "STRING"
         },
-        "Event.Ingestion.Group.Type": {
+        "Event.Ingestion_Group.Type": {
           "mapping": "STRING"
         },
-        "Event.Ingestion.Group.Operation": {
+        "Event.Ingestion_Group.Operation": {
           "mapping": "STRING"
         }
       }
