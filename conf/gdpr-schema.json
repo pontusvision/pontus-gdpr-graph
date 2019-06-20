@@ -551,6 +551,11 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Metadata.Type.Person.Identity",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Metadata.Type.Person.Natural",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -772,7 +777,7 @@
       "cardinality": "SINGLE"
     },
 
-	{
+    {
       "name": "Object.Data_Policy.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -808,7 +813,7 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-	{
+    {
       "name": "Object.Data_Source.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -828,8 +833,8 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-	
-	
+
+
     {
       "name": "Object.Data_Source.Description",
       "dataType": "String",
@@ -1278,16 +1283,6 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Natural.Customer_ID",
-      "dataType": "String",
-      "cardinality": "SINGLE"
-    },
-    {
-      "name": "Person.Natural.Date_Of_Birth",
-      "dataType": "Date",
-      "cardinality": "SINGLE"
-    },
-    {
       "name": "Person.Employee.Date_Of_Birth",
       "dataType": "Date",
       "cardinality": "SINGLE"
@@ -1357,6 +1352,81 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+
+
+
+    {
+      "name": "Person.Identity.Customer_ID",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Date_Of_Birth",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Person.Identity.Ethnicity",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Full_Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Full_Name_fuzzy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Gender",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Height",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Last_Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Marital_Status",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Name_Qualifier",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Nationality",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+
+
+
+
+    {
+      "name": "Person.Natural.Customer_ID",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Date_Of_Birth",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+
     {
       "name": "Person.Natural.Ethnicity",
       "dataType": "String",
@@ -1462,7 +1532,7 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-	{
+    {
       "name": "Person.Organisation.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -1636,6 +1706,11 @@
       "useStatic": false
     },
     {
+      "name": "Person.Identity",
+      "partition": false,
+      "useStatic": false
+    },
+    {
       "name": "Person.Natural",
       "partition": false,
       "useStatic": false
@@ -1759,6 +1834,11 @@
     },
     {
       "name": "Impacted_By_Data_Breach",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
+      "name": "Is_Alias",
       "multiplicity": "MULTI",
       "unidirected": false
     },
@@ -2043,7 +2123,7 @@
         "Object.Data_Policy.Name": {
           "mapping": "STRING"
         },
-		"Object.Data_Policy.Form_Id": {
+        "Object.Data_Policy.Form_Id": {
           "mapping": "STRING"
         },
         "Object.Data_Policy.Form_Owner_Id": {
@@ -2071,7 +2151,7 @@
         "Object.Data_Source.Update_Date",
         "Object.Data_Source.Description",
         "Metadata.Type.Object.Data_Source",
-		"Object.Data_Source.Form_Id",
+        "Object.Data_Source.Form_Id",
         "Object.Data_Source.Form_Owner_Id",
         "Object.Data_Source.Form_Submission_Id",
         "Object.Data_Source.Form_Submission_Owner_Id"
@@ -2093,7 +2173,7 @@
         "Object.Data_Source.Name": {
           "mapping": "STRING"
         },
-		"Object.Data_Source.Form_Id": {
+        "Object.Data_Source.Form_Id": {
           "mapping": "STRING"
         },
         "Object.Data_Source.Form_Owner_Id": {
@@ -2148,6 +2228,77 @@
           "mapping": "STRING"
         },
         "Event.Subject_Access_Request.Request_Type": {
+          "mapping": "STRING"
+        }
+      }
+    },
+    {
+      "name": "Person.Identity.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Person.Identity",
+        "Person.Identity.Place_Of_Birth",
+        "Person.Identity.Full_Name",
+        "Person.Identity.Gender",
+        "Person.Identity.Customer_ID",
+        "Person.Identity.Title",
+        "Person.Identity.Nationality",
+        "Person.Identity.Full_Name_fuzzy",
+        "Person.Identity.Ethnicity",
+        "Person.Identity.Date_Of_Birth",
+        "Person.Identity.Name_Qualifier",
+        "Person.Identity.Marital_Status",
+        "Person.Identity.Last_Name",
+        "Person.Identity.Religion"
+      ],
+      "propertyKeysMappings": {
+        "Metadata.Type.Person.Identity": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Date_Of_Birth": {
+          "mapping": "DEFAULT"
+        },
+        "Person.Identity.Full_Name": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Full_Name_fuzzy": {
+          "mapping": "TEXTSTRING",
+          "analyzer": {
+            "name": "text-analyzer",
+            "value": "pg_word_delimiter"
+          }
+        },
+        "Person.Identity.Last_Name": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Gender": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Nationality": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Place_Of_Birth": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Religion": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Ethnicity": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Marital_Status": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Name_Qualifier": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Title": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Customer_ID": {
           "mapping": "STRING"
         }
       }
@@ -2747,7 +2898,7 @@
         "Person.Organisation.Name",
         "Person.Organisation.orgCountrySet",
         "Person.Organisation.Department",
-		"Person.Organisation.Form_Id",
+        "Person.Organisation.Form_Id",
         "Person.Organisation.Form_Owner_Id",
         "Person.Organisation.Form_Submission_Id",
         "Person.Organisation.Form_Submission_Owner_Id"
@@ -2772,7 +2923,7 @@
         "Person.Organisation.orgCountrySet": {
           "mapping": "STRING"
         },
-		"Person.Organisation.Form_Id": {
+        "Person.Organisation.Form_Id": {
           "mapping": "STRING"
         },
         "Person.Organisation.Form_Owner_Id": {
