@@ -1411,6 +1411,21 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+    {
+    "name": "Person.Identity.Place_Of_Birth",
+    "dataType": "String",
+    "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Religion",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Title",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
 
 
 
@@ -1472,6 +1487,23 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+
+    {
+      "name": "Person.Natural.Place_Of_Birth",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Religion",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Title",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
     {
       "name": "Person.Organisation.Email",
       "dataType": "String",
@@ -1551,23 +1583,8 @@
       "name": "Person.Organisation.Form_Submission_Owner_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
-    },
-
-    {
-      "name": "Person.Natural.Place_Of_Birth",
-      "dataType": "String",
-      "cardinality": "SINGLE"
-    },
-    {
-      "name": "Person.Natural.Religion",
-      "dataType": "String",
-      "cardinality": "SINGLE"
-    },
-    {
-      "name": "Person.Natural.Title",
-      "dataType": "String",
-      "cardinality": "SINGLE"
     }
+
   ],
   "vertexLabels": [
     {
