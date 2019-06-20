@@ -1361,7 +1361,7 @@
 
 
     {
-      "name": "Person.Identity.Customer_ID",
+      "name": "Person.Identity.ID",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -2265,7 +2265,7 @@
         "Person.Identity.Place_Of_Birth",
         "Person.Identity.Full_Name",
         "Person.Identity.Gender",
-        "Person.Identity.Customer_ID",
+        "Person.Identity.ID",
         "Person.Identity.Title",
         "Person.Identity.Nationality",
         "Person.Identity.Full_Name_fuzzy",
@@ -2320,7 +2320,7 @@
         "Person.Identity.Title": {
           "mapping": "STRING"
         },
-        "Person.Identity.Customer_ID": {
+        "Person.Identity.ID": {
           "mapping": "STRING"
         }
       }
