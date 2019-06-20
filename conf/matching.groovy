@@ -704,32 +704,43 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
             nativeType = nativeType.getComponentType();
 
-            def propVals = slurper.parseText(propVal)
 
+            def propVals;
 
-            propVals.each { propValItem ->
-
-              addNewMatchRequest(
-                binding
-                , matchReqs
-                , (String) propValItem as String
-                , nativeType
-                , (String) propName
-                , (String) vertexName
-                , (String) vertexLabel
-                , (String) predicate
-                , (boolean) prop.excludeFromSearch
-                , (boolean) prop.excludeFromSubsequenceSearch
-                , (boolean) prop.excludeFromUpdate
-                , (boolean) prop.mandatoryInSearch
-                , (String) prop.postProcessor ?: null
-                , (String) prop.postProcessorVar ?: null
-                , sb
-              );
-
+            try {
+              propVals = slurper.parseText(propVal)
 
             }
+            catch (Throwable t){
+              propVals = null;
+            }
 
+            if (propVals != null) {
+
+
+              propVals.each { propValItem ->
+
+                addNewMatchRequest(
+                  binding
+                  , matchReqs
+                  , (String) propValItem as String
+                  , nativeType
+                  , (String) propName
+                  , (String) vertexName
+                  , (String) vertexLabel
+                  , (String) predicate
+                  , (boolean) prop.excludeFromSearch
+                  , (boolean) prop.excludeFromSubsequenceSearch
+                  , (boolean) prop.excludeFromUpdate
+                  , (boolean) prop.mandatoryInSearch
+                  , (String) prop.postProcessor ?: null
+                  , (String) prop.postProcessorVar ?: null
+                  , sb
+                );
+
+
+              }
+            }
 
           } else {
             addNewMatchRequest(
