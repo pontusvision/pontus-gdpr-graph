@@ -656,6 +656,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
   binding.put("original_request", JsonOutput.prettyPrint(JsonOutput.toJson(currRecord)));
 
+
   def rules = parsedRules
 
   List<MatchReq> matchReqs = new ArrayList<>(rules.vertices.size() as int)
@@ -669,10 +670,17 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
     Boolean passedCondition = true;
 
-    if (vtx.condition) {
-      passedCondition = Boolean
-        .parseBoolean(PVValTemplate.getTemplate((String) vtx.condition).make(binding).toString());
+    try {
+      if (vtx.condition) {
+        passedCondition = Boolean
+          .parseBoolean(PVValTemplate.getTemplate((String) vtx.condition).make(binding).toString());
+      }
     }
+    catch (Throwable t){
+      passedCondition = false;
+    }
+
+
 
     if (passedCondition) {
       vtx.props.each { prop ->
