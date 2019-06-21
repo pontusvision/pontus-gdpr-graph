@@ -70,12 +70,12 @@ O.Form.Vertex_Label
 
 
 
-    eventIngestionGroupLabel = createVertexLabel(mgmt, "Event.Ingestion_Group");
+    eventIngestionGroupLabel = createVertexLabel(mgmt, "Event.Group_Ingestion");
 
-    eventIngestionGroupProp01 = createProp(mgmt, "Event.Ingestion_Group.Metadata_Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
-    eventIngestionGroupProp02 = createProp(mgmt, "Event.Ingestion_Group.Metadata_End_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
-    eventIngestionGroupProp03 = createProp(mgmt, "Event.Ingestion_Group.Type", String.class, org.janusgraph.core.Cardinality.SINGLE);
-    eventIngestionGroupProp04 = createProp(mgmt, "Event.Ingestion_Group.Operation", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionGroupProp01 = createProp(mgmt, "Event.Group_Ingestion.Metadata_Start_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionGroupProp02 = createProp(mgmt, "Event.Group_Ingestion.Metadata_End_Date", Date.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionGroupProp03 = createProp(mgmt, "Event.Group_Ingestion.Type", String.class, org.janusgraph.core.Cardinality.SINGLE);
+    eventIngestionGroupProp04 = createProp(mgmt, "Event.Group_Ingestion.Operation", String.class, org.janusgraph.core.Cardinality.SINGLE);
 
     eventIngestionIdx01 = createMixedIdx(mgmt, "eventIngestionGroupIdx01"
             ,eventIngestionGroupLabel
