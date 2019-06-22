@@ -812,8 +812,11 @@ def addRandomDataProcedures(graph, g) {
                         next()
 
                 for (def k = 0; k < randValK; k++) {
-                    def pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment')).order().by(shuffle).range(0, 1).next()
-                    g.addE("Has_Data_Procedures").from(pia).to(dp).next()
+                    def pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment')).order().by(shuffle).range(0, 1).tryNext()
+                    if (pia.isPresent()){
+                        g.addE("Has_Data_Procedures").from(pia.get()).to(dp).next()
+
+                    }
                 }
             }
 
@@ -1618,11 +1621,11 @@ def addLawfulBasisAndPrivacyNotices(graph, g) {
         */
 
 
-        def pnId0 = g.V().has("Metadata.Type.Object.Privacy_Notice", eq("Object.Privacy_Notice"))?.next()?.id();
+        def pnId0 = g.V().has("Metadata.Type.Object.Privacy_Notice", eq("Object.Privacy_Notice"))?.id().tryNext();
 
-        if (pnId0){
-            g.addE("Has_Lawful_Basis_On").from(g.V(pnId0).next()).to(lawfulBasisVertices[0]).next()
-            g.addE("Has_Lawful_Basis_On").from(g.V(pnId0).next()).to(lawfulBasisVertices[1]).next()
+        if (pnId0.isPresent()){
+            g.addE("Has_Lawful_Basis_On").from(g.V(pnId0.get()).next()).to(lawfulBasisVertices[0]).next()
+            g.addE("Has_Lawful_Basis_On").from(g.V(pnId0.get()).next()).to(lawfulBasisVertices[1]).next()
 
         }
 
@@ -2879,7 +2882,8 @@ def addRandomDataInit(graph, g) {
 
     } catch (e) {
         e.printStackTrace()
-        sb.append('\nFailed to load schema!\n').append(e);
+        sb.append('\nFailed to load Data!\n').append(e).append(
+          org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 
     }
 
