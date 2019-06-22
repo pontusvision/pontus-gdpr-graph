@@ -1341,9 +1341,9 @@ def getMetadataTypes(int level) {
 
 def getLevel(String label) {
     def levels = [
-            'Event Ingestion Group',
+            'Event  Group Ingestion',
             'Event Ingestion',
-            'Person.Natural',
+            'Person Natural',
             'Object Email Address',
             'Object Credential',
             'Event Form Ingestion',
@@ -1355,11 +1355,11 @@ def getLevel(String label) {
             'Object Privacy Impact Assessment',
             'Object Lawful Basis',
             'Event Subject Access Request',
-            'Person.Employee',
+            'Person Employee',
             'Object Awareness Campaign',
             'Event Training',
             'Event Data_Breach',
-            'Person.Organisation',
+            'Person Organisation',
             'Object Data Procedures',
             'Object MoU',
             'Object Form',

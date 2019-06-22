@@ -16,8 +16,6 @@ RUN cd /root/.m2/repository && for i in *; do if [[ "com" == $i || "pv-gdpr" == 
 
 FROM alpine
 
-COPY --from=builder  /pontus-gdpr-graph/conf /pontus-gdpr-graph/conf
-COPY --from=builder  /pontus-gdpr-graph/bin /pontus-gdpr-graph/bin
 COPY --from=builder /root/.m2/ /root/.m2/
 
 
