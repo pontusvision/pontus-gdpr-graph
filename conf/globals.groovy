@@ -640,49 +640,51 @@ boolean isASCII(String s) {
 def getPropsNonMetadataAsHTMLTableRows(GraphTraversalSource g, Long vid, String origLabel) {
     StringBuilder sb = new StringBuilder();
 
-    sb.append("{");
+//    sb.append("{");
 
 
-    boolean firstLine = true;
-    g.V(vid).valueMap().next().forEach { origKey, origVal ->
+//    boolean firstLine = true;
 
-        if (!firstLine){
-            sb.append (',')
-        }
-        firstLine = false;
-        sb.append('"').append(origKey).append('": "').append(origVal).append('"')
-//        String val = origVal.get(0)
-//        String key = origKey.replaceAll('[_.]', ' ')
-//        if (!key.startsWith('Metadata')) {
-//            sb.append("<tr><td class='tg-yw4l'>");
-//            if (key.endsWith("b64")) {
-//                val = new String(val.decodeBase64())
-//                key += ' (Decoded)'
-//            }
-//            val = val.replaceAll('\\\\"', '"')
-//            val = val.replaceAll('\"', '"')
+    sb.append(new groovy.json.JsonBuilder(g.V(vid).valueMap().next()).toString());
+//    g.V(vid).valueMap().next().forEach { origKey, origVal ->
 //
-//            val = org.apache.commons.lang3.StringEscapeUtils.escapeHtml4(HtmlManipulator.replaceHtmlEntities(val));
-//            val = val.replaceAll("(\\r\\n|\\n)", "<br />");
-//
-//            val = val.replaceAll('\\\\', '');
-//
-//            if (!isASCII(val)) {
-//                val = val.replaceAll("\\p{C}", "?");
-//            }
-//
-//            if (origKey.startsWith(origLabel)) {
-//                sb.append(key.substring(origLabel.length() + 1))
-//            } else {
-//                sb.append(key);
-//            }
-//            sb.append("</td><td class='tg-yw4l'>") //.append("<![CDATA[");
-//                    .append(val)
-////                    .append("]]>")
-//                    .append("</td></tr>");
+//        if (!firstLine){
+//            sb.append (',')
 //        }
-    }
-    sb.append("}");
+//        firstLine = false;
+//        sb.append('"').append(origKey).append('": "').append(origVal).append('"')
+////        String val = origVal.get(0)
+////        String key = origKey.replaceAll('[_.]', ' ')
+////        if (!key.startsWith('Metadata')) {
+////            sb.append("<tr><td class='tg-yw4l'>");
+////            if (key.endsWith("b64")) {
+////                val = new String(val.decodeBase64())
+////                key += ' (Decoded)'
+////            }
+////            val = val.replaceAll('\\\\"', '"')
+////            val = val.replaceAll('\"', '"')
+////
+////            val = org.apache.commons.lang3.StringEscapeUtils.escapeHtml4(HtmlManipulator.replaceHtmlEntities(val));
+////            val = val.replaceAll("(\\r\\n|\\n)", "<br />");
+////
+////            val = val.replaceAll('\\\\', '');
+////
+////            if (!isASCII(val)) {
+////                val = val.replaceAll("\\p{C}", "?");
+////            }
+////
+////            if (origKey.startsWith(origLabel)) {
+////                sb.append(key.substring(origLabel.length() + 1))
+////            } else {
+////                sb.append(key);
+////            }
+////            sb.append("</td><td class='tg-yw4l'>") //.append("<![CDATA[");
+////                    .append(val)
+//////                    .append("]]>")
+////                    .append("</td></tr>");
+////        }
+//    }
+//    sb.append("}");
 
     return sb.toString().bytes.encodeBase64();
 
