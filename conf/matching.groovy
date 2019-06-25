@@ -404,8 +404,15 @@ def matchVertices(JanusGraph graph, GraphTraversalSource gTravSource = g, List<M
 
   matchReqs.each {
     List<MatchReq> matchReqList = matchReqByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() });
-    matchReqList.push(it)
-    vertexListsByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() })
+
+    // LPPM - 25 June 2019 - reduce the number of combinations below by pruning out any records that don't have
+    // any hits in the graph as early as possible.  The logic here is that if a match request does not have any matches
+    // on its own, what hope do we have to use it as a filter combined with other entries???  This is especially true
+    // when the NLP engines give us false positives (e.g. erroneous matches for names, dates, etc).
+    if (it.hasGraphEntries(graph,gTravSource.V())){
+      matchReqList.push(it)
+      vertexListsByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() })
+    }
 
   }
 
@@ -425,8 +432,6 @@ def matchVertices(JanusGraph graph, GraphTraversalSource gTravSource = g, List<M
 
 
     List<MatchReq> uniqueProps = vCopy2.unique { a, b -> a.propName <=> b.propName }
-
-    uniqueProps = uniqueProps.findAll{ it2 -> it2.hasGraphEntries(graph,gtrav)} ;
 
 
     int maxExpectedSizeOfQueries = uniqueProps.size()
@@ -998,7 +1003,7 @@ def parseEdges(def rules) {
   return [edgeReqsByVertexName, edgeReqs]
 }
 
-def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexIdByVertexName, StringBuffer sb = null) {
+def createEdges(GraphTraversalSource gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexIdByVertexName, StringBuffer sb = null) {
 
   edgeReqs.each { it ->
 
