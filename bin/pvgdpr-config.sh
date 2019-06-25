@@ -29,7 +29,14 @@ PVGDPR_OPTS=" \
  -Dcom.sun.management.jmxremote.authenticate=false \
  -Dcom.sun.management.jmxremote.ssl=false \
  -Dcom.sun.management.jmxremote.port=9999 \
- -Dcom.sun.management.jmxremote.rmi.port=9998"
+-Dcom.sun.management.jmxremote.rmi.port=9999 \
+-Dcom.sun.management.jmxremote=true \
+-Dcom.sun.management.jmxremote.port=9999 \
+-Dcom.sun.management.jmxremote.ssl=false \
+-Dcom.sun.management.jmxremote.authenticate=false \
+-Dcom.sun.management.jmxremote.local.only=false \
+-Djava.rmi.server.hostname=localhost \
+ -Dcom.sun.management.jmxremote.rmi.port=9999"
 
 CLASS=com.pontusvision.gdpr.App
 #CLASS=uk.gov.cdp.pole.bootstrap.Bootstrap
