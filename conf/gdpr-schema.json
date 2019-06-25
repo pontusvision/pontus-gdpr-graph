@@ -1,10 +1,11 @@
+
 {
   "elasticSearchTemplates": [
     {
       "name": "persondatamixedidx",
       "body": {
         "index_patterns": [
-          "janusgraph*persondatamixedidx"
+          "janusgraph*mixedidx"
         ],
         "order": 0,
         "settings": {
@@ -154,37 +155,37 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Metadata_End_Date",
+      "name": "Event.Group_Ingestion.Metadata_End_Date",
       "dataType": "Date",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Metadata_Start_Date",
+      "name": "Event.Group_Ingestion.Metadata_Start_Date",
       "dataType": "Date",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Operation",
+      "name": "Event.Group_Ingestion.Operation",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Type",
+      "name": "Event.Group_Ingestion.Type",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Has_Controller",
+      "name": "Event.Group_Ingestion.Has_Controller",
       "dataType": "Boolean",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Has_Processor",
+      "name": "Event.Group_Ingestion.Has_Processor",
       "dataType": "Boolean",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Event.Ingestion.Group.Has_Data_Owner",
+      "name": "Event.Group_Ingestion.Has_Data_Owner",
       "dataType": "Boolean",
       "cardinality": "SINGLE"
     },
@@ -261,107 +262,107 @@
     {
       "name": "Location.Address.parser.category",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.city",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.city_district",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.country",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.country_region",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.entrance",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.house",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.house_number",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.island",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.level",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.near",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.po_box",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.postcode",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.road",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.staircase",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.state",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.state_district",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.suburb",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.unit",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Location.Address.parser.world_region",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Metadata.Controller",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Metadata.Create_Date",
@@ -376,7 +377,7 @@
     {
       "name": "Metadata.Lineage",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Metadata.Lineage_Location_Tag",
@@ -396,7 +397,7 @@
     {
       "name": "Metadata.Processor",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Metadata.Redaction",
@@ -406,7 +407,7 @@
     {
       "name": "Metadata.Status",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Metadata.Type",
@@ -434,7 +435,7 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Metadata.Type.Event.Ingestion.Group",
+      "name": "Metadata.Type.Event.Group_Ingestion",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -489,7 +490,23 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Metadata.Type.Object.Data_Source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Metadata.Type.Object.Email_Address",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Metadata.Type.Object.Data_Policy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Metadata.Type.Object.Phone_Number",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -534,7 +551,12 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Metadata.Type.Person",
+      "name": "Metadata.Type.Person.Identity",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Metadata.Type.Person.Natural",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -606,12 +628,12 @@
     {
       "name": "Object.AWS_Instance.ProductCodeIDs",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Object.AWS_Instance.ProductCodeTypes",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Object.AWS_Instance.Public_Dns_Name",
@@ -621,7 +643,7 @@
     {
       "name": "Object.AWS_Instance.Tags",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Object.AWS_Network_Interface.AttachTime",
@@ -651,7 +673,7 @@
     {
       "name": "Object.AWS_Network_Interface.PrivateIpAddresses",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Object.AWS_Security_Group.GroupName",
@@ -666,12 +688,12 @@
     {
       "name": "Object.AWS_Security_Group.Ip_Perms_Egress_IpRanges",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Object.AWS_Security_Group.Ip_Perms_Ingress_IpRanges",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Object.AWS_VPC.Id",
@@ -734,6 +756,156 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Object.Data_Policy.Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Policy.CreateDate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Policy.UpdateDate",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Data_Policy.Description",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Data_Policy.Form_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Policy.Form_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Policy.Form_Submission_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Policy.Form_Submission_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Data_Source.Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Create_Date",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Update_Date",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Form_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Form_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Form_Submission_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Form_Submission_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+
+    {
+      "name": "Object.Data_Source.Description",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Credential_Principal",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Credential_Secret",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Credential_ApiKey",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI_Config",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI_Template",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI_Control",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI_Read",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI_Delete",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI_Update",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.URI_Monitor",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Procedures.Type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Procedures.Update_Mechanism",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Procedures.Update_URL",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Object.Data_Procedures.Delete_URL",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -759,9 +931,31 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Object.Phone_Number.Type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Phone_Number.Raw",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Phone_Number.Numbers_Only",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Phone_Number.Last_7_Digits",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
       "name": "Object.Email_Address.Email",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Object.Form.Metadata_Create_Date",
@@ -921,7 +1115,7 @@
     {
       "name": "Object.Notification_Templates.Types",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Object.Notification_Templates.URL",
@@ -1089,18 +1283,13 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Customer_ID",
-      "dataType": "String",
-      "cardinality": "SINGLE"
-    },
-    {
-      "name": "Person.Date_Of_Birth",
-      "dataType": "Date",
-      "cardinality": "SINGLE"
-    },
-    {
       "name": "Person.Employee.Date_Of_Birth",
       "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Employee.ID",
+      "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
@@ -1146,7 +1335,7 @@
     {
       "name": "Person.Employee.Nationality",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Employee.Place_Of_Birth",
@@ -1168,60 +1357,167 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+
+
+
     {
-      "name": "Person.Ethnicity",
+      "name": "Person.Identity.ID",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Full_Name",
+      "name": "Person.Identity.Date_Of_Birth",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Person.Identity.Ethnicity",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Full_Name_fuzzy",
+      "name": "Person.Identity.Full_Name",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Gender",
+      "name": "Person.Identity.Full_Name_fuzzy",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Height",
+      "name": "Person.Identity.Gender",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Last_Name",
+      "name": "Person.Identity.Height",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Marital_Status",
+      "name": "Person.Identity.Last_Name",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Name_Qualifier",
+      "name": "Person.Identity.Marital_Status",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Nationality",
+      "name": "Person.Identity.Name_Qualifier",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
+    {
+      "name": "Person.Identity.Nationality",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+    "name": "Person.Identity.Place_Of_Birth",
+    "dataType": "String",
+    "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Religion",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Identity.Title",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+
+
+
+
+    {
+      "name": "Person.Natural.Customer_ID",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Date_Of_Birth",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Person.Natural.Ethnicity",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Full_Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Full_Name_fuzzy",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Gender",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Height",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Last_Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Marital_Status",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Name_Qualifier",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Nationality",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Person.Natural.Place_Of_Birth",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Religion",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Natural.Title",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
     {
       "name": "Person.Organisation.Email",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Organisation.Fax",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Organisation.Name",
@@ -1231,7 +1527,7 @@
     {
       "name": "Person.Organisation.Phone",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Organisation.Registration_Number",
@@ -1241,7 +1537,7 @@
     {
       "name": "Person.Organisation.Sector",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Organisation.Short_Name",
@@ -1256,38 +1552,44 @@
     {
       "name": "Person.Organisation.Type",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Organisation.URL",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Organisation.orgCountrySet",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Organisation.Department",
       "dataType": "String",
-      "cardinality": "SET"
+      "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Place_Of_Birth",
+      "name": "Person.Organisation.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Religion",
+      "name": "Person.Organisation.Form_Owner_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Person.Title",
+      "name": "Person.Organisation.Form_Submission_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Person.Organisation.Form_Submission_Owner_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
     }
+
   ],
   "vertexLabels": [
     {
@@ -1311,7 +1613,7 @@
       "useStatic": false
     },
     {
-      "name": "Event.Ingestion.Group",
+      "name": "Event.Group_Ingestion",
       "partition": false,
       "useStatic": false
     },
@@ -1366,6 +1668,16 @@
       "useStatic": false
     },
     {
+      "name": "Object.Data_Source",
+      "partition": false,
+      "useStatic": false
+    },
+    {
+      "name": "Object.Data_Policy",
+      "partition": false,
+      "useStatic": false
+    },
+    {
       "name": "Object.Email_Address",
       "partition": false,
       "useStatic": false
@@ -1401,6 +1713,11 @@
       "useStatic": false
     },
     {
+      "name": "Object.Phone_Number",
+      "partition": false,
+      "useStatic": false
+    },
+    {
       "name": "Object.Privacy_Impact_Assessment",
       "partition": false,
       "useStatic": false
@@ -1411,7 +1728,12 @@
       "useStatic": false
     },
     {
-      "name": "Person",
+      "name": "Person.Identity",
+      "partition": false,
+      "useStatic": false
+    },
+    {
+      "name": "Person.Natural",
       "partition": false,
       "useStatic": false
     },
@@ -1538,6 +1860,11 @@
       "unidirected": false
     },
     {
+      "name": "Is_Alias",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
       "name": "Is_Data_Owner",
       "multiplicity": "MULTI",
       "unidirected": false
@@ -1571,11 +1898,17 @@
       "name": "Uses_Email",
       "multiplicity": "MULTI",
       "unidirected": false
+    },
+    {
+      "name": "Has_Phone",
+      "multiplicity": "MULTI",
+      "unidirected": false
     }
+
   ],
   "vertexIndexes": [
     {
-      "name": "eventDataBreachIdx00",
+      "name": "Event.Data_Breach.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1608,7 +1941,7 @@
       }
     },
     {
-      "name": "objectMoUIdx00",
+      "name": "Object.MoU.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1651,7 +1984,7 @@
       }
     },
     {
-      "name": "objectAWS_InstanceIdx00",
+      "name": "Object.AWS_Instance.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1686,7 +2019,7 @@
       }
     },
     {
-      "name": "objectAWS_Security_GroupIdx00",
+      "name": "Object.AWS_Security_Group.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1717,7 +2050,7 @@
       }
     },
     {
-      "name": "objectAWS_VPCIdx01",
+      "name": "Object.AWS_VPC.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1736,11 +2069,11 @@
       }
     },
     {
-      "name": "objectAWS_Network_InterfaceIdx00",
-      "composite": true,
+      "name": "Object.AWS_Network_Interface.MixedIdx",
+      "composite": false,
       "unique": false,
       "indexOnly": null,
-      "mixedIndex": null,
+      "mixedIndex": "search",
       "propertyKeys": [
         "Object.AWS_Network_Interface.Description",
         "Object.AWS_Network_Interface.NetworkInterfaceId",
@@ -1751,7 +2084,7 @@
       ]
     },
     {
-      "name": "objectDataProceduresIdx",
+      "name": "Object.Data_Procedures.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1781,8 +2114,104 @@
         }
       }
     },
+
     {
-      "name": "eventTrainingStatusMixedIdx",
+      "name": "Object.Data_Policy.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+
+        "Object.Data_Policy.Name",
+        "Object.Data_Policy.CreateDate",
+        "Object.Data_Policy.UpdateDate",
+        "Object.Data_Policy.Form_Id",
+        "Object.Data_Policy.Form_Owner_Id",
+        "Object.Data_Policy.Form_Submission_Id",
+        "Object.Data_Policy.Form_Submission_Owner_Id",
+        "Metadata.Type.Object.Data_Policy"
+      ],
+      "propertyKeysMappings": {
+        "Metadata.Type.Object.Data_Policy": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.UpdateDate": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.CreateDate": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.Name": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.Form_Id": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.Form_Owner_Id": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.Form_Submission_Id": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Policy.Form_Submission_Owner_Id": {
+          "mapping": "STRING"
+        }
+
+      }
+    },
+    {
+      "name": "Object.Data_Source.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+
+        "Object.Data_Source.Name",
+        "Object.Data_Source.Create_Date",
+        "Object.Data_Source.Update_Date",
+        "Object.Data_Source.Description",
+        "Metadata.Type.Object.Data_Source",
+        "Object.Data_Source.Form_Id",
+        "Object.Data_Source.Form_Owner_Id",
+        "Object.Data_Source.Form_Submission_Id",
+        "Object.Data_Source.Form_Submission_Owner_Id"
+
+      ],
+      "propertyKeysMappings": {
+        "Metadata.Type.Object.Data_Source": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Description": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Update_Date": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Create_Date": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Name": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Form_Id": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Form_Owner_Id": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Form_Submission_Id": {
+          "mapping": "STRING"
+        },
+        "Object.Data_Source.Form_Submission_Owner_Id": {
+          "mapping": "STRING"
+        }
+
+      }
+    },
+    {
+      "name": "Event.Training.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1801,7 +2230,7 @@
       }
     },
     {
-      "name": "eventSARStatusMixedIdx",
+      "name": "Event.Subject_Access_Request.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1826,86 +2255,181 @@
       }
     },
     {
-      "name": "personDataMixedIdx",
+      "name": "Person.Identity.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
-        "Metadata.Type.Person",
-        "Person.Place_Of_Birth",
-        "Person.Full_Name",
-        "Person.Gender",
-        "Person.Customer_ID",
-        "Person.Title",
-        "Person.Nationality",
-        "Person.Full_Name_fuzzy",
-        "Person.Ethnicity",
-        "Person.Date_Of_Birth",
-        "Person.Name_Qualifier",
-        "Person.Marital_Status",
-        "Person.Last_Name",
-        "Person.Religion"
+        "Metadata.Type.Person.Identity",
+        "Person.Identity.Place_Of_Birth",
+        "Person.Identity.Full_Name",
+        "Person.Identity.Gender",
+        "Person.Identity.ID",
+        "Person.Identity.Title",
+        "Person.Identity.Nationality",
+        "Person.Identity.Full_Name_fuzzy",
+        "Person.Identity.Ethnicity",
+        "Person.Identity.Date_Of_Birth",
+        "Person.Identity.Name_Qualifier",
+        "Person.Identity.Marital_Status",
+        "Person.Identity.Last_Name",
+        "Person.Identity.Religion"
       ],
       "propertyKeysMappings": {
-        "Metadata.Type.Person": {
+        "Metadata.Type.Person.Identity": {
           "mapping": "STRING"
         },
-        "Person.Date_Of_Birth": {
+        "Person.Identity.Date_Of_Birth": {
           "mapping": "DEFAULT"
         },
-        "Person.Full_Name": {
+        "Person.Identity.Full_Name": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.Full_Name_fuzzy": {
           "mapping": "TEXTSTRING",
           "analyzer": {
             "name": "text-analyzer",
             "value": "pg_word_delimiter"
           }
         },
-        "Person.Full_Name_fuzzy": {
-          "mapping": "TEXTSTRING",
-          "analyzer": {
-            "name": "text-analyzer",
-            "value": "pg_word_delimiter"
-          }
-        },
-        "Person.Last_Name": {
-          "mapping": "TEXTSTRING",
-          "analyzer": {
-            "name": "text-analyzer",
-            "value": "pg_word_delimiter"
-          }
-        },
-        "Person.Gender": {
+        "Person.Identity.Last_Name": {
           "mapping": "STRING"
         },
-        "Person.Nationality": {
+        "Person.Identity.Gender": {
           "mapping": "STRING"
         },
-        "Person.Place_Of_Birth": {
+        "Person.Identity.Nationality": {
           "mapping": "STRING"
         },
-        "Person.Religion": {
+        "Person.Identity.Place_Of_Birth": {
           "mapping": "STRING"
         },
-        "Person.Ethnicity": {
+        "Person.Identity.Religion": {
           "mapping": "STRING"
         },
-        "Person.Marital_Status": {
+        "Person.Identity.Ethnicity": {
           "mapping": "STRING"
         },
-        "Person.Name_Qualifier": {
+        "Person.Identity.Marital_Status": {
           "mapping": "STRING"
         },
-        "Person.Title": {
+        "Person.Identity.Name_Qualifier": {
           "mapping": "STRING"
         },
-        "Person.Customer_ID": {
+        "Person.Identity.Title": {
+          "mapping": "STRING"
+        },
+        "Person.Identity.ID": {
           "mapping": "STRING"
         }
       }
     },
     {
-      "name": "objectEmailAddressEmailMixedIdx",
+      "name": "Person.Natural.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Person.Natural",
+        "Person.Natural.Place_Of_Birth",
+        "Person.Natural.Full_Name",
+        "Person.Natural.Gender",
+        "Person.Natural.Customer_ID",
+        "Person.Natural.Title",
+        "Person.Natural.Nationality",
+        "Person.Natural.Full_Name_fuzzy",
+        "Person.Natural.Ethnicity",
+        "Person.Natural.Date_Of_Birth",
+        "Person.Natural.Name_Qualifier",
+        "Person.Natural.Marital_Status",
+        "Person.Natural.Last_Name",
+        "Person.Natural.Religion"
+      ],
+      "propertyKeysMappings": {
+        "Metadata.Type.Person.Natural": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Date_Of_Birth": {
+          "mapping": "DEFAULT"
+        },
+        "Person.Natural.Full_Name": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Full_Name_fuzzy": {
+          "mapping": "TEXTSTRING",
+          "analyzer": {
+            "name": "text-analyzer",
+            "value": "pg_word_delimiter"
+          }
+        },
+        "Person.Natural.Last_Name": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Gender": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Nationality": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Place_Of_Birth": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Religion": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Ethnicity": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Marital_Status": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Name_Qualifier": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Title": {
+          "mapping": "STRING"
+        },
+        "Person.Natural.Customer_ID": {
+          "mapping": "STRING"
+        }
+      }
+    },
+    {
+      "name": "Object.Phone_Number.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Object.Phone_Number",
+        "Object.Phone_Number.Type",
+        "Object.Phone_Number.Raw",
+        "Object.Phone_Number.Numbers_Only",
+        "Object.Phone_Number.Last_7_Digits"
+
+      ],
+      "propertyKeysMappings": {
+        "Metadata.Type.Object.Phone_Number": {
+          "mapping": "STRING"
+        },
+        "Object.Phone_Number.Type": {
+          "mapping": "STRING"
+        },
+        "Object.Phone_Number.Raw": {
+          "mapping": "STRING"
+        },
+        "Object.Phone_Number.Numbers_Only": {
+          "mapping": "DEFAULT"
+        },
+        "Object.Phone_Number.Last_7_Digits": {
+          "mapping": "DEFAULT"
+        }
+      }
+    },
+    {
+      "name": "Object.Email_Address.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1924,7 +2448,7 @@
       }
     },
     {
-      "name": "objectCredentialMixedIdx",
+      "name": "Object.Credential.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1943,7 +2467,7 @@
       }
     },
     {
-      "name": "objectIdentityCardIdNameMixedIdx",
+      "name": "Object.Identity_Card.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -1962,7 +2486,7 @@
       }
     },
     {
-      "name": "locationAddressStreetMixedIdx",
+      "name": "Location.Address.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2077,7 +2601,7 @@
       }
     },
     {
-      "name": "Object_Privacy_Impact_Assessment_Start_Date",
+      "name": "Object.Privacy_Impact_Assessment.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2130,7 +2654,7 @@
       }
     },
     {
-      "name": "objectAwarenessCampaignDescriptionMixedIdx",
+      "name": "Object.Awareness_Campaign.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2171,7 +2695,7 @@
       }
     },
     {
-      "name": "objectInsurancePolicyMixedIdx",
+      "name": "Object.Insurance_Policy.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2223,7 +2747,7 @@
       }
     },
     {
-      "name": "objectLawfulBasis0MixedIdx",
+      "name": "Object.Lawful_Basis.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2246,7 +2770,7 @@
       }
     },
     {
-      "name": "objectPrivacyNotice00MixedIdx",
+      "name": "Object.Privacy_Notice.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2256,16 +2780,16 @@
         "Object.Privacy_Notice.Info_Collected",
         "Object.Privacy_Notice.URL",
         "Object.Privacy_Notice.Id",
+        "Object.Privacy_Notice.Form_Id",
         "Object.Privacy_Notice.Form_Owner_Id",
+        "Object.Privacy_Notice.Form_Submission_Id",
+        "Object.Privacy_Notice.Form_Submission_Owner_Id",
         "Object.Privacy_Notice.Effect_On_Individuals",
         "Object.Privacy_Notice.Why_Is_It_Collected",
         "Object.Privacy_Notice.Metadata.Create_Date",
-        "Object.Privacy_Notice.Form_Submission_Owner_Id",
         "Object.Privacy_Notice.How_Is_It_Collected",
         "Object.Privacy_Notice.How_Will_It_Be_Used",
-        "Object.Privacy_Notice.Form_Id",
         "Metadata.Type.Object.Privacy_Notice",
-        "Object.Privacy_Notice.Form_Submission_Id",
         "Object.Privacy_Notice.Who_Will_It_Be_Shared",
         "Object.Privacy_Notice.Likely_To_Complain",
         "Object.Privacy_Notice.Metadata.Update_Date"
@@ -2319,7 +2843,7 @@
       }
     },
     {
-      "name": "personEmployeeMixedIdx",
+      "name": "Person.Employee.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2328,6 +2852,7 @@
         "Metadata.Type.Person.Employee",
         "Person.Employee.Gender",
         "Person.Employee.Is_GDPR_Role",
+        "Person.Employee.ID",
         "Person.Employee.Name_Qualifier",
         "Person.Employee.Religion",
         "Person.Employee.Marital_Status",
@@ -2344,6 +2869,10 @@
         "Metadata.Type.Person.Employee": {
           "mapping": "STRING"
         },
+        "Person.Employee.ID": {
+          "mapping": "STRING"
+        },
+
         "Person.Employee.Role": {
           "mapping": "STRING"
         },
@@ -2383,7 +2912,7 @@
       }
     },
     {
-      "name": "personOrgShortNameMixedIdx",
+      "name": "Person.Organisation.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2395,7 +2924,12 @@
         "Person.Organisation.Registration_Number",
         "Person.Organisation.Name",
         "Person.Organisation.orgCountrySet",
-        "Person.Organisation.Department"
+        "Person.Organisation.Department",
+        "Person.Organisation.Form_Id",
+        "Person.Organisation.Form_Owner_Id",
+        "Person.Organisation.Form_Submission_Id",
+        "Person.Organisation.Form_Submission_Owner_Id"
+
       ],
       "propertyKeysMappings": {
         "Metadata.Type.Person.Organisation": {
@@ -2415,11 +2949,24 @@
         },
         "Person.Organisation.orgCountrySet": {
           "mapping": "STRING"
+        },
+        "Person.Organisation.Form_Id": {
+          "mapping": "STRING"
+        },
+        "Person.Organisation.Form_Owner_Id": {
+          "mapping": "STRING"
+        },
+        "Person.Organisation.Form_Submission_Id": {
+          "mapping": "STRING"
+        },
+        "Person.Organisation.Form_Submission_Owner_Id": {
+          "mapping": "STRING"
         }
+
       }
     },
     {
-      "name": "eventConsentStatusMtdMixedIdx",
+      "name": "Event.Consent.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2441,7 +2988,7 @@
       }
     },
     {
-      "name": "metadataTypeIdx",
+      "name": "Metadata.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2461,35 +3008,35 @@
       }
     },
     {
-      "name": "eventIngestionGroupIdx01",
+      "name": "Event.Ingestion.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
-        "Event.Ingestion.Group.Operation",
-        "Event.Ingestion.Group.Metadata_End_Date",
-        "Event.Ingestion.Group.Type",
-        "Event.Ingestion.Group.Metadata_Start_Date",
-        "Event.Ingestion.Group.Has_Controller",
-        "Event.Ingestion.Group.Has_Processor",
-        "Event.Ingestion.Group.Has_Data_Owner",
-        "Metadata.Type.Event.Ingestion.Group"
+        "Event.Group_Ingestion.Operation",
+        "Event.Group_Ingestion.Metadata_End_Date",
+        "Event.Group_Ingestion.Type",
+        "Event.Group_Ingestion.Metadata_Start_Date",
+        "Event.Group_Ingestion.Has_Controller",
+        "Event.Group_Ingestion.Has_Processor",
+        "Event.Group_Ingestion.Has_Data_Owner",
+        "Metadata.Type.Event.Group_Ingestion"
       ],
       "propertyKeysMappings": {
-        "Metadata.Type.Event.Ingestion.Group": {
+        "Metadata.Type.Event.Group_Ingestion": {
           "mapping": "STRING"
         },
-        "Event.Ingestion.Group.Type": {
+        "Event.Group_Ingestion.Type": {
           "mapping": "STRING"
         },
-        "Event.Ingestion.Group.Operation": {
+        "Event.Group_Ingestion.Operation": {
           "mapping": "STRING"
         }
       }
     },
     {
-      "name": "eventIngestionIdx01",
+      "name": "Event.Ingestion.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2517,7 +3064,7 @@
       }
     },
     {
-      "name": "eventFormIngestionIdx01",
+      "name": "Event.Form_Ingestion.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2548,7 +3095,7 @@
       }
     },
     {
-      "name": "objectFormIdx01",
+      "name": "Object.Form.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
@@ -2579,7 +3126,7 @@
       }
     },
     {
-      "name": "objectNotificationTemplatesIdx00",
+      "name": "Object.Notification_Templates.CompositeIdx",
       "composite": true,
       "unique": false,
       "indexOnly": null,
@@ -2589,7 +3136,7 @@
       ]
     },
     {
-      "name": "objectNotificationTemplatesIdx01",
+      "name": "Object.Notification_Templates.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
