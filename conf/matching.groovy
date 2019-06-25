@@ -8,11 +8,17 @@ import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
 import org.apache.tinkerpop.gremlin.process.traversal.P
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.DefaultGraphTraversal
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
+import org.apache.tinkerpop.gremlin.structure.Transaction
 import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.JanusGraphIndexQuery
+import org.janusgraph.core.JanusGraphVertex
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.stream.Collectors
 import java.util.regex.Pattern
 
 /*
@@ -168,6 +174,7 @@ class MatchReq<T> {
   private Class attribType;
   private String propName;
   private String vertexName;
+  private String vertexLabel;
 
   private String predicateStr;
   private Closure predicate;
@@ -210,12 +217,13 @@ class MatchReq<T> {
 
   }
 
-  MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromSubsequenceSearch = false, boolean excludeFromUpdate = false, boolean mandatoryInSearch = false, double matchWeight, StringBuffer sb = null) {
+  MatchReq(String attribVals, Class<T> attribType, String propName, String vertexName, String vertexLabel, String predicateStr, boolean excludeFromSearch = false, boolean excludeFromSubsequenceSearch = false, boolean excludeFromUpdate = false, boolean mandatoryInSearch = false, double matchWeight, StringBuffer sb = null) {
     this.attribVal = attribVals
     this.attribType = attribType
 
     this.propName = propName
     this.vertexName = vertexName
+    this.vertexLabel = vertexLabel
     this.conv = new Convert<>(attribType)
     this.predicateStr = predicateStr;
     this.predicate = convertPredicateFromStr(predicateStr)
@@ -241,7 +249,7 @@ class MatchReq<T> {
 //        Convert.fromString("asdf", this.attribType);
 
     if (this.attribType == String) {
-      this.attribNativeVal = this.attribVal;
+      this.attribNativeVal = (T) this.attribVal;
     } else {
       this.attribNativeVal = conv.fromString(this.attribVal, this.attribType, this.sb)
 
@@ -320,6 +328,14 @@ class MatchReq<T> {
 
   void setVertexName(String vertexName) {
     this.vertexName = vertexName
+  }
+
+  String getVertexLabel() {
+    return vertexLabel
+  }
+
+  void setVertexLabel(String vertexLabel) {
+    this.vertexLabel = vertexLabel
   }
 
   String getPredicateStr() {
