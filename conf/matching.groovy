@@ -1201,9 +1201,9 @@ def createEdges(GraphTraversalSource gTrav, Set<EdgeRequest> edgeReqs, Map<Strin
       Map<Long, AtomicDouble> fromIds = finalVertexIdByVertexName?.get(it.fromVertexName)
       Map<Long, AtomicDouble> toIds = finalVertexIdByVertexName?.get(it.toVertexName)
 
-      fromIds.forEach { fromId, fromScore ->
+      fromIds?.forEach { fromId, fromScore ->
 
-        toIds.forEach { toId, toScore ->
+        toIds?.forEach { toId, toScore ->
           sb?.append("\n in createEdges; from=$fromId; to=$toId ")
 
           if (fromId != null && toId != null) {
