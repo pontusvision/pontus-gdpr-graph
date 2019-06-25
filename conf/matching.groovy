@@ -1126,11 +1126,11 @@ class EdgeRequest {
     this.fromVertexName = fromVertexName
   }
 
-  String getToVertexLabel() {
+  String getToVertexName() {
     return toVertexName
   }
 
-  void setToVertexLabel(String toVertexName) {
+  void setToVertexName(String toVertexName) {
     this.toVertexName = toVertexName
   }
 
@@ -1156,7 +1156,7 @@ class EdgeRequest {
   }
 
   String toString() {
-    return "${label} = ($fromVertexName)->($toVertexLabel)"
+    return "${label} = ($fromVertexName)->($toVertexName)"
   }
 }
 
@@ -1192,14 +1192,14 @@ def createEdges(GraphTraversalSource gTrav, Set<EdgeRequest> edgeReqs, Map<Strin
 
     sb?.append("\n in createEdges; finalVertexIdByVertexName = $finalVertexIdByVertexName; \nmaxScoresByVertexName = $maxScoresByVertexName ")
 
-    Double maxFromScore = maxScoresByVertexName.get(it.fromVertexLabel)?.get();
-    Double maxToScore = maxScoresByVertexName.get(it.toVertexLabel)?.get();
+    Double maxFromScore = maxScoresByVertexName.get(it.fromVertexName)?.get();
+    Double maxToScore = maxScoresByVertexName.get(it.toVertexName)?.get();
 
     if (maxFromScore != null && maxToScore != null) {
 
 
-      Map<Long, AtomicDouble> fromIds = finalVertexIdByVertexName?.get(it.fromVertexLabel)
-      Map<Long, AtomicDouble> toIds = finalVertexIdByVertexName?.get(it.toVertexLabel)
+      Map<Long, AtomicDouble> fromIds = finalVertexIdByVertexName?.get(it.fromVertexName)
+      Map<Long, AtomicDouble> toIds = finalVertexIdByVertexName?.get(it.toVertexName)
 
       fromIds.forEach { fromId, fromScore ->
 
