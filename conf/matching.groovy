@@ -7,6 +7,10 @@ import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
 import org.apache.tinkerpop.gremlin.process.traversal.P
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.DefaultGraphTraversal
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
+import org.apache.tinkerpop.gremlin.structure.Transaction
 import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.JanusGraphIndexQuery
@@ -240,7 +244,7 @@ class MatchReq<T> {
 //        Convert.fromString("asdf", this.attribType);
 
     if (this.attribType == String) {
-      this.attribNativeVal = this.attribVal;
+      this.attribNativeVal = (T) this.attribVal;
     } else {
       this.attribNativeVal = conv.fromString(this.attribVal, this.attribType, this.sb)
 
@@ -341,6 +345,50 @@ class MatchReq<T> {
     this.predicate = predicate
   }
 
+  boolean hasGraphEntries(JanusGraph graph, GraphTraversal gtrav){
+    List<Long> indexQueryResults = new ArrayList<>(1);
+    int maxHitsPerType = 1;
+
+    GraphTraversal localTrav = getGraphEntries(graph,gtrav, indexQueryResults,maxHitsPerType,null);
+
+    List<Long> travResults =  localTrav.range(0, maxHitsPerType).id().toList();
+
+    return indexQueryResults.size() > 0 || travResults.size() > 0;
+
+  }
+  GraphTraversal getGraphEntries(JanusGraph graph, GraphTraversal gtrav, List<Long> indexQueryResults, int maxHitsPerType, StringBuffer sb) {
+
+    String predicateStr = this.predicateStr as String;
+    if (predicateStr.startsWith("idx:")) {
+      String[] idxQuery = (predicateStr).split(':');
+      String idx = idxQuery[1];
+
+      String value = "v.\"${this.propName}\":${this.attribNativeVal}"
+
+      for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
+        indexQueryResults.add(result.getElement().longId());
+      }
+    } else if (predicateStr.startsWith("idxRaw:")) {
+      String[] idxQuery = (predicateStr).split(':');
+      String idx = idxQuery[1];
+
+      String value = this.attribNativeVal.toString();
+
+      for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
+        indexQueryResults.add(result.getElement().longId());
+      }
+    } else {
+      GraphTraversal retVal = gtrav.has(this.propName, this.predicate(this.attribNativeVal))
+      sb?.append("\n     .has('")?.append(this.propName)?.append("',")
+        ?.append(this.predicate)?.append(",'")?.append(this.attribNativeVal)?.append("')")
+
+      return retVal;
+    }
+
+    return gtrav;
+
+  }
+
   @Override
   String toString() {
     return propName + '=' + attribNativeVal
@@ -348,8 +396,7 @@ class MatchReq<T> {
 }
 
 
-def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
-
+def matchVertices(JanusGraph graph, GraphTraversalSource gTravSource = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
 
   HashMap<String, List<Long>> vertexListsByVertexName = new HashMap();
 
@@ -365,7 +412,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
   matchReqByVertexName.each { vertexName, v ->
 
-    def gtrav = gTrav
+    DefaultGraphTraversal gtrav = (DefaultGraphTraversal) gTravSource.V();
 
     // LPPM - must do a deep copy here, because unique is a bit nasty and actually changes the
     // original record.
@@ -378,6 +425,9 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
 
     List<MatchReq> uniqueProps = vCopy2.unique { a, b -> a.propName <=> b.propName }
+
+    uniqueProps = uniqueProps.findAll{ it2 -> it2.hasGraphEntries(graph,gtrav)} ;
+
 
     int maxExpectedSizeOfQueries = uniqueProps.size()
 
@@ -435,53 +485,17 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
             String vertexLabel = searchableItems.get(0).vertexLabel;
 
             sb?.append("\ng.V().has('Metadata.Type.")?.append(vertexLabel)?.append("',eq('")?.append(vertexLabel)?.append("')")
-            gtrav = gTrav.V().has("Metadata.Type." + vertexLabel, eq(vertexLabel)).clone()
+            gtrav = gTravSource.V().has("Metadata.Type." + vertexLabel, P.eq(vertexLabel));
+            searchableItems.each { it2 -> gtrav = (DefaultGraphTraversal) it2.getGraphEntries((JanusGraph) graph, gtrav,indexQueryResults,maxHitsPerType,sb) }
 
-            searchableItems.each { it2 ->
-
-              String predicateStr = it2.predicateStr as String;
-              if (predicateStr.startsWith("idx:")) {
-                String[] idxQuery = (predicateStr).split(':');
-                String idx = idxQuery[1];
-
-                String value = "v.\"${it2.propName}\":${it2.attribNativeVal}"
-
-//                                indexQueryResults.addAll((graph as JanusGraph).indexQuery(idx, value).vertexStream().mapToLong({ result -> result.getElement().longId()}).collect(Collectors.toList()));
-                for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
-                  indexQueryResults.add(result.getElement().longId());
-                }
-              } else if (predicateStr.startsWith("idxRaw:")) {
-                String[] idxQuery = (predicateStr).split(':');
-                String idx = idxQuery[1];
-
-                String value = it2.attribNativeVal.toString();
-
-//                                indexQueryResults.addAll((graph as JanusGraph).indexQuery(idx, value).vertexStream().mapToLong({ result -> result.getElement().longId()}).collect(Collectors.toList()));
-                for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
-                  indexQueryResults.add(result.getElement().longId());
-                }
-              } else {
-                gtrav = gtrav.has(it2.propName, it2.predicate(it2.attribNativeVal)).clone()
-                sb?.append("\n     .has('")?.append(it2.propName)?.append("',")
-                  ?.append(it2.predicate)?.append(",'")?.append(it2.attribNativeVal)?.append("')")
-
-              }
-
-
-            }
             vertexListsByVertexName.get(vertexName).addAll(gtrav.range(0, maxHitsPerType).id().toList() as Long[])
             if (indexQueryResults.size() > 0) {
               vertexListsByVertexName.get(vertexName).addAll(indexQueryResults.subList(0, maxHitsPerType))
-
             }
             sb?.append("\n $it")
-
           }
         }
-
-
       }
-
     }
 
     sb?.append('\n')?.append(vertexListsByVertexName)?.append("\n")
@@ -676,10 +690,9 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
           .parseBoolean(PVValTemplate.getTemplate((String) vtx.condition).make(binding).toString());
       }
     }
-    catch (Throwable t){
+    catch (Throwable t) {
       passedCondition = false;
     }
-
 
 
     if (passedCondition) {
@@ -711,7 +724,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
               propVals = slurper.parseText(propVal)
 
             }
-            catch (Throwable t){
+            catch (Throwable t) {
               propVals = null;
             }
 
@@ -1025,21 +1038,21 @@ def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Long> finalVertexI
   }
 }
 
-def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
+def ingestDataUsingRules(JanusGraph graph, GraphTraversalSource g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
   Map<String, Long> finalVertexIdByVertexName = new HashMap<>();
 
   def jsonSlurper = new JsonSlurper()
   def rules = jsonSlurper.parseText(jsonRules)
 
   def (edgeReqsByVertexName, edgeReqs) = parseEdges(rules.updatereq)
-  trans = graph.tx()
+  Transaction trans = graph.tx()
   try {
     if (!trans.isOpen()) {
       trans.open()
     }
 
     def matchReqs = getMatchRequests(bindings, rules.updatereq, jsonRules, sb)
-    def (matchIdsByVertexType, vertexListsByVertexName) = matchVertices(g, matchReqs, 10, sb);
+    def (matchIdsByVertexType, vertexListsByVertexName) = matchVertices(graph,g, matchReqs, 10, sb);
 
     matchIdsByVertexType.each { vertexTypeStr, potentialHitIDs ->
 
@@ -1088,13 +1101,13 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
 }
 
 
-def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, String jsonRules, StringBuffer sb = null) {
+def ingestRecordListUsingRules(JanusGraph graph, GraphTraversalSource g, List<Map<String, String>> recordList, String jsonRules, StringBuffer sb = null) {
 
   def jsonSlurper = new JsonSlurper()
   def rules = jsonSlurper.parseText(jsonRules)
 
   def (edgeReqsByVertexName, edgeReqs) = parseEdges(rules.updatereq)
-  trans = graph.tx()
+  Transaction trans = graph.tx()
   try {
     if (!trans.isOpen()) {
       trans.open()
@@ -1103,7 +1116,7 @@ def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, S
     for (Map<String, String> item in recordList) {
 
       def matchReqs = getMatchRequests(item, rules.updatereq, jsonRules, sb)
-      def (matchIdsByVertexName, vertexListsByVertexName) = matchVertices(g, matchReqs, 10, sb);
+      def (matchIdsByVertexName, vertexListsByVertexName) = matchVertices(graph, g, matchReqs, 10, sb);
 
       Map<String, Long> finalVertexIdByVertexName = new HashMap<>();
       matchIdsByVertexName.each { vertexNameStr, potentialHitIDs ->
