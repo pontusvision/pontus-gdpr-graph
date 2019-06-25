@@ -11,15 +11,14 @@ import org.apache.tinkerpop.gremlin.process.traversal.P
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.DefaultGraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
-import org.apache.tinkerpop.gremlin.structure.Transaction
 import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.JanusGraphIndexQuery
 import org.janusgraph.core.JanusGraphVertex
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.stream.Collectors
 import java.util.regex.Pattern
+import java.util.stream.Collectors
 
 /*
 def benchmark = { closure ->
@@ -350,6 +349,51 @@ class MatchReq<T> {
     this.predicate = predicate
   }
 
+  boolean hasGraphEntries(JanusGraph graph, GraphTraversal gtrav) {
+    List<Long> indexQueryResults = new ArrayList<>(1);
+    int maxHitsPerType = 1;
+
+    GraphTraversal localTrav = getGraphEntries(graph, gtrav, indexQueryResults, maxHitsPerType, null);
+
+    List<Long> travResults = localTrav.range(0, maxHitsPerType).id().toList();
+
+    return indexQueryResults.size() > 0 || travResults.size() > 0;
+
+  }
+
+  GraphTraversal getGraphEntries(JanusGraph graph, GraphTraversal gtrav, List<Long> indexQueryResults, int maxHitsPerType, StringBuffer sb) {
+
+    String predicateStr = this.predicateStr as String;
+    if (predicateStr.startsWith("idx:")) {
+      String[] idxQuery = (predicateStr).split(':');
+      String idx = idxQuery[1];
+
+      String value = "v.\"${this.propName}\":${this.attribNativeVal}"
+
+      for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
+        indexQueryResults.add(result.getElement().longId());
+      }
+    } else if (predicateStr.startsWith("idxRaw:")) {
+      String[] idxQuery = (predicateStr).split(':');
+      String idx = idxQuery[1];
+
+      String value = this.attribNativeVal.toString();
+
+      for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
+        indexQueryResults.add(result.getElement().longId());
+      }
+    } else {
+      GraphTraversal retVal = gtrav.has(this.propName, this.predicate(this.attribNativeVal))
+      sb?.append("\n     .has('")?.append(this.propName)?.append("',")
+        ?.append(this.predicate)?.append(",'")?.append(this.attribNativeVal)?.append("')")
+
+      return retVal;
+    }
+
+    return gtrav;
+
+  }
+
   double getMatchWeight() {
     return matchWeight
   }
@@ -454,33 +498,41 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
 
   matchReqs.each {
     List<MatchReq> matchReqList = matchReqByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() });
-    matchReqList.push(it)
-    vertexScoreMapByVertexName.computeIfAbsent(it.vertexName, { k -> new HashMap<>() })
+
+    // LPPM - 25 June 2019 - reduce the number of combinations below by pruning out any records that don't have
+    // any hits in the graph as early as possible.  The logic here is that if a match request does not have any matches
+    // on its own, what hope do we have to use it as a filter combined with other entries???  This is especially true
+    // when the NLP engines give us false positives (e.g. erroneous matches for names, dates, etc).
+    if (it.hasGraphEntries(graph, gTravSource.V())) {
+      matchReqList.push(it)
+      vertexListsByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() })
+    }
   }
 
 
-  matchReqByVertexName.each { k, v ->
+  matchReqByVertexName.each { vertexName, v ->
 
-    def gtrav = gTrav
+    DefaultGraphTraversal gtrav = (DefaultGraphTraversal) gTravSource.V();
 
     // LPPM - must do a deep copy here, because unique is a bit nasty and actually changes the
     // original record.
-    def vFiltered = [];
+    List<MatchReq> vFiltered = [];
 
     vFiltered.addAll(v.findAll { it2 -> !(it2.excludeFromSearch) });
 
-    def vCopy2 = [];
+    List<MatchReq> vCopy2 = [];
     vCopy2.addAll(vFiltered);
 
 
-    def uniqueProps = vCopy2.unique { a, b -> a.propName <=> b.propName }
+    List<MatchReq> uniqueProps = vCopy2.unique { a, b -> a.propName <=> b.propName }
+
 
     int maxExpectedSizeOfQueries = uniqueProps.size()
 
 
-    def mandatoryFields = uniqueProps.findAll { it2 -> it2.mandatoryInSearch }
+    List<MatchReq> mandatoryFields = uniqueProps.findAll { it2 -> it2.mandatoryInSearch }
 
-    def mandatoryFieldPropNames = []
+    List<String> mandatoryFieldPropNames = []
     mandatoryFields.each { it2 ->
       mandatoryFieldPropNames << it2.propName
     }
@@ -703,7 +755,7 @@ def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> other
 
  */
 
-void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String predicate, boolean excludeFromSearch, boolean excludeFromSubsequenceSearch, boolean excludeFromUpdate, boolean mandatoryInSearch, String postProcessor, String postProcessorVar, double matchWeight, StringBuffer sb = null) {
+void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String vertexLabel, String predicate, boolean excludeFromSearch, boolean excludeFromSubsequenceSearch, boolean excludeFromUpdate, boolean mandatoryInSearch, String postProcessor, String postProcessorVar, double matchWeight, StringBuffer sb = null) {
 
   MatchReq mreq = null;
 
@@ -719,28 +771,33 @@ void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, S
 
 
         binding.put(postProcessorVar ?: "it", it);
+
+
         String processedVal = (postProcessor != null) ?
           PVValTemplate.getTemplate((String) postProcessor).make(binding) :
           it;
 
+        if (processedVal != null) {
 
-        mreq = new MatchReq(
-          (String) processedVal as String
-          , nativeTypeAddrParts
-          , (String) "${propName}.${key}" as String
-          , (String) vertexName
-          , (String) predicate
-          , (boolean) excludeFromSearch
-          , (boolean) excludeFromSubsequenceSearch
-          , (boolean) excludeFromUpdate
-          , (boolean) mandatoryInSearch
-          , (double) matchWeight
-          , sb
-        );
+          mreq = new MatchReq(
+            (String) processedVal as String
+            , nativeTypeAddrParts
+            , (String) "${propName}.${key}" as String
+            , (String) vertexName
+            , (String) vertexLabel
+            , (String) predicate
+            , (boolean) excludeFromSearch
+            , (boolean) excludeFromSubsequenceSearch
+            , (boolean) excludeFromUpdate
+            , (boolean) mandatoryInSearch
+            , (double) matchWeight
+            , sb
+          );
 
-        if (mreq?.attribNativeVal != null) {
-          matchReqs.add(mreq)
+          if (mreq?.attribNativeVal != null) {
+            matchReqs.add(mreq)
 
+          }
         }
       }
 
@@ -754,25 +811,28 @@ void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, S
     String processedVal = (postProcessor != null) ?
       PVValTemplate.getTemplate((String) postProcessor).make(binding) :
       propValItem;
+    if (processedVal != null) {
 
-    mreq = new MatchReq(
-      (String) processedVal as String
-      , nativeType
-      , (String) propName
-      , (String) vertexName
-      , (String) predicate
-      , (boolean) excludeFromSearch
-      , (boolean) excludeFromSubsequenceSearch
-      , (boolean) excludeFromUpdate
-      , (boolean) mandatoryInSearch
-      , (double) matchWeight
-      , sb
+      mreq = new MatchReq(
+        (String) processedVal as String
+        , nativeType
+        , (String) propName
+        , (String) vertexName
+        , (String) vertexLabel
+        , (String) predicate
+        , (boolean) excludeFromSearch
+        , (boolean) excludeFromSubsequenceSearch
+        , (boolean) excludeFromUpdate
+        , (boolean) mandatoryInSearch
+        , (double) matchWeight
+        , sb
 
-    );
+      );
 
-    if (mreq?.attribNativeVal != null) {
-      matchReqs.add(mreq)
+      if (mreq?.attribNativeVal != null) {
+        matchReqs.add(mreq)
 
+      }
     }
   }
 
@@ -794,49 +854,98 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
   rules.vertices.each { vtx ->
 
-    String vertexName = vtx.label
-    AtomicDouble maxScore = maxScoresByVertexName.computeIfAbsent(vertexName, { k -> new AtomicDouble(0) })
-    percentageThresholdByVertexName.computeIfAbsent(vertexName, { k -> new Double((double) (vtx.percentageThreshold == null ? percentageThreshold : vtx.percentageThreshold)) })
+    String vertexName = vtx.name ?: vtx.label
+    String vertexLabel = vtx.label
+
+    Boolean passedCondition = true;
+
+    try {
+      if (vtx.condition) {
+        passedCondition = Boolean
+          .parseBoolean(PVValTemplate.getTemplate((String) vtx.condition).make(binding).toString());
+      }
+    }
+    catch (Throwable t) {
+      passedCondition = false;
+    }
+
+
+    if (passedCondition) {
+      AtomicDouble maxScore = maxScoresByVertexName.computeIfAbsent(vertexName, { k -> new AtomicDouble(0) })
+      percentageThresholdByVertexName.computeIfAbsent(vertexName, { k -> new Double((double) (vtx.percentageThreshold == null ? percentageThreshold : vtx.percentageThreshold)) })
 //        int minSizeSubsequences = vtx.minSizeSubsequences ?: -1;
-    vtx.props.each { prop ->
+      vtx.props.each { prop ->
 
-      Class nativeType;
+        Class nativeType;
 
-      if (prop.type == null) {
-        nativeType = String.class
-      } else {
-        nativeType = Class.forName((String) prop.type)
-      }
+        if (prop.type == null) {
+          nativeType = String.class
+        } else {
+          nativeType = Class.forName((String) prop.type)
+        }
 
-      String propName = prop.name
+        String propName = prop.name
 
-      double weight = ((prop.matchWeight == null) ? 1.0 : prop.matchWeight);
-      if (!prop.excludeFromSearch) {
-        maxScore.addAndGet(weight);
+        double weight = ((prop.matchWeight == null) ? 1.0 : prop.matchWeight);
+        if (!prop.excludeFromSearch) {
+          maxScore.addAndGet(weight);
 
-      }
+        }
 
-      String propVal = PVValTemplate.getTemplate((String) prop.val).make(binding)
-      if (propVal != null && !"null".equals(propVal)) {
-        String predicate = prop.predicate ?: "eq"
-
-
-        if (nativeType.isArray()) {
-
-          nativeType = nativeType.getComponentType();
-
-          def propVals = slurper.parseText(propVal)
+        String propVal = PVValTemplate.getTemplate((String) prop.val).make(binding)
+        if (propVal != null && !"null".equals(propVal)) {
+          String predicate = prop.predicate ?: "eq"
 
 
-          propVals.each { propValItem ->
+          if (nativeType.isArray()) {
 
+            nativeType = nativeType.getComponentType();
+
+            def propVals;
+
+            try {
+              propVals = slurper.parseText(propVal)
+
+            }
+            catch (Throwable t) {
+              propVals = null;
+            }
+            if (propVals != null) {
+
+              propVals.each { propValItem ->
+
+                addNewMatchRequest(
+                  binding
+                  , matchReqs
+                  , (String) propValItem as String
+                  , nativeType
+                  , (String) propName
+                  , (String) vertexName
+                  , (String) vertexLabel
+                  , (String) predicate
+                  , (boolean) prop.excludeFromSearch
+                  , (boolean) prop.excludeFromSubsequenceSearch
+                  , (boolean) prop.excludeFromUpdate
+                  , (boolean) prop.mandatoryInSearch
+                  , (String) prop.postProcessor ?: null
+                  , (String) prop.postProcessorVar ?: null
+                  , (double) weight
+                  , sb
+                );
+
+
+              }
+            }
+
+          } else {
             addNewMatchRequest(
               binding
               , matchReqs
-              , (String) propValItem as String
+              , (String) propVal
               , nativeType
               , (String) propName
               , (String) vertexName
+              , (String) vertexLabel
               , (String) predicate
               , (boolean) prop.excludeFromSearch
               , (boolean) prop.excludeFromSubsequenceSearch
@@ -844,41 +953,13 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
               , (boolean) prop.mandatoryInSearch
               , (String) prop.postProcessor ?: null
               , (String) prop.postProcessorVar ?: null
-              , (double) weight
+              , (double) ((prop.matchWeight == null) ? 1.0 : prop.matchWeight)
               , sb
             );
-
-
           }
-
-
-        } else {
-          addNewMatchRequest(
-            binding
-            , matchReqs
-            , (String) propVal
-            , nativeType
-            , (String) propName
-            , (String) vertexName
-            , (String) predicate
-            , (boolean) prop.excludeFromSearch
-            , (boolean) prop.excludeFromSubsequenceSearch
-            , (boolean) prop.excludeFromUpdate
-            , (boolean) prop.mandatoryInSearch
-            , (String) prop.postProcessor ?: null
-            , (String) prop.postProcessorVar ?: null
-            , (double) ((prop.matchWeight == null) ? 1.0 : prop.matchWeight)
-            , sb
-          );
         }
-
-
       }
-
-
     }
-
-
   }
   return [matchReqs, maxScoresByVertexName, percentageThresholdByVertexName];
 
@@ -929,7 +1010,7 @@ def static addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> mat
 
   def localTrav = g
 
-  def matchesForUpdate = [];
+  List<MatchReq> matchesForUpdate = [];
 
   matchesForUpdate.addAll(matchReqsForThisVertexType.findAll { it2 -> !(it2.excludeFromUpdate) })
 
@@ -937,9 +1018,10 @@ def static addNewVertexFromMatchReqs(g, String vertexTypeStr, List<MatchReq> mat
 
   if (atLeastOneUpdate) {
 
-    localTrav = localTrav.addV(vertexTypeStr)
-      .property('Metadata.Type.' + vertexTypeStr, vertexTypeStr)
-      .property('Metadata.Type', vertexTypeStr)
+    String vertexLabel = matchesForUpdate.get(0).vertexLabel;
+    localTrav = localTrav.addV(vertexLabel)
+      .property('Metadata.Type.' + vertexLabel, vertexLabel)
+      .property('Metadata.Type', vertexLabel)
 
     matchesForUpdate.each { it ->
       if (!it.excludeFromUpdate && it.attribNativeVal != null) {
@@ -1017,13 +1099,13 @@ def updateExistingVertexWithMatchReqs(g, Map<Long, AtomicDouble> vertices, List<
 class EdgeRequest {
 
   String label;
-  String fromVertexLabel;
-  String toVertexLabel;
+  String fromVertexName;
+  String toVertexName;
 
-  EdgeRequest(String label, String fromVertexLabel, String toVertexLabel) {
+  EdgeRequest(String label, String fromVertexName, String toVertexName) {
     this.label = label
-    this.fromVertexLabel = fromVertexLabel
-    this.toVertexLabel = toVertexLabel
+    this.fromVertexName = fromVertexName
+    this.toVertexName = toVertexName
   }
 
   String getLabel() {
@@ -1034,20 +1116,20 @@ class EdgeRequest {
     this.label = label
   }
 
-  String getFromVertexLabel() {
-    return fromVertexLabel
+  String getFromVertexName() {
+    return fromVertexName
   }
 
-  void setFromVertexLabel(String fromVertexLabel) {
-    this.fromVertexLabel = fromVertexLabel
+  void setFromVertexName(String fromVertexName) {
+    this.fromVertexName = fromVertexName
   }
 
   String getToVertexLabel() {
-    return toVertexLabel
+    return toVertexName
   }
 
-  void setToVertexLabel(String toVertexLabel) {
-    this.toVertexLabel = toVertexLabel
+  void setToVertexLabel(String toVertexName) {
+    this.toVertexName = toVertexName
   }
 
   boolean equals(o) {
@@ -1056,9 +1138,9 @@ class EdgeRequest {
 
     EdgeRequest that = (EdgeRequest) o
 
-    if (fromVertexLabel != that.fromVertexLabel) return false
+    if (fromVertexName != that.fromVertexName) return false
     if (label != that.label) return false
-    if (toVertexLabel != that.toVertexLabel) return false
+    if (toVertexName != that.toVertexName) return false
 
     return true
   }
@@ -1066,13 +1148,13 @@ class EdgeRequest {
   int hashCode() {
     int result
     result = (label != null ? label.hashCode() : 0)
-    result = 31 * result + (fromVertexLabel != null ? fromVertexLabel.hashCode() : 0)
-    result = 31 * result + (toVertexLabel != null ? toVertexLabel.hashCode() : 0)
+    result = 31 * result + (fromVertexName != null ? fromVertexName.hashCode() : 0)
+    result = 31 * result + (toVertexName != null ? toVertexName.hashCode() : 0)
     return result
   }
 
   String toString() {
-    return "${label} = ($fromVertexLabel)->($toVertexLabel)"
+    return "${label} = ($fromVertexName)->($toVertexLabel)"
   }
 }
 
@@ -1083,16 +1165,16 @@ def parseEdges(def rules) {
   Set<EdgeRequest> edgeReqs = new HashSet<>()
 
   rules.edges.each { it ->
-    String fromVertexLabel = it.fromVertexLabel
-    String toVertexLabel = it.toVertexLabel
+    String fromVertexName = it.fromVertexName ?: it.fromVertexLabel
+    String toVertexName = it.toVertexName ?: it.toVertexLabel
     String label = it.label
 
-    EdgeRequest req = new EdgeRequest(label, fromVertexLabel, toVertexLabel);
+    EdgeRequest req = new EdgeRequest(label, fromVertexName, toVertexName);
 
     edgeReqs.add(req)
-    fromEdgeList = edgeReqsByVertexName.computeIfAbsent(fromVertexLabel, { k -> new ArrayList<EdgeRequest>() })
+    fromEdgeList = edgeReqsByVertexName.computeIfAbsent(fromVertexName, { k -> new ArrayList<EdgeRequest>() })
     fromEdgeList.add(req)
-    toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexLabel, { k -> new ArrayList<EdgeRequest>() })
+    toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexName, { k -> new ArrayList<EdgeRequest>() })
     toEdgeList.add(req)
 
   }
@@ -1100,7 +1182,7 @@ def parseEdges(def rules) {
   return [edgeReqsByVertexName, edgeReqs]
 }
 
-def createEdges(gTrav, Set<EdgeRequest> edgeReqs, Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName, Map<String, AtomicDouble> maxScoresByVertexName, StringBuffer sb = null) {
+def createEdges(GraphTraversalSource gTrav, Set<EdgeRequest> edgeReqs, Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName, Map<String, AtomicDouble> maxScoresByVertexName, StringBuffer sb = null) {
 
   edgeReqs.each { it ->
 
@@ -1310,11 +1392,11 @@ def rulesStr = '''
     "vertices":
   [
     {
-    "label": "Person"
+    "label": "Person.Natural"
      ,"props":
     [
       {
-      "name": "Person.Full_Name"
+      "name": "Person.Natural.Full_Name"
        ,"val": "${pg_nlp_res_person}"
        ,"predicate": "eq"
        ,"type":"[Ljava.lang.String;"
@@ -1396,7 +1478,7 @@ def rulesStr = '''
   ]
    ,"edges":
     [
-      { "label": "Has_Ingestion_Event", "fromVertexLabel": "Person", "toVertexLabel": "Event.Ingestion"  }
+      { "label": "Has_Ingestion_Event", "fromVertexName": "Person.Natural", "toVertexName": "Event.Ingestion"  }
     ]
   }
 }
@@ -1734,40 +1816,40 @@ def rulesStr =  '''
     "vertices":
 	[
 	  {
-		"label": "Person"
+		"label": "Person.Natural"
 	   ,"props":
 		[
 		  {
-			"name": "Person.Full_Name"
+			"name": "Person.Natural.Full_Name"
 		   ,"val": "${pg_FirstName?.toUpperCase()?.trim()} ${pg_LastName?.toUpperCase()?.trim()}"
 		   ,"predicate": "eq"
 		   ,"mandatoryInSearch": true
 		  }
 		 ,{
-			"name": "Person.Last_Name"
+			"name": "Person.Natural.Last_Name"
 		   ,"val": "${pg_LastName?.toUpperCase()?.trim()}"
 		   ,"excludeFromSubsequenceSearch": true
 		  }
 		 ,{
-			"name": "Person.Date_Of_Birth"
+			"name": "Person.Natural.Date_Of_Birth"
 		   ,"val": "${pg_DateofBirth}"
 		   ,"type": "java.util.Date"
 		   ,"mandatoryInSearch": true
 
 		  }
 		 ,{
-			"name": "Person.Gender"
+			"name": "Person.Natural.Gender"
 		   ,"val": "${pg_Sex?.toUpperCase()}"
 		   ,"excludeFromSubsequenceSearch": true
 
 		  }
 		 ,{
-			"name": "Person.Title"
+			"name": "Person.Natural.Title"
 		   ,"val": "${'MALE' == pg_Sex?.toUpperCase()? 'MR':'MS'}"
 		   ,"excludeFromSearch": true
 		  }
 		 ,{
-			"name": "Person.Nationality"
+			"name": "Person.Natural.Nationality"
 		   ,"val": "Not Provided"
 		   ,"excludeFromSearch": true
 		  }
@@ -1860,10 +1942,10 @@ def rulesStr =  '''
 	]
    ,"edges":
     [
-      { "label": "Uses_Email", "fromVertexLabel": "Person", "toVertexLabel": "Object.Email_Address" }
-     ,{ "label": "Lives", "fromVertexLabel": "Person", "toVertexLabel": "Location.Address"  }
-     ,{ "label": "Has_Policy", "fromVertexLabel": "Person", "toVertexLabel": "Object.Insurance_Policy"  }
-     ,{ "label": "Has_Ingestion_Event", "fromVertexLabel": "Person", "toVertexLabel": "Event.Ingestion"  }
+      { "label": "Uses_Email", "fromVertexName": "Person.Natural", "toVertexName": "Object.Email_Address" }
+     ,{ "label": "Lives", "fromVertexName": "Person.Natural", "toVertexName": "Location.Address"  }
+     ,{ "label": "Has_Policy", "fromVertexName": "Person.Natural", "toVertexName": "Object.Insurance_Policy"  }
+     ,{ "label": "Has_Ingestion_Event", "fromVertexName": "Person.Natural", "toVertexName": "Event.Ingestion"  }
     ]
   }
 }
