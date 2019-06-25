@@ -489,7 +489,7 @@ def runIndexQuery(String idx, String value, int maxHitsPerType, MatchReq matchRe
 
 }
 
-def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
+def matchVertices(JanusGraph graph , GraphTraversalSource gTravSource = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
 
 
   Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName = new HashMap<>();
@@ -505,7 +505,7 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
     // when the NLP engines give us false positives (e.g. erroneous matches for names, dates, etc).
     if (it.hasGraphEntries(graph, gTravSource.V())) {
       matchReqList.push(it)
-      vertexListsByVertexName.computeIfAbsent(it.vertexName, { k -> new ArrayList<>() })
+      vertexScoreMapByVertexName.computeIfAbsent(it.vertexName, { k -> new HashMap<>() })
     }
   }
 
