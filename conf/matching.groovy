@@ -11,6 +11,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.P
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.DefaultGraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
+import org.apache.tinkerpop.gremlin.structure.Transaction
 import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.janusgraph.core.JanusGraph
 import org.janusgraph.core.JanusGraphIndexQuery
@@ -512,7 +513,6 @@ def matchVertices(JanusGraph graph , GraphTraversalSource gTravSource = g, List<
 
   matchReqByVertexName.each { vertexName, v ->
 
-    DefaultGraphTraversal gtrav = (DefaultGraphTraversal) gTravSource.V();
 
     // LPPM - must do a deep copy here, because unique is a bit nasty and actually changes the
     // original record.
@@ -589,6 +589,8 @@ def matchVertices(JanusGraph graph , GraphTraversalSource gTravSource = g, List<
           if (searchableItems.size() > 0) {
             boolean atLeastOneTraversal = false;
             double standardScore = 0;
+            GraphTraversal graphTraversal = gTravSource.V();
+
             searchableItems.each { matchReq ->
 
               String predicateStr = matchReq.predicateStr as String;
@@ -616,13 +618,13 @@ def matchVertices(JanusGraph graph , GraphTraversalSource gTravSource = g, List<
               } else {
                 if (!atLeastOneTraversal) {
 
-                  sb?.append("\ng.V().has('Metadata.Type.")?.append(k)?.append("',eq('")?.append(k)?.append("')")
-                  gtrav = gTrav.V().has("Metadata.Type." + k, eq(k)).clone()
+                  sb?.append("\ng.V().has('Metadata.Type.")?.append(matchReq.vertexLabel)?.append("',eq('")?.append(matchReq.vertexLabel)?.append("')")
+                  graphTraversal = gTravSource.V().has("Metadata.Type." + matchReq.vertexLabel, P.eq(matchReq.vertexLabel));
                   atLeastOneTraversal = true;
                 }
                 standardScore += matchReq.matchWeight;
 
-                gtrav = gtrav.has(matchReq.propName, matchReq.predicate(matchReq.attribNativeVal)).clone()
+                graphTraversal = graphTraversal.has(matchReq.propName, matchReq.predicate(matchReq.attribNativeVal))
                 sb?.append("\n     .has('")
                   ?.append(matchReq.propName)?.append("',")
                   ?.append(matchReq.predicate)?.append(",'")?.append(matchReq.attribNativeVal)?.append("')")
@@ -636,7 +638,7 @@ def matchVertices(JanusGraph graph , GraphTraversalSource gTravSource = g, List<
 
             if (atLeastOneTraversal) {
 
-              (gtrav.range(0, maxHitsPerType).id().toList() as Long[]).each { vId ->
+              (graphTraversal.range(0, maxHitsPerType).id().toList() as Long[]).each { vId ->
                 AtomicDouble totalScore = vertexScoreMap.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
 
                 // Get rid of any index scores here in case we have any mixed entries;
@@ -1172,9 +1174,9 @@ def parseEdges(def rules) {
     EdgeRequest req = new EdgeRequest(label, fromVertexName, toVertexName);
 
     edgeReqs.add(req)
-    fromEdgeList = edgeReqsByVertexName.computeIfAbsent(fromVertexName, { k -> new ArrayList<EdgeRequest>() })
+    List<EdgeRequest> fromEdgeList = edgeReqsByVertexName.computeIfAbsent(fromVertexName, { k -> new ArrayList<EdgeRequest>() })
     fromEdgeList.add(req)
-    toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexName, { k -> new ArrayList<EdgeRequest>() })
+    List<EdgeRequest>  toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexName, { k -> new ArrayList<EdgeRequest>() })
     toEdgeList.add(req)
 
   }
@@ -1208,7 +1210,7 @@ def createEdges(GraphTraversalSource gTrav, Set<EdgeRequest> edgeReqs, Map<Strin
 
             Long[] foundIds = gTrav.V(toId)
               .both()
-              .hasId(within(fromId)).id()
+              .hasId(P.within(fromId)).id()
               .toSet() as Long[]
 
             sb?.append("\n in createEdges $foundIds")
@@ -1252,7 +1254,7 @@ def createEdges(GraphTraversalSource gTrav, Set<EdgeRequest> edgeReqs, Map<Strin
   }
 }
 
-def processMatchRequests(g,
+def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
                          List<MatchReq> matchReqs,
                          int maxHitsPerType,
                          Map<String, Double> percentageThresholdByVertexName,
@@ -1265,7 +1267,7 @@ def processMatchRequests(g,
   def (
   Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName,
   Map<String, List<MatchReq>>          matchReqByVertexName
-  ) = matchVertices(g, matchReqs, maxHitsPerType, sb);
+  ) = matchVertices(graph, g, matchReqs, maxHitsPerType, sb);
   vertexScoreMapByVertexName.each { vertexTypeStr, potentialHitIDs ->
 
     List<MatchReq> matchReqsForThisVertexType = matchReqByVertexName.get(vertexTypeStr)
@@ -1296,7 +1298,7 @@ def processMatchRequests(g,
 
 }
 
-def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
+def ingestDataUsingRules(JanusGraph graph, GraphTraversalSource g, Map<String, String> bindings, String jsonRules, StringBuffer sb = null) {
   Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName = new HashMap<>();
 
   def jsonSlurper = new JsonSlurper()
@@ -1306,7 +1308,7 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
   int maxHitsPerType = (rules.maxHitsPerType == null) ? 1000 : (int) rules.maxHitsPerType;
 
   def (Map<String, List<EdgeRequest>> edgeReqsByVertexName, Set<EdgeRequest> edgeReqs) = parseEdges(rules.updatereq)
-  trans = graph.tx()
+  Transaction trans = graph.tx()
   try {
     if (!trans.isOpen()) {
       trans.open()
@@ -1315,7 +1317,8 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
     def (List<MatchReq> matchReqs, Map<String, AtomicDouble> maxScoresByVertexName, Map<String, Double> percentageThresholdByVertexName) =
     getMatchRequests(bindings, rules.updatereq, jsonRules, percentageThreshold, sb)
 
-    processMatchRequests(g,
+    processMatchRequests(graph,
+      g,
       matchReqs,
       maxHitsPerType,
       percentageThresholdByVertexName,
@@ -1338,7 +1341,7 @@ def ingestDataUsingRules(graph, g, Map<String, String> bindings, String jsonRule
 }
 
 
-def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, String jsonRules, StringBuffer sb = null) {
+def ingestRecordListUsingRules(JanusGraph graph, GraphTraversalSource g, List<Map<String, String>> recordList, String jsonRules, StringBuffer sb = null) {
   Map<String, Map<Long, AtomicDouble>> finalVertexIdByVertexName = new HashMap<>();
 
   def jsonSlurper = new JsonSlurper()
@@ -1349,7 +1352,7 @@ def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, S
   int maxHitsPerType = (rules.maxHitsPerType == null) ? 1000 : (int) rules.maxHitsPerType;
 
   def (Map<String, List<EdgeRequest>> edgeReqsByVertexName, Set<EdgeRequest> edgeReqs) = parseEdges(rules.updatereq)
-  trans = graph.tx()
+  Transaction trans = graph.tx()
   try {
     if (!trans.isOpen()) {
       trans.open()
@@ -1361,7 +1364,7 @@ def ingestRecordListUsingRules(graph, g, List<Map<String, String>> recordList, S
       getMatchRequests(item, rules.updatereq, jsonRules, percentageThreshold, sb);
 
 
-      processMatchRequests(g,
+      processMatchRequests(graph, g,
         matchReqs,
         maxHitsPerType,
         percentageThresholdByVertexName,
