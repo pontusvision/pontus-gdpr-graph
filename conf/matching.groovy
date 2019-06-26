@@ -347,6 +347,44 @@ class MatchReq<T> {
   }
 }
 
+static Set<List<MatchReq>> subsequencesUniqueTypes(List<MatchReq> items) {
+  Set<List<MatchReq>> ans = new HashSet<>();
+
+  HashSet next;
+  for (Iterator iter = items.iterator(); iter.hasNext(); ans = next) {
+    MatchReq h = iter.next();
+    next = new HashSet();
+    Iterator answerIterator = ans.iterator();
+
+    while (answerIterator.hasNext()) {
+      List<MatchReq> it = (List) answerIterator.next();
+      List<MatchReq> sublist = new ArrayList<>(it);
+      sublist.add(h);
+
+      Set<String> types = new HashSet<>()
+      boolean hasDups = false;
+      int ilen = sublist.size();
+      for (int i = 0; i < ilen; i++) {
+        MatchReq req = sublist.get(i);
+        if (!types.add(req.propName)) {
+          hasDups = true;
+          break;
+        }
+      }
+      if (!hasDups) {
+        next.add(sublist);
+      }
+    }
+
+    next.addAll(ans);
+    List<MatchReq> hlist = new ArrayList<>();
+    hlist.add(h);
+    next.add(hlist);
+  }
+
+  return ans;
+}
+
 
 def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
 
@@ -390,7 +428,11 @@ def matchVertices(gTrav = g, List<MatchReq> matchReqs, int maxHitsPerType, Strin
     }
 
 
-    Set<List<MatchReq>> subs = vFiltered.subsequences()
+    Set<List<MatchReq>> subs = subsequencesUniqueTypes(vFiltered)
+    // LPPM - 08/02/2019 - subsequences was creating way too many entries;
+    // the alternative above only gives subsequences with unique types.
+    // here is the original:
+    // vFiltered.subsequences()
 
 //        expectedSizeOfQueries = expectedSizeOfQueries > 2? expectedSizeOfQueries - 1: expectedSizeOfQueries
 
