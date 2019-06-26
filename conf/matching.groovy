@@ -8,7 +8,6 @@ import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
 import groovy.text.Template
 import org.apache.tinkerpop.gremlin.process.traversal.P
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.DefaultGraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.Transaction
@@ -351,15 +350,20 @@ class MatchReq<T> {
   }
 
   boolean hasGraphEntries(JanusGraph graph, GraphTraversal gtrav) {
-    List<Long> indexQueryResults = new ArrayList<>(1);
-    int maxHitsPerType = 1;
 
-    GraphTraversal localTrav = getGraphEntries(graph, gtrav, indexQueryResults, maxHitsPerType, null);
+    if (!this.excludeFromSearch && this.excludeFromUpdate) {
+      List<Long> indexQueryResults = new ArrayList<>(1);
+      int maxHitsPerType = 1;
 
-    List<Long> travResults = localTrav.range(0, maxHitsPerType).id().toList();
+      GraphTraversal localTrav = getGraphEntries(graph, gtrav, indexQueryResults, maxHitsPerType, null);
 
-    return indexQueryResults.size() > 0 || travResults.size() > 0;
+      List<Long> travResults = localTrav.range(0, maxHitsPerType).id().toList();
 
+      return indexQueryResults.size() > 0 || travResults.size() > 0;
+
+    }
+
+    return true;
   }
 
   GraphTraversal getGraphEntries(JanusGraph graph, GraphTraversal gtrav, List<Long> indexQueryResults, int maxHitsPerType, StringBuffer sb) {
@@ -490,7 +494,7 @@ def runIndexQuery(String idx, String value, int maxHitsPerType, MatchReq matchRe
 
 }
 
-def matchVertices(JanusGraph graph , GraphTraversalSource gTravSource = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
+def matchVertices(JanusGraph graph, GraphTraversalSource gTravSource = g, List<MatchReq> matchReqs, int maxHitsPerType, StringBuffer sb = null) {
 
 
   Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName = new HashMap<>();
@@ -507,6 +511,11 @@ def matchVertices(JanusGraph graph , GraphTraversalSource gTravSource = g, List<
     if (it.hasGraphEntries(graph, gTravSource.V())) {
       matchReqList.push(it)
       vertexScoreMapByVertexName.computeIfAbsent(it.vertexName, { k -> new HashMap<>() })
+    }
+    else
+    {
+      sb?.append("\nremoved match Request $it from the list as it was not in the graph, and marked as searchable without updates\n\n" )
+
     }
   }
 
@@ -634,7 +643,7 @@ def matchVertices(JanusGraph graph , GraphTraversalSource gTravSource = g, List<
 
             }
             // Vertex ID vs Score
-            Map<Long, AtomicDouble> vertexScoreMap = vertexScoreMapByVertexName.get(k);
+            Map<Long, AtomicDouble> vertexScoreMap = vertexScoreMapByVertexName.get(vertexName);
 
             if (atLeastOneTraversal) {
 
@@ -1176,7 +1185,7 @@ def parseEdges(def rules) {
     edgeReqs.add(req)
     List<EdgeRequest> fromEdgeList = edgeReqsByVertexName.computeIfAbsent(fromVertexName, { k -> new ArrayList<EdgeRequest>() })
     fromEdgeList.add(req)
-    List<EdgeRequest>  toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexName, { k -> new ArrayList<EdgeRequest>() })
+    List<EdgeRequest> toEdgeList = edgeReqsByVertexName.computeIfAbsent(toVertexName, { k -> new ArrayList<EdgeRequest>() })
     toEdgeList.add(req)
 
   }
