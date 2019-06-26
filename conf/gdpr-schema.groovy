@@ -357,7 +357,7 @@ O.Form.Vertex_Label
             ,new Pair<>(personCustomerId, Mapping.STRING)
     ] ;
 
-    createMixedIdx(mgmt, "personDataMixedIdx", false, personIdxProps) ;
+    createMixedIdx(mgmt, "Person.Natural.MixedIdx", false, personIdxProps) ;
 
 
 //    createCompIdx(mgmt, "personDateOfBirth", personDateOfBirth)
