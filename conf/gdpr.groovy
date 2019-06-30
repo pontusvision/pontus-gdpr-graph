@@ -2655,6 +2655,7 @@ def __addVPCEdgesFromUserIdGroupPairs(
           .append(t.toString()).append('\n')
 
         trans.rollback();
+        throw t
       } finally {
         trans.close();
       }
@@ -2696,6 +2697,7 @@ def __addSecGroupEdgesFromUserIdGroupPairs(graph, g, Long origSecGroupVid, userI
 
 
         trans.rollback();
+        throw t;
       } finally {
         trans.close();
       }
@@ -2894,6 +2896,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
         trans.rollback();
 
         sb.append("VPC err - ").append(t.toString()).append('\n');
+        throw t;
       } finally {
         trans.close()
       }
@@ -2963,6 +2966,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
         } catch (Throwable t) {
           sb.append("awsi - error ").append(t.toString());
           trans.rollback()
+          throw t;
 
         } finally {
           trans.close()
@@ -3031,6 +3035,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
             trans.rollback();
 
             sb.append("secGroup - error ").append(t.toString());
+            throw t;
           } finally {
             trans.close()
           }
@@ -3065,6 +3070,8 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
         } catch (Throwable t) {
           sb.append("Edge - error ").append(t.toString()).append('\n');
           trans.rollback();
+          throw t;
+
         } finally {
           trans.close()
         }
