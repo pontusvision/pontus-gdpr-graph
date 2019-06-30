@@ -789,7 +789,7 @@ def addRandomDataProcedures(graph, g) {
 
 
     def randVal = new Random();
-    def randValK = randVal.nextInt(5);
+    def randValK = randVal.nextInt(1) + 1;
 
     def oneWeekInMs = 3600000 * 24 * 7;
     def eighteenWeeks = oneWeekInMs * 18;
@@ -816,7 +816,7 @@ def addRandomDataProcedures(graph, g) {
     for (def i = 0; i < types.length; i++) {
       def typeStr = types[i];
 
-      props = g.V().has('Metadata.Type' + "." + typeStr, eq(typeStr)).range(0, 1).properties().key().findAll {
+      props = g.V().has('Metadata.Type' + "." + typeStr, P.eq(typeStr)).range(0, 1).properties().key().findAll {
         (!it.startsWith('Metadata'))
       }
 
@@ -848,12 +848,11 @@ def addRandomDataProcedures(graph, g) {
           property("Object.Data_Procedures.Update_Mechanism", distributionRequestType.sample()).
           next()
 
-        for (def k = 0; k < randValK; k++) {
-          def pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment')).order().by(shuffle).range(0, 1).tryNext()
-          if (pia.isPresent()) {
-            g.addE("Has_Data_Procedures").from(pia.get()).to(dp).next()
+        for (int k = 0; k < randValK; k++) {
+          Vertex pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment')).order().by(Order.shuffle).range(0, 1).next()
+          g.addE("Has_Data_Procedures").from(pia).to(dp).next()
 
-          }
+
         }
       }
 
@@ -881,7 +880,7 @@ def addDataSourcesToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
 //
 //    }
     Random randVal = new Random()
-    def randVal1 = randVal.nextInt(10)
+    def randVal1 = randVal.nextInt(5) + 3
 
 
     for (int i = 0; i < randVal1; i++) {
@@ -890,7 +889,7 @@ def addDataSourcesToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
         .order().by(Order.shuffle).range(0, 1).next()
 
 
-      def numServersImpacted = randVal.nextInt(10);
+      def numServersImpacted = randVal.nextInt(10) + 1;
       for (def j = 0; j < numServersImpacted; j++) {
 
         Vertex awsInstance = g.V().has('Metadata.Type.Object.AWS_Instance', P.eq('Object.AWS_Instance'))
@@ -924,30 +923,29 @@ def addEdgesPiaDataSourcesPrivNotices(JanusGraph graph, GraphTraversalSource g) 
 //    }
 
     Random randVal = new Random()
-    int randVal1 = randVal.nextInt(10)
+    int randVal1 = randVal.nextInt(2) + 1
 
 
     for (int i = 0; i < randVal1; i++) {
 
-      int randVal2 = randVal.nextInt(10)
+      int randVal2 = randVal.nextInt(2) + 1
 
-      Optional<GraphTraversal> dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
-        .order().by(Order.shuffle).range(0, 1).tryNext()
+      Vertex dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
+        .order().by(Order.shuffle).range(0, 1).next()
 
 
-      Optional<GraphTraversal> pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
-        .order().by(Order.shuffle).range(0, 1).tryNext()
+      Vertex pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
+        .order().by(Order.shuffle).range(0, 1).next()
 
-      Optional<GraphTraversal> privacyNotice = g.V().has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
-        .order().by(Order.shuffle).range(0, 1).tryNext()
+      Vertex privacyNotice = g.V().has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
+        .order().by(Order.shuffle).range(0, 1).next()
 
 
       for (int j = 0; j < randVal2; j++) {
 
-        if (dataSource.isPresent() && pia.isPresent() && privacyNotice.isPresent()) {
-          g.V().addE("Has_Privacy_Notice").from(pia.get()).to(privacyNotice.get()).next();
-          g.V().addE("Has_Privacy_Impact_Assessment").from(dataSource.get()).to(privacyNotice.get()).next();
-        }
+        g.V().addE("Has_Privacy_Notice").from(pia).to(privacyNotice).next();
+        g.V().addE("Has_Privacy_Impact_Assessment").from(dataSource).to(pia).next();
+
 
       }
 
@@ -1006,7 +1004,6 @@ def addRandomDataBreachEvents(JanusGraph graph, GraphTraversalSource g) {
       new Pair<String, Double>("False Alert", (Double) 3.0),
       new Pair<String, Double>("No Impact", (Double) 3.0)];
     def distributionImpact = new EnumeratedDistribution<String>(probabilitiesImpact.asList())
-
 
 
     for (int i = 0; i < randVal1; i++) {
@@ -1442,7 +1439,7 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
 
   def randVal = new Random();
 
-  def numMoUs = randVal.nextInt(5);
+  def numMoUs = randVal.nextInt(3) + 3;
 
 //  Transaction trans = graph.tx()
   try {
@@ -1450,7 +1447,6 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
 //      trans.open()
 //
 //    }
-
 
 
     for (int k = 0; k < numMoUs; k++) {
@@ -1505,7 +1501,6 @@ def addPrivacyImpactAssessment(JanusGraph graph, GraphTraversalSource g) {
 //      trans.open()
 //
 //    }
-
 
 
     g.addV("Object.Privacy_Impact_Assessment").
@@ -1736,15 +1731,25 @@ def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
       GraphTraversal privNotice = g.V().has("Object.Privacy_Notice.Description", P.eq(privNoticeDesc[i]))
 
       if (privNotice.hasNext()) {
-        lawfulBasisVertices[i] = privNotice.next();
+        privNotice.next();
       } else {
-        lawfulBasisVertices[i] = g.addV("Object.Privacy_Notice").
+        g.addV("Object.Privacy_Notice").
           property("Metadata.Type", "Object.Privacy_Notice").
           property("Metadata.Type.Object.Privacy_Notice", "Object.Privacy_Notice").
           property("Object.Privacy_Notice.Text", privNoticeText[i]).
-          property("Object.Privacy_Notice.Description", privNoticeText[i]).
+          property("Object.Privacy_Notice.Description", privNoticeDesc[i]).
           property("Object.Privacy_Notice.Effect_On_Individuals", "low").
-          property("Object.Privacy_Notice.How_Will_It_Be_Used", "Test New Software").
+          property("Object.Privacy_Notice.Who_Is_Collecting", "ABG Inc").
+          property("Object.Privacy_Notice.Info_Collected", "Emails").
+          property("Object.Privacy_Notice.URL", "http://www.abg.com/data").
+          property("Object.Privacy_Notice.Id", i).
+          property("Object.Privacy_Notice.Why_Is_It_Collected", "required for BAU").
+          property("Object.Privacy_Notice.Expiry_Date", new Date()).
+          property("Object.Privacy_Notice.How_Is_It_Collected", "Electronic Form").
+          property("Object.Privacy_Notice.How_Will_It_Be_Used", "Research and Development").
+          property("Object.Privacy_Notice.Who_Will_It_Be_Shared", "GAB ltd").
+          property("Object.Privacy_Notice.Likely_To_Complain", "no").
+          property("Object.Privacy_Notice.Delivery_Date", new Date()).
           next()
       }
 
@@ -1768,18 +1773,14 @@ def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
     */
 
 
-    Optional<Vertex> pn = g.V().has("Metadata.Type.Object.Privacy_Notice", P.eq("Object.Privacy_Notice"))
-      .order().by(Order.shuffle).range(0, 1).tryNext();
+    Vertex pn = g.V().has("Metadata.Type.Object.Privacy_Notice", P.eq("Object.Privacy_Notice"))
+      .order().by(Order.shuffle).range(0, 1).next();
 
-    if (pn.isPresent()) {
-      int numLawfulBasis = lawfulBasisVertices.length;
+    int numLawfulBasis = lawfulBasisVertices.length;
 
-      int index = new Random().nextInt(numLawfulBasis);
+    int index = new Random().nextInt(numLawfulBasis);
 
-      g.addE("Has_Lawful_Basis_On").from(pn.get()).to(lawfulBasisVertices[index]).next()
-
-
-    }
+    g.addE("Has_Lawful_Basis_On").from(pn).to(lawfulBasisVertices[index]).next()
 
 
 //        __addConsentForPrivacyNotice(graph, g, g.V(pnId0).next())
@@ -2442,16 +2443,13 @@ def createDataProtectionAuthorities(JanusGraph graph, GraphTraversalSource g) {
       g.V().addE('Is_Located').from(org).to(location).next()
 
 
-      for (def k = 0; k < randValK; k++) {
+      if ((randValK % 5) == 0) {
 
-        Optional<GraphTraversal<Vertex, Vertex>> pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
-          .order().by(Order.shuffle).range(0, 1).tryNext()
+        Vertex pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
+          .order().by(Order.shuffle).range(0, 1).next()
 
-        if (pia.isPresent()) {
-          Vertex piaVert = pia.get();
-          g.addE("Has_Data_Procedures").from(piaVert).to(org).next()
+        g.addE("Has_Data_Procedures").from(pia).to(org).next()
 
-        }
       }
 
 
@@ -3008,7 +3006,6 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 //    }
 
 
-
             long createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
             long updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks) * 2
             metadataCreateDate = new Date((long) createMillis)
@@ -3177,4 +3174,4 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
 }
 
 //g.V().drop().iterate()
-//addRandomDataInit(graph,g)
+//addRandomDataInit(graph, g)

@@ -2760,13 +2760,13 @@
         "Object.Privacy_Notice.Form_Submission_Owner_Id",
         "Object.Privacy_Notice.Effect_On_Individuals",
         "Object.Privacy_Notice.Why_Is_It_Collected",
-        "Object.Privacy_Notice.Metadata.Create_Date",
+        "Object.Privacy_Notice.Delivery_Date",
         "Object.Privacy_Notice.How_Is_It_Collected",
         "Object.Privacy_Notice.How_Will_It_Be_Used",
         "Metadata.Type.Object.Privacy_Notice",
         "Object.Privacy_Notice.Who_Will_It_Be_Shared",
         "Object.Privacy_Notice.Likely_To_Complain",
-        "Object.Privacy_Notice.Metadata.Update_Date"
+        "Object.Privacy_Notice.Expiry_Date"
       ],
       "propertyKeysMappings": {
         "Metadata.Type.Object.Privacy_Notice": {
