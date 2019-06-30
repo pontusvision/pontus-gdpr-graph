@@ -1891,7 +1891,13 @@
       "name": "Has_Contract",
       "multiplicity": "MULTI",
       "unidirected": false
+    },
+    {
+      "name": "Runs_On",
+      "multiplicity": "MULTI",
+      "unidirected": false
     }
+
   ],
   "vertexIndexes": [
     {
@@ -2750,6 +2756,7 @@
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
+        "Object.Privacy_Notice.Description",
         "Object.Privacy_Notice.Who_Is_Collecting",
         "Object.Privacy_Notice.Info_Collected",
         "Object.Privacy_Notice.URL",

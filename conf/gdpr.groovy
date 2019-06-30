@@ -889,14 +889,21 @@ def addDataSourcesToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
         .order().by(Order.shuffle).range(0, 1).next()
 
 
-      def numServersImpacted = randVal.nextInt(10) + 1;
-      for (def j = 0; j < numServersImpacted; j++) {
+      def numServersImpacted = randVal.nextInt(10) + 5;
 
-        Vertex awsInstance = g.V().has('Metadata.Type.Object.AWS_Instance', P.eq('Object.AWS_Instance'))
-          .order().by(Order.shuffle).range(0, 1).next()
+      g.V().has('Metadata.Type.Object.AWS_Instance', P.eq('Object.AWS_Instance'))
+        .order().by(Order.shuffle).range(0, numServersImpacted).each { awsInstance ->
+        g.addE("Runs_On").from(dataSource).to(awsInstance).next()
 
-        g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataSource).next()
       }
+//
+//      for (def j = 0; j < numServersImpacted; j++) {
+//
+//        Vertex awsInstance = g.V().has('Metadata.Type.Object.AWS_Instance', P.eq('Object.AWS_Instance'))
+//          .order().by(Order.shuffle).range(0, 1).next()
+//
+//        g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataSource).next()
+//      }
 
 
     }
