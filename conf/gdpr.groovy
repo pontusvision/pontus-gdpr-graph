@@ -925,10 +925,11 @@ def addEdgesPiaDataSourcesPrivNotices(JanusGraph graph, GraphTraversalSource g) 
       Vertex dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
         .order().by(Order.shuffle).range(0, 1).next()
 
-      Vertex privacyNotice = g.V().has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
-        .order().by(Order.shuffle).range(0, 1).next()
 
       Vertex pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
+        .order().by(Order.shuffle).range(0, 1).next()
+
+      Vertex privacyNotice = g.V().has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
         .order().by(Order.shuffle).range(0, 1).next()
 
 
@@ -1452,6 +1453,8 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
         property("Object.Contract.Id", new Random().nextLong()).
         property("Object.Contract.Description", "This is a Data Sharing Contract").
         property("Object.Contract.Status", "Active").
+        property("Metadata.Type.Object.Contract", "Object.Contract").
+        property("Metadata.Type", "Object.Contract").
         property("Object.Contract.Link", "https://www.abcinc.com/contract").next();
 
 
