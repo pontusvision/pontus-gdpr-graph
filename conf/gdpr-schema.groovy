@@ -1,4 +1,5 @@
 import org.apache.commons.math3.util.Pair
+import org.janusgraph.core.PropertyKey
 import org.janusgraph.core.schema.Mapping
 
 

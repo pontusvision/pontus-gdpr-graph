@@ -3008,7 +3008,7 @@
       }
     },
     {
-      "name": "Event.Ingestion.MixedIdx",
+      "name": "Event.Group_Ingestion.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
