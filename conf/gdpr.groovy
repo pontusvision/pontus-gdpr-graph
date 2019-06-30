@@ -924,8 +924,10 @@ def addEdgesPiaDataSourcesPrivNotices(JanusGraph graph, GraphTraversalSource g) 
 
       Vertex dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
         .order().by(Order.shuffle).range(0, 1).next()
+
       Vertex privacyNotice = g.V().has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
         .order().by(Order.shuffle).range(0, 1).next()
+
       Vertex pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
         .order().by(Order.shuffle).range(0, 1).next()
 
@@ -1475,6 +1477,10 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
 
   } catch (Throwable t) {
     trans.rollback();
+    throw t;
+  }
+  finally{
+    trans.close();
   }
 }
 
@@ -1697,8 +1703,6 @@ def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
           property("Metadata.Lineage", "https://gdpr-info.eu/art-6-gdpr/").
           property("Metadata.Redaction", "/data/protection/officer").
           property("Metadata.Version", 1).
-          property("Metadata.Create_Date", metadataCreateDate).
-          property("Metadata.Update_Date", metadataUpdateDate).
           property("Metadata.Status", "new").
           property("Metadata.GDPR_Status", "n/a").
           property("Metadata.Lineage_Server_Tag", "AWS_AAA").
