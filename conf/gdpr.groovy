@@ -737,7 +737,7 @@ def addDataSources(JanusGraph graph, GraphTraversalSource g) {
 
 
     for (int i = 0; i < name.length; i++) {
-      Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption = g.V().has("Object.Data_Source.Name", P.eq(name[i])).tryNext()
+      Optional< GraphTraversal<Vertex, Vertex>> dataSourceOption = g.V().has("Object.Data_Source.Name", P.eq(name[i])).tryNext()
       GraphTraversal<Vertex, Vertex> dataSource;
       if (!dataSourceOption.isPresent()) {
         dataSource = g.addV("Object.Data_Source");
@@ -1961,7 +1961,7 @@ def addOrganisations(JanusGraph graph, GraphTraversalSource g) {
 }
 
 
-def createDataProtectionAuthorities() {
+def createDataProtectionAuthorities(JanusGraph graph, GraphTraversalSource g) {
 
   def authData = [
     [
@@ -2392,7 +2392,7 @@ def createDataProtectionAuthorities() {
       def metadataUpdateDate = new Date((long) updateMillis)
 
 
-      def location = g.addV("Location.Address").
+      Vertex location = g.addV("Location.Address").
         property("Metadata.Lineage", "http://ec.europa.eu/justice/data-protection/article-29/structure/data-protection-authorities/index_en.htm").
 
         property("Metadata.Redaction", "/dataprotectionofficer/aaa").
@@ -2408,7 +2408,7 @@ def createDataProtectionAuthorities() {
         property("Location.Address.Post_Code", authDataObj.locationAddrCity).next()
 
 
-      long orgId = g.addV("Person.Organisation").
+      Vertex org = g.addV("Person.Organisation").
         property("Metadata.Lineage", "http://ec.europa.eu/justice/data-protection/article-29/structure/data-protection-authorities/index_en.htm").
         property("Metadata.Redaction", "/dataprotectionofficer/aaa").
         property("Metadata.Version", "1").
@@ -2425,16 +2425,21 @@ def createDataProtectionAuthorities() {
         property("Person.Organisation.Phone", authDataObj.orgPhone).
         property("Person.Organisation.Email", authDataObj.orgEmail).
         property("Person.Organisation.Fax", authDataObj.orgFax).
-        next().id();
+        next();
+
+      g.V().addE('Is_Located').from(org).to(location).next()
+
 
 
       for (def k = 0; k < randValK; k++) {
-        def org = g.V(orgId);
 
-        def pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment'))
-          .order().by(shuffle).range(0, 1).next()
+        Optional<GraphTraversal<Vertex, Vertex>> pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
+          .order().by(Order.shuffle).range(0, 1).tryNext()
 
-        g.addE("Has_Data_Procedures").from(pia).to(org).next()
+        if(pia.isPresent()){
+          g.addE("Has_Data_Procedures").from(pia.get().next()).to(org).next()
+
+        }
       }
 
 
@@ -3108,12 +3113,12 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
     sb.append("\n called addLawfulBasisAndPrivacyNotices(graph, g)");
 
     addEdgesPiaDataSourcesPrivNotices(graph, g);
-    sb.append("\n called addLawfulBasisAndPrivacyNotices(graph, g)");
+    sb.append("\n called addEdgesPiaDataSourcesPrivNotices(graph, g)");
 
     addRandomDataProcedures(graph, g);
     sb.append("\n called addRandomDataProcedures(graph, g)");
 
-    createDataProtectionAuthorities();
+    createDataProtectionAuthorities(graph, g);
     sb.append("\n called createDataProtectionAuthorities()");
 
     addRandomAWSGraph(graph, g, null, null);
