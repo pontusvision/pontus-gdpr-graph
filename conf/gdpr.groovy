@@ -1712,6 +1712,35 @@ def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
 
     }
 
+    String [] privNoticeDesc = ["This is a sample Privacy Notice", "This is another sample Privacy Notice"];
+    String [] privNoticeText = ["This is a sample Privacy Notice Text; the legal terms go here",
+                                "This is another sample Privacy Notice Text; the legal terms go here"];
+
+    ilen = privNoticeDesc.length;
+
+
+    for (int i = 0; i < ilen; i++) {
+
+
+      GraphTraversal privNotice = g.V().has("Object.Privacy_Notice.Description", P.eq(privNoticeDesc[i]))
+
+      if (privNotice.hasNext()) {
+        lawfulBasisVertices[i] = privNotice.next();
+      } else {
+        lawfulBasisVertices[i] = g.addV("Object.Privacy_Notice").
+          property("Metadata.Type", "Object.Privacy_Notice").
+          property("Metadata.Type.Object.Privacy_Notice", "Object.Privacy_Notice").
+          property("Object.Privacy_Notice.Text", privNoticeText[i]).
+          property("Object.Privacy_Notice.Description", privNoticeText[i]).
+          property("Object.Privacy_Notice.Effect_On_Individuals", "low").
+          property("Object.Privacy_Notice.How_Will_It_Be_Used", "Test New Software").
+          next()
+      }
+
+    }
+
+
+
 
     /*
 
