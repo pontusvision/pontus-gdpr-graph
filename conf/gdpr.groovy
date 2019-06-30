@@ -8,6 +8,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Transaction
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.janusgraph.core.JanusGraph
+import org.openrdf.model.Graph
 
 import java.text.SimpleDateFormat
 
@@ -1053,9 +1054,9 @@ def addRandomDataBreachEvents(JanusGraph graph, GraphTraversalSource g) {
 }
 
 
-def addRandomSARs(graph, g) {
+def addRandomSARs(JanusGraph graph, GraphTraversalSource g) {
 
-  def trans = graph.tx()
+  Transaction trans = graph.tx()
   try {
     if (!trans.isOpen()) {
       trans.open()
@@ -1092,7 +1093,7 @@ def addRandomSARs(graph, g) {
       def metadataUpdateDate = new Date((long) updateMillis)
 
       def stat = distributionStatus.sample()
-      def sar = g.addV("Event.Subject_Access_Request").
+      Vertex sar = g.addV("Event.Subject_Access_Request").
         property("Metadata.Controller", "ABC INC").
         property("Metadata.Processor", "ABC INC").
         property("Metadata.Lineage", "Random generator").
@@ -1111,9 +1112,11 @@ def addRandomSARs(graph, g) {
         next()
 
 
-      def employee = g.V().has('Metadata.Type.Person.Employee', eq('Person.Employee')).order().by(shuffle).range(0, 1).tryNext()
+      Optional<Vertex> employee = g.V().has('Metadata.Type.Person.Employee', P.eq('Person.Employee'))
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
-      def person = g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural')).order().by(shuffle).range(0, 1).tryNext()
+      Optional<Vertex> person = g.V().has('Metadata.Type.Person.Natural', P.eq('Person.Natural'))
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
 
       if (person.isPresent()) {
@@ -1499,7 +1502,7 @@ def addPrivacyImpactAssessment(JanusGraph graph, GraphTraversalSource g) {
     }
 
 
-    def pia = g.addV("Object.Privacy_Impact_Assessment").
+    g.addV("Object.Privacy_Impact_Assessment").
       property("Metadata.Create_Date", metadataCreateDate).
       property("Metadata.Update_Date", metadataUpdateDate).
       property("Metadata.Type", "Object.Privacy_Impact_Assessment").
@@ -1532,6 +1535,7 @@ and other relevant legislation.
   }
   catch (Throwable t) {
     trans.rollback()
+    throw t;
   }
   finally {
     if (trans.isOpen()) {
@@ -3079,6 +3083,7 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
     sb.append("\n called addRandomSARs(graph, g)");
 
     addPrivacyImpactAssessment(graph, g);
+    sb.append("\n called addPrivacyImpactAssessment(graph, g)");
 
     addLawfulBasisAndPrivacyNotices(graph, g);
     sb.append("\n called addLawfulBasisAndPrivacyNotices(graph, g)");
