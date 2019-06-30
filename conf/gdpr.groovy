@@ -1,3 +1,16 @@
+// Long count = g.V()
+//   .has("Object.Contract.Description", eq("This is a Data Sharing Contract"))
+//   .count()
+//   .next()
+
+// String res = "no data"
+// if (count > 0){
+
+// res = "HAS DATA"
+// }
+
+// res
+
 import com.pontusvision.utils.LocationAddress
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
@@ -8,7 +21,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Transaction
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.janusgraph.core.JanusGraph
-import org.openrdf.model.Graph
 
 import java.text.SimpleDateFormat
 
@@ -171,17 +183,18 @@ def addCampaignAwarenessBulk(JanusGraph graph, GraphTraversalSource g, List<Map<
 
   Date metadataCreateDate = new Date()
   Date metadataUpdateDate = new Date()
-  Transaction trans = graph.tx()
   long counter = 0;
 
   def awarenessCampaignId = -1L;
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
-    }
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
 
-    GraphTraversal  awarenessCampaign = g.V().has("Metadata.Type.Object.Awareness_Campaign", P.eq("Object.Awareness_Campaign"))
+    GraphTraversal awarenessCampaign = g.V().has("Metadata.Type.Object.Awareness_Campaign", P.eq("Object.Awareness_Campaign"))
 
     if (awarenessCampaign.hasNext()) {
       awarenessCampaignId = awarenessCampaign.next().id();
@@ -321,7 +334,7 @@ def addCampaignAwarenessBulk(JanusGraph graph, GraphTraversalSource g, List<Map<
       g.addE("Event.Training.Person")
         .from(trainingEvent)
         .to(person)
-//        .property("Metadata.Type", "Event.Training.Awareness_Campaign")
+      //        .property("Metadata.Type", "Event.Training.Awareness_Campaign")
 //        .property("Metadata.Create_Date", metadataCreateDate)
         .next()
 
@@ -723,12 +736,12 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps, StringBuffer s
 def addDataSources(JanusGraph graph, GraphTraversalSource g) {
 
 
-  Transaction trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
-
-    }
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
     String[] name = ["Office 365", "Salesforce", "Marketing Data", "CRM System", "Outlook PST", "PDF Zip Files"]
     String[] description = ["Office 365 emails and attachments", "Salesforce.com CRM system data", "Marketing Data from an XLSX spreadsheet",
                             "CRM System data from csv files.", "Outlook PST", "PDF Zip Files"];
@@ -736,13 +749,13 @@ def addDataSources(JanusGraph graph, GraphTraversalSource g) {
 
 
     for (int i = 0; i < name.length; i++) {
-      Optional< GraphTraversal<Vertex, Vertex>> dataSourceOption =
+      Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
         g.V().has("Object.Data_Source.Name", P.eq(name[i])).tryNext()
       GraphTraversal<Vertex, Vertex> dataSource;
       if (!dataSourceOption.isPresent()) {
         dataSource = g.addV("Object.Data_Source");
       } else {
-        dataSource = dataSourceOption.get();
+        dataSource = g.V(dataSourceOption.get().id());
       }
       Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Data_Source").
         property("Metadata.Type.Object.Data_Source", "Object.Data_Source").
@@ -754,12 +767,12 @@ def addDataSources(JanusGraph graph, GraphTraversalSource g) {
 
     }
 
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
 
 
@@ -767,12 +780,13 @@ def addDataSources(JanusGraph graph, GraphTraversalSource g) {
 
 def addRandomDataProcedures(graph, g) {
 
-  def trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-    }
 
     def randVal = new Random();
     def randValK = randVal.nextInt(5);
@@ -847,12 +861,12 @@ def addRandomDataProcedures(graph, g) {
     }
 
 
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
 
 
@@ -860,17 +874,15 @@ def addRandomDataProcedures(graph, g) {
 
 def addDataSourcesToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
 
-  Transaction trans = graph.tx()
+  //  def trans = graph.tx()
   try {
-
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
     Random randVal = new Random()
     def randVal1 = randVal.nextInt(10)
 
-
-    if (!trans.isOpen()) {
-      trans.open()
-
-    }
 
     for (int i = 0; i < randVal1; i++) {
 
@@ -889,17 +901,14 @@ def addDataSourcesToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
 
 
     }
-    trans.commit();
 
 
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    if (trans.isOpen()) {
-      trans.close()
-
-    }
+//    trans.close()
   }
 
 
@@ -907,48 +916,48 @@ def addDataSourcesToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
 
 def addEdgesPiaDataSourcesPrivNotices(JanusGraph graph, GraphTraversalSource g) {
 
-  Transaction trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
     Random randVal = new Random()
     int randVal1 = randVal.nextInt(10)
 
-    if (!trans.isOpen()) {
-      trans.open()
-
-    }
 
     for (int i = 0; i < randVal1; i++) {
 
       int randVal2 = randVal.nextInt(10)
 
-      Vertex dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
-        .order().by(Order.shuffle).range(0, 1).next()
+      Optional<GraphTraversal> dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
 
-      Vertex pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
-        .order().by(Order.shuffle).range(0, 1).next()
+      Optional<GraphTraversal> pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
-      Vertex privacyNotice = g.V().has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
-        .order().by(Order.shuffle).range(0, 1).next()
+      Optional<GraphTraversal> privacyNotice = g.V().has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
 
       for (int j = 0; j < randVal2; j++) {
-        g.V().addE("Has_Privacy_Notice").from(pia).to(privacyNotice).next();
-        g.V().addE("Has_Privacy_Impact_Assessment").from(dataSource).to(privacyNotice).next();
+
+        if (dataSource.isPresent() && pia.isPresent() && privacyNotice.isPresent()) {
+          g.V().addE("Has_Privacy_Notice").from(pia.get()).to(privacyNotice.get()).next();
+          g.V().addE("Has_Privacy_Impact_Assessment").from(dataSource.get()).to(privacyNotice.get()).next();
+        }
+
       }
+
     }
-    trans.commit();
-
-
+    //    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    if (trans.isOpen()) {
-      trans.close()
-
-    }
+//    trans.close()
   }
 
 
@@ -957,8 +966,12 @@ def addEdgesPiaDataSourcesPrivNotices(JanusGraph graph, GraphTraversalSource g) 
 
 def addRandomDataBreachEvents(JanusGraph graph, GraphTraversalSource g) {
 
-  Transaction trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
     Random randVal = new Random()
     def randVal1 = randVal.nextInt(10)
@@ -994,12 +1007,7 @@ def addRandomDataBreachEvents(JanusGraph graph, GraphTraversalSource g) {
       new Pair<String, Double>("No Impact", (Double) 3.0)];
     def distributionImpact = new EnumeratedDistribution<String>(probabilitiesImpact.asList())
 
-    trans = graph.tx();
 
-    if (!trans.isOpen()) {
-      trans.open()
-
-    }
 
     for (int i = 0; i < randVal1; i++) {
 
@@ -1030,17 +1038,12 @@ def addRandomDataBreachEvents(JanusGraph graph, GraphTraversalSource g) {
 
 
     }
-    trans.commit();
-
-
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    if (trans.isOpen()) {
-      trans.close()
-
-    }
+//    trans.close()
   }
 
 
@@ -1049,12 +1052,13 @@ def addRandomDataBreachEvents(JanusGraph graph, GraphTraversalSource g) {
 
 def addRandomSARs(JanusGraph graph, GraphTraversalSource g) {
 
-  Transaction trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-    }
 
     def randVal = new Random()
     def randVal1 = randVal.nextInt(10)
@@ -1125,12 +1129,12 @@ def addRandomSARs(JanusGraph graph, GraphTraversalSource g) {
     }
 
 
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
 
 
@@ -1139,46 +1143,43 @@ def addRandomSARs(JanusGraph graph, GraphTraversalSource g) {
 
 def addDataBreachToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
 
-  Transaction trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
     Random randVal = new Random()
     def randVal1 = randVal.nextInt(10)
 
-
-    if (!trans.isOpen()) {
-      trans.open()
-
-    }
-
     for (int i = 0; i < randVal1; i++) {
 
-      Vertex dataSource = g.V().has('Metadata.Type.Event.Data_Breach', P.eq('Event.Data_Breach'))
-        .order().by(Order.shuffle).range(0, 1).next()
+      Optional<GraphTraversal> trav = g.V().has('Metadata.Type.Event.Data_Breach', P.eq('Event.Data_Breach'))
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
+      if (trav.isPresent()) {
+        Vertex dataSource = trav.get();
 
-      def numServersImpacted = randVal.nextInt(10);
-      for (def j = 0; j < numServersImpacted; j++) {
+        def numServersImpacted = randVal.nextInt(10);
+        for (def j = 0; j < numServersImpacted; j++) {
 
-        Vertex awsInstance = g.V().has('Metadata.Type.Object.AWS_Instance', P.eq('Object.AWS_Instance'))
-          .order().by(Order.shuffle).range(0, 1).next()
+          Vertex awsInstance = g.V().has('Metadata.Type.Object.AWS_Instance', P.eq('Object.AWS_Instance'))
+            .order().by(Order.shuffle).range(0, 1).next()
 
-        g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataSource).next()
+          g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataSource).next()
+        }
+
       }
 
 
     }
-    trans.commit();
-
-
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    if (trans.isOpen()) {
-      trans.close()
-
-    }
+//    trans.close()
   }
 
 
@@ -1189,11 +1190,12 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
   metadataCreateDate = new Date();
   metadataUpdateDate = new Date();
-  trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-
-    if (!trans.isOpen())
-      trans.open()
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
     randVal = new Random()
 
@@ -1325,14 +1327,14 @@ def addRandomChildUserDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
       g.addE("Has_Parent_Or_Guardian").from(person).to(parentOrGuardian).next();
     }
 
-
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
+
 }
 
 
@@ -1340,12 +1342,13 @@ def addDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
 
   metadataCreateDate = new Date()
   metadataUpdateDate = new Date()
-  trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-    }
 
     randVal = new Random()
 
@@ -1356,13 +1359,14 @@ def addDataBulk(graph, g, List<Map<String, String>> listOfMaps) {
     for (Map<String, String> item in listOfMaps) {
 
     }
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
+
 }
 
 def __addConsentForPrivacyNotice(graph, g, Vertex privNoticeVertex) {
@@ -1440,11 +1444,13 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
 
   def numMoUs = randVal.nextInt(5);
 
-  Transaction trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
-    }
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
+
 
 
     for (int k = 0; k < numMoUs; k++) {
@@ -1455,20 +1461,20 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
         property("Object.Contract.Status", "Active").
         property("Metadata.Type.Object.Contract", "Object.Contract").
         property("Metadata.Type", "Object.Contract").
-        property("Object.Contract.Link", "https://www.abcinc.com/contract").next();
+        property("Object.Contract.Link", "https://www.abcinc.com/contract").iterate();
 
 
       Vertex org = g.V().has('Metadata.Type.Person.Organisation', P.eq('Person.Organisation'))
-        .order().by(Order.shuffle).range(0, 1).next()
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
       Vertex org2 = g.V().has('Metadata.Type.Person.Organisation', P.eq('Person.Organisation'))
-        .order().by(Order.shuffle).range(0, 1).next()
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
       Vertex org3 = g.V().has('Metadata.Type.Person.Organisation', P.eq('Person.Organisation'))
-        .order().by(Order.shuffle).range(0, 1).next()
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
       Vertex dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
-        .order().by(Order.shuffle).range(0, 1).next()
+        .order().by(Order.shuffle).range(0, 1).tryNext()
 
       g.addE("Has_Contract").from(dataSource).to(contract).next()
       g.addE("Is_Data_Processor").from(org).to(contract).next()
@@ -1478,13 +1484,14 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
     }
     trans.commit();
 
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback();
-    throw t;
+//    trans.rollback()
+    throw t
+  } finally {
+//    trans.close()
   }
-  finally{
-    trans.close();
-  }
+
 }
 
 
@@ -1493,12 +1500,13 @@ def addPrivacyImpactAssessment(JanusGraph graph, GraphTraversalSource g) {
   Date metadataCreateDate = new Date()
   Date metadataUpdateDate = new Date()
 
-  Transaction trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-    }
 
 
     g.addV("Object.Privacy_Impact_Assessment").
@@ -1529,18 +1537,14 @@ and other relevant legislation.
  */
 
 
-    trans.commit();
+//    trans.commit()
+  } catch (Throwable t) {
+//    trans.rollback()
+    throw t
+  } finally {
+//    trans.close()
+  }
 
-  }
-  catch (Throwable t) {
-    trans.rollback()
-    throw t;
-  }
-  finally {
-    if (trans.isOpen()) {
-      trans.close();
-    }
-  }
 
 //        trans.commit()
 
@@ -1672,12 +1676,13 @@ def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
 
   metadataCreateDate = new Date()
   metadataUpdateDate = new Date()
-  Transaction trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-    }
 
     def definitions = new String[6]
 
@@ -1719,9 +1724,9 @@ def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
 
     }
 
-    String [] privNoticeDesc = ["This is a sample Privacy Notice", "This is another sample Privacy Notice"];
-    String [] privNoticeText = ["This is a sample Privacy Notice Text; the legal terms go here",
-                                "This is another sample Privacy Notice Text; the legal terms go here"];
+    String[] privNoticeDesc = ["This is a sample Privacy Notice", "This is another sample Privacy Notice"];
+    String[] privNoticeText = ["This is a sample Privacy Notice Text; the legal terms go here",
+                               "This is another sample Privacy Notice Text; the legal terms go here"];
 
     ilen = privNoticeDesc.length;
 
@@ -1745,8 +1750,6 @@ def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
       }
 
     }
-
-
 
 
     /*
@@ -1788,13 +1791,14 @@ def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
 //        __addPrivacyImpactAssessment(graph, g, g.V(pnId1).next())
 
 
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
+
 
 }
 
@@ -1830,12 +1834,12 @@ def createForms() {
     ]
   ]
 
-  def trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
-
-    }
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
 
     for (def i = 0; i < formData.size(); i++) {
@@ -1858,13 +1862,14 @@ def createForms() {
     }
 
 
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
+
 
 }
 
@@ -1914,12 +1919,12 @@ def addOrganisations(JanusGraph graph, GraphTraversalSource g) {
   ];
 
 
-  def trans = graph.tx()
+//  def trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
-
-    }
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
 
     for (def i = 0; i < orgData.size(); i++) {
@@ -1956,12 +1961,12 @@ def addOrganisations(JanusGraph graph, GraphTraversalSource g) {
     }
 
 
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
 
 
@@ -2352,12 +2357,13 @@ def createDataProtectionAuthorities(JanusGraph graph, GraphTraversalSource g) {
   ];
 
 
-  def trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open()
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-    }
 
     def randVal = new Random();
     def randValK = randVal.nextInt(5);
@@ -2437,14 +2443,14 @@ def createDataProtectionAuthorities(JanusGraph graph, GraphTraversalSource g) {
       g.V().addE('Is_Located').from(org).to(location).next()
 
 
-
       for (def k = 0; k < randValK; k++) {
 
         Optional<GraphTraversal<Vertex, Vertex>> pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
           .order().by(Order.shuffle).range(0, 1).tryNext()
 
-        if(pia.isPresent()){
-          g.addE("Has_Data_Procedures").from(pia.get().next()).to(org).next()
+        if (pia.isPresent()) {
+          Vertex piaVert = pia.get();
+          g.addE("Has_Data_Procedures").from(piaVert).to(org).next()
 
         }
       }
@@ -2453,12 +2459,12 @@ def createDataProtectionAuthorities(JanusGraph graph, GraphTraversalSource g) {
     }
 
 
-    trans.commit()
+//    trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+//    trans.rollback()
     throw t
   } finally {
-    trans.close()
+//    trans.close()
   }
 
 
@@ -2466,11 +2472,12 @@ def createDataProtectionAuthorities(JanusGraph graph, GraphTraversalSource g) {
 
 
 def createNotificationTemplates() {
-  def trans = graph.tx()
+//  Transaction trans = graph.tx()
   try {
-    if (!trans.isOpen()) {
-      trans.open();
-    }
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
     Long count = g.V().has("Metadata.Type.Object.Notification_Templates", eq("Object.Notification_Templates")).count().next();
 
@@ -2604,14 +2611,12 @@ def createNotificationTemplates() {
     }
 
 
-    trans.commit();
-
-  }
-  catch (t) {
-    trans.rollback();
-    throw t;
+//    trans.commit()
+  } catch (Throwable t) {
+//    trans.rollback()
+    throw t
   } finally {
-    trans.close();
+//    trans.close()
   }
 
 
@@ -2633,12 +2638,13 @@ def __addVPCEdgesFromUserIdGroupPairs(
 
     if (uidPair.VpcId != null && uidPair.PeeringStatus == "active") {
       def peerVpc = g.V().has('Object.AWS_VPC.Id', P.eq(uidPair.VpcId)).next();
-      trans = graph.tx()
-
+//  Transaction trans = graph.tx()
       try {
-        Transaction trans = graph.tx();
-        if (!trans.isOpen())
-          trans.open();
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
+
 
         def origVPC = g.V(origVpcVid).next();
 
@@ -2652,16 +2658,14 @@ def __addVPCEdgesFromUserIdGroupPairs(
           .append('uidPair.VpcId = ').append(uidPair.VpcId).append('\n')
 
 
-        trans.commit();
+//    trans.commit()
       } catch (Throwable t) {
-        sb.append('ERROR - in __addVPCEdgesFromUserIdGroupPairs -')
-          .append(t.toString()).append('\n')
-
-        trans.rollback();
+//    trans.rollback()
         throw t
       } finally {
-        trans.close();
+//    trans.close()
       }
+
 
     }
   }
@@ -2676,11 +2680,12 @@ def __addSecGroupEdgesFromUserIdGroupPairs(graph, g, Long origSecGroupVid, userI
 
     if (uidPair.GroupId != null) {
       def peerSecGroup = g.V().has('Object.AWS_Security_Group.Id', eq(uidPair.GroupId)).next();
-      trans = graph.tx()
-
+      //  Transaction trans = graph.tx()
       try {
-        if (!trans.isOpen())
-          trans.open();
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
         def origSecGroup = g.V(origSecGroupVid).next();
 
@@ -2693,17 +2698,14 @@ def __addSecGroupEdgesFromUserIdGroupPairs(graph, g, Long origSecGroupVid, userI
           .append('uidPair.Id = ').append(uidPair.GroupId).append('\n')
 
 
-        trans.commit();
+//    trans.commit()
       } catch (Throwable t) {
-        sb.append('ERROR - in __addSecGroupEdgesFromUserIdGroupPairs -')
-          .append(t.toString()).append('\n')
-
-
-        trans.rollback();
-        throw t;
+//    trans.rollback()
+        throw t
       } finally {
-        trans.close();
+//    trans.close()
       }
+
 
     }
   }
@@ -2874,11 +2876,13 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
       metadataCreateDate = new Date((long) createMillis)
       metadataUpdateDate = new Date((long) updateMillis)
 
-      trans = graph.tx()
-
+      //  Transaction trans = graph.tx()
       try {
-        if (!trans.isOpen())
-          trans.open();
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
+
 
         vpcId = g.addV("Object.AWS_VPC").
           property("Metadata.Lineage", "aws ec2 describe-instance").
@@ -2893,16 +2897,14 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
           property("Object.AWS_VPC.Id", it.toString()).next().
           id();
 
-        trans.commit();
-        sb.append("VPC added - ").append(it.toString()).append('id = ').append(vpcId).append('\n');
+//    trans.commit()
       } catch (Throwable t) {
-        trans.rollback();
-
-        sb.append("VPC err - ").append(t.toString()).append('\n');
-        throw t;
+//    trans.rollback()
+        throw t
       } finally {
-        trans.close()
+//    trans.close()
       }
+
 
     }
 
@@ -2932,12 +2934,13 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
         metadataCreateDate = new Date((long) createMillis)
         metadataUpdateDate = new Date((long) updateMillis)
 
-        trans = graph.tx()
-
+//  Transaction trans = graph.tx()
         try {
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-          if (!trans.isOpen())
-            trans.open();
 
           awsiId = g.addV("Object.AWS_Instance").
             property("Metadata.Type", "Object.AWS_Instance").
@@ -2964,16 +2967,14 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
             property("Object.AWS_Instance.LaunchTime", iid.LaunchTime).next().
             id();
           sb.append("AWSI added - ").append(iidStr).append('id = ').append(awsiId).append('\n');
-          trans.commit();
-
+//    trans.commit()
         } catch (Throwable t) {
-          sb.append("awsi - error ").append(t.toString());
-          trans.rollback()
-          throw t;
-
+//    trans.rollback()
+          throw t
         } finally {
-          trans.close()
+//    trans.close()
         }
+
 
       }
 
@@ -3000,13 +3001,13 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
         }
 
         if (sgvId == null) {
-          trans = graph.tx()
-
-
+//  Transaction trans = graph.tx()
           try {
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-            if (!trans.isOpen())
-              trans.open();
 
 
             long createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks)
@@ -3031,25 +3032,23 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
               // property("Object.AWS_Security_Group.Ip_Perms_Egress_IpRanges",   iid.LaunchTime).
               id();
 
-            trans.commit();
-
-            sb.append("secGroup added - ").append(sgStr).append('id = ').append(sgvId).append('\n');
+//    trans.commit()
           } catch (Throwable t) {
-            trans.rollback();
-
-            sb.append("secGroup - error ").append(t.toString());
-            throw t;
+//    trans.rollback()
+            throw t
           } finally {
-            trans.close()
+//    trans.close()
           }
+
         }
 
-        trans = graph.tx()
-
+//  Transaction trans = graph.tx()
         try {
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
 
-          if (!trans.isOpen())
-            trans.open();
           sb.append("retrieving ").append(sgvId).append('\n');
           sb.append("retrieving ").append(sgvId.class).append('\n');
 
@@ -3068,16 +3067,14 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
             .from(vpc)
             .to(sgv).next();
 
-          trans.commit();
-
+//    trans.commit()
         } catch (Throwable t) {
-          sb.append("Edge - error ").append(t.toString()).append('\n');
-          trans.rollback();
-          throw t;
-
+//    trans.rollback()
+          throw t
         } finally {
-          trans.close()
+//    trans.close()
         }
+
       }
     }
 
@@ -3103,8 +3100,15 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
   listOfMaps.add(map4);
 
   StringBuffer sb = new StringBuffer();
+  Transaction trans = graph.tx()
 
   try {
+
+    if (!trans.isOpen()) {
+      trans.open()
+
+    }
+
 
     addOrganisations(graph, g);
     sb.append("\n called addOrganisations(graph, g)");
@@ -3155,17 +3159,20 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
 
 //        createForms();
 
+    trans.commit()
 
   } catch (e) {
+    trans.rollback();
     e.printStackTrace()
     sb.append('\nFailed to load Data!\n').append(e).append(
       org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 
+  }
+  finally {
+    trans.close()
   }
 
   return sb.toString()
 
 
 }
-
-
