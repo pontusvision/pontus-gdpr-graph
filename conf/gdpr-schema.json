@@ -800,12 +800,12 @@
     },
     {
       "name": "Object.Data_Source.Create_Date",
-      "dataType": "String",
+      "dataType": "Date",
       "cardinality": "SINGLE"
     },
     {
       "name": "Object.Data_Source.Update_Date",
-      "dataType": "String",
+      "dataType": "Date",
       "cardinality": "SINGLE"
     },
     {
@@ -2166,12 +2166,6 @@
           "mapping": "STRING"
         },
         "Object.Data_Source.Description": {
-          "mapping": "STRING"
-        },
-        "Object.Data_Source.Update_Date": {
-          "mapping": "STRING"
-        },
-        "Object.Data_Source.Create_Date": {
           "mapping": "STRING"
         },
         "Object.Data_Source.Name": {

@@ -723,11 +723,10 @@ def ingestCRMData(graph, g, List<Map<String, String>> listOfMaps, StringBuffer s
 def addDataSources(JanusGraph graph, GraphTraversalSource g) {
 
 
-  def trans = graph.tx()
+  Transaction trans = graph.tx()
   try {
     if (!trans.isOpen()) {
       trans.open()
-
 
     }
     String[] name = ["Office 365", "Salesforce", "Marketing Data", "CRM System", "Outlook PST", "PDF Zip Files"]
@@ -737,7 +736,8 @@ def addDataSources(JanusGraph graph, GraphTraversalSource g) {
 
 
     for (int i = 0; i < name.length; i++) {
-      Optional< GraphTraversal<Vertex, Vertex>> dataSourceOption = g.V().has("Object.Data_Source.Name", P.eq(name[i])).tryNext()
+      Optional< GraphTraversal<Vertex, Vertex>> dataSourceOption =
+        g.V().has("Object.Data_Source.Name", P.eq(name[i])).tryNext()
       GraphTraversal<Vertex, Vertex> dataSource;
       if (!dataSourceOption.isPresent()) {
         dataSource = g.addV("Object.Data_Source");
