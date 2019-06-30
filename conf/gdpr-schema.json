@@ -1,4 +1,3 @@
-
 {
   "elasticSearchTemplates": [
     {
@@ -504,7 +503,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Metadata.Type.Object.Phone_Number",
       "dataType": "String",
@@ -531,7 +529,7 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Metadata.Type.Object.MoU",
+      "name": "Metadata.Type.Object.Contract",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -770,13 +768,11 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Object.Data_Policy.Description",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Object.Data_Policy.Form_Id",
       "dataType": "String",
@@ -797,7 +793,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Object.Data_Source.Name",
       "dataType": "String",
@@ -833,8 +828,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
-
     {
       "name": "Object.Data_Source.Description",
       "dataType": "String",
@@ -935,7 +928,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Object.Phone_Number.Raw",
       "dataType": "String",
@@ -951,7 +943,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Object.Email_Address.Email",
       "dataType": "String",
@@ -1058,42 +1049,42 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.MoU.Description",
+      "name": "Object.Contract.Description",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.MoU.Form_Id",
+      "name": "Object.Contract.Form_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.MoU.Form_Owner_Id",
+      "name": "Object.Contract.Form_Owner_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.MoU.Form_Submission_Id",
+      "name": "Object.Contract.Form_Submission_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.MoU.Form_Submission_Owner_Id",
+      "name": "Object.Contract.Form_Submission_Owner_Id",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.MoU.Id",
+      "name": "Object.Contract.Id",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.MoU.Link",
+      "name": "Object.Contract.Link",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.MoU.Status",
+      "name": "Object.Contract.Status",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -1357,9 +1348,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
-
-
     {
       "name": "Person.Identity.ID",
       "dataType": "String",
@@ -1370,7 +1358,6 @@
       "dataType": "Date",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Person.Identity.Ethnicity",
       "dataType": "String",
@@ -1417,9 +1404,9 @@
       "cardinality": "SINGLE"
     },
     {
-    "name": "Person.Identity.Place_Of_Birth",
-    "dataType": "String",
-    "cardinality": "SINGLE"
+      "name": "Person.Identity.Place_Of_Birth",
+      "dataType": "String",
+      "cardinality": "SINGLE"
     },
     {
       "name": "Person.Identity.Religion",
@@ -1431,11 +1418,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
-
-
-
-
     {
       "name": "Person.Natural.Customer_ID",
       "dataType": "String",
@@ -1446,7 +1428,6 @@
       "dataType": "Date",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Person.Natural.Ethnicity",
       "dataType": "String",
@@ -1492,7 +1473,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Person.Natural.Place_Of_Birth",
       "dataType": "String",
@@ -1508,7 +1488,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Person.Organisation.Email",
       "dataType": "String",
@@ -1589,7 +1568,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     }
-
   ],
   "vertexLabels": [
     {
@@ -1703,7 +1681,7 @@
       "useStatic": false
     },
     {
-      "name": "Object.MoU",
+      "name": "Object.Contract",
       "partition": false,
       "useStatic": false
     },
@@ -1820,11 +1798,6 @@
       "unidirected": false
     },
     {
-      "name": "Has_MoU",
-      "multiplicity": "MULTI",
-      "unidirected": false
-    },
-    {
       "name": "Has_Parent_Or_Guardian",
       "multiplicity": "MULTI",
       "unidirected": false
@@ -1903,8 +1876,17 @@
       "name": "Has_Phone",
       "multiplicity": "MULTI",
       "unidirected": false
+    },
+    {
+      "name": "Is_Located",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
+      "name": "Has_Contract",
+      "multiplicity": "MULTI",
+      "unidirected": false
     }
-
   ],
   "vertexIndexes": [
     {
@@ -1941,44 +1923,44 @@
       }
     },
     {
-      "name": "Object.MoU.MixedIdx",
+      "name": "Object.Contract.MixedIdx",
       "composite": false,
       "unique": false,
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
-        "Object.MoU.Form_Submission_Owner_Id",
-        "Object.MoU.Form_Id",
-        "Object.MoU.Id",
-        "Object.MoU.Form_Submission_Id",
-        "Object.MoU.Link",
-        "Object.MoU.Status",
-        "Object.MoU.Form_Owner_Id",
-        "Metadata.Type.Object.MoU"
+        "Object.Contract.Form_Submission_Owner_Id",
+        "Object.Contract.Form_Id",
+        "Object.Contract.Id",
+        "Object.Contract.Form_Submission_Id",
+        "Object.Contract.Link",
+        "Object.Contract.Status",
+        "Object.Contract.Form_Owner_Id",
+        "Metadata.Type.Object.Contract"
       ],
       "propertyKeysMappings": {
-        "Metadata.Type.Object.MoU": {
+        "Metadata.Type.Object.Contract": {
           "mapping": "STRING"
         },
-        "Object.MoU.Id": {
+        "Object.Contract.Id": {
           "mapping": "STRING"
         },
-        "Object.MoU.Status": {
+        "Object.Contract.Status": {
           "mapping": "STRING"
         },
-        "Object.MoU.Link": {
+        "Object.Contract.Link": {
           "mapping": "STRING"
         },
-        "Object.MoU.Form_Owner_Id": {
+        "Object.Contract.Form_Owner_Id": {
           "mapping": "STRING"
         },
-        "Object.MoU.Form_Id": {
+        "Object.Contract.Form_Id": {
           "mapping": "STRING"
         },
-        "Object.MoU.Form_Submission_Id": {
+        "Object.Contract.Form_Submission_Id": {
           "mapping": "STRING"
         },
-        "Object.MoU.Form_Submission_Owner_Id": {
+        "Object.Contract.Form_Submission_Owner_Id": {
           "mapping": "STRING"
         }
       }
@@ -2114,7 +2096,6 @@
         }
       }
     },
-
     {
       "name": "Object.Data_Policy.MixedIdx",
       "composite": false,
@@ -2122,7 +2103,6 @@
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
-
         "Object.Data_Policy.Name",
         "Object.Data_Policy.CreateDate",
         "Object.Data_Policy.UpdateDate",
@@ -2157,7 +2137,6 @@
         "Object.Data_Policy.Form_Submission_Owner_Id": {
           "mapping": "STRING"
         }
-
       }
     },
     {
@@ -2167,7 +2146,6 @@
       "indexOnly": null,
       "mixedIndex": "search",
       "propertyKeys": [
-
         "Object.Data_Source.Name",
         "Object.Data_Source.Create_Date",
         "Object.Data_Source.Update_Date",
@@ -2177,7 +2155,6 @@
         "Object.Data_Source.Form_Owner_Id",
         "Object.Data_Source.Form_Submission_Id",
         "Object.Data_Source.Form_Submission_Owner_Id"
-
       ],
       "propertyKeysMappings": {
         "Metadata.Type.Object.Data_Source": {
@@ -2207,7 +2184,6 @@
         "Object.Data_Source.Form_Submission_Owner_Id": {
           "mapping": "STRING"
         }
-
       }
     },
     {
@@ -2408,7 +2384,6 @@
         "Object.Phone_Number.Raw",
         "Object.Phone_Number.Numbers_Only",
         "Object.Phone_Number.Last_7_Digits"
-
       ],
       "propertyKeysMappings": {
         "Metadata.Type.Object.Phone_Number": {
@@ -2872,7 +2847,6 @@
         "Person.Employee.ID": {
           "mapping": "STRING"
         },
-
         "Person.Employee.Role": {
           "mapping": "STRING"
         },
@@ -2929,7 +2903,6 @@
         "Person.Organisation.Form_Owner_Id",
         "Person.Organisation.Form_Submission_Id",
         "Person.Organisation.Form_Submission_Owner_Id"
-
       ],
       "propertyKeysMappings": {
         "Metadata.Type.Person.Organisation": {
@@ -2962,7 +2935,6 @@
         "Person.Organisation.Form_Submission_Owner_Id": {
           "mapping": "STRING"
         }
-
       }
     },
     {
