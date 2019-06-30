@@ -167,11 +167,11 @@ listOfMaps.add(map2);
 
 addCampaignAwarenessBulk(graph,g, listOfMaps) */
 
-def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
+def addCampaignAwarenessBulk(JanusGraph graph, GraphTraversalSource g, List<Map<String, String>> listOfMaps) {
 
-  def metadataCreateDate = new Date()
-  def metadataUpdateDate = new Date()
-  def trans = graph.tx()
+  Date metadataCreateDate = new Date()
+  Date metadataUpdateDate = new Date()
+  Transaction trans = graph.tx()
   long counter = 0;
 
   def awarenessCampaignId = -1L;
@@ -181,7 +181,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
     }
 
 
-    awarenessCampaign = g.V().has("Metadata.Type.Object.Awareness_Campaign", eq("Object.Awareness_Campaign"))
+    GraphTraversal  awarenessCampaign = g.V().has("Metadata.Type.Object.Awareness_Campaign", P.eq("Object.Awareness_Campaign"))
 
     if (awarenessCampaign.hasNext()) {
       awarenessCampaignId = awarenessCampaign.next().id();
@@ -235,8 +235,8 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
   for (Map<String, String> item in listOfMaps) {
 
     counter++;
-    role = 'Operations Engineer';
-    reportsTo = 'Operations Manager';
+    def role = 'Operations Engineer';
+    def reportsTo = 'Operations Manager';
 
     if (counter == 1) {
       role = 'Data Protection Officer';
@@ -256,6 +256,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
         trans.open()
       }
 
+      def dob;
 
       try {
         dob = new SimpleDateFormat("yyyy-MM-dd").parse((String) item.get("pg_dob"))
@@ -271,18 +272,7 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
       }
 
 
-      def person = g.addV("Person.Employee").
-        property("Metadata.Controller", item.get("pg_metadataController")).
-        property("Metadata.Processor", item.get("pg_metadataProcessor")).
-        property("Metadata.Lineage", item.get("pg_metadataLineage")).
-        property("Metadata.Redaction", item.get("pg_metadataRedaction")).
-        property("Metadata.Version", item.get("pg_metadataVersion")).
-        property("Metadata.Create_Date", metadataCreateDate).
-        property("Metadata.Update_Date", metadataUpdateDate).
-        property("Metadata.Status", item.get("pg_metadataStatus")).
-        property("Metadata.GDPR_Status", item.get("pg_metadataGDPRStatus")).
-        property("Metadata.Lineage_Server_Tag", item.get("pg_metadataLineageServerTag")).
-        property("Metadata.Lineage_Location_Tag", item.get("pg_metadataLineageLocationTag")).
+      Vertex person = g.addV("Person.Employee").
         property("Metadata.Type", "Person.Employee").
         property("Metadata.Type.Person.Employee", "Person.Employee").
         property("Person.Employee.Full_Name", item.get("pg_name_first") + " " + item.get("pg_name_last")).
@@ -295,13 +285,13 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
         .next();
 
 
-      personId = person.id();
+      def personId = person.id();
 
 
 
 
 
-      trainingEvent = g.addV("Event.Training").
+      Vertex trainingEvent = g.addV("Event.Training").
         property("Metadata.Controller", item.get("pg_metadataController")).
         property("Metadata.Processor", item.get("pg_metadataProcessor")).
         property("Metadata.Lineage", item.get("pg_metadataLineage")).
@@ -331,18 +321,18 @@ def addCampaignAwarenessBulk(graph, g, List<Map<String, String>> listOfMaps) {
       g.addE("Event.Training.Person")
         .from(trainingEvent)
         .to(person)
-        .property("Metadata.Type", "Event.Training.Awareness_Campaign")
-        .property("Metadata.Create_Date", metadataCreateDate)
+//        .property("Metadata.Type", "Event.Training.Awareness_Campaign")
+//        .property("Metadata.Create_Date", metadataCreateDate)
         .next()
 
       if (counter > 1) {
         person = g.V(personId).next();
 
         try {
-          boss = g.V()
-            .has('Person.Employee.Role', eq(reportsTo))
+          Vertex boss = g.V()
+            .has('Person.Employee.Role', P.eq(reportsTo))
             .order()
-            .by(shuffle)
+            .by(Order.shuffle)
             .range(0, 1)
             .next();
 
