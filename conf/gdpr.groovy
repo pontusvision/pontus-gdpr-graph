@@ -220,12 +220,12 @@ def addCampaignAwarenessBulk(JanusGraph graph, GraphTraversalSource g, List<Map<
         next().id();
     }
 
-    trans.commit()
+    // trans.commit()
   } catch (Throwable t) {
-    trans.rollback()
+    // trans.rollback()
     throw t
   } finally {
-    trans.close()
+    // trans.close()
   }
 
 
@@ -265,9 +265,9 @@ def addCampaignAwarenessBulk(JanusGraph graph, GraphTraversalSource g, List<Map<
 
     }
     try {
-      if (!trans.isOpen()) {
-        trans.open()
-      }
+      // if (!trans.isOpen()) {
+      //   trans.open()
+      // }
 
       def dob;
 
@@ -355,12 +355,12 @@ def addCampaignAwarenessBulk(JanusGraph graph, GraphTraversalSource g, List<Map<
       }
 
 
-      trans.commit()
+      // trans.commit()
     } catch (Throwable t) {
-      trans.rollback()
+      // trans.rollback()
       throw t
     } finally {
-      trans.close()
+      // trans.close()
     }
 
 
@@ -1461,20 +1461,20 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
         property("Object.Contract.Status", "Active").
         property("Metadata.Type.Object.Contract", "Object.Contract").
         property("Metadata.Type", "Object.Contract").
-        property("Object.Contract.Link", "https://www.abcinc.com/contract").iterate();
+        property("Object.Contract.Link", "https://www.abcinc.com/contract").next();
 
 
       Vertex org = g.V().has('Metadata.Type.Person.Organisation', P.eq('Person.Organisation'))
-        .order().by(Order.shuffle).range(0, 1).tryNext()
+        .order().by(Order.shuffle).range(0, 1).next()
 
       Vertex org2 = g.V().has('Metadata.Type.Person.Organisation', P.eq('Person.Organisation'))
-        .order().by(Order.shuffle).range(0, 1).tryNext()
+        .order().by(Order.shuffle).range(0, 1).next()
 
       Vertex org3 = g.V().has('Metadata.Type.Person.Organisation', P.eq('Person.Organisation'))
-        .order().by(Order.shuffle).range(0, 1).tryNext()
+        .order().by(Order.shuffle).range(0, 1).next()
 
       Vertex dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
-        .order().by(Order.shuffle).range(0, 1).tryNext()
+        .order().by(Order.shuffle).range(0, 1).next()
 
       g.addE("Has_Contract").from(dataSource).to(contract).next()
       g.addE("Is_Data_Processor").from(org).to(contract).next()
@@ -1482,7 +1482,6 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
       g.addE("Is_Data_Owner").from(org3).to(contract).next()
 
     }
-    trans.commit();
 
 //    trans.commit()
   } catch (Throwable t) {
@@ -3176,3 +3175,6 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
 
 
 }
+
+//g.V().drop().iterate()
+//addRandomDataInit(graph,g)
