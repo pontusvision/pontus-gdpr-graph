@@ -914,15 +914,13 @@ def addDataSourcesToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
 
 }
 
-
-def addDataBreachToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
+def addEdgesPiaDataSourcesPrivNotices(JanusGraph graph, GraphTraversalSource g) {
 
   Transaction trans = graph.tx()
   try {
 
     Random randVal = new Random()
-    def randVal1 = randVal.nextInt(10)
-
+    int randVal1 = randVal.nextInt(10)
 
     if (!trans.isOpen()) {
       trans.open()
@@ -931,20 +929,20 @@ def addDataBreachToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
 
     for (int i = 0; i < randVal1; i++) {
 
-      Vertex dataSource = g.V().has('Metadata.Type.Event.Data_Breach', P.eq('Event.Data_Breach'))
+      int randVal2 = randVal.nextInt(10)
+
+      Vertex dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
+        .order().by(Order.shuffle).range(0, 1).next()
+      Vertex privacyNotice = g.V().has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
+        .order().by(Order.shuffle).range(0, 1).next()
+      Vertex pia = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
         .order().by(Order.shuffle).range(0, 1).next()
 
 
-      def numServersImpacted = randVal.nextInt(10);
-      for (def j = 0; j < numServersImpacted; j++) {
-
-        Vertex awsInstance = g.V().has('Metadata.Type.Object.AWS_Instance', P.eq('Object.AWS_Instance'))
-          .order().by(Order.shuffle).range(0, 1).next()
-
-        g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataSource).next()
+      for (int j = 0; j < randVal2; j++) {
+        g.V().addE("Has_Privacy_Notice").from(pia).to(privacyNotice).next();
+        g.V().addE("Has_Privacy_Impact_Assessment").from(dataSource).to(privacyNotice).next();
       }
-
-
     }
     trans.commit();
 
@@ -1137,6 +1135,54 @@ def addRandomSARs(graph, g) {
     throw t
   } finally {
     trans.close()
+  }
+
+
+}
+
+
+def addDataBreachToAWSInstances(JanusGraph graph, GraphTraversalSource g) {
+
+  Transaction trans = graph.tx()
+  try {
+
+    Random randVal = new Random()
+    def randVal1 = randVal.nextInt(10)
+
+
+    if (!trans.isOpen()) {
+      trans.open()
+
+    }
+
+    for (int i = 0; i < randVal1; i++) {
+
+      Vertex dataSource = g.V().has('Metadata.Type.Event.Data_Breach', P.eq('Event.Data_Breach'))
+        .order().by(Order.shuffle).range(0, 1).next()
+
+
+      def numServersImpacted = randVal.nextInt(10);
+      for (def j = 0; j < numServersImpacted; j++) {
+
+        Vertex awsInstance = g.V().has('Metadata.Type.Object.AWS_Instance', P.eq('Object.AWS_Instance'))
+          .order().by(Order.shuffle).range(0, 1).next()
+
+        g.addE("Impacted_By_Data_Breach").from(awsInstance).to(dataSource).next()
+      }
+
+
+    }
+    trans.commit();
+
+
+  } catch (Throwable t) {
+    trans.rollback()
+    throw t
+  } finally {
+    if (trans.isOpen()) {
+      trans.close()
+
+    }
   }
 
 
@@ -1440,44 +1486,36 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
 }
 
 
+def addPrivacyImpactAssessment(JanusGraph graph, GraphTraversalSource g) {
+
+  Date metadataCreateDate = new Date()
+  Date metadataUpdateDate = new Date()
+
+  Transaction trans = graph.tx()
+  try {
+    if (!trans.isOpen()) {
+      trans.open()
+
+    }
 
 
-def __addPrivacyImpactAssessment(graph, g, Vertex privNoticeVertex) {
+    def pia = g.addV("Object.Privacy_Impact_Assessment").
+      property("Metadata.Create_Date", metadataCreateDate).
+      property("Metadata.Update_Date", metadataUpdateDate).
+      property("Metadata.Type", "Object.Privacy_Impact_Assessment").
+      property("Metadata.Type.Object.Privacy_Impact_Assessment", "Object.Privacy_Impact_Assessment").
+      property("Object.Privacy_Impact_Assessment.Description", "PIA for project xyz.").
+      property("Object.Privacy_Impact_Assessment.Start_Date", new Date()).
+      property("Object.Privacy_Impact_Assessment.Delivery_Date", new Date(System.currentTimeMillis() + 3600 * 24 * 365)).
+      property("Object.Privacy_Impact_Assessment.Risk_To_Individuals", "Low").
+      property("Object.Privacy_Impact_Assessment.Intrusion_On_Privacy", "Low").
+      property("Object.Privacy_Impact_Assessment.Risk_To_Corporation", "Low").
+      property("Object.Privacy_Impact_Assessment.Risk_Of_Reputational_Damage", "Low").
+      property("Object.Privacy_Impact_Assessment.Compliance_Check_Passed", "true").
+      next()
 
-  metadataCreateDate = new Date()
-  metadataUpdateDate = new Date()
-
-//    trans = graph.tx()
-//    try {
-//        trans.open()
-
-
-  pia = g.addV("Object.Privacy_Impact_Assessment").
-    property("Metadata.Controller", "ABC Inc").
-    property("Metadata.Processor", "ABC Inc").
-    property("Metadata.Lineage", "oracle://jdbc://oracledb.com").
-    property("Metadata.Redaction", "/data/protection/officer").
-    property("Metadata.Version", "1").
-    property("Metadata.Create_Date", metadataCreateDate).
-    property("Metadata.Update_Date", metadataUpdateDate).
-    property("Metadata.Status", "New").
-    property("Metadata.GDPR_Status", "n/a").
-    property("Metadata.Lineage_Server_Tag", "AWS_EUR_HOST3").
-    property("Metadata.Lineage_Location_Tag", "GB").
-    property("Metadata.Type", "Object.Privacy_Impact_Assessment").
-    property("Metadata.Type.Object.Privacy_Impact_Assessment", "Object.Privacy_Impact_Assessment").
-    property("Object.Privacy_Impact_Assessment.Description", "PIA for project xyz.").
-    property("Object.Privacy_Impact_Assessment.Start_Date", new Date()).
-    property("Object.Privacy_Impact_Assessment.Delivery_Date", new Date(System.currentTimeMillis() + 3600 * 24 * 365)).
-    property("Object.Privacy_Impact_Assessment.Risk_To_Individuals", "Low").
-    property("Object.Privacy_Impact_Assessment.Intrusion_On_Privacy", "Low").
-    property("Object.Privacy_Impact_Assessment.Risk_To_Corporation", "Low").
-    property("Object.Privacy_Impact_Assessment.Risk_Of_Reputational_Damage", "Low").
-    property("Object.Privacy_Impact_Assessment.Compliance_Check_Passed", "true").
-    next()
-
-  /*
-      Identifying privacy and related risks
+    /*
+    Identifying privacy and related risks
  Record the risks to individuals, including possible intrusions on
 privacy where appropriate.
  Assess the corporate risks, including regulatory action,
@@ -1486,13 +1524,20 @@ reputational damage, and loss of public trust.
 and other relevant legislation.
  Maintain a record of the identified risks.
 
-   */
-
-  g.V().has("Metadata.Type.Person.Employee", eq("Person.Employee")).range(0, 10).as("employees").addE("Approved_Compliance_Check").from("employees").to(pia).next()
+ */
 
 
-  g.addE("Has_Privacy_Notice").from(pia).to(privNoticeVertex).next()
+    trans.commit();
 
+  }
+  catch (Throwable t) {
+    trans.rollback()
+  }
+  finally {
+    if (trans.isOpen()) {
+      trans.close();
+    }
+  }
 
 //        trans.commit()
 
@@ -3033,7 +3078,12 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
     addRandomSARs(graph, g);
     sb.append("\n called addRandomSARs(graph, g)");
 
+    addPrivacyImpactAssessment(graph, g);
+
     addLawfulBasisAndPrivacyNotices(graph, g);
+    sb.append("\n called addLawfulBasisAndPrivacyNotices(graph, g)");
+
+    addEdgesPiaDataSourcesPrivNotices(graph, g);
     sb.append("\n called addLawfulBasisAndPrivacyNotices(graph, g)");
 
     addRandomDataProcedures(graph, g);
@@ -3041,7 +3091,7 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
 
     createDataProtectionAuthorities();
     sb.append("\n called createDataProtectionAuthorities()");
-    
+
     addRandomAWSGraph(graph, g, null, null);
     sb.append("\n called addRandomAWSGraph(graph, g, null, null)");
 

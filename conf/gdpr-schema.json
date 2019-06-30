@@ -1803,6 +1803,11 @@
       "unidirected": false
     },
     {
+      "name": "Has_Privacy_Impact_Assessment",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
       "name": "Has_Policy",
       "multiplicity": "MULTI",
       "unidirected": false
