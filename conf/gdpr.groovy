@@ -1464,7 +1464,7 @@ def addContracts(JanusGraph graph, GraphTraversalSource g) {
       Vertex org3 = g.V().has('Metadata.Type.Person.Organisation', P.eq('Person.Organisation'))
         .order().by(Order.shuffle).range(0, 1).next()
 
-      Vertex dataSource = g.V().has().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
+      Vertex dataSource = g.V().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
         .order().by(Order.shuffle).range(0, 1).next()
 
       g.addE("Has_Contract").from(dataSource).to(contract).next()
@@ -2616,23 +2616,24 @@ def createNotificationTemplates() {
 
 
 def __addVPCEdgesFromUserIdGroupPairs(
-  graph, g,
+  JanusGraph graph, GraphTraversalSource g,
   Long origVpcVid,
   userIdGroupPairs,
   String origGroupIdStr,
   boolean isEgress) {
 
-  def StringBuilder sb = new StringBuilder();
+  StringBuilder sb = new StringBuilder();
 
 
   userIdGroupPairs.each { uidPair ->
 
 
     if (uidPair.VpcId != null && uidPair.PeeringStatus == "active") {
-      def peerVpc = g.V().has('Object.AWS_VPC.Id', eq(uidPair.VpcId)).next();
+      def peerVpc = g.V().has('Object.AWS_VPC.Id', P.eq(uidPair.VpcId)).next();
       trans = graph.tx()
 
       try {
+        Transaction trans = graph.tx();
         if (!trans.isOpen())
           trans.open();
 
@@ -2704,9 +2705,9 @@ def __addSecGroupEdgesFromUserIdGroupPairs(graph, g, Long origSecGroupVid, userI
   return sb.toString()
 }
 
-def __addSecGroupEdges(graph, g, aws_sec_groups) {
+def __addSecGroupEdges(JanusGraph graph, GraphTraversalSource g, aws_sec_groups) {
 
-  def StringBuilder sb = new StringBuilder();
+  StringBuilder sb = new StringBuilder();
 
   def secGroups = com.jayway.jsonpath.JsonPath.parse(aws_sec_groups).read('$.SecurityGroups.[*]').toSet()
 
