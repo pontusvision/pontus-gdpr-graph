@@ -2582,34 +2582,72 @@ def createNotificationTemplates() {
         .next();
 
 
-      g.addV("Object.Notification_Templates")
-        .property("Metadata.Type", "Object.Notification_Templates")
-        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "DATA BREACH REGULATOR TEMPLATE")
-        .property("Object.Notification_Templates.Text", "Dear {{ Person.Organisation.Short_Name }}, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .".bytes.encodeBase64().toString())
-        .property("Object.Notification_Templates.Types", "Event.Data_Breach")
-        .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_regulator_report")
-        .property("Object.Notification_Templates.Label", "Regulator")
-        .next();
 
-      g.addV("Object.Notification_Templates")
-        .property("Metadata.Type", "Object.Notification_Templates")
-        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "DATA BREACH BOARD TEMPLATE")
-        .property("Object.Notification_Templates.Text", "Dear Board Members, We regret to inform that we have found a data breach in our infrastructure.  The servers involved are .".bytes.encodeBase64().toString())
-        .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_board_report")
-        .property("Object.Notification_Templates.Types", "Event.Data_Breach")
-        .property("Object.Notification_Templates.Label", "Board")
-        .next();
 
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Object.Notification_Templates.Id", "DATA BREACH PERSON TEMPLATE")
-        .property("Object.Notification_Templates.Text", "Dear {{ connected_data.Person_Name }}, We regret to inform you that your data may have been stolen.".bytes.encodeBase64().toString())
+        .property("Object.Notification_Templates.Text", "<hr>\n" +
+          "\n" +
+          "<h1> Summary of Data Breach Impact </h1>\n" +
+          "<hr>\n" +
+          "  People: {{ impacted_people | length }}<br/>\n" +
+          "  Data Sources: {{ impacted_data_sources | length }}<br/>\n" +
+          "  Servers : {{ impacted_servers | length }}<br/>\n" +
+          "\n" +
+          "<hr>\n" +
+          "<hr>\n" +
+          "\n" +
+          "\n" +
+          "{% if impacted_people[0] is defined %}\n" +
+          "  <h2> List of {{ impacted_people | length }} People impacted </h2>\n" +
+          "\n" +
+          " {% for mainkey in impacted_people %}\n" +
+          "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+          "  {% for key, value in mainkey.items() %}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+          "  {% endfor %}\n" +
+          "  {{ \"</table>\" }}\n" +
+          "  {% endfor %}\n" +
+          "{% else %}\n" +
+          "  <h2> No people impacted </h2>\n" +
+          "{% endif %}\n" +
+          "\n" +
+          "\n" +
+          "{% if impacted_data_sources[0] is defined %}\n" +
+          "  <h2> List of {{ impacted_data_sources | length }} Data Sources impacted </h2>\n" +
+          "\n" +
+          " {% for mainkey in impacted_data_sources %}\n" +
+          "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+          "  {% for key, value in mainkey.items() %}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+          "  {% endfor %}\n" +
+          "  {{ \"</table>\" }}\n" +
+          "  {% endfor %}\n" +
+          "{% else %}\n" +
+          "  <h2> No data sources impacted </h2>\n" +
+          "{% endif %}\n" +
+          "    \n" +
+          "{% if impacted_servers[0] is defined %}\n" +
+          "  <h2> List of {{ impacted_servers | length }} Servers impacted </h2>\n" +
+          "\n" +
+          " {% for mainkey in impacted_servers %}\n" +
+          "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+          "  {% for key, value in mainkey.items() %}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+          "  {% endfor %}\n" +
+          "  {{ \"</table>\" }}\n" +
+          "  {% endfor %}\n" +
+          "{% else %}\n" +
+          "  <h2> No Servers impacted </h2>\n" +
+          "{% endif %}    ".bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
         .property("Object.Notification_Templates.Types", "Event.Data_Breach")
-        .property("Object.Notification_Templates.Label", "Person.Natural")
+        .property("Object.Notification_Templates.Label", "Data Breach")
         .next();
 
     }
