@@ -1000,7 +1000,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 
   GraphTraversal impactedDataSourcesTrav = g.V(pg_id)
     .both().has("Metadata.Type.Object.AWS_Instance", P.eq('Object.AWS_Instance'))
-    .bothE('Runs_On').outV()
+    .bothE('Runs_On').outV().dedup()
 
   GraphTraversal dsTravClone = impactedDataSourcesTrav.clone()
 
@@ -1010,11 +1010,18 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
     }
   };
 
-  def impactedPeople = dsTravClone.out("Has Ingestion Event").timeLimit(1000)
-    .until(
-      has("Metadata.Type.Person.Natural", P.eq('Person.Natural'))
-     .or().loops().is(P.eq(4)))
-     .repeat(out()).timeLimit(1000)
+  def impactedPeople = dsTravClone
+    .out("Has_Ingestion_Event")
+    .out("Has_Ingestion_Event")
+    .in("Has_Ingestion_Event")
+    .has("Metadata.Type.Person.Natural", P.eq('Person.Natural'))
+    .valueMap()
+    .toList()
+    .collect { item ->
+    item.collectEntries { key, val ->
+      [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+    }
+  };
 
   def allData = new HashMap<>();
 
