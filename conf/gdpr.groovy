@@ -3898,8 +3898,9 @@ def getScoresJson() {
       firstTime = false;
     }
 
-    sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue }")
+    sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"GDPR Scores\" }")
   }
+
 
   sb.append(']')
 
@@ -3954,7 +3955,7 @@ def calculatePOLECounts(){
     // sb.append(var)
 
     Long numEntries = graph.indexQuery(dataType + ".MixedIdx",var).vertexTotals()
-    sb.append (" { \"metricname\": \"$dataType\", \"metricvalue\": $numEntries }")
+    sb.append (" { \"metricname\": \"$dataType\", \"metricvalue\": $numEntries, \"metrictype\": \"POLE Counts\" }")
   }
   sb.append(']')
 
