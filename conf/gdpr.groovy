@@ -3907,5 +3907,60 @@ def getScoresJson() {
 
 }
 
+
+def calculatePOLECounts(){
+
+  List<String> vertexLabels = [
+    "Event.Consent"
+    ,"Event.Data_Breach"
+    ,"Event.Form_Ingestion"
+    ,"Event.Ingestion"
+    ,"Event.Subject_Access_Request"
+    ,"Event.Training"
+    ,"Location.Address"
+    ,"Object.AWS_Instance"
+    ,"Object.AWS_Network_Interface"
+    ,"Object.AWS_Security_Group"
+    ,"Object.AWS_VPC"
+    ,"Object.Awareness_Campaign"
+    ,"Object.Credential"
+    ,"Object.Data_Procedures"
+    ,"Object.Email_Address"
+    ,"Object.Form"
+    ,"Object.Identity_Card"
+    ,"Object.Insurance_Policy"
+    ,"Object.Lawful_Basis"
+    ,"Object.Contract"
+    ,"Object.Notification_Templates"
+    ,"Object.Privacy_Impact_Assessment"
+    ,"Object.Privacy_Notice"
+    ,"Person.Natural"
+    ,"Person.Employee"
+    ,"Person.Organisation"
+
+  ] ;
+
+
+  StringBuffer sb = new StringBuffer("[")
+  boolean firstTime = true;
+  vertexLabels.each{ dataType ->
+    if (!firstTime){
+      sb.append(",")
+    }
+    else{
+      firstTime = false;
+    }
+    String var = "v.\"Metadata.Type.${dataType}\": ${dataType}"
+    // sb.append(var)
+
+    Long numEntries = graph.indexQuery(dataType + ".MixedIdx",var).vertexTotals()
+    sb.append (" { \"metricname\": \"$dataType\", \"metricvalue\": $numEntries }")
+  }
+  sb.append(']')
+
+  return sb.toString()
+
+}
+
 //g.V().drop().iterate()
 //addRandomDataInit(graph, g)
