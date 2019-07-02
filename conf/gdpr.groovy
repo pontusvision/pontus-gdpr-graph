@@ -2588,29 +2588,28 @@ def createNotificationTemplates() {
         .property("Metadata.Type", "Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Object.Notification_Templates.Id", "DATA BREACH PERSON TEMPLATE")
-        .property("Object.Notification_Templates.Text", "<hr>\n" +
+        .property("Object.Notification_Templates.Text", "<div style='padding: 10px; background: black'>\n" +
+          "<hr/>\n" +
           "\n" +
           "<h1> Summary of Data Breach Impact </h1>\n" +
-          "<hr>\n" +
+          "<hr/>\n" +
           "  People: {{ impacted_people | length }}<br/>\n" +
           "  Data Sources: {{ impacted_data_sources | length }}<br/>\n" +
           "  Servers : {{ impacted_servers | length }}<br/>\n" +
           "\n" +
-          "<hr>\n" +
-          "<hr>\n" +
+          "<hr/>\n" +
+          "<hr/>\n" +
           "\n" +
           "\n" +
           "{% if impacted_people[0] is defined %}\n" +
           "  <h2> List of {{ impacted_people | length }} People impacted </h2>\n" +
+          "  <table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Date Of Birth</th></tr>\n" +
           "\n" +
           " {% for mainkey in impacted_people %}\n" +
-          "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
-          "  {% for key, value in mainkey.items() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (mainkey['Person_Natural_Full_Name'] , mainkey['Person_Natural_Date_Of_Birth'] )}}\n" +
           "  {% endfor %}\n" +
-          "  {{ \"</table>\" }}\n" +
-          "  {% endfor %}\n" +
+          "    {{ \"</table>\" }}\n" +
+          "\n" +
           "{% else %}\n" +
           "  <h2> No people impacted </h2>\n" +
           "{% endif %}\n" +
@@ -2618,15 +2617,13 @@ def createNotificationTemplates() {
           "\n" +
           "{% if impacted_data_sources[0] is defined %}\n" +
           "  <h2> List of {{ impacted_data_sources | length }} Data Sources impacted </h2>\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Update Date</th></tr>\" }}\n" +
           "\n" +
           " {% for mainkey in impacted_data_sources %}\n" +
-          "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
-          "  {% for key, value in mainkey.items() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (mainkey['Object_Data_Source_Name'] , mainkey['Object_Data_Source_Update_Date'] )}}\n" +
           "  {% endfor %}\n" +
-          "  {{ \"</table>\" }}\n" +
-          "  {% endfor %}\n" +
+          "    {{ \"</table>\" }}\n" +
+          "\n" +
           "{% else %}\n" +
           "  <h2> No data sources impacted </h2>\n" +
           "{% endif %}\n" +
@@ -2644,7 +2641,8 @@ def createNotificationTemplates() {
           "  {% endfor %}\n" +
           "{% else %}\n" +
           "  <h2> No Servers impacted </h2>\n" +
-          "{% endif %}    ".bytes.encodeBase64().toString())
+          "{% endif %}    \n" +
+          "</div>".bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
         .property("Object.Notification_Templates.Types", "Event.Data_Breach")
         .property("Object.Notification_Templates.Label", "Data Breach")
@@ -3215,6 +3213,697 @@ def addRandomDataInit(JanusGraph graph, GraphTraversalSource g) {
 
   return sb.toString()
 
+
+}
+
+
+def getAwarenessScores(def scoresMap) {
+
+  def retVal = '';
+  long scoreValue
+  try {
+    long numEvents = g.V().has('Metadata.Type.Object.Awareness_Campaign', eq('Object.Awareness_Campaign')).in().as('events').count().next();
+
+    def map = g.V().has('Metadata.Type.Object.Awareness_Campaign', eq('Object.Awareness_Campaign')).in().as('events').groupCount().by('Event.Training.Status').next();
+
+
+    long failedCount = map.get('Failed') == null ? 0 : map.get('Failed');
+    long secondReminder = map.get('Second  Reminder') == null ? 0 : map.get('Second  Reminder');
+    long firstReminder = map.get('Reminder Sent') == null ? 0 : map.get('Reminder Sent');
+
+
+    scoreValue = 100L;
+    if (numEvents > 0) {
+
+      long pcntFailed = (long) (100L * failedCount / numEvents);
+      if (pcntFailed > 10) {
+        scoreValue -= 60L;
+      } else if (failedCount > 0) {
+        scoreValue -= (40L + 2L * pcntFailed)
+      }
+
+
+      long pcntSecondReminder = (long) (100L * secondReminder / numEvents);
+      if (pcntSecondReminder > 10) {
+        scoreValue -= 30L;
+      } else if (secondReminder > 0) {
+        scoreValue -= (10L + 2L * pcntWithNegativeConsent)
+      }
+
+      scoreValue -= (10L * firstReminder / numEvents)
+
+
+    } else {
+      scoreValue = 0L;
+    }
+
+
+  }
+  catch (Throwable t) {
+    scoreValue = 0L;
+  }
+  scoresMap.put('Awareness', scoreValue);
+
+  return scoreValue
+}
+
+
+def getChildrenScores(scoresMap) {
+
+  long ageThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 365L * 18L));
+  def dateThreshold = new java.util.Date(ageThresholdMs);
+
+
+  long numChildren = g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+    .where(
+      and(
+        __.values('Person.Natural.Date_Of_Birth').is(gte(dateThreshold))
+      )
+    )
+    .count().next()
+
+  long numNoGuardian = g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+    .where(
+      and(
+        __.values('Person.Natural.Date_Of_Birth').is(gte(dateThreshold))
+        , __.outE('Has_Parent_Or_Guardian').count().is(eq(0))
+      )
+    )
+    .count().next()
+
+  long numWithoutAnyConsent = g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+    .where(
+      and(
+        __.values('Person.Natural.Date_Of_Birth').is(gte(dateThreshold))
+        , __.outE('Consent').count().is(eq(0))
+      )
+    )
+    .count().next()
+
+
+  long numNegativeConsent =
+
+    g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+      .where(
+        __.values('Person.Natural.Date_Of_Birth').is(gte(dateThreshold))
+      ).as('children')
+      .match(
+        __.as('children').outE('Consent').as('consentEdges')
+        , __.as('consentEdges').count().as('consentEdgesCount')
+        , __.as('consentEdges').inV().as('consentEvents')
+        , __.as('consentEvents').has('Event.Consent.Status', eq('No Consent ')).count().as('negConsentCount')
+        , __.as('children').id().as('childId')
+
+      )
+      .select('consentEdgesCount', 'negConsentCount', 'childId')
+      .where('consentEdgesCount', eq('negConsentCount'))
+      .where(__.as('consentEdgesCount').is(gt(0)))
+
+      .count().next()
+
+
+  long numPendingConsent =
+
+    g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+      .where(
+        __.values('Person.Natural.Date_Of_Birth').is(gte(dateThreshold))
+      ).as('children')
+      .match(
+        __.as('children').outE('Consent').as('consentEdges')
+        , __.as('consentEdges').count().as('consentEdgesCount')
+        , __.as('consentEdges').inV().as('consentEvents')
+        , __.as('consentEvents').has('Event.Consent.Status', eq('Consent Pending')).count().as('pendingConsentCount')
+        , __.as('children').id().as('childId')
+
+      )
+      .select('consentEdgesCount', 'pendingConsentCount', 'childId')
+      .where('consentEdgesCount', eq('pendingConsentCount'))
+      .where(__.as('consentEdgesCount').is(gt(0)))
+
+      .count().next()
+
+
+  long scoreValue = 100L;
+  if (numChildren > 0) {
+
+    long pcntWithoutAnyConsent = (long) (100L * numWithoutAnyConsent / numChildren);
+    if (pcntWithoutAnyConsent > 10) {
+      scoreValue -= 32L;
+    } else if (numWithoutAnyConsent > 0) {
+      scoreValue -= (22L + pcntWithoutAnyConsent)
+    }
+
+
+    long pcntWithoutAnyGuardian = (long) (100L * numNoGuardian / numChildren);
+    if (pcntWithoutAnyGuardian > 10) {
+      scoreValue -= 32L;
+    } else if (numNoGuardian > 0) {
+      scoreValue -= (22L + pcntWithoutAnyGuardian)
+    }
+
+    long pcntWithNegativeConsent = (long) (100L * numNegativeConsent / numChildren);
+    if (pcntWithNegativeConsent > 10) {
+      scoreValue -= 32L;
+    } else if (numNegativeConsent > 0) {
+      scoreValue -= (22L + pcntWithNegativeConsent)
+    }
+
+    scoreValue -= (7L * numPendingConsent / numChildren)
+
+
+  }
+
+  scoresMap.put('Children', scoreValue)
+  return scoreValue
+
+}
+
+def getConsentScores(def scoresMap) {
+  long ageThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 365L * 18L));
+  def dateThreshold = new java.util.Date(ageThresholdMs);
+
+
+  long numAdults = g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+    .where(
+      and(
+        __.values('Person.Natural.Date_Of_Birth').is(lt(dateThreshold))
+      )
+    )
+    .count().next()
+
+
+  long numWithoutAnyConsent = g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+    .where(
+      and(
+        __.values('Person.Natural.Date_Of_Birth').is(lt(dateThreshold))
+        , __.outE('Consent').count().is(eq(0))
+      )
+    )
+    .count().next()
+
+
+  long numNegativeConsent =
+
+    g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+      .where(
+        __.values('Person.Natural.Date_Of_Birth').is(lt(dateThreshold))
+      ).as('adults')
+      .match(
+        __.as('adults').outE('Consent').as('consentEdges')
+        , __.as('consentEdges').count().as('consentEdgesCount')
+        , __.as('consentEdges').inV().as('consentEvents')
+        , __.as('consentEvents').has('Event.Consent.Status', eq('No Consent ')).count().as('negConsentCount')
+
+      )
+      .select('consentEdgesCount', 'negConsentCount')
+      .where('consentEdgesCount', eq('negConsentCount'))
+      .where(__.as('consentEdgesCount').is(gt(0)))
+
+      .count().next()
+
+
+  long numPendingConsent =
+
+    g.V().has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+      .where(
+        __.values('Person.Natural.Date_Of_Birth').is(lt(dateThreshold))
+      ).as('adults')
+      .match(
+        __.as('adults').outE('Consent').as('consentEdges')
+        , __.as('consentEdges').count().as('consentEdgesCount')
+        , __.as('consentEdges').inV().as('consentEvents')
+        , __.as('consentEvents').has('Event.Consent.Status', eq('Consent Pending')).count().as('pendingConsentCount')
+
+      )
+      .select('consentEdgesCount', 'pendingConsentCount')
+      .where('consentEdgesCount', eq('pendingConsentCount'))
+      .where(__.as('consentEdgesCount').is(gt(0)))
+
+      .count().next()
+
+
+  long scoreValue = 100L;
+  if (numAdults > 0) {
+
+    long pcntWithoutAnyConsent = (long) (100L * numWithoutAnyConsent / numAdults);
+    if (pcntWithoutAnyConsent > 10) {
+      scoreValue -= 45L;
+    } else if (numWithoutAnyConsent > 0) {
+      scoreValue -= (25L + 2L * pcntWithoutAnyConsent)
+    }
+
+
+    long pcntWithNegativeConsent = (long) (100L * numNegativeConsent / numAdults);
+    if (pcntWithNegativeConsent > 10) {
+      scoreValue -= 45L;
+    } else if (numNegativeConsent > 0) {
+      scoreValue -= (25L + 2L * pcntWithNegativeConsent)
+    }
+
+    scoreValue -= (10L * numPendingConsent / numAdults)
+
+
+  }
+
+  scoresMap.put('Consent', scoreValue)
+  return scoreValue
+
+}
+
+def getDataBreachesScores(def scoresMap) {
+  long numItems = g.V().has('Metadata.Type.Event.Data_Breach', eq('Event.Data_Breach'))
+    .count().next()
+
+
+  long numOpenDataBreachDataStolen =
+    g.V()
+      .has('Event.Data_Breach.Status', eq('Open'))
+      .where(
+        or(
+          __.has('Event.Data_Breach.Impact', eq('Customer Data Stolen (External)'))
+          , __.has('Event.Data_Breach.Impact', eq('Customer Data Stolen (Internal)'))
+        )
+      )
+      .count().next()
+
+  long numOpenDataBreachDataLost =
+    g.V()
+      .has('Event.Data_Breach.Status', eq('Open'))
+      .where(
+        __.has('Event.Data_Breach.Impact', eq('Data Lost'))
+      )
+      .count().next()
+
+
+  long scoreValue = 100L;
+  if (numItems > 0) {
+
+    if (numOpenDataBreachDataLost > 0) {
+      scoreValue -= (long) (15L + 10L * numOpenDataBreachDataLost / numItems);
+    }
+
+    if (numOpenDataBreachDataStolen > 0) {
+      scoreValue -= (long) (60L + 15L * numOpenDataBreachDataStolen / numItems);
+    }
+
+    scoreValue = scoreValue < 0 ? 0 : scoreValue;
+
+
+  } else {
+    scoreValue = 100L;
+  }
+
+  scoresMap.put('Data Breaches', scoreValue)
+  return scoreValue
+
+
+}
+
+
+def getDataProtnOfficerScores(def scoresMap) {
+
+  long numDPOs = g.V().has('Person.Employee.Role', eq('Data Protection Officer'))
+    .count().next()
+
+
+  long numDPODirectReports = g.V().has('Person.Employee.Role', eq('Data Protection Officer')).inE('Reports_To')
+    .count().next()
+
+
+  long numDPOsFailed = g.V().has('Person.Employee.Role', eq('Data Protection Officer'))
+    .in().has('Event.Training.Status', eq('Failed'))
+    .count().next()
+
+
+  long numDPODirectReportsFailed = g.V().has('Person.Employee.Role', eq('Data Protection Officer')).inE('Reports_To')
+    .outV().in().has('Event.Training.Status', eq('Failed'))
+    .count().next()
+
+
+  long numDPOsSecondReminder = g.V().has('Person.Employee.Role', eq('Data Protection Officer'))
+    .in().has('Event.Training.Status', eq('Second  Reminder'))
+    .count().next()
+
+
+  long numDPODirectReportsSecondReminder = g.V().has('Person.Employee.Role', eq('Data Protection Officer')).inE('Reports_To')
+    .outV().in().has('Event.Training.Status', eq('Second  Reminder'))
+    .count().next()
+
+
+  long scoreValue = 100L;
+  if (numDPOs > 0) {
+    scoreValue -= (long) (25L + 25L * numDPOsFailed / numDPOs);
+    scoreValue -= (long) (6L + 7L * numDPOsSecondReminder / numDPOs);
+  }
+  if (numDPODirectReports > 0) {
+    scoreValue -= (long) (13L + 12L * numDPODirectReportsFailed / numDPODirectReports);
+
+    scoreValue -= (long) (6L + 6L * numDPODirectReportsSecondReminder / numDPODirectReports);
+  }
+  if (numDPOs == 0 && numDPODirectReports == 0) {
+    scoreValue = 0L;
+  }
+
+  scoresMap.put('Data Protection Officer', scoreValue)
+  return scoreValue
+
+}
+
+def getIndivRightsScores(def scoresMap) {
+  long numItems = g.V()
+    .has('Metadata.Type.Object.Data_Procedures', eq('Object.Data_Procedures'))
+    .count()
+    .next()
+
+
+  long numDeleteURL = g.V()
+    .has('Metadata.Type.Object.Data_Procedures', eq('Object.Data_Procedures'))
+    .values('Object.Data_Procedures.Delete_URL')
+    .count()
+    .next()
+
+  long numUpdateURL = g.V()
+    .has('Metadata.Type.Object.Data_Procedures', eq('Object.Data_Procedures'))
+    .values('Object.Data_Procedures.Delete_URL')
+    .count()
+    .next()
+
+  long numWithoutDeleteUrl = (numItems - numDeleteURL);
+  long numWithoutUpdateUrl = (numItems - numUpdateURL);
+
+  long scoreValue = 100L;
+  if (numItems > 0) {
+
+    scoreValue -= (long) (50L * numWithoutDeleteUrl / numItems);
+    scoreValue -= (long) (50L * numWithoutUpdateUrl / numItems);
+
+  } else {
+    scoreValue = 0L;
+  }
+  scoresMap.put('Indiv Rights', scoreValue)
+  return scoreValue
+
+}
+
+def getInfoYouHoldScores(def scoresMap) {
+
+  long numEvents = g.V().has('Metadata.Type.Event.Ingestion', eq('Event.Ingestion')).count().next();
+
+  long numRecordsNoEdges =
+    g.V()
+      .has('Metadata.Type.Event.Ingestion', eq('Event.Ingestion'))
+      .where(__.inE().count().is(eq(1)))
+      .count().next()
+
+
+  long scoreValue = 100L;
+  if (numEvents > 0) {
+
+    long pcntNoEdges = (long) (100L * numRecordsNoEdges / numEvents);
+    if (pcntNoEdges > 5 && pcntNoEdges < 40) {
+      scoreValue -= 40L;
+    } else if (pcntNoEdges > 40) {
+      scoreValue -= (20L + 2L * pcntNoEdges)
+    } else {
+      scoreValue -= (pcntNoEdges)
+    }
+
+
+  } else {
+    scoreValue = 0L;
+  }
+
+
+  scoresMap.put('Info you hold', scoreValue)
+  return scoreValue
+
+}
+
+
+def getInternationalScores(def scoresMap) {
+  long numItems = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment'))
+    .count().next()
+
+
+  long numPrivNoticesWithoutRegulator =
+    g.V()
+      .has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment'))
+      .where(__.out().has('Metadata.Type.Person.Organisation', eq('Person.Organisation')).count().is(eq(0)))
+      .count().next()
+
+
+  long scoreValue = 100L;
+  if (numItems > 0) {
+
+    scoreValue -= (long) (100L * numPrivNoticesWithoutRegulator / numItems);
+
+
+  } else {
+    scoreValue = 0L;
+  }
+
+  scoresMap.put('International', scoreValue)
+  return scoreValue
+
+}
+
+def getLawfulBasisScores(def scoresMap) {
+
+  long numEvents = g.V().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice'))
+    .count().next()
+
+
+  long numWithoutAnyLawfulBasis = g.V().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice'))
+    .where(
+      __.outE('Has_Lawful_Basis_On').count().is(eq(0))
+    )
+    .count().next()
+
+  long scoreValue = 100L;
+  if (numEvents > 0) {
+    scoreValue -= (100L * numWithoutAnyLawfulBasis / numEvents)
+
+  } else {
+    scoreValue = 0L;
+  }
+
+  scoresMap.put('Lawful Basis', scoreValue);
+  return scoreValue
+
+}
+
+
+def getPrivacyImpactAssessmentScores(def scoresMap) {
+  long numItems = g.V().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment'))
+    .count().next()
+
+
+  long numPIAWithoutPrivNotices =
+    g.V()
+      .has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment'))
+      .where(__.both().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice')).count().is(eq(0)))
+      .count().next()
+
+
+  long numPIAWithPrivNoticesAndDataWithoutConsent =
+    g.V()
+      .has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment'))
+      .where(
+        __.both().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice'))
+          .both().has('Event.Consent.Status', eq('No Consent '))
+          .count().is(gt(0))
+      )
+      .count().next()
+
+
+  long numPIAWithPrivNoticesAndDataWithPendingConsent =
+    g.V()
+      .has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment'))
+      .where(
+        __.both().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice'))
+          .both().has('Event.Consent.Status', eq('Consent Pending'))
+          .count().is(gt(0))
+      )
+      .count().next()
+
+
+  long scoreValue = 100L;
+  if (numItems > 0) {
+
+    scoreValue -= (numPIAWithoutPrivNotices > 0) ? (long) (15L + 10L * numPIAWithoutPrivNotices / numItems) : 0;
+    scoreValue -= (numPIAWithPrivNoticesAndDataWithoutConsent > 0) ? (long) (40L + 5L * numPIAWithPrivNoticesAndDataWithoutConsent / numItems) : 0;
+    scoreValue -= (numPIAWithPrivNoticesAndDataWithPendingConsent > 0) ? (long) (20L + 10L * numPIAWithPrivNoticesAndDataWithPendingConsent / numItems) : 0;
+
+
+    scoreValue = scoreValue < 0 ? 0 : scoreValue;
+
+
+  } else {
+    scoreValue = 0L;
+  }
+
+  scoresMap.put('Privacy Impact Assessment', scoreValue)
+  return scoreValue
+
+}
+
+
+def getPrivacyNoticesScores(def scoresMap) {
+  long numEvents = g.V().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice')).count().next();
+
+  long numRecordsNoConsent =
+    g.V().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice')).as('privNotice')
+      .match(
+        __.as('privNotice').both().has('Metadata.Type.Event.Consent', eq('Event.Consent')).count().as('consentCount')
+
+      )
+      .select('consentCount')
+      .where(__.as('consentCount').is(eq(0)))
+      .count().next()
+
+  long numRecordsNoPIA =
+    g.V().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice')).as('privNotice')
+      .match(
+        __.as('privNotice').both().has('Metadata.Type.Object.Privacy_Impact_Assessment', eq('Object.Privacy_Impact_Assessment')).count().as('consentCount')
+
+      )
+      .select('consentCount')
+      .where(__.as('consentCount').is(eq(0)))
+      .count().next()
+
+  long numRecordsLessThan50PcntPositiveConsent =
+    g.V().has('Metadata.Type.Object.Privacy_Notice', eq('Object.Privacy_Notice')).as('privNotice')
+      .match(
+        __.as('privNotice').both().has('Metadata.Type.Event.Consent', eq('Event.Consent')).count().as('consentCount')
+        , __.as('privNotice').both().has('Event.Consent.Status', eq('Consent')).count().math('_ * 2').as('posConsentCountDouble')
+      )
+      .select(
+        'consentCount'
+        , 'posConsentCountDouble'
+      )
+      .where(
+        'consentCount', gt('posConsentCountDouble')
+
+      )
+      .count().next()
+
+
+  long scoreValue = 100L;
+  if (numEvents > 0) {
+
+    long pcntNoConsent = (long) (100L * numRecordsNoConsent / numEvents);
+    if (pcntNoConsent > 10) {
+      scoreValue -= 40L;
+    } else if (numRecordsNoConsent > 0) {
+      scoreValue -= (20L + 2L * pcntNoConsent)
+    }
+
+
+    long pcntNoPIA = (long) (100L * numRecordsNoPIA / numEvents);
+    if (pcntNoPIA > 10) {
+      scoreValue -= 50L;
+    } else if (numRecordsNoPIA > 0) {
+      scoreValue -= (30L + 2L * pcntNoPIA)
+    }
+
+    scoreValue -= (10L * numRecordsLessThan50PcntPositiveConsent / numEvents)
+
+
+  } else {
+    scoreValue = 0L;
+  }
+  scoresMap.put('Privacy Notices', scoreValue)
+  return scoreValue
+
+}
+
+
+def getSubjectAccessRequestScores(def scoresMap) {
+
+  long thirtyDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 30L));
+  def thirtyDayDateThreshold = new java.util.Date(thirtyDayThresholdMs);
+  long tenDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 10L));
+  def tenDayDateThreshold = new java.util.Date(tenDayThresholdMs);
+
+  long numEvents = g.V().has('Metadata.Type.Event.Subject_Access_Request', eq('Event.Subject_Access_Request')).count().next();
+
+  long numRecordsOlder30Days =
+
+    g.V().has('Metadata.Type.Event.Subject_Access_Request', eq('Event.Subject_Access_Request')).as('sar')
+      .where(
+        __.values('Event.Subject_Access_Request.Metadata.Create_Date').is(lte(thirtyDayDateThreshold))
+      )
+
+      .count().next()
+
+  long numRecordsOlder10Days =
+
+    g.V().has('Metadata.Type.Event.Subject_Access_Request', eq('Event.Subject_Access_Request')).as('sar')
+      .where(
+        __.values('Event.Subject_Access_Request.Metadata.Create_Date').is(lte(tenDayDateThreshold))
+      )
+
+      .count().next()
+
+
+  long scoreValue = 100L;
+  if (numEvents > 0) {
+
+    long pcntOlder30Days = (long) (100L * numRecordsOlder30Days / numEvents);
+    if (pcntOlder30Days > 10) {
+      scoreValue -= 80L;
+    } else if (numRecordsOlder30Days > 0) {
+      scoreValue -= (60L + 2L * pcntOlder30Days)
+    }
+
+
+    scoreValue -= (20L * numRecordsOlder10Days / numEvents)
+
+
+  } else {
+    scoreValue = 0L;
+  }
+  scoresMap.put('Subject Access Requests', scoreValue)
+  return scoreValue
+
+}
+
+def getScoresJson() {
+
+  def scoresMap = [:]
+
+  long totalScore = (
+    1 * getAwarenessScores(scoresMap) +
+      2 * getChildrenScores(scoresMap) +
+      6 * getConsentScores(scoresMap) +
+      6 * getDataBreachesScores(scoresMap) +
+      1 * getDataProtnOfficerScores(scoresMap) +
+      1 * getIndivRightsScores(scoresMap) +
+      4 * getInfoYouHoldScores(scoresMap) +
+      1 * getInternationalScores(scoresMap) +
+      1 * getLawfulBasisScores(scoresMap) +
+      6 * getPrivacyNoticesScores(scoresMap) +
+      6 * getPrivacyImpactAssessmentScores(scoresMap) +
+      4 * getSubjectAccessRequestScores(scoresMap)
+  ) / 39
+
+  scoresMap.put('Total Score', totalScore)
+
+  StringBuffer sb = new StringBuffer("[")
+  boolean firstTime = true;
+  scoresMap.each { metricname, metricvalue ->
+    if (!firstTime) {
+      sb.append(",")
+    } else {
+      firstTime = false;
+    }
+
+    sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue }")
+  }
+
+  sb.append(']')
+
+  return sb.toString()
 
 }
 
