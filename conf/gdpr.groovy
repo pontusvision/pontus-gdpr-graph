@@ -3963,5 +3963,208 @@ def calculatePOLECounts(){
 
 }
 
+
+def getNumEventsPerDataSource(){
+  StringBuffer sb = new StringBuffer("[")
+  boolean firstTime = true;
+
+
+  g.V().has('Metadata.Type.Object.Data_Source', eq('Object.Data_Source'))
+    .as('ingestion_event')
+    .out("Has_Ingestion_Event")
+    .out("Has_Ingestion_Event")
+    .as('events')
+    .match(
+      __.as('ingestion_event').values('Object.Data_Source.Name').as('event_id')
+    )
+    .select('event_id')
+    .groupCount() .each { metric ->
+    metric.each { metricname, metricvalue ->
+      if (!firstTime) {
+        sb.append(",")
+      } else {
+        firstTime = false;
+      }
+      sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Events Per Data Source\" }")
+
+    }
+  }
+  sb.append(']')
+  return sb.toString()
+
+}
+
+def getNumNaturalPersonPerDataSource(){
+  StringBuffer sb = new StringBuffer("[")
+  boolean firstTime = true;
+
+
+  g.V().has('Metadata.Type.Object.Data_Source', eq('Object.Data_Source'))
+    .as('ingestion_event')
+    .out("Has_Ingestion_Event")
+    .out("Has_Ingestion_Event")
+    .in("Has_Ingestion_Event")
+    .has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+    .id()
+    .dedup()
+    .as('events')
+    .match(
+      __.as('ingestion_event').values('Object.Data_Source.Name').as('event_id')
+    )
+    .select('event_id')
+    .groupCount() .each { metric ->
+    metric.each { metricname, metricvalue ->
+      if (!firstTime) {
+        sb.append(",")
+      } else {
+        firstTime = false;
+      }
+      sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Events Per Data Source\" }")
+
+    }
+  }
+  sb.append(']')
+
+  return sb.toString()
+
+
+}
+
+def getNumNaturalPersonPerOrganisation(){
+  StringBuffer sb = new StringBuffer("[")
+  boolean firstTime = true;
+
+  def orgTypes = [
+    "Data Controller": "Is_Data_Controller"
+    ,"Data Processor": "Is_Data_Processor"
+    ,"Data Owner": "Is_Data_Owner"
+  ]
+
+
+  orgTypes.each { orgTypeLabel, orgTypeRel ->
+    g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
+      .as('organisation')
+      .out(orgTypeRel)
+      .in('Has_Contract')
+      .out("Has_Ingestion_Event")
+      .out("Has_Ingestion_Event")
+      .in("Has_Ingestion_Event")
+      .has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+      .id()
+      .dedup()
+      .as('events')
+      .match(
+        __.as('organisation').values('Person.Organisation.Name').as('event_id')
+      )
+      .select('event_id')
+      .groupCount()
+      .each { metric ->
+        metric.each { metricname, metricvalue ->
+          if (!firstTime) {
+            sb.append(",")
+          } else {
+            firstTime = false;
+          }
+          sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Natural Person Per $orgTypeLabel\" }")
+
+        }
+
+      }
+
+  }
+
+  sb.append(']')
+
+  return sb.toString()
+
+}
+
+def getDSARStatsPerOrganisation(){
+  StringBuffer sb = new StringBuffer("[")
+  boolean firstTime = true;
+
+  long thirtyDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 30L));
+  def thirtyDayDateThreshold = new java.util.Date(thirtyDayThresholdMs);
+
+  long fifteenDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 15L));
+  def  fifteenDayDateThreshold = new java.util.Date(fifteenDayThresholdMs);
+
+
+  long tenDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 10L));
+  def tenDayDateThreshold = new java.util.Date(tenDayThresholdMs);
+
+  long fiveDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 5L));
+  def  fiveDayDateThreshold = new java.util.Date(fiveDayThresholdMs);
+
+  def allDates = new java.util.Date(System.currentTimeMillis()  );
+
+  def orgTypes = [
+    "Data Controller": "Is_Data_Controller"
+    ,"Data Processor": "Is_Data_Processor"
+    ,"Data Owner": "Is_Data_Owner"
+  ]
+
+  def dayThresholds = [
+    " ":   allDates
+    ," older than 5 days ": fiveDayDateThreshold
+    ," older than 10 days ": tenDayDateThreshold
+    ," older than 15 days ": fifteenDayDateThreshold
+    ," older than 30 days ": thirtyDayDateThreshold
+  ]
+
+
+  dayThresholds.each { timeLabel, timeThreshold ->
+
+    orgTypes.each { orgTypeLabel, orgTypeRel ->
+      g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
+        .as('organisation')
+        .out(orgTypeRel)
+        .in('Has_Contract')
+        .out("Has_Ingestion_Event")
+        .out("Has_Ingestion_Event")
+        .in("Has_Ingestion_Event")
+        .has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+        .out("Made_SAR_Request")
+        .where(
+          __.and(
+            values('Event.Subject_Access_Request.Metadata.Create_Date').is(lte(timeThreshold))
+            ,and(
+            values('Event.Subject_Access_Request.Status').is(neq('Completed')),
+            values('Event.Subject_Access_Request.Status').is(neq('Denied'))
+          )
+          )
+        )  .id()
+        .dedup()
+        .as('events')
+        .match(
+          __.as('organisation').values('Person.Organisation.Name').as('event_id')
+        )
+        .select('event_id')
+        .groupCount()
+        .each { metric ->
+          metric.each { metricname, metricvalue ->
+            if (!firstTime) {
+              sb.append(",")
+            } else {
+              firstTime = false;
+            }
+            sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Incomplete DSARs${timeLabel}Per $orgTypeLabel\" }")
+
+          }
+
+        }
+
+    }
+
+  }
+  sb.append(']')
+
+  return sb.toString()
+
+}
+
+
+
+
 //g.V().drop().iterate()
 //addRandomDataInit(graph, g)
