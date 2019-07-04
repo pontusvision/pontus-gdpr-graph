@@ -3252,6 +3252,11 @@ def getAwarenessScores(def scoresMap) {
 
       scoreValue -= (10L * firstReminder / numEvents)
 
+      // add a bit of a score, after all there was at least some training.
+      if (scoreValue == 0)
+      {
+        scoreValue = 10L
+      }
 
     } else {
       scoreValue = 0L;
@@ -4019,7 +4024,7 @@ def getNumNaturalPersonPerDataSource(){
       } else {
         firstTime = false;
       }
-      sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Events Per Data Source\" }")
+      sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Natural Person Per Data Source\" }")
 
     }
   }
