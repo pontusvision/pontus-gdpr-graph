@@ -4150,7 +4150,7 @@ def getDSARStatsPerOrganisation(){
           } else {
             firstTime = false;
           }
-          sb.append(" {\"dsar_source_type\":\"${key['dsar_type']}#${key['dsar_status']}#${key['dsar_source_type'].label().toString().replaceAll('[_|.]',' ')}#${key['dsar_age']}\", \"dsar_source_name\":\"${key['dsar_source_name']}\", \"dsar_count\": $metricvalue }")
+          sb.append(" {\"dsar_source_type\":\"${key['dsar_type']}    ${key['dsar_status']}     ${key['dsar_source_type'].label().toString().replaceAll('[Is_ |_|.]',' ')}     ${key['dsar_age']}\", \"dsar_source_name\":\"${key['dsar_source_name']}\", \"dsar_count\": $metricvalue }")
 
         }
 
