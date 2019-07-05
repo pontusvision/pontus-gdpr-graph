@@ -4085,8 +4085,6 @@ def getNumNaturalPersonPerOrganisation(){
 }
 
 def getDSARStatsPerOrganisation(){
-// g.V().drop().iterate()
-
 
   StringBuffer sb = new StringBuffer("[")
   boolean firstTime = true;
@@ -4104,59 +4102,65 @@ def getDSARStatsPerOrganisation(){
   long fiveDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 5L));
   def  fiveDayDateThreshold = new java.util.Date(fiveDayThresholdMs);
 
+  def typeOrg =
+    [
+      "Is_Data_Controller",
+      "Is_Data_Processor",
+      "Is_Data_Owner"
+    ]
 
-
-
-  g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
-    .as('organisation')
-    .outE().as('dsar_source_type')
-    .inV()
-    .in('Has_Contract')
-    .out("Has_Ingestion_Event")
-    .out("Has_Ingestion_Event")
-    .in("Has_Ingestion_Event")
-    .has('Metadata.Type.Person.Natural', eq('Person.Natural'))
-    .out("Made_SAR_Request")
-    .where(
-      __.or(
-        values('Event.Subject_Access_Request.Metadata.Update_Date').is(gte(thirtyDayDateThreshold)),
-        hasNot('Event.Subject_Access_Request.Metadata.Update_Date')
+  typeOrg.each{ org ->
+    g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
+      .as('organisation')
+      .outE(org)
+      .as('dsar_source_type')
+      .inV().in('Has_Contract')
+      .out("Has_Ingestion_Event")
+      .out("Has_Ingestion_Event")
+      .in("Has_Ingestion_Event")
+      .has('Metadata.Type.Person.Natural', eq('Person.Natural'))
+      .out("Made_SAR_Request")
+      .where(
+        __.or(
+          values('Event.Subject_Access_Request.Metadata.Update_Date').is(gte(thirtyDayDateThreshold)),
+          hasNot('Event.Subject_Access_Request.Metadata.Update_Date')
+        )
       )
-    )
-    .dedup()
-    .as('events')
-    .match(
-      __.as('organisation').values('Person.Organisation.Name').as('dsar_source_name')
-      ,__.as('events').values('Event.Subject_Access_Request.Status').as('dsar_status')
-      ,__.as('events').values('Event.Subject_Access_Request.Request_Type').as('dsar_type')
-      ,__.as('events').values('Event.Subject_Access_Request.Metadata.Create_Date').as('dsar_create_date')
-      .coalesce(is(gt(fiveDayDateThreshold)).constant("Last 5 days"),
-        is(between(fiveDayDateThreshold,tenDayDateThreshold)).constant("Last 10 days"),
-        is(between(tenDayDateThreshold,fifteenDayDateThreshold)).constant("Last 15 days"),
-        is(between(fifteenDayDateThreshold,thirtyDayDateThreshold)).constant("Last 30 days"),
-        is(lt(thirtyDayDateThreshold)).constant("Older than 30 days"))
-      .as('dsar_age')
-    )
 
-    .select('dsar_source_type','dsar_source_name','dsar_status', 'dsar_type', 'dsar_age')
-    .groupCount()
-    .each { metric ->
-      metric.each { key, metricvalue ->
-        if (!firstTime) {
-          sb.append("\n,")
-        } else {
-          firstTime = false;
+      .dedup()
+      .as('events')
+      .match(
+        __.as('organisation').values('Person.Organisation.Name').as('dsar_source_name')
+        ,__.as('events').values('Event.Subject_Access_Request.Status').as('dsar_status')
+        ,__.as('events').values('Event.Subject_Access_Request.Request_Type').as('dsar_type')
+        ,__.as('events').values('Event.Subject_Access_Request.Metadata.Create_Date').as('dsar_create_date')
+        .coalesce(is(gt(fiveDayDateThreshold)).constant("Last 5 days"),
+          is(between(fiveDayDateThreshold,tenDayDateThreshold)).constant("Last 10 days"),
+          is(between(tenDayDateThreshold,fifteenDayDateThreshold)).constant("Last 15 days"),
+          is(between(fifteenDayDateThreshold,thirtyDayDateThreshold)).constant("Last 30 days"),
+          is(lt(thirtyDayDateThreshold)).constant("Older than 30 days"))
+        .as('dsar_age')
+      )
+      .select('dsar_source_type','dsar_source_name','dsar_status', 'dsar_type', 'dsar_age')
+      .groupCount()
+      .each { metric ->
+        metric.each { key, metricvalue ->
+          if (!firstTime) {
+            sb.append("\n,")
+          } else {
+            firstTime = false;
+          }
+          sb.append(" {\"dsar_source_type\":\"${key['dsar_type']}#${key['dsar_status']}#${key['dsar_source_type'].label().toString().replaceAll('[_|.]',' ')}#${key['dsar_age']}\", \"dsar_source_name\":\"${key['dsar_source_name']}\", \"dsar_count\": $metricvalue }")
+
         }
-        sb.append(" {\"dsar_source_type\":\"${key['dsar_type']}#${key['dsar_status']}#${key['dsar_source_type'].label().toString().replaceAll('[_|.]',' ')}#${key['dsar_age']}\", \"dsar_source_name\":\"${key['dsar_source_name']}\", \"dsar_count\": $metricvalue }")
 
       }
-
-    }
-
+  }
 
   sb.append(']')
 
   return sb.toString()
+
 
 }
 
