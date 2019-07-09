@@ -11,6 +11,7 @@ import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.janusgraph.core.EdgeLabel;
 import org.janusgraph.core.PropertyKey;
 import org.janusgraph.core.schema.JanusGraphManagement;
 
@@ -392,9 +393,14 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   public EdgeLabelsReply edgeLabels(String str)
   {
-    //        GraphTraversal<Edge,String> trav = App.g.E().label().dedup();
+    Iterable<EdgeLabel> labels     =  App.graph.openManagement().getRelationTypes(EdgeLabel.class);
 
-    EdgeLabelsReply reply = new EdgeLabelsReply(App.g.E().label().toSet());
+    Set<String> labelNames = new HashSet<>();
+    
+    labels.forEach( label -> labelNames.add(label.name()));
+
+    EdgeLabelsReply reply = new EdgeLabelsReply(labelNames);
+
     return reply;
   }
 
