@@ -396,7 +396,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
     Iterable<EdgeLabel> labels     =  App.graph.openManagement().getRelationTypes(EdgeLabel.class);
 
     Set<String> labelNames = new HashSet<>();
-    
+
     labels.forEach( label -> labelNames.add(label.name()));
 
     EdgeLabelsReply reply = new EdgeLabelsReply(labelNames);
