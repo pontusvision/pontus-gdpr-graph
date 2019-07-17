@@ -349,13 +349,13 @@ class MatchReq<T> {
     this.predicate = predicate
   }
 
-  boolean hasGraphEntries(JanusGraph graph, GraphTraversal gtrav) {
+  boolean hasGraphEntries(JanusGraph graph, GraphTraversal gtrav,StringBuffer sb ) {
 
     if (!this.excludeFromSearch && this.excludeFromUpdate) {
       List<Long> indexQueryResults = new ArrayList<>(1);
       int maxHitsPerType = 1;
 
-      GraphTraversal localTrav = getGraphEntries(graph, gtrav, indexQueryResults, maxHitsPerType, null);
+      GraphTraversal localTrav = getGraphEntries(graph, gtrav, indexQueryResults, maxHitsPerType, sb);
 
       List<Long> travResults = localTrav.range(0, maxHitsPerType).id().toList();
 
@@ -383,6 +383,10 @@ class MatchReq<T> {
       String idx = idxQuery[1];
 
       String value = this.attribNativeVal.toString();
+      value= value?.replaceAll(Pattern.quote("v.'"), 'v."');
+      value = value?.replaceAll(Pattern.quote("':"), '":');
+
+      sb?.append("\n in getGraphEntries()  idx=$idx; value=$value; predicateStr = ${predicateStr}, maxHitsPerType=$maxHitsPerType ")
 
       for (JanusGraphIndexQuery.Result<JanusGraphVertex> result : (graph as JanusGraph).indexQuery(idx, value).limit(maxHitsPerType).vertexStream().collect(Collectors.toList())) {
         indexQueryResults.add(result.getElement().longId());
@@ -484,7 +488,7 @@ def runIndexQuery(String idx, String value, int maxHitsPerType, MatchReq matchRe
 //    resultStream.forEach { JanusGraphIndexQuery.Result<JanusGraphVertex> result ->
 //      Long vId = (Long) result.element.id();
 //      double score = result.score
-//      sb?.append("\n")?.append(result.getElement().id())?.append(": ")?.append(result.getScore());
+//      sb?.append("  )?.append(result.getElement().id())?.append(": ")?.append(result.getScore());
 //      AtomicDouble totalScore = indexQueryResults.computeIfAbsent(vId, { key -> new AtomicDouble(0) });
 //      totalScore.addAndGet(matchReq.matchWeight * (score / maxScore))
 //
@@ -508,13 +512,13 @@ def matchVertices(JanusGraph graph, GraphTraversalSource gTravSource = g, List<M
     // any hits in the graph as early as possible.  The logic here is that if a match request does not have any matches
     // on its own, what hope do we have to use it as a filter combined with other entries???  This is especially true
     // when the NLP engines give us false positives (e.g. erroneous matches for names, dates, etc).
-    if (it.hasGraphEntries(graph, gTravSource.V())) {
+    if (it.hasGraphEntries(graph, gTravSource.V(),sb)) {
       matchReqList.push(it)
       vertexScoreMapByVertexName.computeIfAbsent(it.vertexName, { k -> new HashMap<>() })
     }
     else
     {
-      sb?.append("\nremoved match Request $it from the list as it was not in the graph, and marked as searchable without updates\n\n" )
+      sb?.append("\nremoved match Request $it from the list as it was not in the graph, and marked as searchable without updates\n"   )
 
     }
   }
@@ -681,7 +685,7 @@ def matchVertices(JanusGraph graph, GraphTraversalSource gTravSource = g, List<M
 
 //    maxScoresByVertexName.get(k).addAndGet(maxScore)
 
-    sb?.append('\n')?.append(vertexScoreMapByVertexName)?.append("\n")
+    sb?.append('\n')?.append(vertexScoreMapByVertexName)?.append(" ")
 
 
   }
@@ -764,7 +768,7 @@ def findMatchingNeighbours(gTrav = g, Set<Long> requiredTypeIds, Set<Long> other
 
 /*
 
- */
+*/
 
 void addNewMatchRequest(Map<String, String> binding, List<MatchReq> matchReqs, String propValItem, Class nativeType, String propName, String vertexName, String vertexLabel, String predicate, boolean excludeFromSearch, boolean excludeFromSubsequenceSearch, boolean excludeFromUpdate, boolean mandatoryInSearch, String postProcessor, String postProcessorVar, double matchWeight, StringBuffer sb = null) {
 
@@ -870,6 +874,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
     Boolean passedCondition = true;
 
+
     try {
       if (vtx.condition) {
         passedCondition = Boolean
@@ -882,9 +887,12 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
 
     if (passedCondition) {
+
       AtomicDouble maxScore = maxScoresByVertexName.computeIfAbsent(vertexName, { k -> new AtomicDouble(0) })
       percentageThresholdByVertexName.computeIfAbsent(vertexName, { k -> new Double((double) (vtx.percentageThreshold == null ? percentageThreshold : vtx.percentageThreshold)) })
 //        int minSizeSubsequences = vtx.minSizeSubsequences ?: -1;
+
+
       vtx.props.each { prop ->
 
         Class nativeType;
@@ -903,7 +911,11 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
         }
 
+
+
         String propVal = PVValTemplate.getTemplate((String) prop.val).make(binding)
+
+
         if (propVal != null && !"null".equals(propVal)) {
           String predicate = prop.predicate ?: "eq"
 
@@ -921,6 +933,8 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
             catch (Throwable t) {
               propVals = null;
             }
+
+
             if (propVals != null) {
 
               propVals.each { propValItem ->
@@ -949,6 +963,9 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
             }
 
           } else {
+
+            sb.append("\n in getMatchRequests() - single processing $propName")
+
             addNewMatchRequest(
               binding
               , matchReqs
@@ -1405,90 +1422,90 @@ def rulesStr = '''
   [
     {
     "label": "Person.Natural"
-     ,"props":
+    ,"props":
     [
       {
       "name": "Person.Natural.Full_Name"
-       ,"val": "${pg_nlp_res_person}"
-       ,"predicate": "eq"
-       ,"type":"[Ljava.lang.String;"
-       ,"excludeFromUpdate": true
-       ,"postProcessor": "${it?.toUpperCase()}"
+      ,"val": "${pg_nlp_res_person}"
+      ,"predicate": "eq"
+      ,"type":"[Ljava.lang.String;"
+      ,"excludeFromUpdate": true
+      ,"postProcessor": "${it?.toUpperCase()}"
 
       }
     ]
     }
-   ,{
+  ,{
     "label": "Location.Address"
-     ,"props":
+    ,"props":
     [
       {
       "name": "Location.Address.parser.postcode"
-       ,"val": "${pg_nlp_res_postcode}"
-       ,"type":"[Ljava.lang.String;"
-       ,"postProcessorVar": "eachPostCode"
-       ,"postProcessor": "${com.pontusvision.utils.PostCode.format(eachPostCode)}"
-       ,"excludeFromUpdate": true
+      ,"val": "${pg_nlp_res_postcode}"
+      ,"type":"[Ljava.lang.String;"
+      ,"postProcessorVar": "eachPostCode"
+      ,"postProcessor": "${com.pontusvision.utils.PostCode.format(eachPostCode)}"
+      ,"excludeFromUpdate": true
       }
 
     ]
 
     }
-   ,{
+  ,{
     "label": "Object.Email_Address"
-     ,"props":
+    ,"props":
     [
       {
       "name": "Object.Email_Address.Email"
-       ,"val": "${pg_nlp_res_emailaddress}"
-       ,"type":"[Ljava.lang.String;"
-       ,"excludeFromUpdate": true
+      ,"val": "${pg_nlp_res_emailaddress}"
+      ,"type":"[Ljava.lang.String;"
+      ,"excludeFromUpdate": true
       }
     ]
 
     }
-   ,{
+  ,{
     "label": "Object.Insurance_Policy"
-     ,"props":
+    ,"props":
     [
       {
       "name": "Object.Insurance_Policy.Number"
-       ,"val": "${pg_nlp_res_policy_number}"
-       ,"type":"[Ljava.lang.String;"
-       ,"excludeFromUpdate": true
+      ,"val": "${pg_nlp_res_policy_number}"
+      ,"type":"[Ljava.lang.String;"
+      ,"excludeFromUpdate": true
       }
     ]
 
     }
-   ,{
+  ,{
     "label": "Event.Ingestion"
-     ,"props":
+    ,"props":
     [
       {
       "name": "Event.Ingestion.Type"
-       ,"val": "MarketingEmailSystem"
-       ,"excludeFromSearch": true
+      ,"val": "MarketingEmailSystem"
+      ,"excludeFromSearch": true
       }
-     ,{
+    ,{
       "name": "Event.Ingestion.Operation"
-       ,"val": "Upsert"
-       ,"excludeFromSearch": true
+      ,"val": "Upsert"
+      ,"excludeFromSearch": true
       }
-     ,{
+    ,{
       "name": "Event.Ingestion.Domain_b64"
-       ,"val": "${original_request?.bytes?.encodeBase64()?.toString()}"
-       ,"excludeFromSearch": true
+      ,"val": "${original_request?.bytes?.encodeBase64()?.toString()}"
+      ,"excludeFromSearch": true
       }
-     ,{
+    ,{
       "name": "Event.Ingestion.Metadata_Create_Date"
-       ,"val": "${new Date()}"
-       ,"excludeFromSearch": true
+      ,"val": "${new Date()}"
+      ,"excludeFromSearch": true
       }
 
     ]
     }
   ]
-   ,"edges":
+  ,"edges":
     [
       { "label": "Has_Ingestion_Event", "fromVertexName": "Person.Natural", "toVertexName": "Event.Ingestion"  }
     ]
@@ -1514,7 +1531,7 @@ bindings['pg_nlp_res_cred_card'] = '[]';
 bindings['pg_nlp_res_emailaddress'] = '["retoh@optonline.net"]';
 bindings['pg_nlp_res_location'] = '["Greenock","UK","London","Paris"]';
 bindings['pg_nlp_res_city'] = '[]';
-bindings['pg_nlp_res_person'] = '["John Smith"," ","\t1: "]';
+bindings['pg_nlp_res_person'] = '["John Smith"," ","  1: "]';
 bindings['pg_nlp_res_phone'] = '[null,"01475545350","01","5350","47","554"]';
 bindings['pg_nlp_res_postcode'] = '["PA15",null,"PA15 4SY"]';
 bindings['pg_nlp_res_policy_number'] = '[]';
@@ -1952,12 +1969,12 @@ def rulesStr =  '''
 		]
 	  }
 	]
-   ,"edges":
+  ,"edges":
     [
       { "label": "Uses_Email", "fromVertexName": "Person.Natural", "toVertexName": "Object.Email_Address" }
-     ,{ "label": "Lives", "fromVertexName": "Person.Natural", "toVertexName": "Location.Address"  }
-     ,{ "label": "Has_Policy", "fromVertexName": "Person.Natural", "toVertexName": "Object.Insurance_Policy"  }
-     ,{ "label": "Has_Ingestion_Event", "fromVertexName": "Person.Natural", "toVertexName": "Event.Ingestion"  }
+    ,{ "label": "Lives", "fromVertexName": "Person.Natural", "toVertexName": "Location.Address"  }
+    ,{ "label": "Has_Policy", "fromVertexName": "Person.Natural", "toVertexName": "Object.Insurance_Policy"  }
+    ,{ "label": "Has_Ingestion_Event", "fromVertexName": "Person.Natural", "toVertexName": "Event.Ingestion"  }
     ]
   }
 }
@@ -1987,5 +2004,8 @@ sb.toString()
 
 // describeSchema()
 // g.V()
+
+
+
 
 */
