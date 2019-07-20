@@ -1002,7 +1002,8 @@ def getTopHitsWithEdgeCheck(g,
                             Map<String, List<EdgeRequest>> edgeReqsByVertexType,
                             StringBuffer sb = null) {
 
-  sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; potentialHitIDs = ${potentialHitIDs} scoreThreshold = ${scoreThreshold}")
+  sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; potentialHitIDs = ${potentialHitIDs};" +
+    " scoreThreshold = ${scoreThreshold}, edgeReqsByVertexType = ${edgeReqsByVertexType}")
   Map<Long, AtomicDouble> topHits = getTopHits(potentialHitIDs, scoreThreshold, sb)
 
   sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; topHits = ${topHits} ")
@@ -1022,6 +1023,13 @@ def getTopHitsWithEdgeCheck(g,
       return (tempTopHits?.size() > 0);
     });
     sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; topHits  = ${topHitsFiltered} ")
+
+    if (topHitsFiltered.size() == 0){
+      sb?.append("\nFiltered too much; removing filter" )
+
+      topHitsFiltered.putAll(topHits);
+    }
+    sb?.append("\nAfter Filter : In getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; topHits  = ${topHitsFiltered} ")
 
     return topHitsFiltered;
 
@@ -1412,436 +1420,16 @@ def ingestRecordListUsingRules(JanusGraph graph, GraphTraversalSource g, List<Ma
   }
 }
 
+
+
+///
+
 /*
+
 def rulesStr = '''
 {
   "updatereq":
   {
-
-    "vertices":
-  [
-    {
-    "label": "Person.Natural"
-    ,"props":
-    [
-      {
-      "name": "Person.Natural.Full_Name"
-      ,"val": "${pg_nlp_res_person}"
-      ,"predicate": "eq"
-      ,"type":"[Ljava.lang.String;"
-      ,"excludeFromUpdate": true
-      ,"postProcessor": "${it?.toUpperCase()}"
-
-      }
-    ]
-    }
-  ,{
-    "label": "Location.Address"
-    ,"props":
-    [
-      {
-      "name": "Location.Address.parser.postcode"
-      ,"val": "${pg_nlp_res_postcode}"
-      ,"type":"[Ljava.lang.String;"
-      ,"postProcessorVar": "eachPostCode"
-      ,"postProcessor": "${com.pontusvision.utils.PostCode.format(eachPostCode)}"
-      ,"excludeFromUpdate": true
-      }
-
-    ]
-
-    }
-  ,{
-    "label": "Object.Email_Address"
-    ,"props":
-    [
-      {
-      "name": "Object.Email_Address.Email"
-      ,"val": "${pg_nlp_res_emailaddress}"
-      ,"type":"[Ljava.lang.String;"
-      ,"excludeFromUpdate": true
-      }
-    ]
-
-    }
-  ,{
-    "label": "Object.Insurance_Policy"
-    ,"props":
-    [
-      {
-      "name": "Object.Insurance_Policy.Number"
-      ,"val": "${pg_nlp_res_policy_number}"
-      ,"type":"[Ljava.lang.String;"
-      ,"excludeFromUpdate": true
-      }
-    ]
-
-    }
-  ,{
-    "label": "Event.Ingestion"
-    ,"props":
-    [
-      {
-      "name": "Event.Ingestion.Type"
-      ,"val": "MarketingEmailSystem"
-      ,"excludeFromSearch": true
-      }
-    ,{
-      "name": "Event.Ingestion.Operation"
-      ,"val": "Upsert"
-      ,"excludeFromSearch": true
-      }
-    ,{
-      "name": "Event.Ingestion.Domain_b64"
-      ,"val": "${original_request?.bytes?.encodeBase64()?.toString()}"
-      ,"excludeFromSearch": true
-      }
-    ,{
-      "name": "Event.Ingestion.Metadata_Create_Date"
-      ,"val": "${new Date()}"
-      ,"excludeFromSearch": true
-      }
-
-    ]
-    }
-  ]
-  ,"edges":
-    [
-      { "label": "Has_Ingestion_Event", "fromVertexName": "Person.Natural", "toVertexName": "Event.Ingestion"  }
-    ]
-  }
-}
-'''
-
-// edgeLabel = createEdgeLabel(mgmt, "Has_Policy")
-// trigger the String.Mixin() call in the static c-tor
-
-// sb.append("${PostCode.format(pg_ZipCode)}")
-
-
-def bindings = [:]
-
-
-bindings['pg_metadataController'] = 'abc inc';
-bindings['pg_metadataGDPRStatus'] = 'Personal';
-bindings['pg_metadataLineage'] = 'https://randomuser.me/api/?format=csv';
-bindings['pg_nlp_res_address'] = '[" ","ddress: "]';
-bindings['pg_nlp_res_company'] = '["DoD"]';
-bindings['pg_nlp_res_cred_card'] = '[]';
-bindings['pg_nlp_res_emailaddress'] = '["retoh@optonline.net"]';
-bindings['pg_nlp_res_location'] = '["Greenock","UK","London","Paris"]';
-bindings['pg_nlp_res_city'] = '[]';
-bindings['pg_nlp_res_person'] = '["John Smith"," ","  1: "]';
-bindings['pg_nlp_res_phone'] = '[null,"01475545350","01","5350","47","554"]';
-bindings['pg_nlp_res_postcode'] = '["PA15",null,"PA15 4SY"]';
-bindings['pg_nlp_res_policy_number'] = '[]';
-
-
-
-StringBuffer sb = new StringBuffer();
-try {
-    ingestDataUsingRules(graph, g, bindings, rulesStr, sb)
-}
-catch (Throwable t) {
-    String stackTrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t)
-
-    sb.append("\n$t\n$stackTrace")
-
-    throw new Throwable(sb.toString())
-
-
-}
-sb.toString()
-
-*/
-
-/*
-def jsonSlurper = new JsonSlurper()
-def listOfMaps = jsonSlurper.parseText '''
-[ {
-  "pg_ExistingCustomer" : "NO",
-  "pg_FirstName" : "MICHAEL",
-  "pg_LastName" : "PLATINI",
-  "pg_ZipCode" : "B6 7NP",
-  "pg_City" : "Birmingham",
-  "pg_NumOfMarketingEmailSent" : "15",
-  "pg_NumOpened" : "8",
-  "pg_NumOfBrandEnagementEmailSent" : "8",
-  "pg_NumTotalClickThrough" : "11",
-  "pg_OpenOnDevice" : "Mobile",
-  "pg_PrimaryEmailAddress" : "kiddailey@hotmail.com",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "18/10/1969",
-  "pg_MailBounced" : "1",
-  "pg_Sex" : "Male",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : null,
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : null,
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : null
-}, {
-  "pg_ExistingCustomer" : "NO",
-  "pg_FirstName" : "JUDY",
-  "pg_LastName" : "CAMEROON",
-  "pg_ZipCode" : "B60 1DX",
-  "pg_City" : "Bromsgrove",
-  "pg_NumOfMarketingEmailSent" : "13",
-  "pg_NumOpened" : "8",
-  "pg_NumOfBrandEnagementEmailSent" : "7",
-  "pg_NumTotalClickThrough" : "11",
-  "pg_OpenOnDevice" : "Desktop",
-  "pg_PrimaryEmailAddress" : "knorr@live.com",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : "yeugo@hotmail.com",
-  "pg_PermissionToContactSecondary" : "No",
-  "pg_DateofBirth" : "04/12/1972",
-  "pg_MailBounced" : "0",
-  "pg_Sex" : "Female",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : null,
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : null,
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : null
-}, {
-  "pg_ExistingCustomer" : "NO",
-  "pg_FirstName" : "SACHIN",
-  "pg_LastName" : "KUMAR",
-  "pg_ZipCode" : "B742NH",
-  "pg_City" : "Coldfield",
-  "pg_NumOfMarketingEmailSent" : "11",
-  "pg_NumOpened" : "8",
-  "pg_NumOfBrandEnagementEmailSent" : "7",
-  "pg_NumTotalClickThrough" : "13",
-  "pg_OpenOnDevice" : "Mobile",
-  "pg_PrimaryEmailAddress" : "mbswan@optonline.net",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "12/09/1973",
-  "pg_MailBounced" : "1",
-  "pg_Sex" : "Male",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : null,
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : null,
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : null
-}, {
-  "pg_ExistingCustomer" : "YES",
-  "pg_FirstName" : "CORY",
-  "pg_LastName" : "RHODES",
-  "pg_ZipCode" : "DE75 7PQ",
-  "pg_City" : "Heanor",
-  "pg_NumOfMarketingEmailSent" : "10",
-  "pg_NumOpened" : "9",
-  "pg_NumOfBrandEnagementEmailSent" : "7",
-  "pg_NumTotalClickThrough" : "11",
-  "pg_OpenOnDevice" : "Mobile",
-  "pg_PrimaryEmailAddress" : "dieman@yahoo.com",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "05/04/1975",
-  "pg_MailBounced" : "0",
-  "pg_Sex" : "Male",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : "98497047",
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : "Open",
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : "VVAP"
-}, {
-  "pg_ExistingCustomer" : "YES",
-  "pg_FirstName" : "MICKEY",
-  "pg_LastName" : "CRISTINO",
-  "pg_ZipCode" : "NE70 7QG",
-  "pg_City" : "Belford",
-  "pg_NumOfMarketingEmailSent" : "13",
-  "pg_NumOpened" : "9",
-  "pg_NumOfBrandEnagementEmailSent" : "10",
-  "pg_NumTotalClickThrough" : "14",
-  "pg_OpenOnDevice" : "Mobile",
-  "pg_PrimaryEmailAddress" : "jaxweb@sbcglobal.net",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "31/08/1976",
-  "pg_MailBounced" : "0",
-  "pg_Sex" : "Female",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : "10330435",
-  "pg_PolicyType" : "Non- Renewable",
-  "pg_PolicyStatus" : "Open",
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : "WUFP"
-}, {
-  "pg_ExistingCustomer" : "NO",
-  "pg_FirstName" : "HERMAN",
-  "pg_LastName" : "STONE",
-  "pg_ZipCode" : "HS8 5QX",
-  "pg_City" : "South Uist",
-  "pg_NumOfMarketingEmailSent" : "13",
-  "pg_NumOpened" : "8",
-  "pg_NumOfBrandEnagementEmailSent" : "9",
-  "pg_NumTotalClickThrough" : "11",
-  "pg_OpenOnDevice" : "Desktop",
-  "pg_PrimaryEmailAddress" : "hermanab@live.com",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "13/08/1979",
-  "pg_MailBounced" : "0",
-  "pg_Sex" : "Male",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : null,
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : null,
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : null
-}, {
-  "pg_ExistingCustomer" : "YES",
-  "pg_FirstName" : "JOHN",
-  "pg_LastName" : "SMITH",
-  "pg_ZipCode" : "PA15 4SY",
-  "pg_City" : "Greenock",
-  "pg_NumOfMarketingEmailSent" : "15",
-  "pg_NumOpened" : "8",
-  "pg_NumOfBrandEnagementEmailSent" : "9",
-  "pg_NumTotalClickThrough" : "10",
-  "pg_OpenOnDevice" : "Desktop",
-  "pg_PrimaryEmailAddress" : "retoh@optonline.net",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "08/04/1973",
-  "pg_MailBounced" : "1",
-  "pg_Sex" : "Male",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : "10330434",
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : "Open",
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : "RIKR"
-}, {
-  "pg_ExistingCustomer" : "YES",
-  "pg_FirstName" : "TRACY",
-  "pg_LastName" : "NOAH",
-  "pg_ZipCode" : "CM2 9HX",
-  "pg_City" : "Chemsford",
-  "pg_NumOfMarketingEmailSent" : "14",
-  "pg_NumOpened" : "8",
-  "pg_NumOfBrandEnagementEmailSent" : "9",
-  "pg_NumTotalClickThrough" : "10",
-  "pg_OpenOnDevice" : "Desktop",
-  "pg_PrimaryEmailAddress" : "tromey@mac.com",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "26/10/1982",
-  "pg_MailBounced" : "0",
-  "pg_Sex" : "Female",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : "49949479",
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : "Open",
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : "JUDV"
-}, {
-  "pg_ExistingCustomer" : "NO",
-  "pg_FirstName" : "JOHN",
-  "pg_LastName" : "DAILEY",
-  "pg_ZipCode" : "BH8 1  HM",
-  "pg_City" : "Bournemouth",
-  "pg_NumOfMarketingEmailSent" : "12",
-  "pg_NumOpened" : "10",
-  "pg_NumOfBrandEnagementEmailSent" : "10",
-  "pg_NumTotalClickThrough" : "13",
-  "pg_OpenOnDevice" : "Mobile",
-  "pg_PrimaryEmailAddress" : "sabren@icloud.com",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : "kuaoiio@gmail.com",
-  "pg_PermissionToContactSecondary" : "Yes",
-  "pg_DateofBirth" : "20/11/1984",
-  "pg_MailBounced" : "2",
-  "pg_Sex" : "Male",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : null,
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : null,
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : null
-}, {
-  "pg_ExistingCustomer" : "NO",
-  "pg_FirstName" : "KEITH",
-  "pg_LastName" : "SAUNDERS",
-  "pg_ZipCode" : "PH34 3ET",
-  "pg_City" : "Speam Bridge",
-  "pg_NumOfMarketingEmailSent" : "12",
-  "pg_NumOpened" : "9",
-  "pg_NumOfBrandEnagementEmailSent" : "10",
-  "pg_NumTotalClickThrough" : "11",
-  "pg_OpenOnDevice" : "Desktop",
-  "pg_PrimaryEmailAddress" : "shazow@yahoo.com",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "22/01/1987",
-  "pg_MailBounced" : "1",
-  "pg_Sex" : "Male",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : null,
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : null,
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : null
-}, {
-  "pg_ExistingCustomer" : "NO",
-  "pg_FirstName" : "MICHELLE",
-  "pg_LastName" : "DAVIDSON",
-  "pg_ZipCode" : "SG13 7EJ",
-  "pg_City" : "Hertford",
-  "pg_NumOfMarketingEmailSent" : "11",
-  "pg_NumOpened" : "10",
-  "pg_NumOfBrandEnagementEmailSent" : "8",
-  "pg_NumTotalClickThrough" : "14",
-  "pg_OpenOnDevice" : "Mobile",
-  "pg_PrimaryEmailAddress" : "moxfulder@sbcglobal.net",
-  "pg_PermissionToContactPrimary" : "Yes",
-  "pg_SecondaryEmailID" : null,
-  "pg_PermissionToContactSecondary" : null,
-  "pg_DateofBirth" : "27/01/1987",
-  "pg_MailBounced" : "0",
-  "pg_Sex" : "Female",
-  "pg_Unsubscribed" : "No",
-  "pg_SpamReported" : "No",
-  "pg_Policynumber" : null,
-  "pg_PolicyType" : null,
-  "pg_PolicyStatus" : null,
-  "pg_ProspectStatus" : "Active",
-  "pg_ClientManager" : null
-} ]
-'''
-
-
-def rulesStr =  '''
-{
-  "updatereq":
-  {
-
     "vertices":
 	[
 	  {
@@ -1849,95 +1437,66 @@ def rulesStr =  '''
 	   ,"props":
 		[
 		  {
-			"name": "Person.Natural.Full_Name"
-		   ,"val": "${pg_FirstName?.toUpperCase()?.trim()} ${pg_LastName?.toUpperCase()?.trim()}"
-		   ,"predicate": "eq"
+			"name": "Person.Natural.Full_Name_fuzzy"
+		   ,"val": "${person}"
+		   ,"predicate": "textContainsFuzzy"
+		   ,"type":"[Ljava.lang.String;"
+		   ,"excludeFromUpdate": true
 		   ,"mandatoryInSearch": true
+		   ,"postProcessor": "${it?.toUpperCase()?.trim()}"
+
 		  }
 		 ,{
 			"name": "Person.Natural.Last_Name"
-		   ,"val": "${pg_LastName?.toUpperCase()?.trim()}"
-		   ,"excludeFromSubsequenceSearch": true
-		  }
-		 ,{
-			"name": "Person.Natural.Date_Of_Birth"
-		   ,"val": "${pg_DateofBirth}"
-		   ,"type": "java.util.Date"
-		   ,"mandatoryInSearch": true
-
-		  }
-		 ,{
-			"name": "Person.Natural.Gender"
-		   ,"val": "${pg_Sex?.toUpperCase()}"
-		   ,"excludeFromSubsequenceSearch": true
-
-		  }
-		 ,{
-			"name": "Person.Natural.Title"
-		   ,"val": "${'MALE' == pg_Sex?.toUpperCase()? 'MR':'MS'}"
-		   ,"excludeFromSearch": true
-		  }
-		 ,{
-			"name": "Person.Natural.Nationality"
-		   ,"val": "Not Provided"
-		   ,"excludeFromSearch": true
+		   ,"val": "${person}"
+		   ,"predicate": "textContainsFuzzy"
+		   ,"type":"[Ljava.lang.String;"
+		   ,"excludeFromUpdate": true
+		   ,"postProcessor": "${it?.toUpperCase()?.trim()}"
 		  }
 		]
 	  }
 	 ,{
 		"label": "Location.Address"
-		,"props":
+	   ,"props":
 		[
 		  {
 			"name": "Location.Address.parser.postcode"
-		   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
+		   ,"val": "${postcode}"
+		   ,"type":"[Ljava.lang.String;"
+		   ,"excludeFromUpdate": true
 		   ,"mandatoryInSearch": true
-		  }
-		 ,{
-			"name": "Location.Address.parser.city"
-		   ,"val": "${pg_City?.toLowerCase()}"
-		   ,"excludeFromSubsequenceSearch": true
-		  }
-		 ,{
-			"name": "Location.Address.Post_Code"
-		   ,"val": "${com.pontusvision.utils.PostCode.format(pg_ZipCode)}"
-		   ,"excludeFromSearch": true
+		   ,"postProcessorVar": "eachPostCode"
+		   ,"postProcessor": "${com.pontusvision.utils.PostCode.format(eachPostCode)}"
 		  }
 		]
 
 	  }
 	 ,{
 		"label": "Object.Email_Address"
-		,"props":
+	   ,"props":
 		[
 		  {
 			"name": "Object.Email_Address.Email"
-		   ,"val": "${pg_PrimaryEmailAddress}"
+		   ,"val": "${email}"
+		   ,"type":"[Ljava.lang.String;"
+		   ,"excludeFromUpdate": true
+		   ,"mandatoryInSearch": true
 		  }
 		]
 
 	  }
 	 ,{
 		"label": "Object.Insurance_Policy"
-		,"props":
+	   ,"props":
 		[
 		  {
 			"name": "Object.Insurance_Policy.Number"
-		   ,"val": "${pg_Policynumber}"
+		   ,"val": "${policy_number}"
+		   ,"type":"[Ljava.lang.String;"
+		   ,"excludeFromUpdate": true
 		   ,"mandatoryInSearch": true
 		  }
-		 ,{
-			"name": "Object.Insurance_Policy.Type"
-		   ,"val": "${pg_PolicyType}"
-		   ,"excludeFromSubsequenceSearch": true
-
-		  }
-		 ,{
-			"name": "Object.Insurance_Policy.Status"
-		   ,"val": "${pg_PolicyStatus}"
-		   ,"excludeFromSearch": true
-		  }
-
 		]
 
 	  }
@@ -1947,12 +1506,12 @@ def rulesStr =  '''
 		[
 		  {
 			"name": "Event.Ingestion.Type"
-		   ,"val": "MarketingEmailSystem"
+		   ,"val": "Outlook PST Files"
 		   ,"excludeFromSearch": true
 		  }
 		 ,{
 			"name": "Event.Ingestion.Operation"
-		   ,"val": "Upsert"
+		   ,"val": "Unstructured Data Insertion"
 		   ,"excludeFromSearch": true
 		  }
 		 ,{
@@ -1961,51 +1520,131 @@ def rulesStr =  '''
 		   ,"excludeFromSearch": true
 		  }
 		 ,{
+			"name": "Event.Ingestion.Domain_Unstructured_Data_b64"
+		   ,"val": "${pg_content?.bytes?.encodeBase64()?.toString()}"
+		   ,"excludeFromSearch": true
+		  }
+		 ,{
 			"name": "Event.Ingestion.Metadata_Create_Date"
 		   ,"val": "${new Date()}"
 		   ,"excludeFromSearch": true
+		   ,"type": "java.util.Date"
+
 		  }
 
 		]
 	  }
+     ,{
+		"label": "Event.Group_Ingestion"
+	   ,"props":
+		[
+		  {
+			"name": "Event.Group_Ingestion.Metadata_Start_Date"
+		   ,"val": "${pg_currDate}"
+		   ,"mandatoryInSearch": true
+		   ,"type": "java.util.Date"
+		  }
+		 ,{
+			"name": "Event.Group_Ingestion.Metadata_End_Date"
+		   ,"val": "${new Date()}"
+		   ,"excludeFromSearch": true
+		   ,"excludeFromSubsequenceSearch": true
+		   ,"type": "java.util.Date"
+		  }
+
+		 ,{
+			"name": "Event.Group_Ingestion.Type"
+		   ,"val": "Outlook PST Files"
+		   ,"mandatoryInSearch": true
+		  }
+		 ,{
+			"name": "Event.Group_Ingestion.Operation"
+		   ,"val": "Unstructured Data Insertion"
+		   ,"mandatoryInSearch": true
+		  }
+
+		]
+	  }
+
 	]
-  ,"edges":
+   ,"edges":
     [
-      { "label": "Uses_Email", "fromVertexName": "Person.Natural", "toVertexName": "Object.Email_Address" }
-    ,{ "label": "Lives", "fromVertexName": "Person.Natural", "toVertexName": "Location.Address"  }
-    ,{ "label": "Has_Policy", "fromVertexName": "Person.Natural", "toVertexName": "Object.Insurance_Policy"  }
-    ,{ "label": "Has_Ingestion_Event", "fromVertexName": "Person.Natural", "toVertexName": "Event.Ingestion"  }
+      { "label": "Has_Ingestion_Event", "fromVertexLabel": "Person.Natural", "toVertexLabel": "Event.Ingestion"  }
+     ,{ "label": "Has_Ingestion_Event", "fromVertexLabel": "Event.Group_Ingestion", "toVertexLabel": "Event.Ingestion"  }
     ]
   }
 }
-
 '''
-// edgeLabel = createEdgeLabel(mgmt, "Has_Policy")
+
+groovy.json.JsonSlurper slurper = new groovy.json.JsonSlurper();
+
+
+def pg_metadataController = 'abc'
+def pg_metadataGDPRStatus = 'Personal'
+def pg_metadataLineage = 'https://randomuser.me/api/?format=csv'
+def pg_nlp_res_address = '[]'
+def pg_nlp_res_cred_card = '[]'
+def pg_nlp_res_emailaddress = '[]'
+def pg_nlp_res_location = '["Como"]'
+def pg_currDate = 'Sat Jul 20 09:28:25 UTC 2019'
+def pg_content = 'b'
+def pg_nlp_res_city = '[]'
+def pg_nlp_res_person = '["John Smith","renova\u00E7\u00E3o da","Smith","John","autom\u00E1tico","renova\u00E7\u00E3o"]'
+def pg_nlp_res_phone = '["200", "6051"]';
+def pg_nlp_res_post_code = '["de 20", "u00ED", "u00EA", "u00FA", "as 48", "u0", "BP 50", "ce 10", "em 27"]'
+def pg_nlp_res_policy_number  = '["10330434"]'
+
+
+def bindings = [:];
+
+bindings['metadataController'] = "${pg_metadataController}";
+bindings['metadataGDPRStatus'] = "${pg_metadataGDPRStatus}";
+bindings['metadataLineage'] = "${pg_metadataLineage}";
+bindings['address'] = "${pg_nlp_res_address}";
+//bindings['company'] = "${pg_nlp_res_company?:[]}";
+bindings['cred_card'] = "${pg_nlp_res_cred_card}";
+bindings['email'] = "${pg_nlp_res_emailaddress}";
+bindings['location'] = "${pg_nlp_res_location}";
+bindings['pg_currDate'] = "${pg_currDate}";
+
+
+
+bindings['pg_content'] = 'parsedContent.text;'
+
+bindings['city'] = "${pg_nlp_res_city}";
+
+
+
+
+
+def personFilter = ['Name insured person: ','1: ','Self','name: ','0','1','Name insured 1: ','Name: ','2','0: ','1: ',' 1: ']
+
+
+
+bindings['person'] = "${com.pontusvision.utils.NLPCleaner.filter(pg_nlp_res_person,(boolean)true,(Set<String>)personFilter) as String}";
+// bindings['person'] = "${pg_nlp_res_person}";
+bindings['phone'] = "${pg_nlp_res_phone}";
+bindings['postcode'] = "${pg_nlp_res_post_code}";
+bindings['policy_number'] = "${pg_nlp_res_policy_number}";
+
+
 
 StringBuffer sb = new StringBuffer ()
 
-// trigger the String.Mixin() call in the static c-tor
-
-// sb.append("${PostCode.format(pg_ZipCode)}")
 try{
-    ingestRecordListUsingRules(graph, g, listOfMaps, rulesStr, sb)
+  sb.append("\n\nbindings: ${bindings}");
+
+  ingestDataUsingRules(graph, g, bindings, rulesStr, sb)
 }
 catch (Throwable t){
-    String stackTrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t)
+  String stackTrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t)
 
-    sb.append("\n$t\n$stackTrace")
+  sb.append("\n$t\n$stackTrace")
+
+  throw new Throwable(sb.toString())
 
 
 }
 sb.toString()
-
-// g.E().drop().iterate()
-// g.V().drop().iterate()
-
-// describeSchema()
-// g.V()
-
-
-
 
 */
