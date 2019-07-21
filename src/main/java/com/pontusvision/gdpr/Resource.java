@@ -37,8 +37,8 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 @Path("home") public class Resource
 {
 
-  @Inject
-  KeycloakSecurityContext keycloakSecurityContext;
+//  @Inject
+//  KeycloakSecurityContext keycloakSecurityContext;
 
 
 
