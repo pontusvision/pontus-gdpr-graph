@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.server.util.ServerGremlinExecutor;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -14,13 +15,20 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.EdgeLabel;
 import org.janusgraph.core.PropertyKey;
 import org.janusgraph.core.schema.JanusGraphManagement;
+import org.keycloak.KeycloakSecurityContext;
 
+import javax.inject.Inject;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.P.neq;
 import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
 //import org.json.JSONArray;
@@ -28,6 +36,11 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
 @Path("home") public class Resource
 {
+
+  @Inject
+  KeycloakSecurityContext keycloakSecurityContext;
+
+
 
   public Resource()
   {
@@ -275,6 +288,76 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
     return retVal;
   }
+
+  Map<String, Pattern> compiledPatterns = new HashMap<>();
+
+
+
+  @GET @Path ("vertex_prop_values") @Produces(MediaType.APPLICATION_JSON)
+  public FormioSelectResults getVertexPropertyValues(
+       @QueryParam("search") String search
+      ,@QueryParam("limit") Long limit
+      ,@QueryParam("skip") Long skip
+
+  )
+  {
+//    final  String bizCtx = "BizCtx";
+//
+//    final AtomicBoolean matches = new AtomicBoolean(false);
+//
+//    keycloakSecurityContext.getAuthorizationContext().getPermissions().forEach(perm -> perm.getClaims().forEach(
+//        (s, strings) -> {
+//          if (bizCtx.equals(s)){
+//            strings.forEach( allowedVal -> {
+//              Pattern patt = compiledPatterns.computeIfAbsent(allowedVal, Pattern::compile);
+//              matches.set(patt.matcher(search).matches());
+//
+//            }  );
+//          }
+//        }));
+//
+//    if (matches.get()){
+
+    if (limit == null){
+      limit = 100L;
+    }
+
+    if (skip == null){
+      skip = 0L;
+    }
+
+
+      List<Map<String, Object>> querRes = App
+          .g.V()
+            .has(search,neq(""))
+            .limit(limit)
+            .skip(skip)
+            .as("matches")
+            .match(
+               __.as("matches").values(search).as("val")
+              ,__.as("matches").id().as("id")
+             )
+            .select("id", "val")
+            .toList();
+
+      List<ReactSelectOptions> selectOptions = new ArrayList<>(querRes.size());
+
+
+      for (Map<String, Object> res : querRes)
+      {
+        selectOptions.add(new ReactSelectOptions(res.get("val").toString(), res.get("id").toString()));
+      }
+
+      FormioSelectResults retVal = new FormioSelectResults(selectOptions);
+
+      return retVal;
+
+//    }
+//
+//    return new FormioSelectResults();
+
+  }
+
 
   @POST @Path("vertex_labels") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
 
