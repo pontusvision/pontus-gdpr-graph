@@ -330,7 +330,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       List<Map<String, Object>> querRes = App
           .g.V()
             .has(search,neq(""))
-            .limit(limit)
+            .limit(limit + skip)
             .skip(skip)
             .as("matches")
             .match(
