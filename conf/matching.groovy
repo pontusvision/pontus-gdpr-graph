@@ -1089,7 +1089,7 @@ def updateExistingVertexWithMatchReqs(g, Map<Long, AtomicDouble> vertices, List<
     if (score.get() >= scoreThreshold) {
 
 
-      localTrav = localTrav.V(vertexId)
+      localTrav = g.V(vertexId)
 
       boolean atLeastOneUpdate = false;
       matchReqsForThisVertexType.each { it ->
