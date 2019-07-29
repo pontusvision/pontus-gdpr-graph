@@ -964,7 +964,7 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 
           } else {
 
-            sb.append("\n in getMatchRequests() - single processing $propName")
+            sb?.append("\n in getMatchRequests() - single processing $propName")
 
             addNewMatchRequest(
               binding
