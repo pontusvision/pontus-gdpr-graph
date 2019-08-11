@@ -1878,6 +1878,21 @@
       "unidirected": false
     },
     {
+      "name": "Sent_Email_To",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
+      "name": "Sent_Email_CC",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
+      "name": "Sent_Email_BCC",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
       "name": "Has_Phone",
       "multiplicity": "MULTI",
       "unidirected": false
