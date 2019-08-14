@@ -3628,7 +3628,7 @@ def getInfoYouHoldScores(def scoresMap) {
     if (pcntNoEdges > 5 && pcntNoEdges < 40) {
       scoreValue -= 40L;
     } else if (pcntNoEdges > 40) {
-      scoreValue -= (20L + 2L * pcntNoEdges)
+      scoreValue -= (20L + Math.max( 2L * pcntNoEdges, 70L))
     } else {
       scoreValue -= (pcntNoEdges)
     }
