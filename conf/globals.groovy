@@ -1147,6 +1147,263 @@ def getEdgeProperties (long fromVertexId, long toVertexId){
 }
 
 
+def getVisJSGraph(long pg_vid, long pg_depth)
+{
+//g.V().has("Metadata.Type.Person.Natural",eq("Person.Natural")).id()
+//g.V(1720320).bothE()
+//1720320
+//
+//  def pg_depth= 1
+//  def pg_vid= 1827056
+
+  StringBuffer sb = new StringBuffer()
+  StringBuffer sb2 = new StringBuffer()
+
+  Long numEdges = g.V(pg_vid).bothE().count().next();
+  String origLabel = g.V(pg_vid).label().next().replaceAll('[_.]',' ');
+
+  if (numEdges > 15){
+
+    HashSet nodesSet = new HashSet()
+    HashSet edgesSet = new HashSet()
+
+
+    g.V(pg_vid).as('orig')
+      .outE().match(
+      __.as('e').inV().label().as('vLabel')
+      // ,  __.as('e').outV().label().as('inVLabel')
+      ,  __.as('e').label().as('edgeLabel')
+    )
+      .select( 'edgeLabel','vLabel')
+      .groupCount().each{
+      def entry = it;
+
+
+
+      entry.each{
+        key,val ->
+
+
+          if (key instanceof Map){
+
+            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]',' ');
+            String toNodeLabel = key.get('vLabel').replaceAll('[_.]',' ') +
+              ' -> (' + edgeLabel +')';
+
+            String edgeId = key.get('edgeLabel');
+            String toNodeId = key.get('vLabel') +
+              ' -> (' + edgeId +')';
+
+            sb.setLength(0);
+
+            sb.append('{ "id":"').append(toNodeId)
+              .append('","label":"').append(toNodeLabel)
+              .append('","group":"').append(toNodeLabel)
+              .append('","shape":"').append('box')
+              .append('"}\n')
+
+
+            nodesSet.add( sb.toString() );
+
+
+            sb.setLength(0);
+
+            sb.append('{ "from":"')
+              .append(pg_vid).append('","to":"')
+              .append(toNodeId).append('","label":"')
+              .append(edgeLabel).append(' (')
+              .append(val).append(')","value":')
+              .append(val).append('}\n')
+
+            edgesSet.add (sb.toString());
+            sb.setLength(0);
+
+          }
+
+
+
+      }
+
+
+
+    }
+
+
+
+    g.V(pg_vid).as('orig')
+      .inE().match(
+      __.as('e').outV().label().as('vLabel')
+      // ,  __.as('e').outV().label().as('inVLabel')
+      ,  __.as('e').label().as('edgeLabel')
+    )
+      .select( 'edgeLabel','vLabel')
+      .groupCount().each{
+      it.each{
+        key,val ->
+          if (key instanceof Map){
+
+            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]',' ');
+
+            String fromNodeLabel = key.get('vLabel').replaceAll('[_.]',' ') +
+              ' <- ('+edgeLabel+')';
+            String edgeId = key.get('edgeLabel');
+
+            String fromNodeId = key.get('vLabel')+
+              ' <- ('+edgeId+')';
+            sb.setLength(0);
+
+            sb.append('{ "id":"').append(fromNodeId)
+              .append('","label":"').append(fromNodeLabel)
+              .append('","group":"').append(fromNodeLabel)
+              .append('","shape":"').append('box')
+              .append('"}')
+
+            nodesSet.add( sb.toString() );
+
+
+            sb.setLength(0);
+
+            sb.append('{ "from":"')
+              .append(fromNodeId).append('","to":"')
+              .append(pg_vid).append('","label":"')
+              .append(edgeLabel).append(' (')
+              .append(val).append(')","value":')
+              .append(val).append('}')
+            edgesSet.add (sb.toString());
+            sb.setLength(0);
+          }
+
+
+
+      }
+
+
+
+    }
+    sb.setLength(0)
+    sb.append('{ "id":"').append(pg_vid)
+      .append('","label":"').append(origLabel)
+      .append('","group":"').append(origLabel)
+      .append('","fixed":').append(true)
+      .append(',"shape":"').append('image')
+      .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,pg_vid,origLabel).toString())
+      .append('"}')
+
+    nodesSet.add( sb.toString() )
+    sb.setLength(0)
+
+    sb.append('{ "nodes":' )
+      .append(nodesSet.toString()).append(', "edges":').append(edgesSet.toString())
+  }
+  else{
+    int counter = 0;
+
+    try {
+
+      sb.append('{ "nodes":[' );
+
+      g.V(pg_vid)
+        .both()
+        .dedup()
+        .each{
+          String groupStr = it.values('Metadata.Type').next();
+          String labelStr = it.label().toString().replaceAll('[_.]',' ');
+          Long vid = it.id();
+          sb.append(counter == 0? '{':',{')
+            .append('"id":').append(vid)
+            .append(',"group":"').append(groupStr)
+            .append('","label":"').append(labelStr)
+            .append('","shape":"').append('image')
+            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,vid,labelStr).toString())
+            .append('"');
+          if (vid.equals( pg_vid)){
+            sb.append(',"fixed":true');
+          }
+          sb.append('}')
+
+          counter++;
+
+        };
+      g.V(pg_vid)  // Also get the original node
+        .each{
+          String groupStr = it.values('Metadata.Type').next();
+          String labelStr = it.label().toString().replaceAll('[_.]',' ');
+          Long vid = it.id();
+          sb.append(counter == 0? '{':',{')
+            .append('"id":').append(vid)
+            .append(',"group":"').append(groupStr)
+            .append('","label":"').append(labelStr)
+            .append('","shape":"').append('image')
+            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,vid,labelStr).toString())
+            .append('"');
+          if (vid.equals( pg_vid)){
+            sb.append(',"fixed":true');
+          }
+          sb.append('}')
+
+          counter++;
+
+        };
+      sb.append('], "edges":[' )
+
+
+      counter = 0;
+      g.V(pg_vid)
+        .bothE()
+        .dedup()
+        .each{
+          sb.append(counter == 0? '{':',{')
+            .append('"from": ').append(it.inVertex().id())
+            .append(' ,"to": "').append(it.outVertex().id())
+            .append('","label": "').append(it.label().toString().replaceAll('[_.]',' '))
+            .append(',\n prob:')
+            .append(
+              Math.round(
+                Math.min(
+                  it.values('toScorePercent').next(),
+                  it.values('fromScorePercent').next()
+                ) * 100) / 100 )
+            .append('%"}')
+
+          counter++;
+
+        }
+
+      sb.append(']' );
+
+
+    }catch (Throwable t){
+      sb.append(t.toString());
+    }
+
+  }
+  sb.append(', "origLabel":"').append(origLabel).append('"');
+  int counter = 0;
+  sb.append(', "reportButtons": [');
+  try{
+    g.V()
+      .has('Object.Notification_Templates.Types'
+        ,eq(g.V(pg_vid).values('Metadata.Type').next()))
+      .valueMap('Object.Notification_Templates.Label','Object.Notification_Templates.Text')
+      .each{
+        sb.append(counter > 0? ',{': '{');
+        counter ++;
+        sb.append('"text":"');
+        if (it.get('Object.Notification_Templates.Text') != null)
+          sb.append(it.get('Object.Notification_Templates.Text')[0].toString());
+        sb.append('","label":"');
+        if (it.get('Object.Notification_Templates.Label') != null)
+          sb.append(it.get('Object.Notification_Templates.Label')[0]);
+        sb.append('", "vid": ').append(pg_vid);
+
+        sb.append("}")
+
+      }
+  } catch(e) {}
+  sb.append('] }');
+  sb.toString()
+}
+
 def getVisJsGraphImmediateNeighbourEdges(long pg_vid, StringBuffer sb, int counter, Set<String> currEdges) {
 
 
@@ -1289,9 +1546,260 @@ def getLevel(String label) {
   return index;
 }
 
-def getVisJsGraph(long pg_vid, int depth = 1) {
+
+def getVisJsGraph(long pg_vid){
+
+
   StringBuffer sb = new StringBuffer()
-  StringBuffer sb2 = new StringBuffer()
+
+  Long numEdges = g.V(pg_vid).bothE().count().next();
+  String origLabel = g.V(pg_vid).label().next().replaceAll('[_.]',' ');
+
+  if (numEdges > 15){
+
+    HashSet nodesSet = new HashSet()
+    HashSet edgesSet = new HashSet()
+
+
+    g.V(pg_vid).as('orig')
+      .outE().match(
+      __.as('e').inV().label().as('vLabel')
+      // ,  __.as('e').outV().label().as('inVLabel')
+      ,  __.as('e').label().as('edgeLabel')
+    )
+      .select( 'edgeLabel','vLabel')
+      .groupCount().each{
+      def entry = it;
+
+
+
+      entry.each{
+        key,val ->
+
+
+          if (key instanceof Map){
+
+            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]',' ');
+            String toNodeLabel = key.get('vLabel').replaceAll('[_.]',' ') +
+              ' -> (' + edgeLabel +')';
+
+            String edgeId = key.get('edgeLabel');
+            String toNodeId = key.get('vLabel') +
+              ' -> (' + edgeId +')';
+
+            sb.setLength(0);
+
+            sb.append('{ "id":"').append(toNodeId)
+              .append('","label":"').append(toNodeLabel)
+              .append('","group":"').append(toNodeLabel)
+              .append('","shape":"').append('box')
+              .append('"}\n')
+
+
+            nodesSet.add( sb.toString() );
+
+
+            sb.setLength(0);
+
+            sb.append('{ "from":"')
+              .append(pg_vid).append('","to":"')
+              .append(toNodeId).append('","label":"')
+              .append(edgeLabel).append(' (')
+              .append(val).append(')","value":')
+              .append(val).append('}\n')
+
+            edgesSet.add (sb.toString());
+            sb.setLength(0);
+
+          }
+
+
+
+      }
+
+
+
+    }
+
+
+
+    g.V(pg_vid).as('orig')
+      .inE().match(
+      __.as('e').outV().label().as('vLabel')
+      // ,  __.as('e').outV().label().as('inVLabel')
+      ,  __.as('e').label().as('edgeLabel')
+    )
+      .select( 'edgeLabel','vLabel')
+      .groupCount().each{
+      it.each{
+        key,val ->
+          if (key instanceof Map){
+
+            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]',' ');
+
+            String fromNodeLabel = key.get('vLabel').replaceAll('[_.]',' ') +
+              ' <- ('+edgeLabel+')';
+            String edgeId = key.get('edgeLabel');
+
+            String fromNodeId = key.get('vLabel')+
+              ' <- ('+edgeId+')';
+            sb.setLength(0);
+
+            sb.append('{ "id":"').append(fromNodeId)
+              .append('","label":"').append(fromNodeLabel)
+              .append('","group":"').append(fromNodeLabel)
+              .append('","shape":"').append('box')
+              .append('"}')
+
+            nodesSet.add( sb.toString() );
+
+
+            sb.setLength(0);
+
+            sb.append('{ "from":"')
+              .append(fromNodeId).append('","to":"')
+              .append(pg_vid).append('","label":"')
+              .append(edgeLabel).append(' (')
+              .append(val).append(')","value":')
+              .append(val).append('}')
+            edgesSet.add (sb.toString());
+            sb.setLength(0);
+          }
+
+
+
+      }
+
+
+
+    }
+    sb.setLength(0)
+    sb.append('{ "id":"').append(pg_vid)
+      .append('","label":"').append(origLabel)
+      .append('","group":"').append(origLabel)
+      .append('","fixed":').append(true)
+      .append(',"shape":"').append('image')
+      .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,pg_vid,origLabel).toString())
+      .append('"}')
+
+    nodesSet.add( sb.toString() )
+    sb.setLength(0)
+
+    sb.append('{ "nodes":' )
+      .append(nodesSet.toString()).append(', "edges":').append(edgesSet.toString())
+  }
+  else{
+    int counter = 0;
+
+    try {
+
+      sb.append('{ "nodes":[' );
+
+      g.V(pg_vid)
+        .both()
+        .dedup()
+        .each{
+          String groupStr = it.values('Metadata.Type').next();
+          String labelStr = it.label().toString().replaceAll('[_.]',' ');
+          Long vid = it.id();
+          sb.append(counter == 0? '{':',{')
+            .append('"id":').append(vid)
+            .append(',"group":"').append(groupStr)
+            .append('","label":"').append(labelStr)
+            .append('","shape":"').append('image')
+            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,vid,labelStr).toString())
+            .append('"');
+          if (vid.equals( pg_vid)){
+            sb.append(',"fixed":true');
+          }
+          sb.append('}')
+
+          counter++;
+
+        };
+      g.V(pg_vid)  // Also get the original node
+        .each{
+          String groupStr = it.values('Metadata.Type').next();
+          String labelStr = it.label().toString().replaceAll('[_.]',' ');
+          Long vid = it.id();
+          sb.append(counter == 0? '{':',{')
+            .append('"id":').append(vid)
+            .append(',"group":"').append(groupStr)
+            .append('","label":"').append(labelStr)
+            .append('","shape":"').append('image')
+            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,vid,labelStr).toString())
+            .append('"');
+          if (vid.equals( pg_vid)){
+            sb.append(',"fixed":true');
+          }
+          sb.append('}')
+
+          counter++;
+
+        };
+      sb.append('], "edges":[' )
+
+
+      counter = 0;
+      g.V(pg_vid)
+        .bothE()
+        .dedup()
+        .each{
+          sb.append(counter == 0? '{':',{')
+            .append('"from": ').append(it.inVertex().id())
+            .append(' ,"to": "').append(it.outVertex().id())
+            .append('","label": "').append(it.label().toString().replaceAll('[_.]',' '))
+            .append(',\n prob:')
+            .append(
+              Math.round(
+                Math.min(
+                  it.values('toScorePercent').next(),
+                  it.values('fromScorePercent').next()
+                ) * 100) / 100 )
+            .append('%"}')
+
+          counter++;
+
+        }
+
+      sb.append(']' );
+
+
+    }catch (Throwable t){
+      sb.append(t.toString());
+    }
+
+  }
+  sb.append(', "origLabel":"').append(origLabel).append('"');
+  int counter = 0;
+  sb.append(', "reportButtons": [');
+  try{
+    g.V()
+      .has('Object.Notification_Templates.Types'
+        ,eq(g.V(pg_vid).values('Metadata.Type').next()))
+      .valueMap('Object.Notification_Templates.Label','Object.Notification_Templates.Text')
+      .each{
+        sb.append(counter > 0? ',{': '{');
+        counter ++;
+        sb.append('"text":"');
+        if (it.get('Object.Notification_Templates.Text') != null)
+          sb.append(it.get('Object.Notification_Templates.Text')[0].toString());
+        sb.append('","label":"');
+        if (it.get('Object.Notification_Templates.Label') != null)
+          sb.append(it.get('Object.Notification_Templates.Label')[0]);
+        sb.append('", "vid": ').append(pg_vid);
+
+        sb.append("}")
+
+      }
+  } catch(e) {}
+  sb.append('] }');
+  return sb.toString()
+}
+
+
+def getVisJsGraph(long pg_vid, int depth) {
+  StringBuffer sb = new StringBuffer()
 
   Long numEdges = g.V(pg_vid).bothE().count().next();
   String origLabel = g.V(pg_vid).label().next().replaceAll('[_.]', ' ');
