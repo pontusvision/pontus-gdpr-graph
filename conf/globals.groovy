@@ -9,6 +9,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Vertex
+import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONMapper
+import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONVersion
 import org.janusgraph.core.*
 import org.janusgraph.core.schema.*
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
@@ -1132,6 +1134,16 @@ def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int count
 
 
   return counter;
+}
+
+
+def getEdgeProperties (long fromVertexId, long toVertexId){
+  def mapper = GraphSONMapper.build().version(GraphSONVersion.V1_0).create().createMapper();
+
+  def v = g.V(fromVertexId).bothE().filter(bothV().id().is(toVertexId)).valueMap().next()
+
+  mapper.writeValueAsString(v)
+
 }
 
 
