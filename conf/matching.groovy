@@ -413,7 +413,14 @@ class MatchReq<T> {
 
   @Override
   String toString() {
-    return propName + '=' + attribNativeVal
+    StringBuffer sb = new StringBuffer();
+
+    sb.append('{ "')
+      .append(propName).append('":"').append(attribVal)
+      .append('","matchWeight":').append(matchWeight)
+      .append(' ,"operator":"').append(predicateStr)
+      .append('" }')
+    return sb.toString();
   }
 }
 
@@ -994,10 +1001,10 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
 }
 
 
-def getTopHitsWithEdgeCheck(g,
+def getTopHitsWithEdgeCheck(GraphTraversalSource g,
                             Map<Long, AtomicDouble> potentialHitIDs,
                             double scoreThreshold,
-                            HashMap<String, Map<Long, AtomicDouble>> matchIdsByVertexType,
+                            Map<String, Map<Long, AtomicDouble>> matchIdsByVertexType,
                             String vertexTypeStr,
                             Map<String, List<EdgeRequest>> edgeReqsByVertexType,
                             StringBuffer sb = null) {
@@ -1302,6 +1309,8 @@ def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
   Map<String, Map<Long, AtomicDouble>> vertexScoreMapByVertexName,
   Map<String, List<MatchReq>>          matchReqByVertexName
   ) = matchVertices(graph, g, matchReqs, maxHitsPerType, sb);
+
+
   vertexScoreMapByVertexName.each { vertexTypeStr, potentialHitIDs ->
 
     List<MatchReq> matchReqsForThisVertexType = matchReqByVertexName.get(vertexTypeStr)
@@ -1321,6 +1330,10 @@ def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
       Long vId = addNewVertexFromMatchReqs(g, (String) vertexTypeStr, matchReqsForThisVertexType, sb)
       newVertices.put(vId, new AtomicDouble(maxScore));
       finalVertexIdByVertexName.put((String) vertexTypeStr, newVertices)
+
+      if ('Event.Ingestion'.equalsIgnoreCase(matchReqsForThisVertexType?.get(0)?.getVertexLabel())) {
+        g.V(vId).property('Event.Ingestion.Business_Rules', matchReqByVertexName.toString() )
+      }
 
     }
 

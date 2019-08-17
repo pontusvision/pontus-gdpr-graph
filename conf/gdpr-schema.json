@@ -154,6 +154,12 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Event.Ingestion.Business_Rules",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
       "name": "Event.Group_Ingestion.Metadata_End_Date",
       "dataType": "Date",
       "cardinality": "SINGLE"
