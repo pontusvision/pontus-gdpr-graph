@@ -417,9 +417,9 @@ class MatchReq<T> {
 
     sb.append('{ "')
       .append(propName).append('":"').append(attribVal)
-      .append('","matchWeight":').append(matchWeight)
-      .append(' ,"operator":"').append(predicateStr)
-      .append('" }')
+      .append('"\n,"matchWeight":').append(matchWeight)
+      .append('\n,"operator":"').append(predicateStr)
+      .append('" }\n')
     return sb.toString();
   }
 }
