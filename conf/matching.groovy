@@ -1332,7 +1332,8 @@ def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
       finalVertexIdByVertexName.put((String) vertexTypeStr, newVertices)
 
       if ('Event.Ingestion'.equalsIgnoreCase(matchReqsForThisVertexType?.get(0)?.getVertexLabel())) {
-        g.V(vId).property('Event.Ingestion.Business_Rules', matchReqByVertexName.toString() )
+        sb.append("\n\n\n ADDING Event.Ingestion.Business_Rules: ${matchReqByVertexName.toString()}\n\n")
+        g.V(vId).property('Event.Ingestion.Business_Rules', matchReqByVertexName.toString() ).next();
       }
 
     }
