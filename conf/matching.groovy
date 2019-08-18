@@ -415,11 +415,14 @@ class MatchReq<T> {
   String toString() {
     StringBuffer sb = new StringBuffer();
 
-    sb.append('{ "')
-      .append(propName).append('":"').append(attribVal)
-      .append('"\n,"matchWeight":').append(matchWeight)
-      .append('\n,"operator":"').append(predicateStr)
-      .append('" }\n')
+    if (!excludeFromSearch){
+      sb.append('\n{\n"')
+        .append(propName).append('":"').append(attribVal)
+        .append('"\n,"matchWeight":').append(matchWeight)
+        .append('\n,"operator":"').append(predicateStr)
+        .append('"\n}\n')
+
+    }
     return sb.toString();
   }
 }
