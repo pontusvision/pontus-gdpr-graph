@@ -95,6 +95,27 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+
+    {
+      "name": "Event.Consent.Form_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Event.Consent.Form_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Event.Consent.Form_Submission_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Event.Consent.Form_Submission_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
     {
       "name": "Event.Data_Breach.Description",
       "dataType": "String",
@@ -917,6 +938,11 @@
     },
     {
       "name": "Object.Data_Source.URI_Monitor",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Retention_Policy_JSON",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
