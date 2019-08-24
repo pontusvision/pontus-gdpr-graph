@@ -2491,6 +2491,17 @@ def createNotificationTemplates() {
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
+        .property("Object.Notification_Templates.Id", "INGESTION BUSINESS RULES")
+        .property("Object.Notification_Templates.Text", ("ToDo: Add business rules here").bytes.encodeBase64().toString())
+        .property("Object.Notification_Templates.Types", "Event.Ingestion")
+        .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
+        .property("Object.Notification_Templates.Label", "Business Rules")
+        .next();
+
+
+      g.addV("Object.Notification_Templates")
+        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
+        .property("Metadata.Type", "Object.Notification_Templates")
         .property("Object.Notification_Templates.Id", "SAR READ TEMPLATE")
         .property("Object.Notification_Templates.Text", ("<p>Dear {{ context.Person_Natural_Title | capitalize }} {{ context.Person_Natural_Last_Name |capitalize }}, </p>\n" +
           "\n" +

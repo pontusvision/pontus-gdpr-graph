@@ -34,6 +34,18 @@
   ],
   "propertyKeys": [
     {
+      "name": "similarity",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "probability",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+
+    {
       "name": "maxFromScore",
       "dataType": "Double",
       "cardinality": "SINGLE"
@@ -158,7 +170,6 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Event.Group_Ingestion.Metadata_End_Date",
       "dataType": "Date",
@@ -416,6 +427,26 @@
     },
     {
       "name": "Metadata.Type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Metadata.Type.Object.Sensitive_Data",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Metadata.Type.Object.Health",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Metadata.Type.Object.Biometric",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Metadata.Type.Object.Genetic",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -1275,6 +1306,106 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Object.Sensitive_Data.Ethnicity",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Sensitive_Data.Religion",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Sensitive_Data.Political_View",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Sensitive_Data.Union Membership",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Sensitive_Data.Club_Membership",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Sensitive_Data.Church_Membership",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Sensitive_Data.Sexual_Orientation",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Health.Blood_Type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Health.Organ_Donor",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Health.Diseases",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Health.Alergies",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Biometric.Weight_kg",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Biometric.Eye_Colour",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Biometric.Height_cm",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Biometric.Fingerprints",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Biometric.Facial_Picture",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Biometric.Retinal_scans",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Genetic.DNA",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Genetic.RNA",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Genetic.Family_Medical_History",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Object.Privacy_Notice.Why_Is_It_Collected",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -1577,6 +1708,26 @@
   ],
   "vertexLabels": [
     {
+      "name": "Object.Sensitive_Data",
+      "partition": false,
+      "useStatic": false
+    },
+    {
+      "name": "Object.Health",
+      "partition": false,
+      "useStatic": false
+    },
+    {
+      "name": "Object.Biometric",
+      "partition": false,
+      "useStatic": false
+    },
+    {
+      "name": "Object.Genetic",
+      "partition": false,
+      "useStatic": false
+    },
+    {
       "name": "Event.Consent",
       "partition": false,
       "useStatic": false
@@ -1733,6 +1884,12 @@
     }
   ],
   "edgeLabels": [
+    {
+      "name": "Has_Sensitive_Data",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+
     {
       "name": "Approved_Compliance_Check",
       "multiplicity": "MULTI",
@@ -1918,9 +2075,89 @@
       "multiplicity": "MULTI",
       "unidirected": false
     }
-
   ],
   "vertexIndexes": [
+
+
+    {
+      "name": "Object.Sensitive_Data.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Object.Sensitive_Data",
+        "Object.Sensitive_Data.Ethnicity",
+        "Object.Sensitive_Data.Religion",
+        "Object.Sensitive_Data.Political_View",
+        "Object.Sensitive_Data.Union Membership",
+        "Object.Sensitive_Data.Club_Membership",
+        "Object.Sensitive_Data.Church_Membership",
+        "Object.Sensitive_Data.Sexual_Orientation"
+      ],
+      "propertyKeysMappings": {
+      }
+    },
+
+    {
+      "name": "Object.Health.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Object.Health",
+        "Object.Health.Blood_Type",
+        "Object.Health.Organ_Donor",
+        "Object.Health.Diseases",
+        "Object.Health.Alergies"
+      ],
+      "propertyKeysMappings": {
+      }
+    },
+
+    {
+      "name": "Object.Biometric",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Object.Biometric",
+        "Object.Biometric.Weight_kg",
+        "Object.Biometric.Eye_Colour",
+        "Object.Biometric.Height_cm"
+      ],
+      "propertyKeysMappings": {
+      }
+    },
+
+    {
+      "name": "Object.Genetic",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Object.Genetic",
+        "Object.Genetic.DNA",
+        "Object.Genetic.RNA"
+      ],
+      "propertyKeysMappings": {
+      }
+    },
+
+
+
+
+
+
+
+
+
+
+
+
     {
       "name": "Event.Data_Breach.MixedIdx",
       "composite": false,
