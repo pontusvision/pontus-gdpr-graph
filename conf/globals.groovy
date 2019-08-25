@@ -1358,7 +1358,7 @@ def getVisJSGraph(long pg_vid, long pg_depth)
               ) * 100) / 100 )
           .append('%')
 
-      }catch (Throwable t){sb.setLength(0)}
+      }catch (Throwable t){prob.setLength(0)}
 
 
       counter = 0;
@@ -1758,7 +1758,7 @@ def getVisJsGraph(long pg_vid){
               ) * 100) / 100 )
           .append('%')
 
-      }catch (Throwable t){sb.setLength(0)}
+      }catch (Throwable t){prob.setLength(0)}
 
       counter = 0;
       g.V(pg_vid)
