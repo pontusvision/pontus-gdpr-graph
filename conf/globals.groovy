@@ -1358,7 +1358,7 @@ def getVisJSGraph(long pg_vid, long pg_depth)
               ) * 100) / 100 )
           .append('%')
 
-      }catch (Throwable t){/* ignore */}
+      }catch (Throwable t){sb.setLength(0)}
 
 
       counter = 0;
@@ -1747,6 +1747,18 @@ def getVisJsGraph(long pg_vid){
         };
       sb.append('], "edges":[' )
 
+      StringBuffer prob = new StringBuffer();
+      try {
+        prob.append(' - prob - ')
+          .append(
+            Math.round(
+              Math.min(
+                it.values('toScorePercent').next(),
+                it.values('fromScorePercent').next()
+              ) * 100) / 100 )
+          .append('%')
+
+      }catch (Throwable t){sb.setLength(0)}
 
       counter = 0;
       g.V(pg_vid)
@@ -1757,14 +1769,8 @@ def getVisJsGraph(long pg_vid){
             .append('"from": ').append(it.inVertex().id())
             .append(' ,"to": "').append(it.outVertex().id())
             .append('","label": "').append(it.label().toString().replaceAll('[_.]',' '))
-            .append(',\n prob:')
-            .append(
-              Math.round(
-                Math.min(
-                  it.values('toScorePercent').next(),
-                  it.values('fromScorePercent').next()
-                ) * 100) / 100 )
-            .append('%"}')
+            .append(prob.toString())
+            .append('"}')
 
           counter++;
 
