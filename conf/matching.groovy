@@ -1438,54 +1438,6 @@ def ingestRecordListUsingRules(JanusGraph graph, GraphTraversalSource g, List<Ma
   }
 }
 
-def getProbabilityOfPossibleMatches(long startVertexId, Map<String, Double> weightsPerVertex){
-
-  String vertType = g.V(startVertexId).label().next();
-
-  def weightedScores = new HashMap<Long, Double>();
-
-  Double totalScore = 0;
-
-  g.V(startVertexId).both().label().each{ String label ->
-    totalScore+= weightsPerVertex.get(label, new Double(0));
-  }
-
-  g.V(startVertexId)
-    .both().bothE()
-    .filter(bothV()
-      .has("Metadata.Type.${vertType}", eq(vertType))
-      .id().not(is(startVertexId))).path()
-    .each{ path ->
-
-      path.objects().each{ obj ->
-        if (obj instanceof Edge){
-
-          int counter = 0;
-          obj.bothVertices().each { v ->
-
-            if ('Person.Natural'.equals(v.label())){
-              Long currVid = v.id() as Long;
-              def currScore =  weightedScores.get(currVid,new Double(0));
-              // def listOfPaths = perUserVertices.computeIfAbsent(v.id(), s -> [] )
-              int vertIdx = (counter == 0)? 1: 0
-              String label = obj.bothVertices().get(vertIdx).label()
-              Double scoreForLabel = weightsPerVertex.get(label, new Double(0));
-
-              currScore += scoreForLabel/totalScore;
-              weightedScores.put(currVid, currScore);
-
-            }
-            counter ++;
-          }
-        }
-        // }
-      }
-    }
-
-
-  return weightedScores;
-
-}
 
 
 

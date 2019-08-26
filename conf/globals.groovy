@@ -1,3 +1,5 @@
+import com.hubspot.jinjava.Jinjava
+import com.hubspot.jinjava.lib.fn.ELFunctionDefinition
 import com.pontusvision.utils.ElasticSearchHelper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -977,65 +979,167 @@ def renderReportInText(long pg_id, String reportType = 'SAR Read', GraphTraversa
   return "Failed to render data"
 }
 
+
+public class PontusJ2ReportingFunctions {
+
+  public static HashMap<Long, Double> getProbabilityOfPossibleMatches(Long startVertexId, Map<String, Double> weightsPerVertex) {
+
+    String vertType = g.V(startVertexId).label().next();
+
+    def weightedScores = new HashMap<Long, Double>();
+
+    Double totalScore = 0;
+
+    g.V(startVertexId).both().label().each { String label ->
+      totalScore += weightsPerVertex.get(label, new Double(0));
+    }
+
+    g.V(startVertexId)
+      .both().bothE()
+      .filter(bothV()
+        .has("Metadata.Type.${vertType}", eq(vertType))
+        .id().not(is(startVertexId))).path()
+      .each { path ->
+
+        path.objects().each { obj ->
+          if (obj instanceof Edge) {
+
+            int counter = 0;
+            obj.bothVertices().each { v ->
+
+              if (vertType == v.label()) {
+                Long currVid = v.id() as Long;
+                def currScore = weightedScores.get(currVid, new Double(0));
+                // def listOfPaths = perUserVertices.computeIfAbsent(v.id(), s -> [] )
+                int vertIdx = (counter == 0) ? 1 : 0
+                String label = obj.bothVertices().get(vertIdx).label()
+                Double scoreForLabel = weightsPerVertex.get(label, new Double(0));
+
+                currScore += scoreForLabel / totalScore;
+                weightedScores.put(currVid, currScore);
+
+              }
+              counter++;
+            }
+          }
+          // }
+        }
+      }
+
+
+    return weightedScores;
+
+  }
+
+  public static GraphTraversalSource g;
+
+  public static Map<Map<String, String>, Double> possibleMatches(Long pg_id, Map<String, Double> weightsPerVertex) {
+    Map<Long, Double> probs = getProbabilityOfPossibleMatches(g, pg_id, weightsPerVertex);
+
+    Map<Map<String, String>, Double> retVal = new HashMap<>();
+    probs.each { vid, prob ->
+      Map<String, String> context = g.V(vid).valueMap()[0].collectEntries { key, val ->
+        [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+      };
+      retVal.put(context, prob);
+    }
+
+    return retVal;
+  }
+
+  public static Map<String, String> context(String pg_id) {
+    def context = g.V(Long.parseLong(pg_id)).valueMap(true)[0].collectEntries { key, val ->
+      [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
+    };
+    return context;
+  }
+  public static List<Map<String, String>> neighbours(String pg_id) {
+    def neighbours = g.V(Long.parseLong(pg_id)).both().valueMap(true).toList().collect { item ->
+      item.collectEntries { key, val ->
+        [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
+      }
+    };
+
+  }
+
+
+}
+
+
 def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraversalSource g = g) {
+  Jinjava jinJava = new Jinjava();
 
-  def context = g.V(pg_id).valueMap()[0].collectEntries { key, val ->
-    [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
-  };
-
-  def neighbours = g.V(pg_id).both().valueMap().toList().collect { item ->
-    item.collectEntries { key, val ->
-      [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
-    }
-  };
-
-
-  def impactedServers = g.V(pg_id)
-    .both()
-    .has("Metadata.Type.Object.AWS_Instance", P.eq('Object.AWS_Instance'))
-    .valueMap().toList().collect { item ->
-    item.collectEntries { key, val ->
-      [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
-    }
-  };
-
-
-  GraphTraversal impactedDataSourcesTrav = g.V(pg_id)
-    .both().has("Metadata.Type.Object.AWS_Instance", P.eq('Object.AWS_Instance'))
-    .bothE('Runs_On').outV().dedup()
-
-  GraphTraversal dsTravClone = impactedDataSourcesTrav.clone()
-
-  def impactedDataSources = impactedDataSourcesTrav.valueMap().toList().collect { item ->
-    item.collectEntries { key, val ->
-      [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
-    }
-  };
-
-  def impactedPeople = dsTravClone
-    .out("Has_Ingestion_Event")
-    .out("Has_Ingestion_Event")
-    .in("Has_Ingestion_Event")
-    .has("Metadata.Type.Person.Natural", P.eq('Person.Natural'))
-    .valueMap()
-    .toList()
-    .collect { item ->
-    item.collectEntries { key, val ->
-      [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
-    }
-  };
-
+  String vertType = g.V(pg_id).label();
   def allData = new HashMap<>();
+
+
+  def context = g.V(pg_id).valueMap(true)[0].collectEntries { key, val ->
+    [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
+  };
+
+  def neighbours = g.V(pg_id).both().valueMap(true).toList().collect { item ->
+    item.collectEntries { key, val ->
+      [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
+    }
+  };
 
   allData.put('context', context);
   allData.put('connected_data', neighbours);
-  allData.put('impacted_data_sources', impactedDataSources);
-  allData.put('impacted_servers', impactedServers);
-  allData.put('impacted_people', impactedPeople);
+
+
+  PontusJ2ReportingFunctions.g = g;
+
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "possibleMatches",
+    PontusJ2ReportingFunctions.class   , "possibleMatches", Long.class, Map<String, Double>.class));
+
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "context",
+    PontusJ2ReportingFunctions.class   , "context", String.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "connected_data",
+    PontusJ2ReportingFunctions.class   , "neighbours", String.class));
 
 
 
-  com.hubspot.jinjava.Jinjava jinJava = new com.hubspot.jinjava.Jinjava();
+
+  if ('Event.Data_Breach' == vertType) {
+    def impactedServers = g.V(pg_id)
+      .both()
+      .has("Metadata.Type.Object.AWS_Instance", P.eq('Object.AWS_Instance'))
+      .valueMap().toList().collect { item ->
+      item.collectEntries { key, val ->
+        [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+      }
+    };
+
+    GraphTraversal impactedDataSourcesTrav = g.V(pg_id)
+      .both().has("Metadata.Type.Object.AWS_Instance", P.eq('Object.AWS_Instance'))
+      .bothE('Runs_On').outV().dedup()
+
+    GraphTraversal dsTravClone = impactedDataSourcesTrav.clone()
+
+    def impactedDataSources = impactedDataSourcesTrav.valueMap().toList().collect { item ->
+      item.collectEntries { key, val ->
+        [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+      }
+    };
+    def impactedPeople = dsTravClone
+      .out("Has_Ingestion_Event")
+      .out("Has_Ingestion_Event")
+      .in("Has_Ingestion_Event")
+      .has("Metadata.Type.Person.Natural", P.eq('Person.Natural'))
+      .valueMap()
+      .toList()
+      .collect { item ->
+        item.collectEntries { key, val ->
+          [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+        }
+      };
+    allData.put('impacted_data_sources', impactedDataSources);
+    allData.put('impacted_servers', impactedServers);
+    allData.put('impacted_people', impactedPeople);
+
+  }
+
+
   return jinJava.render(new String(pg_templateTextInBase64.decodeBase64()), allData).bytes.encodeBase64().toString();
 
 }
@@ -1137,7 +1241,7 @@ def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int count
 }
 
 
-def getEdgeProperties (long fromVertexId, long toVertexId){
+def getEdgeProperties(long fromVertexId, long toVertexId) {
   def mapper = GraphSONMapper.build().version(GraphSONVersion.V1_0).create().createMapper();
 
   def v = g.V(fromVertexId).bothE().filter(bothV().id().is(toVertexId)).valueMap().next()
@@ -1147,8 +1251,7 @@ def getEdgeProperties (long fromVertexId, long toVertexId){
 }
 
 
-def getVisJSGraph(long pg_vid, long pg_depth)
-{
+def getVisJSGraph(long pg_vid, long pg_depth) {
 //g.V().has("Metadata.Type.Person.Natural",eq("Person.Natural")).id()
 //g.V(1720320).bothE()
 //1720320
@@ -1160,9 +1263,9 @@ def getVisJSGraph(long pg_vid, long pg_depth)
   StringBuffer sb2 = new StringBuffer()
 
   Long numEdges = g.V(pg_vid).bothE().count().next();
-  String origLabel = g.V(pg_vid).label().next().replaceAll('[_.]',' ');
+  String origLabel = g.V(pg_vid).label().next().replaceAll('[_.]', ' ');
 
-  if (numEdges > 15){
+  if (numEdges > 15) {
 
     HashSet nodesSet = new HashSet()
     HashSet edgesSet = new HashSet()
@@ -1172,27 +1275,27 @@ def getVisJSGraph(long pg_vid, long pg_depth)
       .outE().match(
       __.as('e').inV().label().as('vLabel')
       // ,  __.as('e').outV().label().as('inVLabel')
-      ,  __.as('e').label().as('edgeLabel')
+      , __.as('e').label().as('edgeLabel')
     )
-      .select( 'edgeLabel','vLabel')
-      .groupCount().each{
+      .select('edgeLabel', 'vLabel')
+      .groupCount().each {
       def entry = it;
 
 
 
-      entry.each{
-        key,val ->
+      entry.each {
+        key, val ->
 
 
-          if (key instanceof Map){
+          if (key instanceof Map) {
 
-            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]',' ');
-            String toNodeLabel = key.get('vLabel').replaceAll('[_.]',' ') +
-              ' -> (' + edgeLabel +')';
+            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]', ' ');
+            String toNodeLabel = key.get('vLabel').replaceAll('[_.]', ' ') +
+              ' -> (' + edgeLabel + ')';
 
             String edgeId = key.get('edgeLabel');
             String toNodeId = key.get('vLabel') +
-              ' -> (' + edgeId +')';
+              ' -> (' + edgeId + ')';
 
             sb.setLength(0);
 
@@ -1203,7 +1306,7 @@ def getVisJSGraph(long pg_vid, long pg_depth)
               .append('"}\n')
 
 
-            nodesSet.add( sb.toString() );
+            nodesSet.add(sb.toString());
 
 
             sb.setLength(0);
@@ -1215,41 +1318,38 @@ def getVisJSGraph(long pg_vid, long pg_depth)
               .append(val).append(')","value":')
               .append(val).append('}\n')
 
-            edgesSet.add (sb.toString());
+            edgesSet.add(sb.toString());
             sb.setLength(0);
 
           }
 
 
-
       }
 
 
-
     }
-
 
 
     g.V(pg_vid).as('orig')
       .inE().match(
       __.as('e').outV().label().as('vLabel')
       // ,  __.as('e').outV().label().as('inVLabel')
-      ,  __.as('e').label().as('edgeLabel')
+      , __.as('e').label().as('edgeLabel')
     )
-      .select( 'edgeLabel','vLabel')
-      .groupCount().each{
-      it.each{
-        key,val ->
-          if (key instanceof Map){
+      .select('edgeLabel', 'vLabel')
+      .groupCount().each {
+      it.each {
+        key, val ->
+          if (key instanceof Map) {
 
-            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]',' ');
+            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]', ' ');
 
-            String fromNodeLabel = key.get('vLabel').replaceAll('[_.]',' ') +
-              ' <- ('+edgeLabel+')';
+            String fromNodeLabel = key.get('vLabel').replaceAll('[_.]', ' ') +
+              ' <- (' + edgeLabel + ')';
             String edgeId = key.get('edgeLabel');
 
-            String fromNodeId = key.get('vLabel')+
-              ' <- ('+edgeId+')';
+            String fromNodeId = key.get('vLabel') +
+              ' <- (' + edgeId + ')';
             sb.setLength(0);
 
             sb.append('{ "id":"').append(fromNodeId)
@@ -1258,7 +1358,7 @@ def getVisJSGraph(long pg_vid, long pg_depth)
               .append('","shape":"').append('box')
               .append('"}')
 
-            nodesSet.add( sb.toString() );
+            nodesSet.add(sb.toString());
 
 
             sb.setLength(0);
@@ -1269,14 +1369,12 @@ def getVisJSGraph(long pg_vid, long pg_depth)
               .append(edgeLabel).append(' (')
               .append(val).append(')","value":')
               .append(val).append('}')
-            edgesSet.add (sb.toString());
+            edgesSet.add(sb.toString());
             sb.setLength(0);
           }
 
 
-
       }
-
 
 
     }
@@ -1286,37 +1384,36 @@ def getVisJSGraph(long pg_vid, long pg_depth)
       .append('","group":"').append(origLabel)
       .append('","fixed":').append(true)
       .append(',"shape":"').append('image')
-      .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,pg_vid,origLabel).toString())
+      .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, pg_vid, origLabel).toString())
       .append('"}')
 
-    nodesSet.add( sb.toString() )
+    nodesSet.add(sb.toString())
     sb.setLength(0)
 
-    sb.append('{ "nodes":' )
+    sb.append('{ "nodes":')
       .append(nodesSet.toString()).append(', "edges":').append(edgesSet.toString())
-  }
-  else{
+  } else {
     int counter = 0;
 
     try {
 
-      sb.append('{ "nodes":[' );
+      sb.append('{ "nodes":[');
 
       g.V(pg_vid)
         .both()
         .dedup()
-        .each{
+        .each {
           String groupStr = it.values('Metadata.Type').next();
-          String labelStr = it.label().toString().replaceAll('[_.]',' ');
+          String labelStr = it.label().toString().replaceAll('[_.]', ' ');
           Long vid = it.id();
-          sb.append(counter == 0? '{':',{')
+          sb.append(counter == 0 ? '{' : ',{')
             .append('"id":').append(vid)
             .append(',"group":"').append(groupStr)
             .append('","label":"').append(labelStr)
             .append('","shape":"').append('image')
-            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,vid,labelStr).toString())
+            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
             .append('"');
-          if (vid.equals( pg_vid)){
+          if (vid.equals(pg_vid)) {
             sb.append(',"fixed":true');
           }
           sb.append('}')
@@ -1325,18 +1422,18 @@ def getVisJSGraph(long pg_vid, long pg_depth)
 
         };
       g.V(pg_vid)  // Also get the original node
-        .each{
+        .each {
           String groupStr = it.values('Metadata.Type').next();
-          String labelStr = it.label().toString().replaceAll('[_.]',' ');
+          String labelStr = it.label().toString().replaceAll('[_.]', ' ');
           Long vid = it.id();
-          sb.append(counter == 0? '{':',{')
+          sb.append(counter == 0 ? '{' : ',{')
             .append('"id":').append(vid)
             .append(',"group":"').append(groupStr)
             .append('","label":"').append(labelStr)
             .append('","shape":"').append('image')
-            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,vid,labelStr).toString())
+            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
             .append('"');
-          if (vid.equals( pg_vid)){
+          if (vid.equals(pg_vid)) {
             sb.append(',"fixed":true');
           }
           sb.append('}')
@@ -1344,43 +1441,45 @@ def getVisJSGraph(long pg_vid, long pg_depth)
           counter++;
 
         };
-      sb.append('], "edges":[' )
+      sb.append('], "edges":[')
 
 
       StringBuffer prob = new StringBuffer();
       try {
-        prob.append(' - prob - ')
+        prob.append(' - s - ')
           .append(
             Math.round(
               Math.min(
                 it.values('toScorePercent').next(),
                 it.values('fromScorePercent').next()
-              ) * 100) / 100 )
+              ) * 100) / 100)
           .append('%')
 
-      }catch (Throwable t){prob.setLength(0)}
+      } catch (Throwable t) {
+        prob.setLength(0)
+      }
 
 
       counter = 0;
       g.V(pg_vid)
         .bothE()
         .dedup()
-        .each{
-          sb.append(counter == 0? '{':',{')
+        .each {
+          sb.append(counter == 0 ? '{' : ',{')
             .append('"from": ').append(it.inVertex().id())
             .append(' ,"to": "').append(it.outVertex().id())
-            .append('","label": "').append(it.label().toString().replaceAll('[_.]',' '))
-            .append (prob.toString())
+            .append('","label": "').append(it.label().toString().replaceAll('[_.]', ' '))
+            .append(prob.toString())
             .append('"}')
 
           counter++;
 
         }
 
-      sb.append(']' );
+      sb.append(']');
 
 
-    }catch (Throwable t){
+    } catch (Throwable t) {
       sb.append(t.toString());
     }
 
@@ -1388,14 +1487,14 @@ def getVisJSGraph(long pg_vid, long pg_depth)
   sb.append(', "origLabel":"').append(origLabel).append('"');
   int counter = 0;
   sb.append(', "reportButtons": [');
-  try{
+  try {
     g.V()
       .has('Object.Notification_Templates.Types'
-        ,eq(g.V(pg_vid).values('Metadata.Type').next()))
-      .valueMap('Object.Notification_Templates.Label','Object.Notification_Templates.Text')
-      .each{
-        sb.append(counter > 0? ',{': '{');
-        counter ++;
+        , eq(g.V(pg_vid).values('Metadata.Type').next()))
+      .valueMap('Object.Notification_Templates.Label', 'Object.Notification_Templates.Text')
+      .each {
+        sb.append(counter > 0 ? ',{' : '{');
+        counter++;
         sb.append('"text":"');
         if (it.get('Object.Notification_Templates.Text') != null)
           sb.append(it.get('Object.Notification_Templates.Text')[0].toString());
@@ -1407,7 +1506,8 @@ def getVisJSGraph(long pg_vid, long pg_depth)
         sb.append("}")
 
       }
-  } catch(e) {}
+  } catch (e) {
+  }
   sb.append('] }');
   sb.toString()
 }
@@ -1555,15 +1655,15 @@ def getLevel(String label) {
 }
 
 
-def getVisJsGraph(long pg_vid){
+def getVisJsGraph(long pg_vid) {
 
 
   StringBuffer sb = new StringBuffer()
 
   Long numEdges = g.V(pg_vid).bothE().count().next();
-  String origLabel = g.V(pg_vid).label().next().replaceAll('[_.]',' ');
+  String origLabel = g.V(pg_vid).label().next().replaceAll('[_.]', ' ');
 
-  if (numEdges > 15){
+  if (numEdges > 15) {
 
     HashSet nodesSet = new HashSet()
     HashSet edgesSet = new HashSet()
@@ -1573,27 +1673,27 @@ def getVisJsGraph(long pg_vid){
       .outE().match(
       __.as('e').inV().label().as('vLabel')
       // ,  __.as('e').outV().label().as('inVLabel')
-      ,  __.as('e').label().as('edgeLabel')
+      , __.as('e').label().as('edgeLabel')
     )
-      .select( 'edgeLabel','vLabel')
-      .groupCount().each{
+      .select('edgeLabel', 'vLabel')
+      .groupCount().each {
       def entry = it;
 
 
 
-      entry.each{
-        key,val ->
+      entry.each {
+        key, val ->
 
 
-          if (key instanceof Map){
+          if (key instanceof Map) {
 
-            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]',' ');
-            String toNodeLabel = key.get('vLabel').replaceAll('[_.]',' ') +
-              ' -> (' + edgeLabel +')';
+            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]', ' ');
+            String toNodeLabel = key.get('vLabel').replaceAll('[_.]', ' ') +
+              ' -> (' + edgeLabel + ')';
 
             String edgeId = key.get('edgeLabel');
             String toNodeId = key.get('vLabel') +
-              ' -> (' + edgeId +')';
+              ' -> (' + edgeId + ')';
 
             sb.setLength(0);
 
@@ -1604,7 +1704,7 @@ def getVisJsGraph(long pg_vid){
               .append('"}\n')
 
 
-            nodesSet.add( sb.toString() );
+            nodesSet.add(sb.toString());
 
 
             sb.setLength(0);
@@ -1616,41 +1716,38 @@ def getVisJsGraph(long pg_vid){
               .append(val).append(')","value":')
               .append(val).append('}\n')
 
-            edgesSet.add (sb.toString());
+            edgesSet.add(sb.toString());
             sb.setLength(0);
 
           }
 
 
-
       }
 
 
-
     }
-
 
 
     g.V(pg_vid).as('orig')
       .inE().match(
       __.as('e').outV().label().as('vLabel')
       // ,  __.as('e').outV().label().as('inVLabel')
-      ,  __.as('e').label().as('edgeLabel')
+      , __.as('e').label().as('edgeLabel')
     )
-      .select( 'edgeLabel','vLabel')
-      .groupCount().each{
-      it.each{
-        key,val ->
-          if (key instanceof Map){
+      .select('edgeLabel', 'vLabel')
+      .groupCount().each {
+      it.each {
+        key, val ->
+          if (key instanceof Map) {
 
-            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]',' ');
+            String edgeLabel = key.get('edgeLabel').replaceAll('[_.]', ' ');
 
-            String fromNodeLabel = key.get('vLabel').replaceAll('[_.]',' ') +
-              ' <- ('+edgeLabel+')';
+            String fromNodeLabel = key.get('vLabel').replaceAll('[_.]', ' ') +
+              ' <- (' + edgeLabel + ')';
             String edgeId = key.get('edgeLabel');
 
-            String fromNodeId = key.get('vLabel')+
-              ' <- ('+edgeId+')';
+            String fromNodeId = key.get('vLabel') +
+              ' <- (' + edgeId + ')';
             sb.setLength(0);
 
             sb.append('{ "id":"').append(fromNodeId)
@@ -1659,7 +1756,7 @@ def getVisJsGraph(long pg_vid){
               .append('","shape":"').append('box')
               .append('"}')
 
-            nodesSet.add( sb.toString() );
+            nodesSet.add(sb.toString());
 
 
             sb.setLength(0);
@@ -1670,14 +1767,12 @@ def getVisJsGraph(long pg_vid){
               .append(edgeLabel).append(' (')
               .append(val).append(')","value":')
               .append(val).append('}')
-            edgesSet.add (sb.toString());
+            edgesSet.add(sb.toString());
             sb.setLength(0);
           }
 
 
-
       }
-
 
 
     }
@@ -1687,37 +1782,36 @@ def getVisJsGraph(long pg_vid){
       .append('","group":"').append(origLabel)
       .append('","fixed":').append(true)
       .append(',"shape":"').append('image')
-      .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,pg_vid,origLabel).toString())
+      .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, pg_vid, origLabel).toString())
       .append('"}')
 
-    nodesSet.add( sb.toString() )
+    nodesSet.add(sb.toString())
     sb.setLength(0)
 
-    sb.append('{ "nodes":' )
+    sb.append('{ "nodes":')
       .append(nodesSet.toString()).append(', "edges":').append(edgesSet.toString())
-  }
-  else{
+  } else {
     int counter = 0;
 
     try {
 
-      sb.append('{ "nodes":[' );
+      sb.append('{ "nodes":[');
 
       g.V(pg_vid)
         .both()
         .dedup()
-        .each{
+        .each {
           String groupStr = it.values('Metadata.Type').next();
-          String labelStr = it.label().toString().replaceAll('[_.]',' ');
+          String labelStr = it.label().toString().replaceAll('[_.]', ' ');
           Long vid = it.id();
-          sb.append(counter == 0? '{':',{')
+          sb.append(counter == 0 ? '{' : ',{')
             .append('"id":').append(vid)
             .append(',"group":"').append(groupStr)
             .append('","label":"').append(labelStr)
             .append('","shape":"').append('image')
-            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,vid,labelStr).toString())
+            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
             .append('"');
-          if (vid.equals( pg_vid)){
+          if (vid.equals(pg_vid)) {
             sb.append(',"fixed":true');
           }
           sb.append('}')
@@ -1726,18 +1820,18 @@ def getVisJsGraph(long pg_vid){
 
         };
       g.V(pg_vid)  // Also get the original node
-        .each{
+        .each {
           String groupStr = it.values('Metadata.Type').next();
-          String labelStr = it.label().toString().replaceAll('[_.]',' ');
+          String labelStr = it.label().toString().replaceAll('[_.]', ' ');
           Long vid = it.id();
-          sb.append(counter == 0? '{':',{')
+          sb.append(counter == 0 ? '{' : ',{')
             .append('"id":').append(vid)
             .append(',"group":"').append(groupStr)
             .append('","label":"').append(labelStr)
             .append('","shape":"').append('image')
-            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g,vid,labelStr).toString())
+            .append('","image":"').append(getPropsNonMetadataAsHTMLTableRows(g, vid, labelStr).toString())
             .append('"');
-          if (vid.equals( pg_vid)){
+          if (vid.equals(pg_vid)) {
             sb.append(',"fixed":true');
           }
           sb.append('}')
@@ -1745,30 +1839,32 @@ def getVisJsGraph(long pg_vid){
           counter++;
 
         };
-      sb.append('], "edges":[' )
+      sb.append('], "edges":[')
 
       StringBuffer prob = new StringBuffer();
       try {
-        prob.append(' - prob - ')
+        prob.append(' - s - ')
           .append(
             Math.round(
               Math.min(
                 it.values('toScorePercent').next(),
                 it.values('fromScorePercent').next()
-              ) * 100) / 100 )
+              ) * 100) / 100)
           .append('%')
 
-      }catch (Throwable t){prob.setLength(0)}
+      } catch (Throwable t) {
+        prob.setLength(0)
+      }
 
       counter = 0;
       g.V(pg_vid)
         .bothE()
         .dedup()
-        .each{
-          sb.append(counter == 0? '{':',{')
+        .each {
+          sb.append(counter == 0 ? '{' : ',{')
             .append('"from": ').append(it.inVertex().id())
             .append(' ,"to": "').append(it.outVertex().id())
-            .append('","label": "').append(it.label().toString().replaceAll('[_.]',' '))
+            .append('","label": "').append(it.label().toString().replaceAll('[_.]', ' '))
             .append(prob.toString())
             .append('"}')
 
@@ -1776,10 +1872,10 @@ def getVisJsGraph(long pg_vid){
 
         }
 
-      sb.append(']' );
+      sb.append(']');
 
 
-    }catch (Throwable t){
+    } catch (Throwable t) {
       sb.append(t.toString());
     }
 
@@ -1787,14 +1883,14 @@ def getVisJsGraph(long pg_vid){
   sb.append(', "origLabel":"').append(origLabel).append('"');
   int counter = 0;
   sb.append(', "reportButtons": [');
-  try{
+  try {
     g.V()
       .has('Object.Notification_Templates.Types'
-        ,eq(g.V(pg_vid).values('Metadata.Type').next()))
-      .valueMap('Object.Notification_Templates.Label','Object.Notification_Templates.Text')
-      .each{
-        sb.append(counter > 0? ',{': '{');
-        counter ++;
+        , eq(g.V(pg_vid).values('Metadata.Type').next()))
+      .valueMap('Object.Notification_Templates.Label', 'Object.Notification_Templates.Text')
+      .each {
+        sb.append(counter > 0 ? ',{' : '{');
+        counter++;
         sb.append('"text":"');
         if (it.get('Object.Notification_Templates.Text') != null)
           sb.append(it.get('Object.Notification_Templates.Text')[0].toString());
@@ -1806,7 +1902,8 @@ def getVisJsGraph(long pg_vid){
         sb.append("}")
 
       }
-  } catch(e) {}
+  } catch (e) {
+  }
   sb.append('] }');
   return sb.toString()
 }

@@ -2498,6 +2498,27 @@ def createNotificationTemplates() {
         .property("Object.Notification_Templates.Label", "Business Rules")
         .next();
 
+      g.addV("Object.Notification_Templates")
+        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
+        .property("Metadata.Type", "Object.Notification_Templates")
+        .property("Object.Notification_Templates.Id", "MATCHES")
+        .property("Object.Notification_Templates.Text", ("enter data here").bytes.encodeBase64().toString())
+        .property("Object.Notification_Templates.Types", "Person.Natural")
+        .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
+        .property("Object.Notification_Templates.Label", "Matches")
+        .next();
+
+
+      g.addV("Object.Notification_Templates")
+        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
+        .property("Metadata.Type", "Object.Notification_Templates")
+        .property("Object.Notification_Templates.Id", "MATCHES")
+        .property("Object.Notification_Templates.Text", ("enter data here").bytes.encodeBase64().toString())
+        .property("Object.Notification_Templates.Types", "Person.Identity")
+        .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
+        .property("Object.Notification_Templates.Label", "Matches")
+        .next();
+
 
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
