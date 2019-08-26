@@ -1347,7 +1347,7 @@
       "cardinality": "SINGLE"
     },
     {
-      "name": "Object.Sensitive_Data.Union Membership",
+      "name": "Object.Sensitive_Data.Union_Membership",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
@@ -2116,7 +2116,7 @@
         "Object.Sensitive_Data.Ethnicity",
         "Object.Sensitive_Data.Religion",
         "Object.Sensitive_Data.Political_View",
-        "Object.Sensitive_Data.Union Membership",
+        "Object.Sensitive_Data.Union_Membership",
         "Object.Sensitive_Data.Club_Membership",
         "Object.Sensitive_Data.Church_Membership",
         "Object.Sensitive_Data.Sexual_Orientation"

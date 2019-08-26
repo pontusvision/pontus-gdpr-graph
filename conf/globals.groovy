@@ -1033,8 +1033,8 @@ public class PontusJ2ReportingFunctions {
 
   public static GraphTraversalSource g;
 
-  public static Map<Map<String, String>, Double> possibleMatches(Long pg_id, Map<String, Double> weightsPerVertex) {
-    Map<Long, Double> probs = getProbabilityOfPossibleMatches(g, pg_id, weightsPerVertex);
+  public static Map<Map<String, String>, Double> possibleMatches(String pg_id, Map<String, Double> weightsPerVertex) {
+    Map<Long, Double> probs = getProbabilityOfPossibleMatches(g, Long.parseLong(pg_id), weightsPerVertex);
 
     Map<Map<String, String>, Double> retVal = new HashMap<>();
     probs.each { vid, prob ->
@@ -1090,7 +1090,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
   PontusJ2ReportingFunctions.g = g;
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "possibleMatches",
-    PontusJ2ReportingFunctions.class   , "possibleMatches", Long.class, Map<String, Double>.class));
+    PontusJ2ReportingFunctions.class   , "possibleMatches", Long.class, Map.class));
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "context",
     PontusJ2ReportingFunctions.class   , "context", String.class));
