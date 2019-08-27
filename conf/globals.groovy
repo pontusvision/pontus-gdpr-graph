@@ -1035,7 +1035,7 @@ public class PontusJ2ReportingFunctions {
   public static GraphTraversalSource g;
 
   public static Map<Map<String, String>, Double> possibleMatchesMap(String pg_id, Map<String, Double> weightsPerVertex) {
-    Map<Long, Double> probs = getProbabilityOfPossibleMatches(g, Long.parseLong(pg_id), weightsPerVertex);
+    Map<Long, Double> probs = getProbabilityOfPossibleMatches(Long.parseLong(pg_id), weightsPerVertex);
 
     Map<Map<String, String>, Double> retVal = new HashMap<>();
     probs.each { vid, prob ->
@@ -1050,8 +1050,9 @@ public class PontusJ2ReportingFunctions {
 
   public static Map<Map<String, String>, Double> possibleMatches(String pg_id, String weightsPerServer) {
 
+
     Map<String,Double> weights =
-      new ObjectMapper().readValue(weightsPerServer, HashMap.class);
+      new ObjectMapper().readValue(weightsPerServer, Map.class);
 
     return possibleMatchesMap(pg_id, weights);
   }
