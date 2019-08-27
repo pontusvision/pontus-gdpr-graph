@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.hubspot.jinjava.Jinjava
 import com.hubspot.jinjava.lib.fn.ELFunctionDefinition
 import com.pontusvision.utils.ElasticSearchHelper
@@ -1033,7 +1034,7 @@ public class PontusJ2ReportingFunctions {
 
   public static GraphTraversalSource g;
 
-  public static Map<Map<String, String>, Double> possibleMatches(String pg_id, Map<String, Double> weightsPerVertex) {
+  public static Map<Map<String, String>, Double> possibleMatchesMap(String pg_id, Map<String, Double> weightsPerVertex) {
     Map<Long, Double> probs = getProbabilityOfPossibleMatches(g, Long.parseLong(pg_id), weightsPerVertex);
 
     Map<Map<String, String>, Double> retVal = new HashMap<>();
@@ -1049,10 +1050,11 @@ public class PontusJ2ReportingFunctions {
 
   public static Map<Map<String, String>, Double> possibleMatches(String pg_id, String weightsPerServer) {
 
-    JsonSlurper slurper = new JsonSlurper();
-    def weights = slurper.parse(weightsPerServer);
 
-    return possibleMatches(pg_id, weights);
+    HashMap<String,Double> weights =
+      new ObjectMapper().readValue(weightsPerServer, HashMap.class);
+
+    return possibleMatchesMap(pg_id, weights);
   }
 
   public static Map<String, String> context(String pg_id) {
