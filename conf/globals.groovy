@@ -1050,8 +1050,7 @@ public class PontusJ2ReportingFunctions {
 
   public static Map<Map<String, String>, Double> possibleMatches(String pg_id, String weightsPerServer) {
 
-
-    HashMap<String,Double> weights =
+    Map<String,Double> weights =
       new ObjectMapper().readValue(weightsPerServer, HashMap.class);
 
     return possibleMatchesMap(pg_id, weights);
