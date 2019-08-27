@@ -1090,7 +1090,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
   PontusJ2ReportingFunctions.g = g;
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "possibleMatches",
-    PontusJ2ReportingFunctions.class   , "possibleMatches", Long.class, Map.class));
+    PontusJ2ReportingFunctions.class   , "possibleMatches", String.class, Map.class));
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "context",
     PontusJ2ReportingFunctions.class   , "context", String.class));
