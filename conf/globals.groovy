@@ -1047,6 +1047,14 @@ public class PontusJ2ReportingFunctions {
     return retVal;
   }
 
+  public static Map<Map<String, String>, Double> possibleMatches(String pg_id, String weightsPerServer) {
+
+    JsonSlurper slurper = new JsonSlurper();
+    def weights = slurper.parse(weightsPerServer);
+
+    return possibleMatches(pg_id, weights);
+  }
+
   public static Map<String, String> context(String pg_id) {
     def context = g.V(Long.parseLong(pg_id)).valueMap(true)[0].collectEntries { key, val ->
       [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
@@ -1090,7 +1098,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
   PontusJ2ReportingFunctions.g = g;
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "possibleMatches",
-    PontusJ2ReportingFunctions.class   , "possibleMatches", String.class, Map.class));
+    PontusJ2ReportingFunctions.class   , "possibleMatches", String.class, String.class));
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "context",
     PontusJ2ReportingFunctions.class   , "context", String.class));
