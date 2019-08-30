@@ -168,15 +168,35 @@ def class PVValTemplate {
 
 }
 
-class MatchReqAdapter extends TypeAdapter<MatchReq> {
+class JsonSerializer {
   public static GsonBuilder builder = new GsonBuilder();
   public static Gson gson = null;
 
   static {
     builder.registerTypeAdapter(MatchReq.class, new MatchReqAdapter());
+    builder.registerTypeAdapter(Date.class, new TypeAdapter<Date>() {
+      @Override
+      void write(JsonWriter jsonWriter, Date o) throws IOException {
+        jsonWriter.beginObject();
+        jsonWriter.value(o.toString())
+        jsonWriter.endObject();
+
+
+      }
+
+      @Override
+      Date read(JsonReader jsonReader) throws IOException {
+        return null
+      }
+    });
+
     builder.setPrettyPrinting();
     gson = builder.create();
   }
+
+}
+
+class MatchReqAdapter extends TypeAdapter<MatchReq> {
 
   @Override
   public MatchReq read(JsonReader reader) throws IOException {
@@ -1374,7 +1394,7 @@ def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
 //        json rootKey: matchReqByVertexName
 
 //        String bizRule = JsonOutput.prettyPrint(json.toString())
-        String bizRule = MatchReqAdapter.gson.toJson(matchReqByVertexName);
+        String bizRule = JsonSerializer.gson.toJson(matchReqByVertexName);
 
         sb.append("\n\n\n ADDING Event.Ingestion.Business_Rules: ${bizRule}\n\n")
 
