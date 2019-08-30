@@ -923,7 +923,7 @@
     },
     {
       "name": "Object.Data_Source.URI_Read",
-      "dataType": "String",
+      "dataType": "String"
       "cardinality": "SINGLE"
     },
     {

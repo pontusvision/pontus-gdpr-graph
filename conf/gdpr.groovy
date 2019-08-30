@@ -3963,7 +3963,7 @@ def calculatePOLECounts(){
     ,"Object.Awareness_Campaign"
     ,"Object.Credential"
     ,"Object.Data_Procedures"
-    ,"Object.Data_Sources"
+    ,"Object.Data_Source"
     ,"Object.Email_Address"
     ,"Object.Form"
     ,"Object.Identity_Card"
