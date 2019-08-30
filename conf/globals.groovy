@@ -1109,7 +1109,7 @@ public class PontusJ2ReportingFunctions {
       "</table>");
   }
 
-  public static Map<String, String> jsonToMap(String json) {
+  public static Map jsonToMap(String json) {
     return new ObjectMapper().readValue(json, Map.class);
 
   }
