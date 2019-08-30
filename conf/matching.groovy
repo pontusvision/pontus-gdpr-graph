@@ -1,12 +1,13 @@
-import com.fasterxml.jackson.core.PrettyPrinter
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.util.concurrent.AtomicDouble
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.TypeAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
 import com.pontusvision.utils.LocationAddress
 import com.pontusvision.utils.PostCode
-import groovy.json.JsonBuilder
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
@@ -14,7 +15,6 @@ import groovy.text.Template
 import org.apache.tinkerpop.gremlin.process.traversal.P
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
-import org.apache.tinkerpop.gremlin.structure.Edge
 import org.apache.tinkerpop.gremlin.structure.Transaction
 import org.codehaus.groovy.runtime.StringGroovyMethods
 import org.janusgraph.core.JanusGraph
@@ -166,6 +166,38 @@ def class PVValTemplate {
     return templateMap.computeIfAbsent(templateName, { key -> engine.createTemplate(key) })
   }
 
+}
+
+class MatchReqAdapter extends TypeAdapter<MatchReq> {
+  public static GsonBuilder builder = new GsonBuilder();
+  public static Gson gson = null;
+
+  static {
+    builder.registerTypeAdapter(MatchReq.class, new MatchReqAdapter());
+    builder.setPrettyPrinting();
+    gson = builder.create();
+  }
+
+  @Override
+  public MatchReq read(JsonReader reader) throws IOException {
+    return null;
+  }
+
+  @Override
+  public void write(JsonWriter writer, MatchReq obj) throws IOException {
+
+    if (!obj.excludeFromSearch) {
+
+      writer.beginObject();
+
+      writer.name(obj.propName).value(obj.attribVal)
+        .name("matchWeight").value(obj.matchWeight)
+        .name("operator").value(obj.predicateStr)
+      writer.endObject();
+
+    }
+
+  }
 }
 
 
@@ -354,7 +386,7 @@ class MatchReq<T> {
     this.predicate = predicate
   }
 
-  boolean hasGraphEntries(JanusGraph graph, GraphTraversal gtrav,StringBuffer sb ) {
+  boolean hasGraphEntries(JanusGraph graph, GraphTraversal gtrav, StringBuffer sb) {
 
     if (!this.excludeFromSearch && this.excludeFromUpdate) {
       List<Long> indexQueryResults = new ArrayList<>(1);
@@ -388,7 +420,7 @@ class MatchReq<T> {
       String idx = idxQuery[1];
 
       String value = this.attribNativeVal.toString();
-      value= value?.replaceAll(Pattern.quote("v.'"), 'v."');
+      value = value?.replaceAll(Pattern.quote("v.'"), 'v."');
       value = value?.replaceAll(Pattern.quote("':"), '":');
 
       sb?.append("\n in getGraphEntries()  idx=$idx; value=$value; predicateStr = ${predicateStr}, maxHitsPerType=$maxHitsPerType ")
@@ -420,7 +452,7 @@ class MatchReq<T> {
   String toString() {
     StringBuffer sb = new StringBuffer();
 
-    if (!excludeFromSearch){
+    if (!excludeFromSearch) {
       sb.append('\n{\n"')
         .append(propName).append('":"').append(attribVal)
         .append('"\n,"matchWeight":').append(matchWeight)
@@ -528,13 +560,11 @@ def matchVertices(JanusGraph graph, GraphTraversalSource gTravSource = g, List<M
     // any hits in the graph as early as possible.  The logic here is that if a match request does not have any matches
     // on its own, what hope do we have to use it as a filter combined with other entries???  This is especially true
     // when the NLP engines give us false positives (e.g. erroneous matches for names, dates, etc).
-    if (it.hasGraphEntries(graph, gTravSource.V(),sb)) {
+    if (it.hasGraphEntries(graph, gTravSource.V(), sb)) {
       matchReqList.push(it)
       vertexScoreMapByVertexName.computeIfAbsent(it.vertexName, { k -> new HashMap<>() })
-    }
-    else
-    {
-      sb?.append("\nremoved match Request $it from the list as it was not in the graph, and marked as searchable without updates\n"   )
+    } else {
+      sb?.append("\nremoved match Request $it from the list as it was not in the graph, and marked as searchable without updates\n")
 
     }
   }
@@ -928,7 +958,6 @@ def getMatchRequests(Map<String, String> currRecord, Object parsedRules, String 
         }
 
 
-
         String propVal = PVValTemplate.getTemplate((String) prop.val).make(binding)
 
 
@@ -1040,8 +1069,8 @@ def getTopHitsWithEdgeCheck(GraphTraversalSource g,
     });
     sb?.append("\nIn getTopHitsWithEdgeCheck() -- vertType = ${vertexTypeStr} ; topHits  = ${topHitsFiltered} ")
 
-    if (topHitsFiltered.size() == 0){
-      sb?.append("\nFiltered too much; removing filter" )
+    if (topHitsFiltered.size() == 0) {
+      sb?.append("\nFiltered too much; removing filter")
 
       topHitsFiltered.putAll(topHits);
     }
@@ -1345,14 +1374,12 @@ def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
 //        json rootKey: matchReqByVertexName
 
 //        String bizRule = JsonOutput.prettyPrint(json.toString())
-        Gson gson = new Gson();
-        String bizRule =gson.toJson(matchReqByVertexName);
+        String bizRule = MatchReqAdapter.gson.toJson(matchReqByVertexName);
 
         sb.append("\n\n\n ADDING Event.Ingestion.Business_Rules: ${bizRule}\n\n")
 
 
-
-        g.V(vId).property('Event.Ingestion.Business_Rules', bizRule ).next();
+        g.V(vId).property('Event.Ingestion.Business_Rules', bizRule).next();
       }
 
     }
@@ -1452,10 +1479,6 @@ def ingestRecordListUsingRules(JanusGraph graph, GraphTraversalSource g, List<Ma
     trans.close()
   }
 }
-
-
-
-
 
 
 ///
