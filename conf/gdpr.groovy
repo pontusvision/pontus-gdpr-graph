@@ -3963,6 +3963,7 @@ def calculatePOLECounts(){
     ,"Object.Awareness_Campaign"
     ,"Object.Credential"
     ,"Object.Data_Procedures"
+    ,"Object.Data_Sources"
     ,"Object.Email_Address"
     ,"Object.Form"
     ,"Object.Identity_Card"
@@ -3972,6 +3973,10 @@ def calculatePOLECounts(){
     ,"Object.Notification_Templates"
     ,"Object.Privacy_Impact_Assessment"
     ,"Object.Privacy_Notice"
+    ,"Object.Sensitive_Data"
+    ,"Object.Health"
+    ,"Object.Biometric"
+    ,"Object.Genetic"
     ,"Person.Natural"
     ,"Person.Employee"
     ,"Person.Organisation"
@@ -4060,12 +4065,56 @@ def getNumNaturalPersonPerDataSource(){
 
     }
   }
+  sb.append(getNumSensitiveDataPerDataSource())
   sb.append(']')
 
   return sb.toString()
 
 
 }
+
+def getNumSensitiveDataPerDataSource(){
+  StringBuffer sb = new StringBuffer()
+  boolean firstTime = false;
+
+
+  g.V().has('Metadata.Type.Object.Data_Source', eq('Object.Data_Source'))
+    .as('ingestion_event')
+    .out("Has_Ingestion_Event")
+    .out("Has_Ingestion_Event")
+    .out("Has_Sensitive_Data")
+    .has('Metadata.Type.Object.Sensitive_Data', eq('Object.Sensitive_Data'))
+  // .bothE("Has_Sensitive_Data")
+  // .label()
+  // .dedup().count()
+  //   .
+
+  // .filter(bothE("Has_Sensitive_Data").count().is(gt(0)))
+    .id()
+  // .dedup()
+    .as('events')
+    .match(
+      __.as('ingestion_event').values('Object.Data_Source.Name').as('event_id')
+    )
+    .select('event_id')
+    .groupCount() .each { metric ->
+    metric.each { metricname, metricvalue ->
+      if (!firstTime) {
+        sb.append(",")
+      } else {
+        firstTime = false;
+      }
+      sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Sensitive Data Per Data Source\" }")
+
+    }
+  }
+//  sb.append(']')
+
+  return sb.toString()
+
+
+}
+
 
 def getNumNaturalPersonPerOrganisation(){
   StringBuffer sb = new StringBuffer("[")

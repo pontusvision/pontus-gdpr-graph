@@ -1051,7 +1051,7 @@ public class PontusJ2ReportingFunctions {
   public static Map<Map<String, String>, Double> possibleMatches(String pg_id, String weightsPerServer) {
 
 
-    Map<String,Double> weights =
+    Map<String, Double> weights =
       new ObjectMapper().readValue(weightsPerServer, Map.class);
 
     return possibleMatchesMap(pg_id, weights);
@@ -1063,12 +1063,54 @@ public class PontusJ2ReportingFunctions {
     };
     return context;
   }
+
   public static List<Map<String, String>> neighbours(String pg_id) {
     def neighbours = g.V(Long.parseLong(pg_id)).both().valueMap(true).toList().collect { item ->
       item.collectEntries { key, val ->
         [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
       }
     };
+
+  }
+
+  public static String htmlTableCustomHeader(Map<String, String> map, String tableHeader, String tableFooter) {
+    StringBuilder htmlBuilder = new StringBuilder();
+    htmlBuilder.append(tableHeader);
+
+    htmlBuilder.append(htmlRows(map))
+    htmlBuilder.append(tableFooter);
+
+    return htmlBuilder.toString();
+  }
+
+  public static String htmlRows(Map<String, String> map, String rowsCss = "border: 1px solid #dddddd;text-align: left;padding: 8px;") {
+    StringBuilder htmlBuilder = new StringBuilder();
+    for (Map.Entry<String, String> entry : map.entrySet()) {
+      htmlBuilder.append(String.format("<tr style='${rowsCss}'><td style='${rowsCss}'>%s</td><td style='${rowsCss}'>%s</td></tr>\n",
+        entry.getKey(), entry.getValue()));
+    }
+
+    return htmlBuilder.toString();
+  }
+
+  public static String htmlTable(Map<String, String> map) {
+    htmlTableCustomHeader(map,
+      "<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>",
+      "</table>");
+  }
+
+
+  public static String jsonToHtmlTable(String json) {
+    Map<String, String> jsonMap =
+      new ObjectMapper().readValue(json, Map.class);
+
+    htmlTableCustomHeader(jsonMap,
+      "<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>",
+      "</table>");
+  }
+
+  public static Map<String, String> jsonToMap(String json) {
+    return new ObjectMapper().readValue(json, Map.class);
 
   }
 
@@ -1100,13 +1142,23 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
   PontusJ2ReportingFunctions.g = g;
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "possibleMatches",
-    PontusJ2ReportingFunctions.class   , "possibleMatches", String.class, String.class));
+    PontusJ2ReportingFunctions.class, "possibleMatches", String.class, String.class));
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "context",
-    PontusJ2ReportingFunctions.class   , "context", String.class));
+    PontusJ2ReportingFunctions.class, "context", String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "connected_data",
-    PontusJ2ReportingFunctions.class   , "neighbours", String.class));
+    PontusJ2ReportingFunctions.class, "neighbours", String.class));
 
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlTableCustomHeader",
+    PontusJ2ReportingFunctions.class, "htmlTableCustomHeader", Map.class, String.class, String.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlRows",
+    PontusJ2ReportingFunctions.class, "htmlRows", Map.class,String.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlTable",
+    PontusJ2ReportingFunctions.class, "htmlTable", Map.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "jsonToHtmlTable",
+    PontusJ2ReportingFunctions.class, "jsonToHtmlTable", String.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "jsonToMap",
+    PontusJ2ReportingFunctions.class, "jsonToMap", String.class));
 
 
 
