@@ -1,8 +1,11 @@
+import com.fasterxml.jackson.core.PrettyPrinter
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.util.concurrent.AtomicDouble
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
 import com.pontusvision.utils.LocationAddress
 import com.pontusvision.utils.PostCode
+import groovy.json.JsonBuilder
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.text.GStringTemplateEngine
@@ -422,9 +425,10 @@ class MatchReq<T> {
         .append('"\n,"matchWeight":').append(matchWeight)
         .append('\n,"operator":"').append(predicateStr)
         .append('"\n}\n')
+      return sb.toString();
 
     }
-    return sb.toString();
+    return null;
   }
 }
 
@@ -1336,8 +1340,16 @@ def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
       finalVertexIdByVertexName.put((String) vertexTypeStr, newVertices)
 
       if ('Event.Ingestion'.equalsIgnoreCase(matchReqsForThisVertexType?.get(0)?.getVertexLabel())) {
-        sb.append("\n\n\n ADDING Event.Ingestion.Business_Rules: ${matchReqByVertexName.toString()}\n\n")
-        g.V(vId).property('Event.Ingestion.Business_Rules', matchReqByVertexName.toString() ).next();
+        def json = new JsonBuilder()
+
+        String bizRule = JsonOutput.prettyPrint(json.toString())
+
+        sb.append("\n\n\n ADDING Event.Ingestion.Business_Rules: ${bizRule}\n\n")
+
+        json rootKey: matchReqByVertexName
+
+
+        g.V(vId).property('Event.Ingestion.Business_Rules', bizRule ).next();
       }
 
     }
