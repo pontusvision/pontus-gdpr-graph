@@ -1126,7 +1126,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 
 
   def context = g.V(pg_id).valueMap(true)[0].collectEntries { key, val ->
-    [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
+    [key.toString().replaceAll('[.]', '_'), key.toString().equals('Event.Ingestion.Business_Rules')?val.toString() : (val.toString() - '[' - ']')]
   };
 
   def neighbours = g.V(pg_id).both().valueMap(true).toList().collect { item ->
