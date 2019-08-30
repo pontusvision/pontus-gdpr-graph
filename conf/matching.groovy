@@ -206,16 +206,18 @@ class MatchReqAdapter extends TypeAdapter<MatchReq> {
   @Override
   public void write(JsonWriter writer, MatchReq obj) throws IOException {
 
-    if (!obj.excludeFromSearch) {
+//    if (!obj.excludeFromSearch) {
 
-      writer.beginObject();
+    writer.beginObject()
+      .name(obj.propName).value(obj.attribVal)
+      .name("matchWeight").value(obj.matchWeight)
+      .name("excludeFromSearch").value(obj.excludeFromSearch)
+      .name("excludeFromSubsequenceSearch").value(obj.excludeFromSubsequenceSearch)
+      .name("excludeFromUpdate").value(obj.excludeFromUpdate)
+      .name("operator").value(obj.predicateStr)
+      .endObject();
 
-      writer.name(obj.propName).value(obj.attribVal)
-        .name("matchWeight").value(obj.matchWeight)
-        .name("operator").value(obj.predicateStr)
-      writer.endObject();
-
-    }
+//    }
 
   }
 }
