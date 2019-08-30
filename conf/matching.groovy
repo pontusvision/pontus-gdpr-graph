@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.core.PrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.util.concurrent.AtomicDouble
+import com.google.gson.Gson
 import com.joestelmach.natty.DateGroup
 import com.joestelmach.natty.Parser
 import com.pontusvision.utils.LocationAddress
@@ -1340,10 +1341,12 @@ def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
       finalVertexIdByVertexName.put((String) vertexTypeStr, newVertices)
 
       if ('Event.Ingestion'.equalsIgnoreCase(matchReqsForThisVertexType?.get(0)?.getVertexLabel())) {
-        def json = new JsonBuilder()
-        json rootKey: matchReqByVertexName
 
-        String bizRule = JsonOutput.prettyPrint(json.toString())
+//        json rootKey: matchReqByVertexName
+
+//        String bizRule = JsonOutput.prettyPrint(json.toString())
+        Gson gson = new Gson();
+        String bizRule =gson.toJson(matchReqByVertexName);
 
         sb.append("\n\n\n ADDING Event.Ingestion.Business_Rules: ${bizRule}\n\n")
 
