@@ -1341,12 +1341,12 @@ def processMatchRequests(JanusGraph graph, GraphTraversalSource g,
 
       if ('Event.Ingestion'.equalsIgnoreCase(matchReqsForThisVertexType?.get(0)?.getVertexLabel())) {
         def json = new JsonBuilder()
+        json rootKey: matchReqByVertexName
 
         String bizRule = JsonOutput.prettyPrint(json.toString())
 
         sb.append("\n\n\n ADDING Event.Ingestion.Business_Rules: ${bizRule}\n\n")
 
-        json rootKey: matchReqByVertexName
 
 
         g.V(vId).property('Event.Ingestion.Business_Rules', bizRule ).next();
