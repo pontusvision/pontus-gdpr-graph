@@ -988,7 +988,7 @@ public class PontusJ2ReportingFunctions {
     String vertType = g.V(startVertexId).label().next();
 
     def weightedScores = new HashMap<Long, Double>();
-    def paths = new HashMap<Long, StringBuffer>();
+    def labelsForMatch = new HashMap<Long, StringBuffer>();
 
     Double totalScore = 0;
 
@@ -1018,12 +1018,12 @@ public class PontusJ2ReportingFunctions {
                 Double scoreForLabel = weightsPerVertex.get(label, new Double(0));
 
                 if (scoreForLabel > 0){
-                  StringBuffer currPath = paths.get(currVid, new StringBuffer());
+                  StringBuffer currPath = labelsForMatch.get(currVid, new StringBuffer());
                   if (currPath.length() > 0){
                     currPath.append (', ')
                   }
                   currPath.append(label);
-                  paths.put(currVid, currPath);
+                  labelsForMatch.put(currVid, currPath);
                 }
                 currScore += scoreForLabel / totalScore;
                 weightedScores.put(currVid, currScore);
@@ -1037,21 +1037,21 @@ public class PontusJ2ReportingFunctions {
       }
 
 
-    return [weightedScores,paths];
+    return [weightedScores,labelsForMatch];
 
   }
 
   public static GraphTraversalSource g;
 
   public static Map<Map<String, String>, Double> possibleMatchesMap(String pg_id, Map<String, Double> weightsPerVertex) {
-    def (Map<Long, Double> probs, Map<Long, String> paths) = getProbabilityOfPossibleMatches(Long.parseLong(pg_id), weightsPerVertex);
+    def (Map<Long, Double> probs, Map<Long, StringBuffer> labelsForMatch) = getProbabilityOfPossibleMatches(Long.parseLong(pg_id), weightsPerVertex);
 
     Map<Map<String, String>, Double> retVal = new HashMap<>();
     probs.each { vid, prob ->
       Map<String, String> context = g.V(vid).valueMap()[0].collectEntries { key, val ->
         [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
       };
-      context.put('Labels_In_Path', paths.get(vid));
+      context.put('Labels_For_Match', labelsForMatch.get(vid).toString());
       retVal.put(context, prob);
     }
 
