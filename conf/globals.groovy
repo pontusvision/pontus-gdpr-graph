@@ -1136,7 +1136,7 @@ public class PontusJ2ReportingFunctions {
       System.out.println("key = ${key}, map = ${map}");
 
       String mainValue = null;
-      map.each { subKey, subVal ->
+      map[0].each { subKey, subVal ->
         if (subKey != 'matchWeight' && subKey != 'excludeFromSearch' &&
           subKey != 'excludeFromSubsequenceSearch' && subKey != 'excludeFromUpdate' &&
           subKey != 'operator') {
