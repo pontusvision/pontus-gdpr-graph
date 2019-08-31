@@ -1143,35 +1143,35 @@ public class PontusJ2ReportingFunctions {
       }
 
       String mainValue = null;
-      innerMap.each { subKey, subVal ->
-        if (subKey != 'matchWeight' && subKey != 'excludeFromSearch' &&
-            subKey != 'excludeFromSubsequenceSearch' && subKey != 'excludeFromUpdate' &&
-            subKey != 'operator') {
+      innerMap.each { entry ->
+        if (entry.key != 'matchWeight' && entry.key != 'excludeFromSearch' &&
+            entry.key != 'excludeFromSubsequenceSearch' && entry.key != 'excludeFromUpdate' &&
+            entry.key != 'operator') {
           sb.append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
-            .append(subKey.toString())
+            .append(entry.key.toString())
             .append("</td>")
-          mainValue = subVal.toString();
+          mainValue = entry.val.toString();
 
         }
       }
       sb.append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
-        .append(map.get('matchWeight'))
+        .append(innerMap.get('matchWeight'))
         .append("</td>")
 
         .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
-        .append(map.get('excludeFromSearch'))
+        .append(innerMap.get('excludeFromSearch'))
         .append("</td>")
 
         .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
-        .append(map.get('excludeFromSubsequenceSearch'))
+        .append(innerMap.get('excludeFromSubsequenceSearch'))
         .append("</td>")
 
         .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
-        .append(map.get('excludeFromUpdate'))
+        .append(innerMap.get('excludeFromUpdate'))
         .append("</td>")
 
         .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
-        .append(map.get('operator'))
+        .append(innerMap.get('operator'))
         .append("</td>")
 
 
