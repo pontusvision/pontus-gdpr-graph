@@ -1116,7 +1116,7 @@ public class PontusJ2ReportingFunctions {
 
   public static String businessRulesTable(String json){
 
-    StringBuffer sb = new StringBuffer("<table style='margin: 5px'>")
+    StringBuffer sb = new StringBuffer("<table style='margin: 15px'>")
       .append("<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
       .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th>")
       .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Match Weight</th>")
