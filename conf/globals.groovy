@@ -1155,6 +1155,13 @@ public class PontusJ2ReportingFunctions {
 
         }
       }
+
+      System.out.println("innerMap.get('matchWeight' = ${innerMap.get('matchWeight')}");
+      System.out.println("innerMap.get('excludeFromSearch' = ${innerMap.get('excludeFromSearch')}");
+      System.out.println("innerMap.get('excludeFromSubsequenceSearch' = ${innerMap.get('excludeFromSubsequenceSearch')}");
+      System.out.println("innerMap.get('excludeFromUpdate' = ${innerMap.get('excludeFromUpdate')}");
+      System.out.println("innerMap.get('operator' = ${innerMap.get('operator')}");
+
       sb.append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
         .append(innerMap.get('matchWeight'))
         .append("</td>")
