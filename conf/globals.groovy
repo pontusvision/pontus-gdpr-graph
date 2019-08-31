@@ -1129,8 +1129,11 @@ public class PontusJ2ReportingFunctions {
 
     Map br = jsonToMap(json);
 
+    System.out.println('Before loop');
+
     br.each { key, map ->
       sb.append("<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+      System.out.println("key = ${key}");
 
       String mainValue = null;
       map.each { subKey, subVal ->
@@ -1177,6 +1180,7 @@ public class PontusJ2ReportingFunctions {
 
 //    {{  "<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>" | format (c.key , c.value )}}
 
+    return sb.toString();
 
   }
 
