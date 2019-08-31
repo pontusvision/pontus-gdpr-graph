@@ -1129,20 +1129,20 @@ public class PontusJ2ReportingFunctions {
 
     Map br = jsonToMap(json);
 
-    System.out.println('Before loop');
+//    System.out.println('Before loop');
 
     br.each { key, map ->
       sb.append("<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
 
       def innerMap = map[0];
 
-      System.out.println("key = ${key}, map[0] = ${innerMap} map.size() = ${map.size()}; map[0].size = ${innerMap.size()}; ${map.class} innerMap.class = ${innerMap.class}");
+//      System.out.println("key = ${key}, map[0] = ${innerMap} map.size() = ${map.size()}; map[0].size = ${innerMap.size()}; ${map.class} innerMap.class = ${innerMap.class}");
 
-      innerMap.each { it ->
-        System.out.println("it = ${it}; it.class = ${it.class}");
-        System.out.println("it.key = ${it.key}; it.val = ${it.value}");
-      }
-
+//      innerMap.each { it ->
+//        System.out.println("it = ${it}; it.class = ${it.class}");
+//        System.out.println("it.key = ${it.key}; it.val = ${it.value}");
+//      }
+//
       String mainValue = null;
       innerMap.each { entry ->
         if (entry.key != 'matchWeight' && entry.key != 'excludeFromSearch' &&
@@ -1156,11 +1156,11 @@ public class PontusJ2ReportingFunctions {
         }
       }
 
-      System.out.println("innerMap.get('matchWeight' = ${innerMap.get('matchWeight')}");
-      System.out.println("innerMap.get('excludeFromSearch' = ${innerMap.get('excludeFromSearch')}");
-      System.out.println("innerMap.get('excludeFromSubsequenceSearch' = ${innerMap.get('excludeFromSubsequenceSearch')}");
-      System.out.println("innerMap.get('excludeFromUpdate' = ${innerMap.get('excludeFromUpdate')}");
-      System.out.println("innerMap.get('operator' = ${innerMap.get('operator')}");
+//      System.out.println("innerMap.get('matchWeight' = ${innerMap.get('matchWeight')}");
+//      System.out.println("innerMap.get('excludeFromSearch' = ${innerMap.get('excludeFromSearch')}");
+//      System.out.println("innerMap.get('excludeFromSubsequenceSearch' = ${innerMap.get('excludeFromSubsequenceSearch')}");
+//      System.out.println("innerMap.get('excludeFromUpdate' = ${innerMap.get('excludeFromUpdate')}");
+//      System.out.println("innerMap.get('operator' = ${innerMap.get('operator')}");
 
       sb.append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
         .append(innerMap.get('matchWeight'))
