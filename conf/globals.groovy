@@ -1133,7 +1133,10 @@ public class PontusJ2ReportingFunctions {
 
     br.each { key, map ->
       sb.append("<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
-      System.out.println("key = ${key}, map[0] = ${map[0]} map.size() = ${map.size()}; map[0].size = ${map[0].size()}; ${map.class} map[0].class = ${map[0].class}");
+
+      def innerMap = map[0];
+
+      System.out.println("key = ${key}, map[0] = ${innerMap} map.size() = ${map.size()}; map[0].size = ${innerMap.size()}; ${map.class} innerMap.class = ${innerMap.class}");
 
       String mainValue = null;
       map[0].each { subKey, subVal ->
