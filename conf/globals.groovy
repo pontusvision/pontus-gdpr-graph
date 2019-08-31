@@ -983,11 +983,12 @@ def renderReportInText(long pg_id, String reportType = 'SAR Read', GraphTraversa
 
 public class PontusJ2ReportingFunctions {
 
-  public static HashMap<Long, Double> getProbabilityOfPossibleMatches(Long startVertexId, Map<String, Double> weightsPerVertex) {
+  public static def getProbabilityOfPossibleMatches(Long startVertexId, Map<String, Double> weightsPerVertex) {
 
     String vertType = g.V(startVertexId).label().next();
 
     def weightedScores = new HashMap<Long, Double>();
+    def paths = new HashMap<Long, StringBuffer>();
 
     Double totalScore = 0;
 
@@ -1016,6 +1017,14 @@ public class PontusJ2ReportingFunctions {
                 String label = obj.bothVertices().get(vertIdx).label()
                 Double scoreForLabel = weightsPerVertex.get(label, new Double(0));
 
+                if (scoreForLabel > 0){
+                  StringBuffer currPath = paths.get(currVid, new StringBuffer());
+                  if (currPath.length() > 0){
+                    currPath.append (', ')
+                  }
+                  currPath.append(label);
+                  paths.put(currVid, currPath);
+                }
                 currScore += scoreForLabel / totalScore;
                 weightedScores.put(currVid, currScore);
 
@@ -1028,20 +1037,21 @@ public class PontusJ2ReportingFunctions {
       }
 
 
-    return weightedScores;
+    return [weightedScores,paths];
 
   }
 
   public static GraphTraversalSource g;
 
   public static Map<Map<String, String>, Double> possibleMatchesMap(String pg_id, Map<String, Double> weightsPerVertex) {
-    Map<Long, Double> probs = getProbabilityOfPossibleMatches(Long.parseLong(pg_id), weightsPerVertex);
+    def (Map<Long, Double> probs, Map<Long, String> paths) = getProbabilityOfPossibleMatches(Long.parseLong(pg_id), weightsPerVertex);
 
     Map<Map<String, String>, Double> retVal = new HashMap<>();
     probs.each { vid, prob ->
       Map<String, String> context = g.V(vid).valueMap()[0].collectEntries { key, val ->
         [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
       };
+      context.put('Labels_In_Path', paths.get(vid));
       retVal.put(context, prob);
     }
 

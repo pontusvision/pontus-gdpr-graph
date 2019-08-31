@@ -2492,7 +2492,7 @@ def createNotificationTemplates() {
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
         .property("Object.Notification_Templates.Id", "INGESTION BUSINESS RULES")
-        .property("Object.Notification_Templates.Text", ("ToDo: Add business rules here").bytes.encodeBase64().toString())
+        .property("Object.Notification_Templates.Text", ("{{ pv:businessRulesTable(context.Event_Ingestion_Business_Rules) }}").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Event.Ingestion")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
         .property("Object.Notification_Templates.Label", "Business Rules")
@@ -2505,19 +2505,18 @@ def createNotificationTemplates() {
         .property("Object.Notification_Templates.Text", ("\n" +
           "{% set possibleMatches = pv:possibleMatches(context.id,'{\"Object.Email_Address\": 10.5, \"Location.Address\": 10.1, \"Object.Phone_Number\": 1.0}') %}\n" +
           "{% set numMatches = possibleMatches.size() %}\n" +
-          "{{ context.Person_Identity_Full_Name}} Potentially matches {{ numMatches }}\n" +
+          "{{ context.Person_Natural_Full_Name}} potentially matches {{ numMatches }} other people: \n" +
           "\n" +
           "{% if numMatches > 0 %}\n" +
           "\n" +
           "\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentage</th></tr>\" }}\n" +
           "  {% for item in possibleMatches.entrySet() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (item.key.Person_Identity_Full_Name , item.value )}}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td>\" | format (item.key.Person_Natural_Full_Name , (item.value)*100.0 ) }}\n" +
           "  {% endfor %}\n" +
           "  {{ \"</table>\" }}\n" +
           "\n" +
-          "{% endif %}\n" +
-          "").bytes.encodeBase64().toString())
+          "{% endif %}").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Person.Natural")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
         .property("Object.Notification_Templates.Label", "Matches")
@@ -2531,19 +2530,18 @@ def createNotificationTemplates() {
         .property("Object.Notification_Templates.Text", ("\n" +
           "{% set possibleMatches = pv:possibleMatches(context.id,'{\"Object.Email_Address\": 10.5, \"Location.Address\": 10.1, \"Object.Phone_Number\": 1.0}') %}\n" +
           "{% set numMatches = possibleMatches.size() %}\n" +
-          "{{ context.Person_Identity_Full_Name}} Potentially matches {{ numMatches }}\n" +
+          "{{ context.Person_Identity_Full_Name}} potentially matches {{ numMatches }} other people: \n" +
           "\n" +
           "{% if numMatches > 0 %}\n" +
           "\n" +
           "\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentage</th></tr>\" }}\n" +
           "  {% for item in possibleMatches.entrySet() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (item.key.Person_Identity_Full_Name , item.value )}}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td>\" | format (item.key.Person_Identity_Full_Name , (item.value)*100.0 ) }}\n" +
           "  {% endfor %}\n" +
           "  {{ \"</table>\" }}\n" +
           "\n" +
-          "{% endif %}\n" +
-          "").bytes.encodeBase64().toString())
+          "{% endif %}").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Person.Identity")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
         .property("Object.Notification_Templates.Label", "Matches")
