@@ -1140,6 +1140,7 @@ public class PontusJ2ReportingFunctions {
 
       innerMap.each { it ->
         System.out.println("it = ${it}; it.class = ${it.class}");
+        System.out.println("it.key = ${it.key}; it.val = ${it.value}");
       }
 
       String mainValue = null;
@@ -1150,7 +1151,7 @@ public class PontusJ2ReportingFunctions {
           sb.append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
             .append(entry.key.toString())
             .append("</td>")
-          mainValue = entry.val.toString();
+          mainValue = entry.value.toString();
 
         }
       }
