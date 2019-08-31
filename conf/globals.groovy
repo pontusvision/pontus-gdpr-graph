@@ -1123,8 +1123,31 @@ public class PontusJ2ReportingFunctions {
     return new ObjectMapper().readValue(json, Map.class);
 
   }
+  public static Long getNumNaturalPersonForPIA(String piaId) {
+    return g.V(Long.parseLong(piaId))
+      .in('Has_Privacy_Impact_Assessment')
+      .filter(label().is('Object.Data_Source'))
+      .out('Has_Ingestion_Event')
+      .out('Has_Ingestion_Event')
+      .in('Has_Ingestion_Event')
+      .filter(label().is('Person.Natural'))
+      .count()
+
+  }
+  public static Long getNumSensitiveInfoForPIA(String piaId) {
+    return g.V(Long.parseLong(piaId))
+     .in('Has_Privacy_Impact_Assessment')
+      .filter(label().is('Object.Data_Source'))
+      .out('Has_Ingestion_Event')
+      .out('Has_Ingestion_Event')
+      .both('Has_Ingestion_Event')
+      .filter(has('Metadata.Type.Object.Sensitive_Data',eq('Object.Sensitive_Data')))
+      .count()
+
+  }
 
   public static String businessRulesTable(String json){
+
 
     StringBuffer sb = new StringBuffer("<table style='margin: 2px; padding: 5px;'>")
       .append("<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
@@ -1255,6 +1278,10 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
     PontusJ2ReportingFunctions.class, "jsonToMap", String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "businessRulesTable",
     PontusJ2ReportingFunctions.class, "businessRulesTable", String.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForPIA",
+    PontusJ2ReportingFunctions.class, "getNumNaturalPersonForPIA", String.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForPIA",
+    PontusJ2ReportingFunctions.class, "getNumSensitiveInfoForPIA", String.class));
 
 
   if ('Event.Data_Breach' == vertType) {
