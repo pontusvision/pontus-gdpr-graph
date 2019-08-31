@@ -2505,14 +2505,14 @@ def createNotificationTemplates() {
         .property("Object.Notification_Templates.Text", ("\n" +
           "{% set possibleMatches = pv:possibleMatches(context.id,'{\"Object.Email_Address\": 10.5, \"Location.Address\": 10.1, \"Object.Phone_Number\": 1.0}') %}\n" +
           "{% set numMatches = possibleMatches.size() %}\n" +
-          "{{ context.Person_Natural_Full_Name}} potentially matches {{ numMatches }} other people: \n" +
+          "{{ context.Person_Natural_Full_Name}} Potentially matches {{ numMatches }}\n" +
           "\n" +
           "{% if numMatches > 0 %}\n" +
           "\n" +
           "\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentage</th></tr>\" }}\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentage</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Labels In Match</th></tr>\" }}\n" +
           "  {% for item in possibleMatches.entrySet() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td>\" | format (item.key.Person_Natural_Full_Name , (item.value)*100.0 ) }}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (item.key.Person_Natural_Full_Name , item.value * 100.0, item.key.Labels_For_Match ) }}\n" +
           "  {% endfor %}\n" +
           "  {{ \"</table>\" }}\n" +
           "\n" +
@@ -2530,14 +2530,14 @@ def createNotificationTemplates() {
         .property("Object.Notification_Templates.Text", ("\n" +
           "{% set possibleMatches = pv:possibleMatches(context.id,'{\"Object.Email_Address\": 10.5, \"Location.Address\": 10.1, \"Object.Phone_Number\": 1.0}') %}\n" +
           "{% set numMatches = possibleMatches.size() %}\n" +
-          "{{ context.Person_Identity_Full_Name}} potentially matches {{ numMatches }} other people: \n" +
+          "{{ context.Person_Identity_Full_Name}} Potentially matches {{ numMatches }}\n" +
           "\n" +
           "{% if numMatches > 0 %}\n" +
           "\n" +
           "\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentage</th></tr>\" }}\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentage</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Labels In Match</th></tr>\" }}\n" +
           "  {% for item in possibleMatches.entrySet() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td>\" | format (item.key.Person_Identity_Full_Name , (item.value)*100.0 ) }}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (item.key.Person_Identity_Full_Name , item.value * 100.0, item.key.Labels_For_Match ) }}\n" +
           "  {% endfor %}\n" +
           "  {{ \"</table>\" }}\n" +
           "\n" +
