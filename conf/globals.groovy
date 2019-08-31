@@ -1114,6 +1114,71 @@ public class PontusJ2ReportingFunctions {
 
   }
 
+  public static String businessRulesTable(String json){
+
+    StringBuffer sb = new StringBuffer("<table style='margin: 5px'>")
+      .append("<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Match Weight</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Exclude From Search</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Exclude From Subsequence Search</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Exclude From Update</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Operation</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th>")
+      .append("</tr>" );
+
+    Map br = jsonToMap(json);
+
+    br.each { key, map ->
+      sb.append("<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+
+      String mainValue = null;
+      map.each { subKey, subVal ->
+        if (subKey != 'matchWeight' && subKey != 'excludeFromSearch' &&
+          subKey != 'excludeFromSubsequenceSearch' && subKey != 'excludeFromUpdate' &&
+          subKey != 'operator') {
+          sb.append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+            .append(subKey.toString())
+            .append("</td>")
+          mainValue = subVal.toString();
+
+        }
+      }
+      sb.append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+        .append(map.get('matchWeight'))
+        .append("</td>")
+
+        .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+        .append(map.get('excludeFromSearch'))
+        .append("</td>")
+
+        .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+        .append(map.get('excludeFromSubsequenceSearch'))
+        .append("</td>")
+
+        .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+        .append(map.get('excludeFromUpdate'))
+        .append("</td>")
+
+        .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+        .append(map.get('operator'))
+        .append("</td>")
+
+
+        .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
+        .append(mainValue)
+        .append("</td>")
+
+
+      sb.append("</tr>")
+    }
+
+    sb.append('</table>')
+
+//    {{  "<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>" | format (c.key , c.value )}}
+
+
+  }
 
 }
 
@@ -1159,7 +1224,8 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
     PontusJ2ReportingFunctions.class, "jsonToHtmlTable", String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "jsonToMap",
     PontusJ2ReportingFunctions.class, "jsonToMap", String.class));
-
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "businessRulesTable",
+    PontusJ2ReportingFunctions.class, "businessRulesTable", String.class));
 
 
   if ('Event.Data_Breach' == vertType) {
