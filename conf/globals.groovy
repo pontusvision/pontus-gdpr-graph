@@ -1138,8 +1138,12 @@ public class PontusJ2ReportingFunctions {
 
       System.out.println("key = ${key}, map[0] = ${innerMap} map.size() = ${map.size()}; map[0].size = ${innerMap.size()}; ${map.class} innerMap.class = ${innerMap.class}");
 
+      innerMap.each { it ->
+        System.out.println("it = ${it}");
+      }
+
       String mainValue = null;
-      map[0].each { subKey, subVal ->
+      innerMap.each { subKey, subVal ->
         if (subKey != 'matchWeight' && subKey != 'excludeFromSearch' &&
             subKey != 'excludeFromSubsequenceSearch' && subKey != 'excludeFromUpdate' &&
             subKey != 'operator') {
