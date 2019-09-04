@@ -1232,6 +1232,11 @@ public class PontusJ2ReportingFunctions {
 
   }
 
+
+  public static Long getNumDataSourcesForPIA(String id){
+     return g.V(Long.parseLong(id)).both().has('Metadata.Type.Object.Data_Source', eq('Object.Data_Source')).id().count()
+  }
+
 }
 
 

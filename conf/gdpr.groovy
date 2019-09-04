@@ -2535,13 +2535,14 @@ def createNotificationTemplates() {
           "{% if numMatches > 0 %}\n" +
           "\n" +
           "\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentage</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Labels In Match</th></tr>\" }}\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>ID</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentage</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Similar Entries</th></tr>\" }}\n" +
           "  {% for item in possibleMatches.entrySet() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (item.key.Person_Identity_Full_Name , item.value * 100.0, item.key.Labels_For_Match ) }}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (item.key.Person_Identity_Full_Name , item.key.Person_Identity_ID , item.value * 100.0, item.key.Labels_For_Match ) }}\n" +
           "  {% endfor %}\n" +
           "  {{ \"</table>\" }}\n" +
           "\n" +
-          "{% endif %}").bytes.encodeBase64().toString())
+          "{% endif %}\n" +
+          "").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Person.Identity")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
         .property("Object.Notification_Templates.Label", "Matches")
