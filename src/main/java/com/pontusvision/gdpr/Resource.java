@@ -408,7 +408,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
           if (StringUtils.isNotEmpty(req.sortCol))
           {
-            resSet = resSet.order().by(req.sortCol, "+asc".equalsIgnoreCase(req.sortDir) ? Order.asc : Order.desc);
+            resSet = resSet.order().by(req.sortCol, "+asc".equalsIgnoreCase(req.sortDir) ? Order.incr : Order.decr);
           }
           resSet.valueMap(true, vals)
                 .range(req.from, req.to);
