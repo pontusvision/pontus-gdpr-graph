@@ -31,8 +31,63 @@ public class AppTest
     /**
      * Rigourous Test :-)
      */
-    public void testApp()
+    public void testSimpleFilters()
     {
-        assertTrue( true );
+        RecordRequest req = new RecordRequest();
+        req.dataType = "Person.Natural";
+        req.filters = new PVGridFilters[2] ;
+        req.filters[0] = new PVGridFilters();
+        req.filters[0].colId="Person.Natural.Full_Name";
+        req.filters[0].type="contains";
+        req.filters[0].filter="Leo";
+        req.filters[0].filterType="text";
+
+
+        req.filters[1] = new PVGridFilters();
+        req.filters[1].colId="Person.Natural.Last_Name";
+        req.filters[1].type="equals";
+        req.filters[1].filter="Martins";
+        req.filters[1].filterType="text";
+
+
+        String idxSearch = Resource.getIndexSearchStr(req);
+
+        System.out.println (idxSearch);
+
+
+        assertEquals( "(v.\"Person.Natural.Full_Name\":*Leo*) AND (v.\"Person.Natural.Last_Name\":Martins)" , idxSearch );
+    }
+
+    public void testComplexFilters()
+    {
+        RecordRequest req = new RecordRequest();
+        req.dataType = "Person.Natural";
+        req.filters = new PVGridFilters[2] ;
+        req.filters[0] = new PVGridFilters();
+        req.filters[0].colId="Person.Natural.Full_Name";
+        req.filters[0].operator="OR";
+        req.filters[0].condition1= new PVGridFilterCondition();
+        req.filters[0].condition1.filter = "Renata";
+        req.filters[0].condition1.type = "notContains";
+        req.filters[0].condition1.filterType="text";
+        req.filters[0].condition2= new PVGridFilterCondition();
+        req.filters[0].condition2.filter = "Leonardo";
+        req.filters[0].condition2.type = "notEquals";
+        req.filters[0].condition2.filterType="text";
+
+
+        req.filters[1] = new PVGridFilters();
+        req.filters[1].colId="Person.Natural.Last_Name";
+        req.filters[1].type="equals";
+        req.filters[1].filter="Martins";
+        req.filters[1].filterType="text";
+
+
+        String idxSearch = Resource.getIndexSearchStr(req);
+
+        System.out.println (idxSearch);
+
+
+        assertEquals( "((v.\"Person.Natural.Full_Name\":*!*Renata*) OR (v.\"Person.Natural.Full_Name\":*!Leonardo)) AND (v.\"Person.Natural.Last_Name\":Martins)" , idxSearch );
     }
 }

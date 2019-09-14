@@ -75,9 +75,13 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
     {
       sb.append('*');
     }
-    if ("notContains".equals(type) || "notEquals".equals(type))
+    if ( "notEquals".equals(type))
     {
       sb.append("*!");
+    }
+    else if ("notContains".equals(type))
+    {
+      sb.append("*!*");
     }
     sb.append(filter);
     if ("contains".equals(type) || "startsWith".equals(type) || "notContains".equals(type))
@@ -155,9 +159,9 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             addFilter(sb, filter.colId, filter.condition1.type, filter.condition1.filter);
             if (filter.condition2 != null)
             {
-              sb.append(") ").append(filter.operator).append("(");
+              sb.append(") ").append(filter.operator).append(" (");
               addFilter(sb, filter.colId, filter.condition2.type, filter.condition2.filter);
-              sb.append(")");
+//              sb.append(")");
             }
             sb.append(")");
           }
