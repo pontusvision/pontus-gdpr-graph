@@ -51,10 +51,46 @@ public class RecordRequest {
         this.search = search;
     }
 
+
+    public String getDataType()
+    {
+        return dataType;
+    }
+
+    public void setDataType(String dataType)
+    {
+        this.dataType = dataType;
+    }
+
+    public PVGridColumn[] getCols()
+    {
+        return cols;
+    }
+
+    public void setCols(PVGridColumn[] cols)
+    {
+        this.cols = cols;
+    }
+    public PVGridFilters[] getFilters()
+    {
+        return filters;
+    }
+
+    public void setFilters(PVGridFilters[] filters)
+    {
+        this.filters = filters;
+    }
+
+    PVGridColumn  cols[];
+
+    PVGridFilters filters[];
+
     PVGridSearch search;
     Long from;
     Long to;
     String sortCol;
     String sortDir;
+
+    String dataType;
 
 }
