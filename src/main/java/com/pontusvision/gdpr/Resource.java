@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.P.eq;
 import static org.apache.tinkerpop.gremlin.process.traversal.P.neq;
 import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
@@ -75,7 +76,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
     {
       sb.append('*');
     }
-    if ( "notEquals".equals(type))
+    if ( "notEqual".equals(type))
     {
       sb.append("*!");
     }
@@ -170,8 +171,9 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
       sb.append(")");
 
     }
-    else
+    else if (req.search != null && req.search.cols != null)
     {
+
       PVGridColumn[] cols = req.search.cols;
 
       for (int i = 0, ilen = cols.length; i < ilen; i++)
@@ -392,7 +394,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             int        limit    = req.to.intValue() - req.from.intValue();
             List<Long> vertices = new ArrayList<>(limit);
 
-            App.graph.indexQuery(req.search.extraSearch[0].value + ".MixedIdx", getIndexSearchStr(req))
+            App.graph.indexQuery(dataType + ".MixedIdx", getIndexSearchStr(req))
                      .vertexStream().forEachOrdered(jgvr -> vertices.add(jgvr.getElement().longId()));
 
             resSet = App.g.V(vertices);
@@ -400,7 +402,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           }
           else
           {
-            resSet = resSet.has("Metadata.Type." + dataType, dataType);
+            resSet = resSet.has("Metadata.Type." + dataType, eq(dataType) );
 
           }
 
