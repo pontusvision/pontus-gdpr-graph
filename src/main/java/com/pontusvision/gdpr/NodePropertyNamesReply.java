@@ -31,9 +31,9 @@ public class NodePropertyNamesReply {
         LinkedList<ReactSelectOptions> labelsList = new LinkedList<>();
 
         for (String vertexLabel: vertexProperties){
-
-            String cleanLabel = vertexLabel.replaceAll(Pattern.quote(".")," ");
-            cleanLabel.replaceFirst("^#","");
+            String cleanLabel = vertexLabel.replaceFirst("^#","");
+            cleanLabel = cleanLabel.replaceAll(Pattern.quote(".")," ");
+            
             labelsList.add(new ReactSelectOptions(cleanLabel,
                     vertexLabel));
 
