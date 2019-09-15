@@ -13,7 +13,9 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.EdgeLabel;
 import org.janusgraph.core.PropertyKey;
+import org.janusgraph.core.schema.JanusGraphIndex;
 import org.janusgraph.core.schema.JanusGraphManagement;
+import org.janusgraph.core.schema.SchemaStatus;
 
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
@@ -76,7 +78,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
     {
       sb.append('*');
     }
-    if ( "notEqual".equals(type))
+    if ("notEqual".equals(type))
     {
       sb.append("*!");
     }
@@ -162,7 +164,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             {
               sb.append(") ").append(filter.operator).append(" (");
               addFilter(sb, filter.colId, filter.condition2.type, filter.condition2.filter);
-//              sb.append(")");
+              //              sb.append(")");
             }
             sb.append(")");
           }
@@ -402,7 +404,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           }
           else
           {
-            resSet = resSet.has("Metadata.Type." + dataType, eq(dataType) );
+            resSet = resSet.has("Metadata.Type." + dataType, eq(dataType));
 
           }
 
@@ -633,18 +635,36 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
         //
         //        }
 
-        Set<String>  props = new HashSet<>();
-        final String label = req.labels[0].value;
+        Set<String>     props = new HashSet<>();
+        final String    label = req.labels[0].value;
+        JanusGraphIndex idx   = App.graph.openManagement().getGraphIndex(label + ".MixedIdx");
+
         App.graph.openManagement().getRelationTypes(PropertyKey.class).forEach(
             propertyKey ->
             {
               if (propertyKey.isPropertyKey())
               {
                 String currLabel = propertyKey.name();
+
                 if (currLabel.startsWith(label))
                 {
-                  props.add(currLabel);
+                  String labelPrefix = "#";
+                  try
+                  {
+                    SchemaStatus status = idx.getIndexStatus(propertyKey);
+                    if (!status.isStable())
+                    {
+                      labelPrefix = "";
+                    }
+                  }
+                  catch (Throwable t)
+                  {
+                    labelPrefix = "";
+                  }
+
+                  props.add(labelPrefix+currLabel);
                 }
+
               }
             }
         );

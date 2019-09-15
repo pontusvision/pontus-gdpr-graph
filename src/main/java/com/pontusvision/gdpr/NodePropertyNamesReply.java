@@ -32,7 +32,9 @@ public class NodePropertyNamesReply {
 
         for (String vertexLabel: vertexProperties){
 
-            labelsList.add(new ReactSelectOptions(vertexLabel.replaceAll(Pattern.quote(".")," "),
+            String cleanLabel = vertexLabel.replaceAll(Pattern.quote(".")," ");
+            cleanLabel.replaceFirst("^#","");
+            labelsList.add(new ReactSelectOptions(cleanLabel,
                     vertexLabel));
 
         }
