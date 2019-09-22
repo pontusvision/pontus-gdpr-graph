@@ -10,6 +10,9 @@ public class PVGridFilters
 
     String filter;
 
+    String dateTo;
+    String dateFrom;
+
     PVGridFilterCondition condition1;
     PVGridFilterCondition condition2;
 

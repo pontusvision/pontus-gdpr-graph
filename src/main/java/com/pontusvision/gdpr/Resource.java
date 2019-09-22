@@ -70,7 +70,99 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   }
 
-  public static StringBuilder addFilter(StringBuilder sb, String colId, String type, String filter)
+  public static StringBuilder addDateFilter(StringBuilder sb, String colId, String dateFrom, String dateTo, String type)
+  {
+
+
+    if ("notEquals".equals(type))
+    {
+      // not equals currently implemented as less than or greter than:
+      sb.append("( (").append("v.\"").append(colId).append("\":")
+        .append("{ * TO ").append(dateFrom).append(" } )")
+        .append(" OR ")
+        .append("(").append("v.\"").append(colId).append("\":")
+        .append("{ ").append(dateFrom).append(" TO * } ) )");
+    }
+    else
+    {
+
+      sb.append("v.\"").append(colId).append("\":");
+
+      //    equals, greaterThan, lessThan, inRange, notEqual
+    /*
+     Ranges can be specified for date, numeric or string fields.
+     Inclusive ranges are specified with square brackets [min TO max] and
+     exclusive ranges with curly brackets {min TO max}.
+     */
+
+      if ("inRange".equals(type))
+      {
+        sb.append("[ ").append(dateFrom).append(" TO ").append(dateTo).append(" ]");
+      }
+      else if ("equals".equals(type))
+      {
+        sb.append("[ ").append(dateFrom).append(" TO ").append(dateFrom).append(" ]");
+      }
+      else if ("lessThan".equals(type))
+      {
+        sb.append("{ * TO ").append(dateFrom).append(" }");
+      }
+      else if ("greaterThan".equals(type))
+      {
+        sb.append("{ ").append(dateFrom).append(" TO * }");
+      }
+
+    }
+    return sb;
+  }
+
+  public static StringBuilder addConditionFilter(StringBuilder sb, PVGridFilters filter)
+  {
+    if (filter.condition1 != null)
+    {
+      sb.append("(");
+      if ("date".equalsIgnoreCase(filter.filterType))
+      {
+        addDateFilter(sb, filter.colId, filter.condition1.dateFrom, filter.condition1.dateTo, filter.condition1.type);
+      }
+      else
+      {
+        addTextFilter(sb, filter.colId, filter.condition1.type, filter.condition1.filter);
+      }
+      if (filter.condition2 != null)
+      {
+        sb.append(") ").append(filter.operator).append(" (");
+        if ("date".equalsIgnoreCase(filter.filterType))
+        {
+          addDateFilter(sb, filter.colId, filter.condition2.dateFrom, filter.condition2.dateTo, filter.condition2.type);
+        }
+        else
+        {
+          addTextFilter(sb, filter.colId, filter.condition2.type, filter.condition2.filter);
+        }
+        //              sb.append(")");
+      }
+      sb.append(")");
+    }
+    return sb;
+
+  }
+
+  public static StringBuilder addFilter(StringBuilder sb, PVGridFilters filter)
+  {
+    if ("date".equalsIgnoreCase(filter.filterType))
+    {
+      return addDateFilter(sb, filter.colId, filter.dateFrom, filter.dateTo, filter.type);
+
+    }
+    else
+    {
+      return addTextFilter(sb, filter.colId, filter.type, filter.filter);
+    }
+
+  }
+
+  public static StringBuilder addTextFilter(StringBuilder sb, String colId, String type, String filter)
   {
     sb.append("v.\"").append(colId).append("\":");
 
@@ -128,12 +220,15 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           [
             { colId: "Object_Notification_Templates_Label", filterType: "text", type: "contains", filter: "adfasdf"},
             { colId: "Object_Notification_Templates_Types", filterType: "text", type: "contains", filter: "aaa"}
+            {"colId":"Person.Natural.Date_Of_Birth","dateTo":null,"dateFrom":"1960-08-16","type":"equals","filterType":"date"}
+            {"colId":"Person.Natural.Date_Of_Birth","dateTo":null,"dateFrom":"1932-09-02","type":"greaterThan","filterType":"date"}
+            {"colId":"Person.Natural.Date_Of_Birth","dateTo":"2020-06-22","dateFrom":"1960-08-16","type":"inRange","filterType":"date"}
           ]
          */
 
         if (filter.operator == null)
         {
-          addFilter(sb, filter.colId, filter.type, filter.filter);
+          addFilter(sb, filter);
         }
         /*
           When we have complex filters, the following format is used:
@@ -152,22 +247,25 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
               filterType: "text",
               operator: "AND"
             }
+            {
+              "colId":"Person.Natural.Date_Of_Birth",
+              "filterType":"date",
+              "operator":"OR",
+              "condition1":{"dateTo":"2020-06-22","dateFrom":"1960-08-16","type":"inRange","filterType":"date"},
+              "condition2":{"dateTo":null,"dateFrom":"1974-08-02","type":"equals","filterType":"date"}
+            }
+            {
+              "colId":"Person.Natural.Date_Of_Birth",
+              "filterType":"date",
+              "operator":"OR",
+              "condition1":{"dateTo":"2020-06-22","dateFrom":"1960-08-16","type":"inRange","filterType":"date"},
+              "condition2":{"dateTo":null,"dateFrom":"1974-08-02","type":"notEqual","filterType":"date"}
+            }
           ]
          */
         else
         {
-          if (filter.condition1 != null)
-          {
-            sb.append("(");
-            addFilter(sb, filter.colId, filter.condition1.type, filter.condition1.filter);
-            if (filter.condition2 != null)
-            {
-              sb.append(") ").append(filter.operator).append(" (");
-              addFilter(sb, filter.colId, filter.condition2.type, filter.condition2.filter);
-              //              sb.append(")");
-            }
-            sb.append(")");
-          }
+          addConditionFilter(sb, filter);
         }
       }
       sb.append(")");
@@ -662,7 +760,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
                     labelPrefix = "";
                   }
 
-                  props.add(labelPrefix+currLabel);
+                  props.add(labelPrefix + currLabel);
                 }
 
               }

@@ -9,6 +9,10 @@ public class PVGridFilterCondition
 
     String filter;
 
+    String dateTo;
+    String dateFrom;
+
+
     public String getFilterType()
     {
         return filterType;

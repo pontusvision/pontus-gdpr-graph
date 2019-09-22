@@ -1109,7 +1109,6 @@ public class PontusJ2ReportingFunctions {
       "</table>");
   }
 
-
   public static String jsonToHtmlTable(String json) {
     Map<String, String> jsonMap =
       new ObjectMapper().readValue(json, Map.class);
@@ -1123,6 +1122,7 @@ public class PontusJ2ReportingFunctions {
     return new ObjectMapper().readValue(json, Map.class);
 
   }
+
   public static Long getNumNaturalPersonForPIA(String piaId) {
     return g.V(Long.parseLong(piaId))
       .in('Has_Privacy_Impact_Assessment')
@@ -1134,6 +1134,7 @@ public class PontusJ2ReportingFunctions {
       .count()
 
   }
+
   public static Long getNumSensitiveInfoForPIA(String piaId) {
     return g.V(Long.parseLong(piaId))
      .in('Has_Privacy_Impact_Assessment')
@@ -1232,11 +1233,27 @@ public class PontusJ2ReportingFunctions {
 
   }
 
-
   public static Long getNumDataSourcesForPIA(String id){
      return g.V(Long.parseLong(id)).both().has('Metadata.Type.Object.Data_Source', eq('Object.Data_Source')).id().count()
   }
 
+  public static JsonSlurper ptDictionarySlurper;
+
+  def static Map ptDictionary;
+  static {
+    ptDictionarySlurper = new JsonSlurper();
+    def inputFile = new File("conf/i18n_pt_translation.json")
+
+    ptDictionary = ptDictionarySlurper.parse(inputFile.text)
+
+  }
+
+  public static String translate(String strToTranslate){
+    if (ptDictionary){
+      return ptDictionary.get(strToTranslate)?:strToTranslate;
+    }
+    return strToTranslate;
+  }
 }
 
 
@@ -1287,6 +1304,9 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
     PontusJ2ReportingFunctions.class, "getNumNaturalPersonForPIA", String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForPIA",
     PontusJ2ReportingFunctions.class, "getNumSensitiveInfoForPIA", String.class));
+
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "t",
+    PontusJ2ReportingFunctions.class, "translate", String.class));
 
 
   if ('Event.Data_Breach' == vertType) {
