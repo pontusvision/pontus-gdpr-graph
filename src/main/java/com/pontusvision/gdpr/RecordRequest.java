@@ -1,96 +1,113 @@
 package com.pontusvision.gdpr;
 
-public class RecordRequest {
-//    {
-//        searchStr: self.searchstr,
-//                from: from,
-//            to: to,
-//            sortBy: self.sortcol,
-//            sortDir: ((self.sortdir > 0) ? "+asc" : "+desc")
-//    }
+public class RecordRequest
+{
+  //    {
+  //        searchStr: self.searchstr,
+  //                from: from,
+  //            to: to,
+  //            sortBy: self.sortcol,
+  //            sortDir: ((self.sortdir > 0) ? "+asc" : "+desc")
+  //    }
 
+  PVGridColumn  cols[];
+  PVGridFilters filters[];
+  PVGridSearch  search;
+  Long          from;
+  Long          to;
+  String        sortCol;
+  String        sortDir;
+  String        dataType;
+  String        customFilter;
 
+  public String getCustomFilter()
+  {
+    return customFilter;
+  }
 
-    public Long getFrom() {
-        return from;
-    }
+  public void setCustomFilter(String customFilter)
+  {
+    this.customFilter = customFilter;
+  }
 
-    public void setFrom(Long from) {
-        this.from = from;
-    }
+  public Long getFrom()
+  {
+    return from;
+  }
 
-    public Long getTo() {
-        return to;
-    }
+  public void setFrom(Long from)
+  {
+    this.from = from;
+  }
 
-    public void setTo(Long to) {
-        this.to = to;
-    }
+  public Long getTo()
+  {
+    return to;
+  }
 
-    public String getSortCol() {
-        return sortCol;
-    }
+  public void setTo(Long to)
+  {
+    this.to = to;
+  }
 
-    public void setSortCol(String sortCol) {
-        this.sortCol = sortCol;
-    }
+  public String getSortCol()
+  {
+    return sortCol;
+  }
 
-    public String getSortDir() {
-        return sortDir;
-    }
+  public void setSortCol(String sortCol)
+  {
+    this.sortCol = sortCol;
+  }
 
-    public void setSortDir(String sortDir) {
-        this.sortDir = sortDir;
-    }
+  public String getSortDir()
+  {
+    return sortDir;
+  }
 
-    public PVGridSearch getSearch() {
-        return search;
-    }
+  public void setSortDir(String sortDir)
+  {
+    this.sortDir = sortDir;
+  }
 
-    public void setSearch(PVGridSearch search) {
-        this.search = search;
-    }
+  public PVGridSearch getSearch()
+  {
+    return search;
+  }
 
+  public void setSearch(PVGridSearch search)
+  {
+    this.search = search;
+  }
 
-    public String getDataType()
-    {
-        return dataType;
-    }
+  public String getDataType()
+  {
+    return dataType;
+  }
 
-    public void setDataType(String dataType)
-    {
-        this.dataType = dataType;
-    }
+  public void setDataType(String dataType)
+  {
+    this.dataType = dataType;
+  }
 
-    public PVGridColumn[] getCols()
-    {
-        return cols;
-    }
+  public PVGridColumn[] getCols()
+  {
+    return cols;
+  }
 
-    public void setCols(PVGridColumn[] cols)
-    {
-        this.cols = cols;
-    }
-    public PVGridFilters[] getFilters()
-    {
-        return filters;
-    }
+  public void setCols(PVGridColumn[] cols)
+  {
+    this.cols = cols;
+  }
 
-    public void setFilters(PVGridFilters[] filters)
-    {
-        this.filters = filters;
-    }
+  public PVGridFilters[] getFilters()
+  {
+    return filters;
+  }
 
-    PVGridColumn  cols[];
-
-    PVGridFilters filters[];
-
-    PVGridSearch search;
-    Long from;
-    Long to;
-    String sortCol;
-    String sortDir;
-
-    String dataType;
+  public void setFilters(PVGridFilters[] filters)
+  {
+    this.filters = filters;
+  }
 
 }

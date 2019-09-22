@@ -24,8 +24,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.P.eq;
-import static org.apache.tinkerpop.gremlin.process.traversal.P.neq;
+import static org.apache.tinkerpop.gremlin.process.traversal.P.*;
 import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
 //import org.json.JSONArray;
@@ -72,7 +71,6 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
 
   public static StringBuilder addDateFilter(StringBuilder sb, String colId, String dateFrom, String dateTo, String type)
   {
-
 
     if ("notEqual".equals(type))
     {
@@ -503,6 +501,28 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           else
           {
             resSet = resSet.has("Metadata.Type." + dataType, eq(dataType));
+
+          }
+
+          if (StringUtils.isNotEmpty(req.customFilter))
+          {
+            if ("unmatchedEvents".equalsIgnoreCase(req.customFilter))
+            {
+              resSet = resSet.where(__.inE().count().is(eq(1)));
+            }
+            else if ("children".equalsIgnoreCase(req.customFilter))
+            {
+              long ageThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 365L * 18L));
+              Date dateThreshold  = new java.util.Date(ageThresholdMs);
+              resSet = resSet.where(__.values("Person.Natural.Date_Of_Birth").is(gte(dateThreshold)));
+            }
+            else if (req.customFilter.startsWith("hasNeighbourId:"))
+            {
+              long neighbourId = Long.parseLong(req.customFilter.split(":")[1]);
+              resSet = resSet.where(__.both().hasId(neighbourId));
+
+            }
+
 
           }
 
