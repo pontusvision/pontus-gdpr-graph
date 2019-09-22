@@ -10,6 +10,8 @@ public class PVGridFilters
 
     String filter;
 
+
+
     String dateTo;
     String dateFrom;
 
@@ -38,7 +40,25 @@ public class PVGridFilters
     {
         this.condition2 = condition2;
     }
+    public String getDateTo()
+    {
+        return dateTo;
+    }
 
+    public void setDateTo(String dateTo)
+    {
+        this.dateTo = dateTo;
+    }
+
+    public String getDateFrom()
+    {
+        return dateFrom;
+    }
+
+    public void setDateFrom(String dateFrom)
+    {
+        this.dateFrom = dateFrom;
+    }
     public String getOperator()
     {
         return operator;
