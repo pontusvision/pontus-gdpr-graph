@@ -74,7 +74,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
   {
 
 
-    if ("notEquals".equals(type))
+    if ("notEqual".equals(type))
     {
       // not equals currently implemented as less than or greter than:
       sb.append("( (").append("v.\"").append(colId).append("\":")
