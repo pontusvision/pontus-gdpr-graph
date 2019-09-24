@@ -1017,10 +1017,10 @@ public class PontusJ2ReportingFunctions {
                 String label = obj.bothVertices().get(vertIdx).label()
                 Double scoreForLabel = weightsPerVertex.get(label, new Double(0));
 
-                if (scoreForLabel > 0){
+                if (scoreForLabel > 0) {
                   StringBuffer currPath = labelsForMatch.get(currVid, new StringBuffer());
-                  if (currPath.length() > 0){
-                    currPath.append (', ')
+                  if (currPath.length() > 0) {
+                    currPath.append(', ')
                   }
                   currPath.append(label);
                   labelsForMatch.put(currVid, currPath);
@@ -1037,7 +1037,7 @@ public class PontusJ2ReportingFunctions {
       }
 
 
-    return [weightedScores,labelsForMatch];
+    return [weightedScores, labelsForMatch];
 
   }
 
@@ -1137,17 +1137,17 @@ public class PontusJ2ReportingFunctions {
 
   public static Long getNumSensitiveInfoForPIA(String piaId) {
     return g.V(Long.parseLong(piaId))
-     .in('Has_Privacy_Impact_Assessment')
+      .in('Has_Privacy_Impact_Assessment')
       .filter(label().is('Object.Data_Source'))
       .out('Has_Ingestion_Event')
       .out('Has_Ingestion_Event')
       .both('Has_Ingestion_Event')
-      .filter(has('Metadata.Type.Object.Sensitive_Data',eq('Object.Sensitive_Data')))
+      .filter(has('Metadata.Type.Object.Sensitive_Data', eq('Object.Sensitive_Data')))
       .count()
 
   }
 
-  public static String businessRulesTable(String json){
+  public static String businessRulesTable(String json) {
 
 
     StringBuffer sb = new StringBuffer("<table style='margin: 2px; padding: 5px;'>")
@@ -1159,7 +1159,7 @@ public class PontusJ2ReportingFunctions {
       .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Exclude From Update</th>")
       .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Operation</th>")
       .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th>")
-      .append("</tr>" );
+      .append("</tr>");
 
     Map br = jsonToMap(json);
 
@@ -1180,8 +1180,8 @@ public class PontusJ2ReportingFunctions {
       String mainValue = null;
       innerMap.each { entry ->
         if (entry.key != 'matchWeight' && entry.key != 'excludeFromSearch' &&
-            entry.key != 'excludeFromSubsequenceSearch' && entry.key != 'excludeFromUpdate' &&
-            entry.key != 'operator') {
+          entry.key != 'excludeFromSubsequenceSearch' && entry.key != 'excludeFromUpdate' &&
+          entry.key != 'operator') {
           sb.append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
             .append(entry.key.toString())
             .append("</td>")
@@ -1216,7 +1216,6 @@ public class PontusJ2ReportingFunctions {
         .append(innerMap.get('operator'))
         .append("</td>")
 
-
         .append("<td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
         .append(mainValue)
         .append("</td>")
@@ -1233,24 +1232,30 @@ public class PontusJ2ReportingFunctions {
 
   }
 
-  public static Long getNumDataSourcesForPIA(String id){
-     return g.V(Long.parseLong(id)).both().has('Metadata.Type.Object.Data_Source', eq('Object.Data_Source')).id().count()
+  public static Long getNumDataSourcesForPIA(String id) {
+    return g.V(Long.parseLong(id)).both().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source')).id().count()
   }
 
   public static JsonSlurper ptDictionarySlurper;
 
-  def static Map ptDictionary;
+  def static ptDictionary;
   static {
     ptDictionarySlurper = new JsonSlurper();
-    def inputFile = new File("conf/i18n_pt_translation.json")
+    try {
+      def inputFile = new File("conf/i18n_pt_translation.json")
 
-    ptDictionary = ptDictionarySlurper.parse(inputFile.text)
+      ptDictionary = ptDictionarySlurper.parse(inputFile.text.toCharArray());
+
+    }
+    catch (Throwable t) {
+      System.err.println("failed to load conf/i18n_pt_translation.json: "+ t.toString());
+    }
 
   }
 
-  public static String translate(String strToTranslate){
-    if (ptDictionary){
-      return ptDictionary.get(strToTranslate)?:strToTranslate;
+  public static String translate(String strToTranslate) {
+    if (ptDictionary) {
+      return ptDictionary.get(strToTranslate) ?: strToTranslate;
     }
     return strToTranslate;
   }
@@ -1265,12 +1270,12 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 
 
   def context = g.V(pg_id).valueMap(true)[0].collectEntries { key, val ->
-    [key.toString().replaceAll('[.]', '_'), val.toString().startsWith('[')? val.toString().substring(1,val.toString().length()-1) : val.toString() ]
+    [key.toString().replaceAll('[.]', '_'), val.toString().startsWith('[') ? val.toString().substring(1, val.toString().length() - 1) : val.toString()]
   };
 
   def neighbours = g.V(pg_id).both().valueMap(true).toList().collect { item ->
     item.collectEntries { key, val ->
-      [key.toString().replaceAll('[.]', '_'), val.toString().startsWith('[')? val.toString().substring(1,val.toString().length()-1) : val.toString() ]
+      [key.toString().replaceAll('[.]', '_'), val.toString().startsWith('[') ? val.toString().substring(1, val.toString().length() - 1) : val.toString()]
     }
   };
 
@@ -1291,7 +1296,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlTableCustomHeader",
     PontusJ2ReportingFunctions.class, "htmlTableCustomHeader", Map.class, String.class, String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlRows",
-    PontusJ2ReportingFunctions.class, "htmlRows", Map.class,String.class));
+    PontusJ2ReportingFunctions.class, "htmlRows", Map.class, String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlTable",
     PontusJ2ReportingFunctions.class, "htmlTable", Map.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "jsonToHtmlTable",
