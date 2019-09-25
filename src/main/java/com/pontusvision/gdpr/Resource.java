@@ -522,6 +522,8 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
               resSet = resSet.where(__.both().hasId(neighbourId));
 
             }
+            GraphTraversal resSet2 = resSet.asAdmin().clone();
+            count = (Long) resSet2.count().next();
 
 
           }
@@ -530,7 +532,8 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           {
             resSet = resSet.order().by(req.sortCol, "+asc".equalsIgnoreCase(req.sortDir) ? Order.incr : Order.decr);
           }
-          resSet.valueMap(true, vals)
+
+          resSet = resSet.valueMap(true, vals)
                 .range(req.from, req.to);
 
           List<Map<String, Object>> res = resSet.toList();
