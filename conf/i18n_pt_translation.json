@@ -386,6 +386,7 @@
   "ID": "Identidade",
   "Impact": "Impacto",
   "Label": "Classificação",
+  "label": "Classificação",
   "Layout": "Layout",
   "Link": "Conexão",
   "Location": "Localização",
