@@ -1248,14 +1248,20 @@ public class PontusJ2ReportingFunctions {
 
     }
     catch (Throwable t) {
-      System.err.println("failed to load conf/i18n_pt_translation.json: "+ t.toString());
+      System.err.println("failed to load conf/i18n_pt_translation.json: " + t.toString());
     }
 
   }
 
   public static String translate(String strToTranslate) {
     if (ptDictionary) {
-      return ptDictionary.get(strToTranslate) ?: strToTranslate;
+      String retVal = ptDictionary.get(strToTranslate);
+      if (!retVal) {
+        System.err.println("failed to find translation conf/i18n_pt_translation.json: " + strToTranslate);
+        return strToTranslate;
+      } else {
+        return retVal;
+      }
     }
     return strToTranslate;
   }
