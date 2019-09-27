@@ -459,13 +459,24 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
     if (req.cols != null && req.dataType != null)
     {
 
-      String[] vals = new String[req.cols.length];
+      Set<String> valsSet = new HashSet<>();
+      Set<String> reportButtonsSet = new HashSet<>();
+
 
       for (int i = 0, ilen = req.cols.length; i < ilen; i++)
       {
-        vals[i] = req.cols[i].id;
+        if (!req.cols[i].id.startsWith("@"))
+        {
+          valsSet.add(req.cols[i].id);
+        }
+        else{
+          reportButtonsSet.add(req.cols[i].id);
+        }
 
       }
+
+
+      String[] vals = valsSet.toArray(new String[valsSet.size()]);
 
       try
       {
@@ -525,7 +536,6 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
             GraphTraversal resSet2 = resSet.asAdmin().clone();
             count = (Long) resSet2.count().next();
 
-
           }
 
           if (StringUtils.isNotEmpty(req.sortCol))
@@ -534,7 +544,7 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
           }
 
           resSet = resSet.valueMap(true, vals)
-                .range(req.from, req.to);
+                         .range(req.from, req.to);
 
           List<Map<String, Object>> res = resSet.toList();
 
@@ -789,6 +799,17 @@ import static org.janusgraph.core.attribute.Text.textContainsFuzzy;
               }
             }
         );
+
+        List<Map<String, Object>> notificationTemplates = App.g.V()
+           .has("Object.Notification_Templates.Types", eq(label))
+           .valueMap("Object.Notification_Templates.Label" ,"Object.Notification_Templates.Text" )
+           .toList();
+
+        notificationTemplates.forEach(map -> {
+          props.add("@"+map.get("Object.Notification_Templates.Label")+"@"+map.get("Object.Notification_Templates.Text"));
+
+        });
+
 
         NodePropertyNamesReply reply = new NodePropertyNamesReply(props);
         return reply;
