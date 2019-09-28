@@ -1022,7 +1022,7 @@ public class PontusJ2ReportingFunctions {
                   if (currPath.length() > 0) {
                     currPath.append(', ')
                   }
-                  currPath.append(label);
+                  currPath.append(translate(label));
                   labelsForMatch.put(currVid, currPath);
                 }
                 currScore += scoreForLabel / totalScore;
@@ -1152,13 +1152,13 @@ public class PontusJ2ReportingFunctions {
 
     StringBuffer sb = new StringBuffer("<table style='margin: 2px; padding: 5px;'>")
       .append("<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>")
-      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th>")
-      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Match Weight</th>")
-      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Exclude From Search</th>")
-      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Exclude From Subsequence Search</th>")
-      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Exclude From Update</th>")
-      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Operation</th>")
-      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>").append(translate("Name")).append("</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>").append(translate("Match Weight")).append("</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>").append(translate("Exclude From Search")).append("</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>").append(translate("Exclude From Subsequence Search")).append("</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>").append(translate("Exclude From Update")).append("</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>").append(translate("Operation")).append("</th>")
+      .append("<th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>").append(translate("Value")).append("</th>")
       .append("</tr>");
 
     Map br = jsonToMap(json);
