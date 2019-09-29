@@ -1271,7 +1271,7 @@ public class PontusJ2ReportingFunctions {
 def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraversalSource g = g) {
   Jinjava jinJava = new Jinjava();
 
-  String vertType = g.V(pg_id).label();
+  String vertType = g.V(pg_id).label().next();
   def allData = new HashMap<>();
 
 
@@ -1326,7 +1326,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
       .has("Metadata.Type.Object.AWS_Instance", P.eq('Object.AWS_Instance'))
       .valueMap().toList().collect { item ->
       item.collectEntries { key, val ->
-        [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+        [key.replaceAll('[.]', '_'), val.toString().substring(1,val.toString().length()-1) ]
       }
     };
 
@@ -1338,7 +1338,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 
     def impactedDataSources = impactedDataSourcesTrav.valueMap().toList().collect { item ->
       item.collectEntries { key, val ->
-        [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+        [key.replaceAll('[.]', '_'), val.toString().substring(1,val.toString().length()-1) ]
       }
     };
     def impactedPeople = dsTravClone
@@ -1350,7 +1350,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
       .toList()
       .collect { item ->
         item.collectEntries { key, val ->
-          [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+          [key.replaceAll('[.]', '_'), val.toString().substring(1,val.toString().length()-1) ]
         }
       };
     allData.put('impacted_data_sources', impactedDataSources);
