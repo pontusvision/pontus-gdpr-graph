@@ -1099,7 +1099,7 @@ public class PontusJ2ReportingFunctions {
     StringBuilder htmlBuilder = new StringBuilder();
     for (Map.Entry<String, String> entry : map.entrySet()) {
       htmlBuilder.append(String.format("<tr style='${rowsCss}'><td style='${rowsCss}'>%s</td><td style='${rowsCss}'>%s</td></tr>\n",
-        entry.getKey(), entry.getValue()));
+        translate(entry.getKey().replaceAll("_", " ")), entry.getValue()));
     }
 
     return htmlBuilder.toString();
@@ -1107,7 +1107,11 @@ public class PontusJ2ReportingFunctions {
 
   public static String htmlTable(Map<String, String> map) {
     htmlTableCustomHeader(map,
-      "<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>",
+      "<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>"+
+        translate("Name")+
+        "</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>" +
+        translate("Value") +
+        "</th></tr>",
       "</table>");
   }
 
