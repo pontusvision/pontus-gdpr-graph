@@ -1172,7 +1172,8 @@ public class PontusJ2ReportingFunctions {
       .has('Metadata.Type.Event.Consent', P.eq('Event.Consent'))
       .in()
       .dedup()
-      .count();
+      .count()
+      .next();
   }
 
   public static Long getNumNaturalPersonForPIA(String piaId) {
@@ -1184,6 +1185,8 @@ public class PontusJ2ReportingFunctions {
       .in('Has_Ingestion_Event')
       .filter(has('Metadata.Type.Person.Natural', P.eq('Person.Natural')))
       .count()
+      .next();
+
 
   }
 
@@ -1194,8 +1197,9 @@ public class PontusJ2ReportingFunctions {
       .out('Has_Ingestion_Event')
       .out('Has_Ingestion_Event')
       .both('Has_Ingestion_Event')
-      .filter(has('Metadata.Type.Object.Sensitive_Data', eq('Object.Sensitive_Data')))
+      .filter(has('Metadata.Type.Object.Sensitive_Data', P.eq('Object.Sensitive_Data')))
       .count()
+       .next()
 
   }
 
@@ -1285,7 +1289,7 @@ public class PontusJ2ReportingFunctions {
   }
 
   public static Long getNumDataSourcesForPIA(String id) {
-    return g.V(Long.parseLong(id)).both().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source')).id().count()
+    return g.V(Long.parseLong(id)).both().has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source')).id().count().next()
   }
 
   public static JsonSlurper ptDictionarySlurper;
