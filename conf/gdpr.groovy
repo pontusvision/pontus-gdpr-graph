@@ -2828,35 +2828,14 @@ def createNotificationTemplatesPt() {
           "  {% endfor %}").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Person.Natural")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
-        .property("Object.Notification_Templates.Label", "SAR Read")
+        .property("Object.Notification_Templates.Label", "DSAR")
         .next();
 
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Object.Notification_Templates.Id", "SAR UPDATE TEMPLATE")
-        .property("Object.Notification_Templates.Text", ("<p>Dear {{ context.Person_Natural_Title | capitalize }} {{ context.Person_Natural_Last_Name |capitalize }}, </p>\n" +
-          "\n" +
-          "  Please find below a summary of your personal data that we can UPDATE:\n" +
-          "  \n" +
-          "  <p><br></p><p>\n" +
-          "  <h3>{{ context.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
-          "  {% for key, value in context.items() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
-          "  {% endfor %}\n" +
-          "  {{ \"</table>\" }}\n" +
-          "  {% endfor %}\n" +
-          "  \n" +
-          "  \n" +
-          "  {% for mainkey in connected_data %}\n" +
-          "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Name</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Value</th></tr>\" }}\n" +
-          "  {% for key, value in mainkey.items() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
-          "  {% endfor %}\n" +
-          "  {{ \"</table>\" }}\n" +
-          "  {% endfor %}").bytes.encodeBase64().toString())
+        .property("Object.Notification_Templates.Text", ("").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Person.Natural")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_update")
         .property("Object.Notification_Templates.Label", "SAR Update")
@@ -2878,65 +2857,25 @@ def createNotificationTemplatesPt() {
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "DATA BREACH PERSON TEMPLATE")
-        .property("Object.Notification_Templates.Text", ("<div style='padding: 10px; background: black'>\n" +
-          "<hr/>\n" +
+        .property("Object.Notification_Templates.Id", "VIOLAÇÃO DE DADOS")
+        .property("Object.Notification_Templates.Text", ("\n" +
+          "{% set possibleMatches = pv:possibleMatches(context.id,'{\"Object.Email_Address\": 10.5, \"Location.Address\": 10.1, \"Object.Phone_Number\": 1.0, \"Object.Senstive_Data\": 10.0, \"Object.Health\": 1.0, \"Object.Biometric\": 50.0 , \"Object.Insurance_Policy\": 1.0}') %}\n" +
+          "{% set numMatches = possibleMatches.size() %}\n" +
+          "{{ context.Person_Identity_Full_Name}} Corresponde potencialmente a {{ numMatches }} registro{%- if numMatches != 1 -%}s{% endif %}.\n" +
           "\n" +
-          "<h1> Resumo de Impacto da Violação de Dados </h1>\n" +
-          "<hr/>\n" +
-          "  Titulares: {{ impacted_people | length }}<br/>\n" +
-          "  Fontes de Dados: {{ impacted_data_sources | length }}<br/>\n" +
-          "  Servidores : {{ impacted_servers | length }}<br/>\n" +
-          "\n" +
-          "<hr/>\n" +
-          "<hr/>\n" +
+          "{% if numMatches > 0 %}\n" +
           "\n" +
           "\n" +
-          "{% if impacted_people[0] is defined %}\n" +
-          "  <h2> Tabela de {{ impacted_people | length }} titulares afetados </h2>\n" +
-          "  <table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Nome</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Date de Nascimento</th></tr>\n" +
-          "\n" +
-          " {% for mainkey in impacted_people %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (mainkey['Person_Natural_Full_Name'] , mainkey['Person_Natural_Date_Of_Birth'] )}}\n" +
-          "  {% endfor %}\n" +
-          "    {{ \"</table>\" }}\n" +
-          "\n" +
-          "{% else %}\n" +
-          "  <h2> Nenhum Titular Afetado </h2>\n" +
-          "{% endif %}\n" +
-          "\n" +
-          "\n" +
-          "{% if impacted_data_sources[0] is defined %}\n" +
-          "  <h2> Tabela de {{ impacted_data_sources | length }} fontes de dados afetadas </h2>\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Fonte</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Data de Update</th></tr>\" }}\n" +
-          "\n" +
-          " {% for mainkey in impacted_data_sources %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (mainkey['Object_Data_Source_Name'] , mainkey['Object_Data_Source_Update_Date'] )}}\n" +
-          "  {% endfor %}\n" +
-          "    {{ \"</table>\" }}\n" +
-          "\n" +
-          "{% else %}\n" +
-          "  <h2> Nenhuma fonte de dados afetetada </h2>\n" +
-          "{% endif %}\n" +
-          "    \n" +
-          "{% if impacted_servers[0] is defined %}\n" +
-          "  <h2> Tabela de {{ impacted_servers | length }} servidores afetados </h2>\n" +
-          "\n" +
-          " {% for mainkey in impacted_servers %}\n" +
-          "  <h3>{{ mainkey.Metadata_Type |replace('.',' ')|replace('_',' ') }}</h3>\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Propriedade</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Valor</th></tr>\" }}\n" +
-          "  {% for key, value in mainkey.items() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (key , value )}}\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Titular</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentual</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Propriedades em Comum</th></tr>\" }}\n" +
+          "  {% for item in possibleMatches.entrySet() %}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (item.key.Person_Identity_Full_Name , item.value * 100.0, item.key.Labels_For_Match ) }}\n" +
           "  {% endfor %}\n" +
           "  {{ \"</table>\" }}\n" +
-          "  {% endfor %}\n" +
-          "{% else %}\n" +
-          "  <h2> Nenhum servidor afetado </h2>\n" +
-          "{% endif %}    \n" +
-          "</div>").bytes.encodeBase64().toString())
+          "\n" +
+          "{% endif %}").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
         .property("Object.Notification_Templates.Types", "Event.Data_Breach")
-        .property("Object.Notification_Templates.Label", "Data Breach")
+        .property("Object.Notification_Templates.Label", "Relatório")
         .next();
 
     }
