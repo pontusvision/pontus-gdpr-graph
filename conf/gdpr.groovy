@@ -1672,8 +1672,153 @@ have a voice.
 the end of the process.
  */
 
+def addLawfulBasisAndPrivacyNoticesPt(JanusGraph graph, GraphTraversalSource g) {
+
+  metadataCreateDate = new Date()
+  metadataUpdateDate = new Date()
+//  Transaction trans = graph.tx()
+  try {
+//    if (!trans.isOpen()) {
+//      trans.open()
+//
+//    }
+
+
+    def definitions = new String[10]
+
+
+    definitions[0] = "Consentimento pelo titular"
+    definitions[1] = "Para o cumprimento de obrigação legal ou regulatória pelo controlador"
+    definitions[2] = "Pela administração pública, para o tratamento e uso compartilhado de dados necessários à execução de políticas públicas previstas em leis e regulamentos ou respaldadas em contratos, convênios ou instrumentos congêneres, observadas as disposições do Capítulo IV desta Lei"
+    definitions[3] = "Para a realização de estudos por órgão de pesquisa, garantida, sempre que possível, a anonimização dos dados pessoais"
+    definitions[4] = "Quando necessário para a execução de contrato ou de procedimentos preliminares relacionados a contrato do qual seja parte o titular, a pedido do titular dos dados"
+    definitions[5] = "Para o exercício regular de direitos em processo judicial, administrativo ou arbitral, esse último nos termos da Lei nº 9.307/96 (Lei de Arbitragem)"
+    definitions[6] = "Para a proteção da vida ou da incolumidade física do titular ou de terceiro"
+    definitions[7] = "Para a tutela da saúde, exclusivamente, em procedimento realizado por profissionais de saúde, serviços de saúde ou autoridade sanitária"
+    definitions[8] = "Quando necessário para atender aos interesses legítimos do controlador ou de terceiro, exceto no caso de prevalecerem direitos e liberdades fundamentais do titular que exijam a proteção dos dados pessoais"
+    definitions[9] = "Para a proteção do crédito, inclusive quanto ao disposto na legislação pertinente"
+
+    def lawfulBasisVertices = new Vertex[6]
+
+    int ilen = definitions.length
+
+
+    for (int i = 0; i < ilen; i++) {
+
+
+      GraphTraversal lawfulBasis1 = g.V().has("Object.Lawful_Basis.Description", P.eq(definitions[i]))
+
+      if (lawfulBasis1.hasNext()) {
+        lawfulBasisVertices[i] = lawfulBasis1.next();
+      } else {
+        lawfulBasisVertices[i] = g.addV("Object.Lawful_Basis").
+          property("Metadata.Lineage", "https://gdpr-info.eu/art-6-gdpr/").
+          property("Metadata.Redaction", "/data/protection/officer").
+          property("Metadata.Version", 1).
+          property("Metadata.Status", "new").
+          property("Metadata.GDPR_Status", "n/a").
+          property("Metadata.Lineage_Server_Tag", "AWS_AAA").
+          property("Metadata.Lineage_Location_Tag", "GB").
+          property("Metadata.Type", "Object.Lawful_Basis").
+          property("Metadata.Type.Object.Lawful_Basis", "Object.Lawful_Basis").
+          property("Object.Lawful_Basis.Id", i).
+          property("Object.Lawful_Basis.Description", definitions[i]).
+          next()
+      }
+
+    }
+
+    String[] privNoticeDesc = ["This is a sample Privacy Notice", "This is another sample Privacy Notice"];
+    String[] privNoticeText = ["This is a sample Privacy Notice Text; the legal terms go here",
+                               "This is another sample Privacy Notice Text; the legal terms go here"];
+
+    ilen = privNoticeDesc.length;
+
+
+    for (int i = 0; i < ilen; i++) {
+
+
+      GraphTraversal privNotice = g.V().has("Object.Privacy_Notice.Description", P.eq(privNoticeDesc[i]))
+
+      if (privNotice.hasNext()) {
+        privNotice.next();
+      } else {
+        g.addV("Object.Privacy_Notice").
+          property("Metadata.Type", "Object.Privacy_Notice").
+          property("Metadata.Type.Object.Privacy_Notice", "Object.Privacy_Notice").
+          property("Object.Privacy_Notice.Text", privNoticeText[i]).
+          property("Object.Privacy_Notice.Description", privNoticeDesc[i]).
+          property("Object.Privacy_Notice.Effect_On_Individuals", "low").
+          property("Object.Privacy_Notice.Who_Is_Collecting", "ABG Inc").
+          property("Object.Privacy_Notice.Info_Collected", "Emails").
+          property("Object.Privacy_Notice.URL", "http://www.abg.com/data").
+          property("Object.Privacy_Notice.Id", i).
+          property("Object.Privacy_Notice.Why_Is_It_Collected", "required for BAU").
+          property("Object.Privacy_Notice.Expiry_Date", new Date()).
+          property("Object.Privacy_Notice.How_Is_It_Collected", "Electronic Form").
+          property("Object.Privacy_Notice.How_Will_It_Be_Used", "Research and Development").
+          property("Object.Privacy_Notice.Who_Will_It_Be_Shared", "GAB ltd").
+          property("Object.Privacy_Notice.Likely_To_Complain", "no").
+          property("Object.Privacy_Notice.Delivery_Date", new Date()).
+          next()
+      }
+
+    }
+
+
+    /*
+
+    What information is being collected? - InfoCollected
+    Who is collecting it? - WhoIsCollecting
+    How is it collected? - HowIsItCollected
+      - Electronic Form (Two types: layering, just-in-time)
+      - Telephone
+      - Paper Form
+
+    Why is it being collected? - WhyIsItCollected
+    How will it be used? - HowWillItBeUsed
+    Who will it be shared with? - WhoWillItBeShared
+    What will be the effect of this on the individuals concerned? - EffectOnIndividuals
+    Is the intended use likely to cause individuals to object or complain? - LikelyToComplain
+    */
+
+
+    Vertex pn = g.V().has("Metadata.Type.Object.Privacy_Notice", P.eq("Object.Privacy_Notice"))
+      .order().by(Order.shuffle).range(0, 1).next();
+
+    int numLawfulBasis = lawfulBasisVertices.length;
+
+    int index = new Random().nextInt(numLawfulBasis);
+
+    g.addE("Has_Lawful_Basis_On").from(pn).to(lawfulBasisVertices[index]).next()
+
+
+//        __addConsentForPrivacyNotice(graph, g, g.V(pnId0).next())
+//        __addConsentForPrivacyNotice(graph, g, g.V(pnId1).next())
+
+//
+//        __addPrivacyImpactAssessment(graph, g, g.V(pnId0).next())
+//        __addPrivacyImpactAssessment(graph, g, g.V(pnId1).next())
+
+
+//    trans.commit()
+  } catch (Throwable t) {
+//    trans.rollback()
+    throw t
+  } finally {
+//    trans.close()
+  }
+
+
+}
+
 
 def addLawfulBasisAndPrivacyNotices(JanusGraph graph, GraphTraversalSource g) {
+
+  if (new File("conf/i18n_pt_translation.json").exists()) {
+    return addLawfulBasisAndPrivacyNoticesPt(graph, g);
+  }
+
 
   metadataCreateDate = new Date()
   metadataUpdateDate = new Date()
@@ -2482,7 +2627,7 @@ def createNotificationTemplates() {
 //      trans.open()
 //
 //    }
-    if (new File("conf/i18n_pt_translation.json").exists()){
+    if (new File("conf/i18n_pt_translation.json").exists()) {
       return createNotificationTemplatesPt();
     }
 
@@ -2764,11 +2909,42 @@ def createNotificationTemplatesPt() {
           "{{ pv:getNumNaturalPersonForPIA(context.id).size() }} titulares.").bytes.encodeBase64().toString())
         .next();
 
+      g.addV("Object.Notification_Templates")
+        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
+        .property("Metadata.Type", "Object.Notification_Templates")
+        .property("Object.Notification_Templates.Id", "Bases Legais")
+        .property("Object.Notification_Templates.Types", "Object.Legal_Basis")
+        .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
+        .property("Object.Notification_Templates.Label", "Relatório")
+        .property("Object.Notification_Templates.Text", ("").bytes.encodeBase64().toString())
+        .next();
 
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "INGESTION BUSINESS RULES")
+        .property("Object.Notification_Templates.Id", "Fontes de Dados")
+        .property("Object.Notification_Templates.Types", "Object.Data_Source")
+        .property("Object.Notification_Templates.URL", "https://localhost:18443/")
+        .property("Object.Notification_Templates.Label", "Relatório")
+        .property("Object.Notification_Templates.Text", ("").bytes.encodeBase64().toString())
+        .next();
+
+      g.addV("Object.Notification_Templates")
+        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
+        .property("Metadata.Type", "Object.Notification_Templates")
+        .property("Object.Notification_Templates.Id", "Contratos")
+        .property("Object.Notification_Templates.Types", "Object.Contract")
+        .property("Object.Notification_Templates.URL", "https://localhost:18443/")
+        .property("Object.Notification_Templates.Label", "Relatório")
+        .property("Object.Notification_Templates.Text", ("").bytes.encodeBase64().toString())
+        .next();
+
+
+
+      g.addV("Object.Notification_Templates")
+        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
+        .property("Metadata.Type", "Object.Notification_Templates")
+        .property("Object.Notification_Templates.Id", "Regras de Negócio")
         .property("Object.Notification_Templates.Text", ("{{ pv:businessRulesTable(context.Event_Ingestion_Business_Rules) }}").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Event.Ingestion")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
@@ -2778,7 +2954,7 @@ def createNotificationTemplatesPt() {
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "MATCHES")
+        .property("Object.Notification_Templates.Id", "Corresponde")
         .property("Object.Notification_Templates.Text", ("\n" +
           "{% set possibleMatches = pv:possibleMatches(context.id,'{\"Object.Email_Address\": 10.5, \"Location.Address\": 10.1, \"Object.Phone_Number\": 1.0, \"Object.Senstive_Data\": 10.0, \"Object.Health\": 1.0, \"Object.Biometric\": 50.0 , \"Object.Insurance_Policy\": 1.0}') %}\n" +
           "{% set numMatches = possibleMatches.size() %}\n" +
@@ -2796,14 +2972,14 @@ def createNotificationTemplatesPt() {
           "{% endif %}").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Person.Natural")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
-        .property("Object.Notification_Templates.Label", "Matches")
+        .property("Object.Notification_Templates.Label", "Corresponde")
         .next();
 
 
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "MATCHES")
+        .property("Object.Notification_Templates.Id", "Corresponde")
         .property("Object.Notification_Templates.Text", ("\n" +
           "{% set possibleMatches = pv:possibleMatches(context.id,'{\"Object.Email_Address\": 10.5, \"Location.Address\": 10.1, \"Object.Phone_Number\": 1.0, \"Object.Senstive_Data\": 10.0, \"Object.Health\": 1.0, \"Object.Biometric\": 50.0 , \"Object.Insurance_Policy\": 1.0}') %}\n" +
           "{% set numMatches = possibleMatches.size() %}\n" +
@@ -2818,17 +2994,17 @@ def createNotificationTemplatesPt() {
           "  {% endfor %}\n" +
           "  {{ \"</table>\" }}\n" +
           "\n" +
-          "{% endif %}" ).bytes.encodeBase64().toString())
+          "{% endif %}").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.Types", "Person.Identity")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
-        .property("Object.Notification_Templates.Label", "Matches")
+        .property("Object.Notification_Templates.Label", "Corresponde")
         .next();
 
 
       g.addV("Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "SAR READ TEMPLATE")
+        .property("Object.Notification_Templates.Id", "DSAR")
         .property("Object.Notification_Templates.Text", ("<p>{{ context.Person_Natural_Title | capitalize }} {{ context.Person_Natural_Last_Name |capitalize }}, </p>\n" +
           "\n" +
           "\n" +
@@ -2856,28 +3032,6 @@ def createNotificationTemplatesPt() {
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
         .property("Object.Notification_Templates.Label", "DSAR")
         .next();
-
-      g.addV("Object.Notification_Templates")
-        .property("Metadata.Type", "Object.Notification_Templates")
-        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "SAR UPDATE TEMPLATE")
-        .property("Object.Notification_Templates.Text", ("").bytes.encodeBase64().toString())
-        .property("Object.Notification_Templates.Types", "Person.Natural")
-        .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_update")
-        .property("Object.Notification_Templates.Label", "SAR Update")
-        .next();
-
-      g.addV("Object.Notification_Templates")
-        .property("Metadata.Type", "Object.Notification_Templates")
-        .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
-        .property("Object.Notification_Templates.Id", "SAR DELETE TEMPLATE")
-        .property("Object.Notification_Templates.Text", ("").bytes.encodeBase64().toString())
-        .property("Object.Notification_Templates.Types", "Person.Natural")
-        .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_delete")
-        .property("Object.Notification_Templates.Label", "SAR Delete")
-        .next();
-
-
 
 
       g.addV("Object.Notification_Templates")
@@ -3152,7 +3306,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
   long oneWeekInMs = 3600000L * 24L * 7L
   long eighteenWeeks = oneWeekInMs * 18L
 
-
+  boolean newEntries = false;
   vpcIds.each {
 
     def vpcId = null
@@ -3166,6 +3320,7 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
       sb.append("VPC error - ").append(t.toString()).append('\n');
     }
     if (vpcId == null) {
+      newEntries = true;
       long createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks) * 2;
       long updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks);
       metadataCreateDate = new Date((long) createMillis)
@@ -3224,6 +3379,8 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
       }
 
       if (awsiId == null) {
+        newEntries = true;
+
         long createMillis = System.currentTimeMillis() - (long) (randVal.nextDouble() * eighteenWeeks);
         long updateMillis = createMillis + (long) (randVal.nextDouble() * eighteenWeeks) * 2;
         metadataCreateDate = new Date((long) createMillis)
@@ -3296,6 +3453,8 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
         }
 
         if (sgvId == null) {
+          newEntries = true;
+
 //  Transaction trans = graph.tx()
           try {
 //    if (!trans.isOpen()) {
@@ -3343,24 +3502,27 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
 //
 //    }
 
-          sb.append("retrieving ").append(sgvId).append('\n');
-          sb.append("retrieving ").append(sgvId.class).append('\n');
+          if (newEntries) {
 
-          sgv = g.V(sgvId).next();
-          awsi = g.V(awsiId).next();
-          vpc = g.V(vpcId).next();
 
-          g.addE("Has_Server")
-            .from(sgv)
-            .to(awsi)
-            .next();
+            sb.append("retrieving ").append(sgvId).append('\n');
+            sb.append("retrieving ").append(sgvId.class).append('\n');
 
-          sgv = g.V(sgvId).next();
+            sgv = g.V(sgvId).next();
+            awsi = g.V(awsiId).next();
+            vpc = g.V(vpcId).next();
 
-          g.addE("Has_Security_Group")
-            .from(vpc)
-            .to(sgv).next();
+            g.addE("Has_Server")
+              .from(sgv)
+              .to(awsi)
+              .next();
 
+            sgv = g.V(sgvId).next();
+
+            g.addE("Has_Security_Group")
+              .from(vpc)
+              .to(sgv).next();
+          }
 //    trans.commit()
         } catch (Throwable t) {
 //    trans.rollback()
@@ -3508,8 +3670,7 @@ def getAwarenessScores(def scoresMap) {
       scoreValue -= (10L * firstReminder / numEvents)
 
       // add a bit of a score, after all there was at least some training.
-      if (scoreValue == 0)
-      {
+      if (scoreValue == 0) {
         scoreValue = 10L
       }
 
@@ -3883,7 +4044,7 @@ def getInfoYouHoldScores(def scoresMap) {
     if (pcntNoEdges > 5 && pcntNoEdges < 40) {
       scoreValue -= 40L;
     } else if (pcntNoEdges > 40) {
-      scoreValue -= (20L + Math.max( 2L * pcntNoEdges, 70L))
+      scoreValue -= (20L + Math.max(2L * pcntNoEdges, 70L))
     } else {
       scoreValue -= (pcntNoEdges)
     }
@@ -4169,58 +4330,57 @@ def getScoresJson() {
 }
 
 
-def calculatePOLECounts(){
+def calculatePOLECounts() {
 
   List<String> vertexLabels = [
     "Event.Consent"
-    ,"Event.Data_Breach"
-    ,"Event.Form_Ingestion"
-    ,"Event.Ingestion"
-    ,"Event.Subject_Access_Request"
-    ,"Event.Training"
-    ,"Location.Address"
-    ,"Object.AWS_Instance"
-    ,"Object.AWS_Network_Interface"
-    ,"Object.AWS_Security_Group"
-    ,"Object.AWS_VPC"
-    ,"Object.Awareness_Campaign"
-    ,"Object.Credential"
-    ,"Object.Data_Procedures"
-    ,"Object.Data_Source"
-    ,"Object.Email_Address"
-    ,"Object.Form"
-    ,"Object.Identity_Card"
-    ,"Object.Insurance_Policy"
-    ,"Object.Lawful_Basis"
-    ,"Object.Contract"
-    ,"Object.Notification_Templates"
-    ,"Object.Privacy_Impact_Assessment"
-    ,"Object.Privacy_Notice"
-    ,"Object.Sensitive_Data"
-    ,"Object.Health"
-    ,"Object.Biometric"
-    ,"Object.Genetic"
-    ,"Person.Natural"
-    ,"Person.Employee"
-    ,"Person.Organisation"
+    , "Event.Data_Breach"
+    , "Event.Form_Ingestion"
+    , "Event.Ingestion"
+    , "Event.Subject_Access_Request"
+    , "Event.Training"
+    , "Location.Address"
+    , "Object.AWS_Instance"
+    , "Object.AWS_Network_Interface"
+    , "Object.AWS_Security_Group"
+    , "Object.AWS_VPC"
+    , "Object.Awareness_Campaign"
+    , "Object.Credential"
+    , "Object.Data_Procedures"
+    , "Object.Data_Source"
+    , "Object.Email_Address"
+    , "Object.Form"
+    , "Object.Identity_Card"
+    , "Object.Insurance_Policy"
+    , "Object.Lawful_Basis"
+    , "Object.Contract"
+    , "Object.Notification_Templates"
+    , "Object.Privacy_Impact_Assessment"
+    , "Object.Privacy_Notice"
+    , "Object.Sensitive_Data"
+    , "Object.Health"
+    , "Object.Biometric"
+    , "Object.Genetic"
+    , "Person.Natural"
+    , "Person.Employee"
+    , "Person.Organisation"
 
-  ] ;
+  ];
 
 
   StringBuffer sb = new StringBuffer("[")
   boolean firstTime = true;
-  vertexLabels.each{ dataType ->
-    if (!firstTime){
+  vertexLabels.each { dataType ->
+    if (!firstTime) {
       sb.append(",")
-    }
-    else{
+    } else {
       firstTime = false;
     }
     String var = "v.\"Metadata.Type.${dataType}\": ${dataType}"
     // sb.append(var)
 
-    Long numEntries = graph.indexQuery(dataType + ".MixedIdx",var).vertexTotals()
-    sb.append (" { \"metricname\": \"$dataType\", \"metricvalue\": $numEntries, \"metrictype\": \"POLE Counts\" }")
+    Long numEntries = graph.indexQuery(dataType + ".MixedIdx", var).vertexTotals()
+    sb.append(" { \"metricname\": \"$dataType\", \"metricvalue\": $numEntries, \"metrictype\": \"POLE Counts\" }")
   }
   sb.append(']')
 
@@ -4229,7 +4389,7 @@ def calculatePOLECounts(){
 }
 
 
-def getNumEventsPerDataSource(){
+def getNumEventsPerDataSource() {
   StringBuffer sb = new StringBuffer("[")
   boolean firstTime = true;
 
@@ -4243,7 +4403,7 @@ def getNumEventsPerDataSource(){
       __.as('ingestion_event').values('Object.Data_Source.Name').as('event_id')
     )
     .select('event_id')
-    .groupCount() .each { metric ->
+    .groupCount().each { metric ->
     metric.each { metricname, metricvalue ->
       if (!firstTime) {
         sb.append(",")
@@ -4259,7 +4419,7 @@ def getNumEventsPerDataSource(){
 
 }
 
-def getNumNaturalPersonPerDataSource(){
+def getNumNaturalPersonPerDataSource() {
   StringBuffer sb = new StringBuffer("[")
   boolean firstTime = true;
 
@@ -4277,7 +4437,7 @@ def getNumNaturalPersonPerDataSource(){
       __.as('ingestion_event').values('Object.Data_Source.Name').as('event_id')
     )
     .select('event_id')
-    .groupCount() .each { metric ->
+    .groupCount().each { metric ->
     metric.each { metricname, metricvalue ->
       if (!firstTime) {
         sb.append(",")
@@ -4296,7 +4456,7 @@ def getNumNaturalPersonPerDataSource(){
 
 }
 
-def getNumSensitiveDataPerDataSource(){
+def getNumSensitiveDataPerDataSource() {
   StringBuffer sb = new StringBuffer()
   boolean firstTime = false;
 
@@ -4320,7 +4480,7 @@ def getNumSensitiveDataPerDataSource(){
       __.as('ingestion_event').values('Object.Data_Source.Name').as('event_id')
     )
     .select('event_id')
-    .groupCount() .each { metric ->
+    .groupCount().each { metric ->
     metric.each { metricname, metricvalue ->
       if (!firstTime) {
         sb.append(",")
@@ -4339,14 +4499,14 @@ def getNumSensitiveDataPerDataSource(){
 }
 
 
-def getNumNaturalPersonPerOrganisation(){
+def getNumNaturalPersonPerOrganisation() {
   StringBuffer sb = new StringBuffer("[")
   boolean firstTime = true;
 
   def orgTypes = [
-    "Data Controller": "Is_Data_Controller"
-    ,"Data Processor": "Is_Data_Processor"
-    ,"Data Owner": "Is_Data_Owner"
+    "Data Controller" : "Is_Data_Controller"
+    , "Data Processor": "Is_Data_Processor"
+    , "Data Owner"    : "Is_Data_Owner"
   ]
 
 
@@ -4388,7 +4548,7 @@ def getNumNaturalPersonPerOrganisation(){
 
 }
 
-def getDSARStatsPerOrganisation(){
+def getDSARStatsPerOrganisation() {
 
   StringBuffer sb = new StringBuffer("[")
   boolean firstTime = true;
@@ -4397,14 +4557,14 @@ def getDSARStatsPerOrganisation(){
   def thirtyDayDateThreshold = new java.util.Date(thirtyDayThresholdMs);
 
   long fifteenDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 15L));
-  def  fifteenDayDateThreshold = new java.util.Date(fifteenDayThresholdMs);
+  def fifteenDayDateThreshold = new java.util.Date(fifteenDayThresholdMs);
 
 
   long tenDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 10L));
   def tenDayDateThreshold = new java.util.Date(tenDayThresholdMs);
 
   long fiveDayThresholdMs = (long) (System.currentTimeMillis() - (3600000L * 24L * 5L));
-  def  fiveDayDateThreshold = new java.util.Date(fiveDayThresholdMs);
+  def fiveDayDateThreshold = new java.util.Date(fiveDayThresholdMs);
 
   def typeOrg =
     [
@@ -4413,7 +4573,7 @@ def getDSARStatsPerOrganisation(){
       "Is_Data_Owner"
     ]
 
-  typeOrg.each{ org ->
+  typeOrg.each { org ->
     g.V().has('Metadata.Type.Person.Organisation', eq('Person.Organisation'))
       .as('organisation')
       .outE(org)
@@ -4435,17 +4595,17 @@ def getDSARStatsPerOrganisation(){
       .as('events')
       .match(
         __.as('organisation').values('Person.Organisation.Name').as('dsar_source_name')
-        ,__.as('events').values('Event.Subject_Access_Request.Status').as('dsar_status')
-        ,__.as('events').values('Event.Subject_Access_Request.Request_Type').as('dsar_type')
-        ,__.as('events').values('Event.Subject_Access_Request.Metadata.Create_Date').as('dsar_create_date')
+        , __.as('events').values('Event.Subject_Access_Request.Status').as('dsar_status')
+        , __.as('events').values('Event.Subject_Access_Request.Request_Type').as('dsar_type')
+        , __.as('events').values('Event.Subject_Access_Request.Metadata.Create_Date').as('dsar_create_date')
         .coalesce(is(gt(fiveDayDateThreshold)).constant("Last 5 days"),
-          is(between(fiveDayDateThreshold,tenDayDateThreshold)).constant("Last 10 days"),
-          is(between(tenDayDateThreshold,fifteenDayDateThreshold)).constant("Last 15 days"),
-          is(between(fifteenDayDateThreshold,thirtyDayDateThreshold)).constant("Last 30 days"),
+          is(between(fiveDayDateThreshold, tenDayDateThreshold)).constant("Last 10 days"),
+          is(between(tenDayDateThreshold, fifteenDayDateThreshold)).constant("Last 15 days"),
+          is(between(fifteenDayDateThreshold, thirtyDayDateThreshold)).constant("Last 30 days"),
           is(lt(thirtyDayDateThreshold)).constant("Older than 30 days"))
         .as('dsar_age')
       )
-      .select('dsar_source_type','dsar_source_name','dsar_status', 'dsar_type', 'dsar_age')
+      .select('dsar_source_type', 'dsar_source_name', 'dsar_status', 'dsar_type', 'dsar_age')
       .groupCount()
       .each { metric ->
         metric.each { key, metricvalue ->
@@ -4454,7 +4614,7 @@ def getDSARStatsPerOrganisation(){
           } else {
             firstTime = false;
           }
-          sb.append(" {\"dsar_source_type\":\"${key['dsar_type']}    ${key['dsar_status']}     ${key['dsar_source_type'].label().toString().replaceAll('[Is_ |_|.]',' ')}     ${key['dsar_age']}\", \"dsar_source_name\":\"${key['dsar_source_name']}\", \"dsar_count\": $metricvalue }")
+          sb.append(" {\"dsar_source_type\":\"${key['dsar_type']}    ${key['dsar_status']}     ${key['dsar_source_type'].label().toString().replaceAll('[Is_ |_|.]', ' ')}     ${key['dsar_age']}\", \"dsar_source_name\":\"${key['dsar_source_name']}\", \"dsar_count\": $metricvalue }")
 
         }
 
@@ -4467,8 +4627,6 @@ def getDSARStatsPerOrganisation(){
 
 
 }
-
-
 
 
 //g.V().drop().iterate()
