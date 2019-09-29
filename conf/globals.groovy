@@ -1135,8 +1135,8 @@ public class PontusJ2ReportingFunctions {
       .valueMap(true)
   }
 
-  public static Map getDataSourcesForLegalBasis(String legalBasisId) {
-    return g.V(Long.parseLong(legalBasisId))
+  public static Map getDataSourcesForLawfulBasis(String lawfulBasisId) {
+    return g.V(Long.parseLong(lawfulBasisId))
       .in()
       .in()
       .has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
@@ -1148,8 +1148,8 @@ public class PontusJ2ReportingFunctions {
   }
 
 
-  public static Long getNumNaturalPersonForLegalBasis(String legalBasisId) {
-    return g.V(Long.parseLong(legalBasisId))
+  public static Long getNumNaturalPersonForLawfulBasis(String lawfulBasisId) {
+    return g.V(Long.parseLong(lawfulBasisId))
       .in()
       .in()
       .has('Metadata.Type.Object.Privacy_Impact_Assessment',P.eq('Object.Privacy_Impact_Assessment'))
@@ -1351,15 +1351,15 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "businessRulesTable",
     PontusJ2ReportingFunctions.class, "businessRulesTable", String.class));
 
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getDataSourcesForLegalBasis",
-    PontusJ2ReportingFunctions.class, "getDataSourcesForLegalBasis", String.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getDataSourcesForLawfulBasis",
+    PontusJ2ReportingFunctions.class, "getDataSourcesForLawfulBasis", String.class));
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getDeptForDataSources",
     PontusJ2ReportingFunctions.class, "getDeptForDataSources", String.class));
 
 
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForLegalBasis",
-    PontusJ2ReportingFunctions.class, "getNumNaturalPersonForLegalBasis", String.class));
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForLawfulBasis",
+    PontusJ2ReportingFunctions.class, "getNumNaturalPersonForLawfulBasis", String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForPIA",
     PontusJ2ReportingFunctions.class, "getNumNaturalPersonForPIA", String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumSensitiveInfoForPIA",

@@ -2913,7 +2913,7 @@ def createNotificationTemplatesPt() {
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Metadata.Type", "Object.Notification_Templates")
         .property("Object.Notification_Templates.Id", "Bases Legais")
-        .property("Object.Notification_Templates.Types", "Object.Legal_Basis")
+        .property("Object.Notification_Templates.Types", "Object.Lawful_Basis")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
         .property("Object.Notification_Templates.Label", "Relatório")
         .property("Object.Notification_Templates.Text", ("").bytes.encodeBase64().toString())
