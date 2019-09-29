@@ -1081,6 +1081,8 @@ public class PontusJ2ReportingFunctions {
       }
     };
 
+    return neighbours;
+
   }
 
   public static String htmlTableCustomHeader(Map<String, String> map, String tableHeader, String tableFooter) {
@@ -1124,7 +1126,7 @@ public class PontusJ2ReportingFunctions {
   }
 
 
-  public static Map getDeptForDataSources(String dataSourceId) {
+  public static List<Map<String, String>> getDeptForDataSources(String dataSourceId) {
     return g.V(Long.parseLong(dataSourceId))
       .in('Has_Privacy_Impact_Assessment')
       .filter(label().is('Object.Data_Source'))
@@ -1133,17 +1135,28 @@ public class PontusJ2ReportingFunctions {
       .in('Has_Ingestion_Event')
       .filter(label().is('Person.Natural'))
       .valueMap(true)
+      .toList().collect({ item ->
+//      .collect { item ->
+      item.collectEntries({ key, val ->
+        [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
+      })
+    } as Closure<Map<String, String>>);
   }
 
-  public static Map getDataSourcesForLawfulBasis(String lawfulBasisId) {
-    return g.V(Long.parseLong(lawfulBasisId))
+  public static List<Map<String, String>> getDataSourcesForLawfulBasis(String lawfulBasisId) {
+    def retVal = g.V(Long.parseLong(lawfulBasisId))
       .in()
       .in()
       .has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
       .in()
       .has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
-      .valueMap(true);
+      .valueMap(true).toList().collect { item ->
+      item.collectEntries { key, val ->
+        [key.toString().replaceAll('[.]', '_'), val.toString() - '[' - ']']
+      }
+    };
 
+    return retVal as List<Map<String, String>>;
 
   }
 
@@ -1152,11 +1165,11 @@ public class PontusJ2ReportingFunctions {
     return g.V(Long.parseLong(lawfulBasisId))
       .in()
       .in()
-      .has('Metadata.Type.Object.Privacy_Impact_Assessment',P.eq('Object.Privacy_Impact_Assessment'))
+      .has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
       .both()
-      .has('Metadata.Type.Object.Privacy_Notice',P.eq('Object.Privacy_Notice'))
+      .has('Metadata.Type.Object.Privacy_Notice', P.eq('Object.Privacy_Notice'))
       .in()
-      .has('Metadata.Type.Event.Consent',P.eq('Event.Consent'))
+      .has('Metadata.Type.Event.Consent', P.eq('Event.Consent'))
       .in()
       .dedup()
       .count();
