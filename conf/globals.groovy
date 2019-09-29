@@ -1022,7 +1022,7 @@ public class PontusJ2ReportingFunctions {
                   if (currPath.length() > 0) {
                     currPath.append(', ')
                   }
-                  currPath.append(translate(label.replaceAll("[_|\\.]"," ")));
+                  currPath.append(translate(label.replaceAll("[_|\\.]", " ")));
                   labelsForMatch.put(currVid, currPath);
                 }
                 currScore += scoreForLabel / totalScore;
@@ -1137,13 +1137,12 @@ public class PontusJ2ReportingFunctions {
 
   public static Map getDataSourcesForLegalBasis(String legalBasisId) {
     return g.V(Long.parseLong(legalBasisId))
-      .in('Has_Privacy_Impact_Assessment')
-      .filter(label().is('Object.Data_Source'))
-      .out('Has_Ingestion_Event')
-      .out('Has_Ingestion_Event')
-      .in('Has_Ingestion_Event')
-      .filter(label().is('Person.Natural'))
-      .valueMap(true)
+      .in()
+      .in()
+      .has('Metadata.Type.Object.Privacy_Impact_Assessment', P.eq('Object.Privacy_Impact_Assessment'))
+      .in()
+      .has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source'))
+      .valueMap(true);
 
 
   }
@@ -1151,24 +1150,26 @@ public class PontusJ2ReportingFunctions {
 
   public static Long getNumNaturalPersonForLegalBasis(String legalBasisId) {
     return g.V(Long.parseLong(legalBasisId))
-      .in('Has_Privacy_Impact_Assessment')
-      .filter(label().is('Object.Data_Source'))
-      .out('Has_Ingestion_Event')
-      .out('Has_Ingestion_Event')
-      .in('Has_Ingestion_Event')
-      .filter(label().is('Person.Natural'))
-      .count()
-
+      .in()
+      .in()
+      .has('Metadata.Type.Object.Privacy_Impact_Assessment',P.eq('Object.Privacy_Impact_Assessment'))
+      .both()
+      .has('Metadata.Type.Object.Privacy_Notice',P.eq('Object.Privacy_Notice'))
+      .in()
+      .has('Metadata.Type.Event.Consent',P.eq('Event.Consent'))
+      .in()
+      .dedup()
+      .count();
   }
 
   public static Long getNumNaturalPersonForPIA(String piaId) {
     return g.V(Long.parseLong(piaId))
       .in('Has_Privacy_Impact_Assessment')
-      .filter(label().is('Object.Data_Source'))
+      .filter(has('Metadata.Type.Object.Data_Source', P.eq('Object.Data_Source')))
       .out('Has_Ingestion_Event')
       .out('Has_Ingestion_Event')
       .in('Has_Ingestion_Event')
-      .filter(label().is('Person.Natural'))
+      .filter(has('Metadata.Type.Person.Natural', P.eq('Person.Natural')))
       .count()
 
   }
@@ -1374,7 +1375,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
       .has("Metadata.Type.Object.AWS_Instance", P.eq('Object.AWS_Instance'))
       .valueMap().toList().collect { item ->
       item.collectEntries { key, val ->
-        [key.replaceAll('[.]', '_'), val.toString().substring(1,val.toString().length()-1) ]
+        [key.replaceAll('[.]', '_'), val.toString().substring(1, val.toString().length() - 1)]
       }
     };
 
@@ -1386,7 +1387,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 
     def impactedDataSources = impactedDataSourcesTrav.valueMap().toList().collect { item ->
       item.collectEntries { key, val ->
-        [key.replaceAll('[.]', '_'), val.toString().substring(1,val.toString().length()-1) ]
+        [key.replaceAll('[.]', '_'), val.toString().substring(1, val.toString().length() - 1)]
       }
     };
     def impactedPeople = dsTravClone
@@ -1398,7 +1399,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
       .toList()
       .collect { item ->
         item.collectEntries { key, val ->
-          [key.replaceAll('[.]', '_'), val.toString().substring(1,val.toString().length()-1) ]
+          [key.replaceAll('[.]', '_'), val.toString().substring(1, val.toString().length() - 1)]
         }
       };
     allData.put('impacted_data_sources', impactedDataSources);
