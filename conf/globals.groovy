@@ -1022,7 +1022,7 @@ public class PontusJ2ReportingFunctions {
                   if (currPath.length() > 0) {
                     currPath.append(', ')
                   }
-                  currPath.append(translate(label));
+                  currPath.append(translate(label.replaceAll("[_|\\.]"," ")));
                   labelsForMatch.put(currVid, currPath);
                 }
                 currScore += scoreForLabel / totalScore;
