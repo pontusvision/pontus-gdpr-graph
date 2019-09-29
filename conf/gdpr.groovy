@@ -1698,7 +1698,7 @@ def addLawfulBasisAndPrivacyNoticesPt(JanusGraph graph, GraphTraversalSource g) 
     definitions[8] = "Quando necessário para atender aos interesses legítimos do controlador ou de terceiro, exceto no caso de prevalecerem direitos e liberdades fundamentais do titular que exijam a proteção dos dados pessoais"
     definitions[9] = "Para a proteção do crédito, inclusive quanto ao disposto na legislação pertinente"
 
-    def lawfulBasisVertices = new Vertex[6]
+    def lawfulBasisVertices = new Vertex[10]
 
     int ilen = definitions.length
 
