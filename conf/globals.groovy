@@ -1313,7 +1313,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
     PontusJ2ReportingFunctions.class, "businessRulesTable", String.class));
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForPIA",
     PontusJ2ReportingFunctions.class, "getNumNaturalPersonForPIA", String.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForPIA",
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumSensitiveInfoForPIA",
     PontusJ2ReportingFunctions.class, "getNumSensitiveInfoForPIA", String.class));
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "t",
