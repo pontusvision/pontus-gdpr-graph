@@ -1416,6 +1416,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
       .out("Has_Ingestion_Event")
       .in("Has_Ingestion_Event")
       .has("Metadata.Type.Person.Natural", P.eq('Person.Natural'))
+      .dedup()
       .valueMap()
       .toList()
       .collect { item ->

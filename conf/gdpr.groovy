@@ -2916,7 +2916,29 @@ def createNotificationTemplatesPt() {
         .property("Object.Notification_Templates.Types", "Object.Lawful_Basis")
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_sar_read")
         .property("Object.Notification_Templates.Label", "Relatório")
-        .property("Object.Notification_Templates.Text", ("").bytes.encodeBase64().toString())
+        .property("Object.Notification_Templates.Text", ("<h1>Relatorio para a base legal:</h1>\n" +
+          "<hr/>\n" +
+          "\n" +
+          "<h4>{{ context.Object_Lawful_Basis_Description }}</h4>\n" +
+          "\n" +
+          "<hr/>\n" +
+          "<h2> Resumo </h2>\n" +
+          "{% set dsList = pv:getDataSourcesForLawfulBasis(context.id) %}\n" +
+          "<h4> Numero de fontes de dados: {{ dsList.size() }} </h4>\n" +
+          "<h4> Numero de Titulares: {{ pv:getNumNaturalPersonForLawfulBasis(context.id) }} </h4>\n" +
+          "<hr/>\n" +
+          "{% if (dsList.size() > 0) %}\n" +
+          "<h2> Detalhes </h2>\n" +
+          "  <br/>\n" +
+          "\n" +
+          "{% for ds in dsList %}\n" +
+          "\n" +
+          "<h4>Detalhes da fonte \"{{ ds.Object_Data_Source_Name }}\":</h4>\n" +
+          "  <br/>\n" +
+          "   {{ pv:htmlTable(ds) }}\n" +
+          "{% endfor %}\n" +
+          "\n" +
+          "{% endif %}").bytes.encodeBase64().toString())
         .next();
 
       g.addV("Object.Notification_Templates")
@@ -3038,21 +3060,61 @@ def createNotificationTemplatesPt() {
         .property("Metadata.Type", "Object.Notification_Templates")
         .property("Metadata.Type.Object.Notification_Templates", "Object.Notification_Templates")
         .property("Object.Notification_Templates.Id", "VIOLAÇÃO DE DADOS")
-        .property("Object.Notification_Templates.Text", ("\n" +
-          "{% set possibleMatches = pv:possibleMatches(context.id,'{\"Object.Email_Address\": 10.5, \"Location.Address\": 10.1, \"Object.Phone_Number\": 1.0, \"Object.Senstive_Data\": 10.0, \"Object.Health\": 1.0, \"Object.Biometric\": 50.0 , \"Object.Insurance_Policy\": 1.0}') %}\n" +
-          "{% set numMatches = possibleMatches.size() %}\n" +
-          "{{ context.Person_Identity_Full_Name}} Corresponde potencialmente a {{ numMatches }} registro{%- if numMatches != 1 -%}s{% endif %}.\n" +
+        .property("Object.Notification_Templates.Text", ("\"<div style='padding: 10px; background: black'>\n" +
+          "<hr/>\n" +
           "\n" +
-          "{% if numMatches > 0 %}\n" +
+          "<h1> Resumo da  VIOLAÇÃO DE DADOS </h1>\n" +
+          "<hr/>\n" +
+          "  Titulares: {{ impacted_people | length }}<br/>\n" +
+          "  Fontes de dados: {{ impacted_data_sources | length }}<br/>\n" +
+          "  Servidores : {{ impacted_servers | length }}<br/>\n" +
+          "\n" +
+          "<hr/>\n" +
+          "<hr/>\n" +
           "\n" +
           "\n" +
-          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Titular</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Percentual</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Propriedades em Comum</th></tr>\" }}\n" +
-          "  {% for item in possibleMatches.entrySet() %}\n" +
-          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%.2f%%</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (item.key.Person_Identity_Full_Name , item.value * 100.0, item.key.Labels_For_Match ) }}\n" +
+          "{% if impacted_people[0] is defined %}\n" +
+          "  <h2> Lista de {{ impacted_people | length }} Titulares </h2>\n" +
+          "  <table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Nome</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Data de Nascimento</th></tr>\n" +
+          "\n" +
+          " {% for mainkey in impacted_people %}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (mainkey['Person_Natural_Full_Name'] , mainkey['Person_Natural_Date_Of_Birth'] )}}\n" +
+          "  {% endfor %}\n" +
+          "    {{ \"</table>\" }}\n" +
+          "\n" +
+          "{% else %}\n" +
+          "  <h2> Nenhum titular afetado </h2>\n" +
+          "{% endif %}\n" +
+          "\n" +
+          "\n" +
+          "{% if impacted_data_sources[0] is defined %}\n" +
+          "  <h2> Lista de  {{ impacted_data_sources | length }} Fontes de Dados </h2>\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Fonte De Dados</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Data do Update</th></tr>\" }}\n" +
+          "\n" +
+          " {% for mainkey in impacted_data_sources %}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (mainkey['Object_Data_Source_Name'] , mainkey['Object_Data_Source_Update_Date'] )}}\n" +
+          "  {% endfor %}\n" +
+          "    {{ \"</table>\" }}\n" +
+          "\n" +
+          "{% else %}\n" +
+          "  <h2> Nenhuma fonte de dados afetada </h2>\n" +
+          "{% endif %}\n" +
+          "    \n" +
+          "{% if impacted_servers[0] is defined %}\n" +
+          "  <h2> Lista de {{ impacted_servers | length }} Servidores afetados </h2>\n" +
+          "\n" +
+          " {% for mainkey in impacted_servers %}\n" +
+          "  <h3>{{ pv:t(mainkey.Metadata_Type |replace('.',' ')|replace('_',' ')) }}</h3>\n" +
+          "  {{ \"<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Propriedade</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>Valor</th></tr>\" }}\n" +
+          "  {% for key, value in mainkey.items() %}\n" +
+          "  {{  \"<tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td><td style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>%s</td>\" | format (pv:t(key.toString().replaceAll(\"_\",\" \")) , value )}}\n" +
           "  {% endfor %}\n" +
           "  {{ \"</table>\" }}\n" +
-          "\n" +
-          "{% endif %}").bytes.encodeBase64().toString())
+          "  {% endfor %}\n" +
+          "{% else %}\n" +
+          "  <h2> Nenhum servidor afetado </h2>\n" +
+          "{% endif %}    \n" +
+          "</div>").bytes.encodeBase64().toString())
         .property("Object.Notification_Templates.URL", "https://localhost:18443/get_data_breach_person_report")
         .property("Object.Notification_Templates.Types", "Event.Data_Breach")
         .property("Object.Notification_Templates.Label", "Relatório")
