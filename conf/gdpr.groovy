@@ -4442,7 +4442,7 @@ def calculatePOLECounts() {
     // sb.append(var)
 
     Long numEntries = graph.indexQuery(dataType + ".MixedIdx", var).vertexTotals()
-    sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(dataType)}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+    sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(dataType.replaceAll('[_|\\.]', ' '))}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
   }
   sb.append(']')
 
