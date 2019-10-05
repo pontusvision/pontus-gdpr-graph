@@ -585,5 +585,7 @@
   "Assigned SAR Request": "Responsável por cumprir",
   "Event Training Person": "foi treinado",
   "Metadata Type Event Training": "Classificação",
-  "Metadata Type Object AWS Security Group": "Classificação"
+  "Metadata Type Object AWS Security Group": "Classificação",
+  "Legislation": "Legislação"
+
 }
