@@ -3745,7 +3745,7 @@ def getAwarenessScores(def scoresMap) {
   catch (Throwable t) {
     scoreValue = 0L;
   }
-  scoresMap.put('Awareness', scoreValue);
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Awareness'), scoreValue);
 
   return scoreValue
 }
@@ -3856,7 +3856,7 @@ def getChildrenScores(scoresMap) {
 
   }
 
-  scoresMap.put('Children', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Children'), scoreValue)
   return scoreValue
 
 }
@@ -3948,7 +3948,7 @@ def getConsentScores(def scoresMap) {
 
   }
 
-  scoresMap.put('Consent', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Consent'), scoreValue)
   return scoreValue
 
 }
@@ -3996,7 +3996,7 @@ def getDataBreachesScores(def scoresMap) {
     scoreValue = 100L;
   }
 
-  scoresMap.put('Data Breaches', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Data Breaches'), scoreValue)
   return scoreValue
 
 
@@ -4047,7 +4047,7 @@ def getDataProtnOfficerScores(def scoresMap) {
     scoreValue = 0L;
   }
 
-  scoresMap.put('Data Protection Officer', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Data Protection Officer'), scoreValue)
   return scoreValue
 
 }
@@ -4083,7 +4083,7 @@ def getIndivRightsScores(def scoresMap) {
   } else {
     scoreValue = 0L;
   }
-  scoresMap.put('Indiv Rights', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Indiv Rights'), scoreValue)
   return scoreValue
 
 }
@@ -4117,7 +4117,7 @@ def getInfoYouHoldScores(def scoresMap) {
   }
 
 
-  scoresMap.put('Info you hold', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Info you hold'), scoreValue)
   return scoreValue
 
 }
@@ -4145,7 +4145,7 @@ def getInternationalScores(def scoresMap) {
     scoreValue = 0L;
   }
 
-  scoresMap.put('International', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('International'), scoreValue)
   return scoreValue
 
 }
@@ -4170,7 +4170,7 @@ def getLawfulBasisScores(def scoresMap) {
     scoreValue = 0L;
   }
 
-  scoresMap.put('Lawful Basis', scoreValue);
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Lawful Basis'), scoreValue);
   return scoreValue
 
 }
@@ -4225,7 +4225,7 @@ def getPrivacyImpactAssessmentScores(def scoresMap) {
     scoreValue = 0L;
   }
 
-  scoresMap.put('Privacy Impact Assessment', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Privacy Impact Assessment'), scoreValue)
   return scoreValue
 
 }
@@ -4295,7 +4295,7 @@ def getPrivacyNoticesScores(def scoresMap) {
   } else {
     scoreValue = 0L;
   }
-  scoresMap.put('Privacy Notices', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Privacy Notices'), scoreValue)
   return scoreValue
 
 }
@@ -4346,7 +4346,7 @@ def getSubjectAccessRequestScores(def scoresMap) {
   } else {
     scoreValue = 0L;
   }
-  scoresMap.put('Subject Access Requests', scoreValue)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Subject Access Requests'), scoreValue)
   return scoreValue
 
 }
@@ -4370,7 +4370,7 @@ def getScoresJson() {
       4 * getSubjectAccessRequestScores(scoresMap)
   ) / 39
 
-  scoresMap.put('Total Score', totalScore)
+  scoresMap.put(PontusJ2ReportingFunctions.translate('Total Score'), totalScore)
 
   StringBuffer sb = new StringBuffer("[")
   boolean firstTime = true;
@@ -4381,7 +4381,7 @@ def getScoresJson() {
       firstTime = false;
     }
 
-    sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"GDPR Scores\" }")
+    sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(metricname)}\", \"metricvalue\": $metricvalue, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('GDPR Scores')}\" }")
   }
 
 
@@ -4442,7 +4442,7 @@ def calculatePOLECounts() {
     // sb.append(var)
 
     Long numEntries = graph.indexQuery(dataType + ".MixedIdx", var).vertexTotals()
-    sb.append(" { \"metricname\": \"$dataType\", \"metricvalue\": $numEntries, \"metrictype\": \"POLE Counts\" }")
+    sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(dataType)}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
   }
   sb.append(']')
 
@@ -4472,7 +4472,7 @@ def getNumEventsPerDataSource() {
       } else {
         firstTime = false;
       }
-      sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Events Per Data Source\" }")
+      sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(metricname)}\", \"metricvalue\": $metricvalue, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('Events Per Data Source')}\" }")
 
     }
   }
@@ -4506,7 +4506,7 @@ def getNumNaturalPersonPerDataSource() {
       } else {
         firstTime = false;
       }
-      sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Natural Person Per Data Source\" }")
+      sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(metricname)}\", \"metricvalue\": $metricvalue, \"metrictype\": \"Natural Person Per Data Source\" }")
 
     }
   }
@@ -4549,7 +4549,7 @@ def getNumSensitiveDataPerDataSource() {
       } else {
         firstTime = false;
       }
-      sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Sensitive Data Per Data Source\" }")
+      sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(metricname)}\", \"metricvalue\": $metricvalue, \"metrictype\": \"Sensitive Data Per Data Source\" }")
 
     }
   }
@@ -4596,7 +4596,8 @@ def getNumNaturalPersonPerOrganisation() {
           } else {
             firstTime = false;
           }
-          sb.append(" { \"metricname\": \"$metricname\", \"metricvalue\": $metricvalue, \"metrictype\": \"Natural Person Per $orgTypeLabel\" }")
+          sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(metricname)}\", \"metricvalue\": $metricvalue," +
+            " \"metrictype\": \"${PontusJ2ReportingFunctions.translate('Natural Person Per')} ${PontusJ2ReportingFunctions.translate(orgTypeLabel)}\" }")
 
         }
 
@@ -4676,7 +4677,10 @@ def getDSARStatsPerOrganisation() {
           } else {
             firstTime = false;
           }
-          sb.append(" {\"dsar_source_type\":\"${key['dsar_type']}    ${key['dsar_status']}     ${key['dsar_source_type'].label().toString().replaceAll('[Is_ |_|.]', ' ')}     ${key['dsar_age']}\", \"dsar_source_name\":\"${key['dsar_source_name']}\", \"dsar_count\": $metricvalue }")
+          sb.append(" {\"dsar_source_type\":\"${PontusJ2ReportingFunctions.translate(key['dsar_type'].toString())}   " +
+            " ${PontusJ2ReportingFunctions.translate(key['dsar_status'].toString())}    " +
+            " ${PontusJ2ReportingFunctions.translate(key['dsar_source_type'].label().toString().replaceAll('[Is_ |_|.]', ' ').toString())}  " +
+            "   ${PontusJ2ReportingFunctions.translate(key['dsar_age'].toString())}\", \"dsar_source_name\":\"${PontusJ2ReportingFunctions.translate(key['dsar_source_name'].toString())}\", \"dsar_count\": $metricvalue }".toString())
 
         }
 

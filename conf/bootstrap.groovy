@@ -12,6 +12,7 @@ try {
     System.out.println("results after loading /opt/pontus-graphdb/graphdb-current//conf/gdpr-schema.json: ${retVal}\n\n\n\n\n")
 
     createNotificationTemplates();
+    addLawfulBasisAndPrivacyNotices(graph,g)
 
 } catch (e) {
     e.printStackTrace()
