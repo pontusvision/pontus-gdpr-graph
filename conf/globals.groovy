@@ -952,7 +952,41 @@ class Schema {
 
 }
 
+def renderReportInTextPt(long pg_id, String reportType = 'DSAR', GraphTraversalSource g = g) {
+  def template = g.V().has('Object.Notification_Templates.Types', eq('Person.Natural'))
+    .has('Object.Notification_Templates.Label', eq(reportType))
+    .values('Object.Notification_Templates.Text').next() as String
+  if (template) {
+
+    // def template = g.V().has('Object.Notification_Templates.Types',eq(label)).next() as String
+    def context = g.V(pg_id).valueMap()[0].collectEntries { key, val ->
+      [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+    };
+
+    def neighbours = g.V(pg_id).both().valueMap().toList().collect { item ->
+      item.collectEntries { key, val ->
+        [key.replaceAll('[.]', '_'), val.toString() - '[' - ']']
+      }
+    };
+
+    def allData = new HashMap<>();
+
+    allData.put('context', context);
+    allData.put('connected_data', neighbours);
+
+    com.hubspot.jinjava.Jinjava jinJava = new com.hubspot.jinjava.Jinjava();
+    return jinJava.render(new String(template.decodeBase64()), allData).toString();
+  }
+  return "Failed to render data"
+}
+
+
 def renderReportInText(long pg_id, String reportType = 'SAR Read', GraphTraversalSource g = g) {
+
+  if (new File("conf/i18n_pt_translation.json").exists()) {
+    return renderReportInTextPt(pg_id, reportType, g);
+  }
+
   def template = g.V().has('Object.Notification_Templates.Types', eq('Person.Natural'))
     .has('Object.Notification_Templates.Label', eq(reportType))
     .values('Object.Notification_Templates.Text').next() as String
