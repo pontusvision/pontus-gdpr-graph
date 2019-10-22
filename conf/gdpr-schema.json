@@ -1942,7 +1942,16 @@
       "multiplicity": "MULTI",
       "unidirected": false
     },
-
+    {
+      "name": "Has_Table",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
+      "name": "Has_Column",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
     {
       "name": "Approved_Compliance_Check",
       "multiplicity": "MULTI",
