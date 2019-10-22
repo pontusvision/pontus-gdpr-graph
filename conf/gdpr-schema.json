@@ -947,6 +947,33 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Object.Data_Source.Engine",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Table_Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Column_Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Data_Source.Domain_Info",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Data_Source.Business_Rules",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
       "name": "Object.Data_Procedures.Type",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -2444,6 +2471,10 @@
         "Object.Data_Source.Name",
         "Object.Data_Source.Create_Date",
         "Object.Data_Source.Update_Date",
+        "Object.Data_Source.Description",
+        "Object.Data_Source.Table_Name",
+        "Object.Data_Source.Column_Name",
+        "Object.Data_Source.Engine",
         "Object.Data_Source.Description",
         "Metadata.Type.Object.Data_Source",
         "Object.Data_Source.Form_Id",
