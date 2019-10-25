@@ -17,6 +17,11 @@ import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONVersion
 import org.janusgraph.core.*
 import org.janusgraph.core.schema.*
 import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
+import org.jfree.chart.ChartFactory
+import org.jfree.chart.ChartUtils
+import org.jfree.chart.JFreeChart
+import org.jfree.chart.plot.PlotOrientation
+import org.jfree.data.category.DefaultCategoryDataset
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -1141,8 +1146,8 @@ public class PontusJ2ReportingFunctions {
 
   public static String htmlTable(Map<String, String> map) {
     htmlTableCustomHeader(map,
-      "<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>"+
-        translate("Name")+
+      "<table style='margin: 5px'><tr style='border: 1px solid #dddddd;text-align: left;padding: 8px;'><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>" +
+        translate("Name") +
         "</th><th style='border: 1px solid #dddddd;text-align: left;padding: 8px;'>" +
         translate("Value") +
         "</th></tr>",
@@ -1237,7 +1242,7 @@ public class PontusJ2ReportingFunctions {
       .both('Has_Ingestion_Event')
       .filter(has('Metadata.Type.Object.Sensitive_Data', P.eq('Object.Sensitive_Data')))
       .count()
-       .next()
+      .next()
 
   }
 
@@ -1347,6 +1352,56 @@ public class PontusJ2ReportingFunctions {
 
   }
 
+  public static String getChart() {
+    try {
+
+      /* Step - 1: Define the data for the bar chart  */
+      DefaultCategoryDataset my_bar_chart_dataset = new DefaultCategoryDataset();
+      my_bar_chart_dataset.addValue(34, "Q1", "Rome");
+      my_bar_chart_dataset.addValue(45, "Q1", "Cairo");
+      my_bar_chart_dataset.addValue(22, "Q2", "Rome");
+      my_bar_chart_dataset.addValue(12, "Q2", "Cairo");
+      my_bar_chart_dataset.addValue(56, "Q3", "Rome");
+      my_bar_chart_dataset.addValue(98, "Q3", "Cairo");
+      my_bar_chart_dataset.addValue(2, "Q4", "Rome");
+      my_bar_chart_dataset.addValue(15, "Q4", "Cairo");
+
+      /* Step -2:Define the JFreeChart object to create bar chart */
+      JFreeChart BarChartObject = ChartFactory.createBarChart(
+        "CountryVsSales - Bar Chart",
+        "Country",
+        "Sales",
+        my_bar_chart_dataset,
+        PlotOrientation.VERTICAL, true, true, false);
+
+      /* Step -3: Write the output as PNG file with bar chart information */
+      int width = 640; /* Width of the image */
+      int height = 480; /* Height of the image */
+
+      ByteArrayOutputStream out = new ByteArrayOutputStream( );
+
+      try {
+        ChartUtils.writeChartAsPNG(out, BarChartObject, width, height);
+      } finally {
+
+        out.flush();
+
+        return  """
+       <img src="data:image/png;base64, ${Base64.mimeEncoder.encode(out.toByteArray())}" alt="Red dot" />
+        """;
+
+
+      }
+
+
+
+    }
+    catch (Exception i) {
+    }
+    return ""
+
+  }
+
   public static String translate(String strToTranslate) {
     if (ptDictionary) {
       String retVal = ptDictionary.get(strToTranslate);
@@ -1384,6 +1439,9 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 
 
   PontusJ2ReportingFunctions.g = g;
+
+  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getChart",
+    PontusJ2ReportingFunctions.class, "getChart"));
 
   jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "possibleMatches",
     PontusJ2ReportingFunctions.class, "possibleMatches", String.class, String.class));
