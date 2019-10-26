@@ -20,6 +20,7 @@ import org.janusgraph.graphdb.types.vertices.JanusGraphSchemaVertex
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.ChartUtils
 import org.jfree.chart.JFreeChart
+import org.jfree.chart.StandardChartTheme
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.data.category.DefaultCategoryDataset
 
@@ -1366,6 +1367,7 @@ public class PontusJ2ReportingFunctions {
       dataset.addValue(2, "Q4", "Rome");
       dataset.addValue(15, "Q4", "Cairo");
 
+      ChartFactory.setChartTheme(StandardChartTheme.createDarknessTheme());
       /* Step -2:Define the JFreeChart object to create bar chart */
       JFreeChart barChart = ChartFactory.createBarChart(
         "CountryVsSales - Bar Chart",
