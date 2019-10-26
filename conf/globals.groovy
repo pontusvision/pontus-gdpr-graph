@@ -1356,49 +1356,47 @@ public class PontusJ2ReportingFunctions {
     try {
 
       /* Step - 1: Define the data for the bar chart  */
-      DefaultCategoryDataset my_bar_chart_dataset = new DefaultCategoryDataset();
-      my_bar_chart_dataset.addValue(34, "Q1", "Rome");
-      my_bar_chart_dataset.addValue(45, "Q1", "Cairo");
-      my_bar_chart_dataset.addValue(22, "Q2", "Rome");
-      my_bar_chart_dataset.addValue(12, "Q2", "Cairo");
-      my_bar_chart_dataset.addValue(56, "Q3", "Rome");
-      my_bar_chart_dataset.addValue(98, "Q3", "Cairo");
-      my_bar_chart_dataset.addValue(2, "Q4", "Rome");
-      my_bar_chart_dataset.addValue(15, "Q4", "Cairo");
+      DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+      dataset.addValue(34, "Q1", "Rome");
+      dataset.addValue(45, "Q1", "Cairo");
+      dataset.addValue(22, "Q2", "Rome");
+      dataset.addValue(12, "Q2", "Cairo");
+      dataset.addValue(56, "Q3", "Rome");
+      dataset.addValue(98, "Q3", "Cairo");
+      dataset.addValue(2, "Q4", "Rome");
+      dataset.addValue(15, "Q4", "Cairo");
 
       /* Step -2:Define the JFreeChart object to create bar chart */
-      JFreeChart BarChartObject = ChartFactory.createBarChart(
+      JFreeChart barChart = ChartFactory.createBarChart(
         "CountryVsSales - Bar Chart",
         "Country",
         "Sales",
-        my_bar_chart_dataset,
+        dataset,
         PlotOrientation.VERTICAL, true, true, false);
 
       /* Step -3: Write the output as PNG file with bar chart information */
       int width = 640; /* Width of the image */
       int height = 480; /* Height of the image */
 
-      ByteArrayOutputStream out = new ByteArrayOutputStream( );
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-      try {
-        ChartUtils.writeChartAsPNG(out, BarChartObject, width, height);
-      } finally {
 
-        out.flush();
+      ChartUtils.writeChartAsPNG(out, barChart, width, height);
 
-        return  """
-       <img src="data:image/png;base64, ${Base64.mimeEncoder.encode(out.toByteArray())}" alt="Red dot" />
+
+      out.flush();
+
+      return """
+       <img src="data:image/png;base64, ${Base64.mimeEncoder.encode(out.toByteArray())}" alt="PV Chart" />
         """;
 
 
-      }
-
-
+    }
+    catch (Exception i)
+    {
+      return i.toString();
 
     }
-    catch (Exception i) {
-    }
-    return ""
 
   }
 
