@@ -69,7 +69,13 @@ public class App
       }
 
       logger.info("Configuring Gremlin Server from {}", file);
-      gserver = new GremlinServer(settings);
+      try
+      {
+        gserver = new GremlinServer(settings);
+      }
+      catch (Throwable t){
+
+      }
       CompletableFuture<ServerGremlinExecutor> c = gserver.start().exceptionally(t -> {
         logger.error("Gremlin Server was unable to start and will now begin shutdown: {}", t.getMessage());
         gserver.stop().join();

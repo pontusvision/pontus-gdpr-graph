@@ -57,7 +57,7 @@
             <artifactId>jasperreports-fonts</artifactId>
             <version>6.10.0</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-driver</artifactId>
