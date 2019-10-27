@@ -1388,10 +1388,7 @@ public class PontusJ2ReportingFunctions {
 
       out.flush();
 
-      return """
-       <img src="data:image/png;base64, ${new String (Base64.mimeEncoder.encode(out.toByteArray()))}" alt="PV Chart" />
-        """;
-
+      return new String (Base64.mimeEncoder.encode(out.toByteArray()));
 
     }
     catch (Exception i)
