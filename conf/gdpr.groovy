@@ -12,6 +12,7 @@
 // res
 
 import com.pontusvision.utils.LocationAddress
+import groovy.json.JsonSlurper
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.apache.tinkerpop.gremlin.process.traversal.Order
@@ -4691,6 +4692,143 @@ def getDSARStatsPerOrganisation() {
 
   return sb.toString()
 
+
+}
+
+
+
+def domainTranslationStr = """
+  {
+    "GENDER": "Person.Identity.Gender"
+   ,"FIRST_NAME":""
+   ,"COMPANY":""
+   ,"AIRPORT_CODE":""
+   ,"AIRPORT":""
+   ,"CA_PROVINCE_TERRITORY":""
+   ,"CA_PROVINCE_TERRITORY_CODE":""
+   ,"CITY":"Location.Address.City"
+   ,"COUNTRY":""
+   ,"COUNTRY_CODE_ISO2":""
+   ,"COUNTRY_CODE_ISO3":""
+   ,"EN_MONTH":""
+   ,"EN_MONTH_ABBREV":""
+   ,"FR_COMMUNE":""
+   ,"FR_REGION":""
+   ,"FR_REGION_LEGACY":""
+   ,"HR_DEPARTMENT":"Person.Organisation.Department"
+   ,"JOB_TITLE":"Person.Employee.Title"
+   ,"LAST_NAME":"Person.Identity.Last_Name"
+   ,"MONTH":""
+   ,"MX_ESTADO":"Location.Address.State"
+   ,"MX_ESTADO_CODE":"Location.Address.State"
+   ,"ORGANIZATION":"Person.Organisation.Name"
+   ,"STREET_TYPE":"Location.Address.Street"
+   ,"US_COUNTY":""
+   ,"US_STATE":"Location.Address.State"
+   ,"US_STATE_CODE":"Location.Address.State"
+   ,"ADDRESS_LINE":"Location.Address.Full_Address"
+   ,"FULL_NAME":"Person.Identity.Full_Name"
+
+  }
+
+""";
+
+JsonSlurper slurper = new JsonSlurper();
+
+def domainTranslation = slurper.parseText(domainTranslationStr);
+
+def addMetadataSource(String name, String description, String dataSourceType, String domain, Double domainFrequency){
+
+
+
+
+  GraphTraversal<Vertex, Vertex> dataSource = g.addV("Object.Metadata_Source");
+  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Metadata_Source")
+    .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
+    .property("Object.Metadata_Source.Name", name)
+    .property("Object.Metadata_Source.Create_Date", new Date())
+    .property("Object.Metadata_Source.Update_Date", new Date())
+    .property("Object.Metadata_Source.Description", description)
+    .property("Object.Metadata_Source.Type", dataSourceType)
+    .property("Object.Metadata_Source.Domain", domainTranslation[domain]?: domain)
+    .property("Object.Metadata_Source.Domain_Frequency", domainFrequency)
+    .next();
+
+
+
+
+
+  return vertexDataSource;
+
+}
+
+
+def addDataSource(String name, String description, String dataSourceType){
+
+  GraphTraversal<Vertex, Vertex> dataSource = g.addV("Object.Data_Source");
+  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Data_Source")
+    .property("Metadata.Type.Object.Data_Source", "Object.Data_Source")
+    .property("Object.Data_Source.Name", name)
+    .property("Object.Data_Source.Create_Date", new Date())
+    .property("Object.Data_Source.Update_Date", new Date())
+    .property("Object.Data_Source.Description", description)
+    .property("Object.Data_Source.Type", dataSourceType)
+    .next();
+
+
+
+
+
+  return vertexDataSource;
+
+}
+
+def addDiscoveryData(String colData){
+
+
+  def propVals = slurper.parseText(colData);
+
+  StringBuffer sb = new StringBuffer();
+
+
+  propVals.each{ it ->
+
+    def dataSrcTableVertex = addMetadataSource(it.name, 'data source from discovery',
+      "DB_TABLE",  null, null);
+
+    sb.append("\n") .append(it.name);
+    it.columns.each{ col ->
+
+
+      def dataSrcColVertex = null;
+
+      if (col.domain != "") {
+        dataSrcColVertex = addMetadataSource(
+          "${it.name}-${col.name}",
+          'data source from discovery',
+          "DB_COLUMN",
+          col.domain,
+          col.domainFrequency);
+
+      }
+      else if (col.semanticDomains.length > 0) {
+        dataSrcColVertex = addMetadataSource(
+          "${it.name}-${col.name}",
+          'data source from discovery',
+          "DB_COLUMN",
+          col.semanticDomains[0].id,
+          col.semanticDomains[0].frequency);
+
+
+      }
+
+      sb.append('\n\t').append (col.name).append('---').append(col.domain).append('----').append(col.domainFrequency);
+      g.addE('Has_Column').from(dataSrcTableVertex).to(dataSrcColVertex).next();
+    }
+
+
+  }
+  sb.toString()
 
 }
 

@@ -552,6 +552,11 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Metadata.Type.Object.Metadata_Source",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Metadata.Type.Object.Email_Address",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -852,6 +857,127 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Object.Metadata_Source.Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Create_Date",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Update_Date",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Form_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Form_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Form_Submission_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Form_Submission_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Description",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Credential_Principal",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Credential_Secret",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Credential_ApiKey",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.URI_Config",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.URI_Template",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.URI_Control",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.URI_Read",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.URI_Delete",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.URI_Update",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.URI_Monitor",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Retention_Policy_JSON",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Engine",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Type",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Domain",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Domain_Frequency",
+      "dataType": "Double",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Metadata_Source.Business_Rules",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
       "name": "Object.Data_Source.Name",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -966,12 +1092,12 @@
       "dataType": "Double",
       "cardinality": "SINGLE"
     },
-
     {
       "name": "Object.Data_Source.Business_Rules",
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+
 
     {
       "name": "Object.Data_Procedures.Type",
@@ -2514,6 +2640,28 @@
           "mapping": "STRING"
         }
       }
+    },  
+    {
+      "name": "Object.Metadata_Source.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Metadata.Type.Object.Metadata_Source",
+        "Object.Metadata_Source.Name",
+        "Object.Metadata_Source.Create_Date",
+        "Object.Metadata_Source.Update_Date",
+        "Object.Metadata_Source.Type",
+        "Object.Metadata_Source.Description",
+        "Object.Metadata_Source.Domain",
+        "Object.Metadata_Source.Domain_Frequency",
+        "Object.Metadata_Source.Engine",
+        "Object.Metadata_Source.Form_Id",
+        "Object.Metadata_Source.Form_Owner_Id",
+        "Object.Metadata_Source.Form_Submission_Id",
+        "Object.Metadata_Source.Form_Submission_Owner_Id"
+      ]
     },
     {
       "name": "Event.Training.MixedIdx",
