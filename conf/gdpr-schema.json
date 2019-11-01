@@ -2079,6 +2079,17 @@
       "unidirected": false
     },
     {
+      "name": "Has_Semantic",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+    {
+      "name": "Has_Link",
+      "multiplicity": "MULTI",
+      "unidirected": false
+    },
+
+    {
       "name": "Approved_Compliance_Check",
       "multiplicity": "MULTI",
       "unidirected": false

@@ -12,6 +12,7 @@
 // res
 
 import com.pontusvision.utils.LocationAddress
+import groovy.json.JsonParserType
 import groovy.json.JsonSlurper
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
@@ -4696,7 +4697,6 @@ def getDSARStatsPerOrganisation() {
 }
 
 
-
 def domainTranslationStr = """
   {
     "GENDER": "Person.Identity.Gender"
@@ -4763,16 +4763,26 @@ def addMetadataSource(String name, String description, String dataSourceType, St
 }
 
 
-def addDataSource(String name, String description, String dataSourceType){
+def addDBColSource(String name, String description, String dataSourceType, String domain, Double domainFrequency){
 
-  GraphTraversal<Vertex, Vertex> dataSource = g.addV("Object.Data_Source");
-  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Data_Source")
-    .property("Metadata.Type.Object.Data_Source", "Object.Data_Source")
-    .property("Object.Data_Source.Name", name)
-    .property("Object.Data_Source.Create_Date", new Date())
-    .property("Object.Data_Source.Update_Date", new Date())
-    .property("Object.Data_Source.Description", description)
-    .property("Object.Data_Source.Type", dataSourceType)
+  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
+    g.V().has("Object.Metadata_Source.Name", P.eq(name)).tryNext()
+  GraphTraversal<Vertex, Vertex> dataSource;
+  if (!dataSourceOption.isPresent()) {
+    dataSource = g.addV("Object.Metadata_Source");
+  } else {
+    dataSource = g.V(dataSourceOption.get().id());
+  }
+
+  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Metadata_Source")
+    .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
+    .property("Object.Metadata_Source.Name", name)
+    .property("Object.Metadata_Source.Create_Date", new Date())
+    .property("Object.Metadata_Source.Update_Date", new Date())
+    .property("Object.Metadata_Source.Description", description)
+    .property("Object.Metadata_Source.Type", dataSourceType)
+    .property("Object.Metadata_Source.Domain", domainTranslation[domain]?: domain)
+    .property("Object.Metadata_Source.Domain_Frequency", domainFrequency)
     .next();
 
 
@@ -4783,54 +4793,132 @@ def addDataSource(String name, String description, String dataSourceType){
 
 }
 
-def addDiscoveryData(String colData){
+def getDbCol (String name){
+  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
+    g.V().has("Object.Metadata_Source.Name", P.eq(name)).tryNext()
+  GraphTraversal<Vertex, Vertex> dataSource;
+  if (!dataSourceOption.isPresent()) {
+    dataSource = g.addV("Object.Metadata_Source")
+      .property("Metadata.Type", "Object.Metadata_Source")
+      .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
+      .property("Object.Metadata_Source.Name", name);
+  } else {
+    dataSource = g.V(dataSourceOption.get().id());
+  }
 
 
-  def propVals = slurper.parseText(colData);
+  return dataSource.next();
 
-  StringBuffer sb = new StringBuffer();
+}
+
+def addDataSource(String name, String description, String dataSourceType, String domain){
+
+  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
+    g.V().has("Object.Data_Source.Name", P.eq(name)).tryNext()
+  GraphTraversal<Vertex, Vertex> dataSource;
+  if (!dataSourceOption.isPresent()) {
+    dataSource = g.addV("Object.Data_Source");
+  } else {
+    dataSource = g.V(dataSourceOption.get().id());
+  }
+  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Data_Source")
+    .property("Metadata.Type.Object.Data_Source", "Object.Data_Source")
+    .property("Object.Data_Source.Name", name)
+    .property("Object.Data_Source.Create_Date", new Date())
+    .property("Object.Data_Source.Update_Date", new Date())
+    .property("Object.Data_Source.Description", description)
+    .property("Object.Data_Source.Type", dataSourceType)
+    .next()
+
+  return vertexDataSource;
+
+}
+
+def addDiscoveryDataFromDB(String dbURL, String dbTableName,  String colMetadataStr, String colDiscoveryDataStr){
 
 
-  propVals.each{ it ->
+  JsonSlurper slurper = new JsonSlurper(type: JsonParserType.LAX);
 
-    def dataSrcTableVertex = addMetadataSource(it.name, 'data source from discovery',
+  def dataSourceVertex = addDataSource(
+    "Discovery DB ${dbURL}",
+    "Discovery metadata for db ${dbURL} - Table ${dbTableName} ",
+    "DISCOVERY_DB",
+    colMetadataStr);
+
+
+
+  def colMap = [:];
+
+  def colDiscoveryData = slurper.parseText(colDiscoveryDataStr);
+
+  colDiscoveryData.columns.each{ it ->
+
+    def dataSrcTableVertex = addMetadataSource(it["name"], 'data source from discovery',
       "DB_TABLE",  null, null);
 
-    sb.append("\n") .append(it.name);
+
+    g.addE('Has_Table').from(dataSourceVertex).to(dataSrcTableVertex);
+
     it.columns.each{ col ->
 
+      def colName = "${dbURL}.${dbTableName}.${col.name.trim()}";
 
-      def dataSrcColVertex = null;
+      def dataSrcColVertex = addDBColSource(
+        colName,
+        'data source from discovery',
+        "DB_COLUMN",
+        col.domain,
+        col.domainFrequency);
 
-      if (col.domain != "") {
-        dataSrcColVertex = addMetadataSource(
-          "${it.name}-${col.name}",
-          'data source from discovery',
-          "DB_COLUMN",
-          col.domain,
-          col.domainFrequency);
+
+      colMap.put(colName, dataSrcColVertex);
+
+
+      // else
+      if (col.semanticDomains.length > 0) {
+        col.semanticDomains.each { semantics ->
+          def semanticTranslation = domainTranslationStr[semantics.id]?: semantics.id;
+
+          def dataSrcColSemanticVertex = addMetadataSource(
+            "${it.get(name)}.${col.name.trim()}.${semanticTranslation}",
+            'data source from discovery',
+            "DB_COLUMN_SEMANTIC",
+            semanticTranslation,
+            semantics.frequency);
+          g.addE('Has_Semantic').from(dataSrcColVertex).to(dataSrcColSemanticVertex).next();
+
+        }
 
       }
-      else if (col.semanticDomains.length > 0) {
-        dataSrcColVertex = addMetadataSource(
-          "${it.name}-${col.name}",
-          'data source from discovery',
-          "DB_COLUMN",
-          col.semanticDomains[0].id,
-          col.semanticDomains[0].frequency);
 
-
-      }
-
-      sb.append('\n\t').append (col.name).append('---').append(col.domain).append('----').append(col.domainFrequency);
       g.addE('Has_Column').from(dataSrcTableVertex).to(dataSrcColVertex).next();
     }
 
 
   }
-  sb.toString()
+
+  def colMetadata = slurper.parseText(colMetadataStr);
+
+  colMetadata.colMetaData.each{ col ->
+
+    if (col.foreignKeyName?.trim()){
+
+      def colName = "${dbURL}.${dbTableName}.${col.colName.trim()}";
+      def colVertex = colMap[colName];
+      def foreignKeyColName = "${dbURL}.${col.foreignKeyName.trim()}";
+      def foreignKeyColVertex = getDbCol(foreignKeyColName);
+
+      g.addE('Has_Link').from(colVertex).to(foreignKeyColVertex);
+
+
+    }
+
+
+  }
+
 
 }
+
 
 
 //g.V().drop().iterate()
