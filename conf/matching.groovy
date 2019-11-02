@@ -1420,7 +1420,7 @@ def ingestDataUsingRules(JanusGraph graph, GraphTraversalSource g, Map<String, S
   def jsonSlurper = new JsonSlurper()
   def rules = jsonSlurper.parseText(jsonRules)
 
-  double percentageThreshold = (rules.percentageThreshold == null) ? 95.0 : (double) (rules.percentageThreshold);
+  double percentageThreshold = (rules.percentageThreshold == null) ? 10.0 : (double) (rules.percentageThreshold);
   int maxHitsPerType = (rules.maxHitsPerType == null) ? 1000 : (int) rules.maxHitsPerType;
 
   def (Map<String, List<EdgeRequest>> edgeReqsByVertexName, Set<EdgeRequest> edgeReqs) = parseEdges(rules.updatereq)
@@ -1464,7 +1464,7 @@ def ingestRecordListUsingRules(JanusGraph graph, GraphTraversalSource g, List<Ma
   def rules = jsonSlurper.parseText(jsonRules)
 
 
-  double percentageThreshold = (rules.percentageThreshold == null) ? 95.0 : (double) (rules.percentageThreshold);
+  double percentageThreshold = (rules.percentageThreshold == null) ? 10.0 : (double) (rules.percentageThreshold);
   int maxHitsPerType = (rules.maxHitsPerType == null) ? 1000 : (int) rules.maxHitsPerType;
 
   def (Map<String, List<EdgeRequest>> edgeReqsByVertexName, Set<EdgeRequest> edgeReqs) = parseEdges(rules.updatereq)
