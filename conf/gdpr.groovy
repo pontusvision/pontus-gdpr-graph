@@ -12,7 +12,6 @@
 // res
 
 import com.pontusvision.utils.LocationAddress
-import groovy.json.JsonParserType
 import groovy.json.JsonSlurper
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
@@ -4762,7 +4761,7 @@ class Discovery {
   }
 
 
-  static addDBColSource(GraphTraversalSource g,String name, String description, String dataSourceType, String domain, Double domainFrequency) {
+  static addDBColSource(GraphTraversalSource g, String name, String description, String dataSourceType, String domain, Double domainFrequency) {
 
     Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
       g.V().has("Object.Metadata_Source.Name", P.eq(name)).tryNext()
@@ -4792,7 +4791,7 @@ class Discovery {
 
   }
 
-  static getDbCol(GraphTraversalSource g,String name) {
+  static getDbCol(GraphTraversalSource g, String name) {
     Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
       g.V().has("Object.Metadata_Source.Name", P.eq(name)).tryNext()
     GraphTraversal<Vertex, Vertex> dataSource;
@@ -4810,7 +4809,7 @@ class Discovery {
 
   }
 
-  static addDataSource(GraphTraversalSource g,String name, String description, String dataSourceType, String domain) {
+  static addDataSource(GraphTraversalSource g, String name, String description, String dataSourceType, String domain) {
 
     Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
       g.V().has("Object.Data_Source.Name", P.eq(name)).tryNext()
@@ -4844,74 +4843,69 @@ class Discovery {
       colMetadataStr);
 
 
+    def dataSrcTableVertex = addMetadataSource("${dbURL}.${dbTableName}", 'data source from discovery',
+      "DB_TABLE", null, null);
+    g.addE('Has_Table').from(dataSourceVertex).to(dataSrcTableVertex);
 
     def colMap = [:];
 
     def colDiscoveryData = slurper.parseText(colDiscoveryDataStr);
 
-    colDiscoveryData.columns.each { it ->
-
-      def dataSrcTableVertex = addMetadataSource(it["name"], 'data source from discovery',
-        "DB_TABLE", null, null);
+    colDiscoveryData?.metadata?.columns?.each { col ->
 
 
-      g.addE('Has_Table').from(dataSourceVertex).to(dataSrcTableVertex);
+      def colName = "${dbURL}.${dbTableName}.${col.name.trim()}";
 
-      it.columns.each { col ->
-
-        def colName = "${dbURL}.${dbTableName}.${col.name.trim()}";
-
-        def dataSrcColVertex = addDBColSource(
-          g,
-          colName,
-          'data source from discovery',
-          "DB_COLUMN",
-          col.domain,
-          col.domainFrequency);
+      def dataSrcColVertex = addDBColSource(
+        g,
+        colName,
+        'data source from discovery',
+        "DB_COLUMN",
+        col.domain,
+        col.domainFrequency);
 
 
-        colMap.put(colName, dataSrcColVertex);
+      colMap.put(colName, dataSrcColVertex);
 
 
-        // else
-        if (col.semanticDomains.length > 0) {
-          col.semanticDomains.each { semantics ->
-            def semanticTranslation = domainTranslation[semantics.id] ?: semantics.id;
+      // else
+      if (col.semanticDomains.length > 0) {
+        col.semanticDomains.each { semantics ->
+          def semanticTranslation = domainTranslation[semantics.id] ?: semantics.id;
 
-            def dataSrcColSemanticVertex = addMetadataSource(
-              g,
-              "${it.get(name)}.${col.name.trim()}.${semanticTranslation}",
-              'data source from discovery',
-              "DB_COLUMN_SEMANTIC",
-              semanticTranslation,
-              semantics.frequency);
-            g.addE('Has_Semantic').from(dataSrcColVertex).to(dataSrcColSemanticVertex).next();
-
-          }
+          def dataSrcColSemanticVertex = addMetadataSource(
+            g,
+            "${it.get(name)}.${col.name.trim()}.${semanticTranslation}",
+            'data source from discovery',
+            "DB_COLUMN_SEMANTIC",
+            semanticTranslation,
+            semantics.frequency);
+          g.addE('Has_Semantic').from(dataSrcColVertex).to(dataSrcColSemanticVertex).next();
 
         }
 
-        g.addE('Has_Column').from(dataSrcTableVertex).to(dataSrcColVertex).next();
       }
 
-
+      g.addE('Has_Column').from(dataSrcTableVertex).to(dataSrcColVertex).next();
     }
+
 
     def colMetadata = slurper.parseText(colMetadataStr);
 
-    colMetadata.colMetaData.each { col ->
+    colMetadata.colMetaData.each {
+      col ->
 
-      if (col.foreignKeyName?.trim()) {
+        if (col.foreignKeyName?.trim()) {
 
-        def colName = "${dbURL}.${dbTableName}.${col.colName.trim()}";
-        def colVertex = colMap[colName];
-        def foreignKeyColName = "${dbURL}.${col.foreignKeyName.trim()}";
-        def foreignKeyColVertex = getDbCol(g,foreignKeyColName);
+          def colName = "${dbURL}.${dbTableName}.${col.colName.trim()}";
+          def colVertex = colMap[colName];
+          def foreignKeyColName = "${dbURL}.${col.foreignKeyName.trim()}";
+          def foreignKeyColVertex = getDbCol(g, foreignKeyColName);
 
-        g.addE('Has_Link').from(colVertex).to(foreignKeyColVertex);
+          g.addE('Has_Link').from(colVertex).to(foreignKeyColVertex);
 
 
-      }
+        }
 
 
     }
@@ -4922,7 +4916,7 @@ class Discovery {
 }
 
 def addDiscoveryDataFromDB(String dbURL, String dbTableName, String colMetadataStr, String colDiscoveryDataStr) {
-  return Discovery.addDiscoveryDataFromDB(g,dbURL, dbTableName, colMetadataStr,colDiscoveryDataStr);
+  return Discovery.addDiscoveryDataFromDB(g, dbURL, dbTableName, colMetadataStr, colDiscoveryDataStr);
 
 }
 
