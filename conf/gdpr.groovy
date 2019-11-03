@@ -4867,7 +4867,7 @@ class Discovery {
         col.domainFrequency);
 
 
-      colMap.put(colName, dataSrcColVertex);
+      colMap.put(colName.toString(), dataSrcColVertex);
 
 
       // else
@@ -4897,7 +4897,7 @@ class Discovery {
         if (col.foreignKeyName?.trim()) {
 
           def colName = "${dbURL}.${dbTableName}.${col.colName.trim()}";
-          def colVertex = colMap[colName];
+          def colVertex = colMap[colName.toString()];
           def foreignKeyColName = "${dbURL}.${col.foreignKeyName.trim()}";
           def foreignKeyColVertex = getDbCol(g, foreignKeyColName);
 
