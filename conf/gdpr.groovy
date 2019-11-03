@@ -4843,7 +4843,9 @@ class Discovery {
       colMetadataStr);
 
 
-    def dataSrcTableVertex = addMetadataSource("${dbURL}.${dbTableName}", 'data source from discovery',
+    def dataSrcTableVertex = addMetadataSource(
+      g,
+      "${dbURL}.${dbTableName}", 'data source from discovery',
       "DB_TABLE", null, null);
     g.addE('Has_Table').from(dataSourceVertex).to(dataSrcTableVertex);
 
