@@ -4871,20 +4871,17 @@ class Discovery {
 
 
       // else
-      if (col.semanticDomains.length > 0) {
-        col.semanticDomains.each { semantics ->
-          def semanticTranslation = domainTranslation[semantics.id] ?: semantics.id;
+      col?.semanticDomains?.each { semantics ->
+        def semanticTranslation = domainTranslation[semantics?.id] ?: semantics?.id;
 
-          def dataSrcColSemanticVertex = addMetadataSource(
-            g,
-            "${it.get(name)}.${col.name.trim()}.${semanticTranslation}",
-            'data source from discovery',
-            "DB_COLUMN_SEMANTIC",
-            semanticTranslation,
-            semantics.frequency);
-          g.addE('Has_Semantic').from(dataSrcColVertex).to(dataSrcColSemanticVertex).next();
-
-        }
+        def dataSrcColSemanticVertex = addMetadataSource(
+          g,
+          "${colName}.${semanticTranslation}",
+          'data source from discovery',
+          "DB_COLUMN_SEMANTIC",
+          semanticTranslation,
+          semantics.frequency);
+        g.addE('Has_Semantic').from(dataSrcColVertex).to(dataSrcColSemanticVertex).next();
 
       }
 
