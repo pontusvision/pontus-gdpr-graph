@@ -3546,8 +3546,8 @@ def addRandomAWSGraph(graph, g, aws_instances, aws_sec_groups) {
               property("Object.AWS_Security_Group.GroupName", sg.GroupName).
               next().
               // property("Object.AWS_Security_Group.Ip_Perms_Ingress_IpRanges", sg.).
-              // property("Object.AWS_Security_Group.Ip_Perms_Egress_IpRanges",   iid.LaunchTime).
-              id();
+                // property("Object.AWS_Security_Group.Ip_Perms_Egress_IpRanges",   iid.LaunchTime).
+                id();
 
 //    trans.commit()
           } catch (Throwable t) {
@@ -4697,7 +4697,103 @@ def getDSARStatsPerOrganisation() {
 }
 
 
-def domainTranslationStr = """
+def addMetadataSource(String name, String description, String dataSourceType, String domain, Double domainFrequency) {
+
+
+  GraphTraversal<Vertex, Vertex> dataSource = g.addV("Object.Metadata_Source");
+  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Metadata_Source")
+    .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
+    .property("Object.Metadata_Source.Name", name)
+    .property("Object.Metadata_Source.Create_Date", new Date())
+    .property("Object.Metadata_Source.Update_Date", new Date())
+    .property("Object.Metadata_Source.Description", description)
+    .property("Object.Metadata_Source.Type", dataSourceType)
+    .property("Object.Metadata_Source.Domain", domainTranslation[domain] ?: domain)
+    .property("Object.Metadata_Source.Domain_Frequency", domainFrequency)
+    .next();
+
+
+
+
+
+  return vertexDataSource;
+
+}
+
+
+def addDBColSource(String name, String description, String dataSourceType, String domain, Double domainFrequency) {
+
+  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
+    g.V().has("Object.Metadata_Source.Name", P.eq(name)).tryNext()
+  GraphTraversal<Vertex, Vertex> dataSource;
+  if (!dataSourceOption.isPresent()) {
+    dataSource = g.addV("Object.Metadata_Source");
+  } else {
+    dataSource = g.V(dataSourceOption.get().id());
+  }
+
+  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Metadata_Source")
+    .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
+    .property("Object.Metadata_Source.Name", name)
+    .property("Object.Metadata_Source.Create_Date", new Date())
+    .property("Object.Metadata_Source.Update_Date", new Date())
+    .property("Object.Metadata_Source.Description", description)
+    .property("Object.Metadata_Source.Type", dataSourceType)
+    .property("Object.Metadata_Source.Domain", domainTranslation[domain] ?: domain)
+    .property("Object.Metadata_Source.Domain_Frequency", domainFrequency)
+    .next();
+
+
+
+
+
+  return vertexDataSource;
+
+}
+
+def getDbCol(String name) {
+  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
+    g.V().has("Object.Metadata_Source.Name", P.eq(name)).tryNext()
+  GraphTraversal<Vertex, Vertex> dataSource;
+  if (!dataSourceOption.isPresent()) {
+    dataSource = g.addV("Object.Metadata_Source")
+      .property("Metadata.Type", "Object.Metadata_Source")
+      .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
+      .property("Object.Metadata_Source.Name", name);
+  } else {
+    dataSource = g.V(dataSourceOption.get().id());
+  }
+
+
+  return dataSource.next();
+
+}
+
+def addDataSource(String name, String description, String dataSourceType, String domain) {
+
+  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
+    g.V().has("Object.Data_Source.Name", P.eq(name)).tryNext()
+  GraphTraversal<Vertex, Vertex> dataSource;
+  if (!dataSourceOption.isPresent()) {
+    dataSource = g.addV("Object.Data_Source");
+  } else {
+    dataSource = g.V(dataSourceOption.get().id());
+  }
+  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Data_Source")
+    .property("Metadata.Type.Object.Data_Source", "Object.Data_Source")
+    .property("Object.Data_Source.Name", name)
+    .property("Object.Data_Source.Create_Date", new Date())
+    .property("Object.Data_Source.Update_Date", new Date())
+    .property("Object.Data_Source.Description", description)
+    .property("Object.Data_Source.Type", dataSourceType)
+    .next()
+
+  return vertexDataSource;
+
+}
+
+class Discovery {
+  static String domainTranslationStr = """
   {
     "GENDER": "Person.Identity.Gender"
    ,"FIRST_NAME":""
@@ -4733,192 +4829,99 @@ def domainTranslationStr = """
 
 """;
 
-JsonSlurper slurper = new JsonSlurper();
+  static JsonSlurper slurper = new JsonSlurper();
 
-def domainTranslation = slurper.parseText(domainTranslationStr);
-
-def addMetadataSource(String name, String description, String dataSourceType, String domain, Double domainFrequency){
+  static domainTranslation = slurper.parseText(domainTranslationStr);
 
 
-
-
-  GraphTraversal<Vertex, Vertex> dataSource = g.addV("Object.Metadata_Source");
-  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Metadata_Source")
-    .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
-    .property("Object.Metadata_Source.Name", name)
-    .property("Object.Metadata_Source.Create_Date", new Date())
-    .property("Object.Metadata_Source.Update_Date", new Date())
-    .property("Object.Metadata_Source.Description", description)
-    .property("Object.Metadata_Source.Type", dataSourceType)
-    .property("Object.Metadata_Source.Domain", domainTranslation[domain]?: domain)
-    .property("Object.Metadata_Source.Domain_Frequency", domainFrequency)
-    .next();
+  static addDiscoveryDataFromDB(String dbURL, String dbTableName, String colMetadataStr, String colDiscoveryDataStr) {
+    
+    def dataSourceVertex = addDataSource(
+      "Discovery DB ${dbURL}",
+      "Discovery metadata for db ${dbURL} - Table ${dbTableName} ",
+      "DISCOVERY_DB",
+      colMetadataStr);
 
 
 
+    def colMap = [:];
+
+    def colDiscoveryData = slurper.parseText(colDiscoveryDataStr);
+
+    colDiscoveryData.columns.each { it ->
+
+      def dataSrcTableVertex = addMetadataSource(it["name"], 'data source from discovery',
+        "DB_TABLE", null, null);
 
 
-  return vertexDataSource;
+      g.addE('Has_Table').from(dataSourceVertex).to(dataSrcTableVertex);
 
-}
+      it.columns.each { col ->
 
+        def colName = "${dbURL}.${dbTableName}.${col.name.trim()}";
 
-def addDBColSource(String name, String description, String dataSourceType, String domain, Double domainFrequency){
-
-  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
-    g.V().has("Object.Metadata_Source.Name", P.eq(name)).tryNext()
-  GraphTraversal<Vertex, Vertex> dataSource;
-  if (!dataSourceOption.isPresent()) {
-    dataSource = g.addV("Object.Metadata_Source");
-  } else {
-    dataSource = g.V(dataSourceOption.get().id());
-  }
-
-  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Metadata_Source")
-    .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
-    .property("Object.Metadata_Source.Name", name)
-    .property("Object.Metadata_Source.Create_Date", new Date())
-    .property("Object.Metadata_Source.Update_Date", new Date())
-    .property("Object.Metadata_Source.Description", description)
-    .property("Object.Metadata_Source.Type", dataSourceType)
-    .property("Object.Metadata_Source.Domain", domainTranslation[domain]?: domain)
-    .property("Object.Metadata_Source.Domain_Frequency", domainFrequency)
-    .next();
+        def dataSrcColVertex = addDBColSource(
+          colName,
+          'data source from discovery',
+          "DB_COLUMN",
+          col.domain,
+          col.domainFrequency);
 
 
+        colMap.put(colName, dataSrcColVertex);
 
 
+        // else
+        if (col.semanticDomains.length > 0) {
+          col.semanticDomains.each { semantics ->
+            def semanticTranslation = domainTranslation[semantics.id] ?: semantics.id;
 
-  return vertexDataSource;
+            def dataSrcColSemanticVertex = addMetadataSource(
+              "${it.get(name)}.${col.name.trim()}.${semanticTranslation}",
+              'data source from discovery',
+              "DB_COLUMN_SEMANTIC",
+              semanticTranslation,
+              semantics.frequency);
+            g.addE('Has_Semantic').from(dataSrcColVertex).to(dataSrcColSemanticVertex).next();
 
-}
-
-def getDbCol (String name){
-  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
-    g.V().has("Object.Metadata_Source.Name", P.eq(name)).tryNext()
-  GraphTraversal<Vertex, Vertex> dataSource;
-  if (!dataSourceOption.isPresent()) {
-    dataSource = g.addV("Object.Metadata_Source")
-      .property("Metadata.Type", "Object.Metadata_Source")
-      .property("Metadata.Type.Object.Metadata_Source", "Object.Metadata_Source")
-      .property("Object.Metadata_Source.Name", name);
-  } else {
-    dataSource = g.V(dataSourceOption.get().id());
-  }
-
-
-  return dataSource.next();
-
-}
-
-def addDataSource(String name, String description, String dataSourceType, String domain){
-
-  Optional<GraphTraversal<Vertex, Vertex>> dataSourceOption =
-    g.V().has("Object.Data_Source.Name", P.eq(name)).tryNext()
-  GraphTraversal<Vertex, Vertex> dataSource;
-  if (!dataSourceOption.isPresent()) {
-    dataSource = g.addV("Object.Data_Source");
-  } else {
-    dataSource = g.V(dataSourceOption.get().id());
-  }
-  Vertex vertexDataSource = dataSource.property("Metadata.Type", "Object.Data_Source")
-    .property("Metadata.Type.Object.Data_Source", "Object.Data_Source")
-    .property("Object.Data_Source.Name", name)
-    .property("Object.Data_Source.Create_Date", new Date())
-    .property("Object.Data_Source.Update_Date", new Date())
-    .property("Object.Data_Source.Description", description)
-    .property("Object.Data_Source.Type", dataSourceType)
-    .next()
-
-  return vertexDataSource;
-
-}
-
-def addDiscoveryDataFromDB(String dbURL, String dbTableName,  String colMetadataStr, String colDiscoveryDataStr){
-
-
-  JsonSlurper slurper = new JsonSlurper(type: JsonParserType.LAX);
-
-  def dataSourceVertex = addDataSource(
-    "Discovery DB ${dbURL}",
-    "Discovery metadata for db ${dbURL} - Table ${dbTableName} ",
-    "DISCOVERY_DB",
-    colMetadataStr);
-
-
-
-  def colMap = [:];
-
-  def colDiscoveryData = slurper.parseText(colDiscoveryDataStr);
-
-  colDiscoveryData.columns.each{ it ->
-
-    def dataSrcTableVertex = addMetadataSource(it["name"], 'data source from discovery',
-      "DB_TABLE",  null, null);
-
-
-    g.addE('Has_Table').from(dataSourceVertex).to(dataSrcTableVertex);
-
-    it.columns.each{ col ->
-
-      def colName = "${dbURL}.${dbTableName}.${col.name.trim()}";
-
-      def dataSrcColVertex = addDBColSource(
-        colName,
-        'data source from discovery',
-        "DB_COLUMN",
-        col.domain,
-        col.domainFrequency);
-
-
-      colMap.put(colName, dataSrcColVertex);
-
-
-      // else
-      if (col.semanticDomains.length > 0) {
-        col.semanticDomains.each { semantics ->
-          def semanticTranslation = domainTranslationStr[semantics.id]?: semantics.id;
-
-          def dataSrcColSemanticVertex = addMetadataSource(
-            "${it.get(name)}.${col.name.trim()}.${semanticTranslation}",
-            'data source from discovery',
-            "DB_COLUMN_SEMANTIC",
-            semanticTranslation,
-            semantics.frequency);
-          g.addE('Has_Semantic').from(dataSrcColVertex).to(dataSrcColSemanticVertex).next();
+          }
 
         }
 
+        g.addE('Has_Column').from(dataSrcTableVertex).to(dataSrcColVertex).next();
       }
 
-      g.addE('Has_Column').from(dataSrcTableVertex).to(dataSrcColVertex).next();
+
+    }
+
+    def colMetadata = slurper.parseText(colMetadataStr);
+
+    colMetadata.colMetaData.each { col ->
+
+      if (col.foreignKeyName?.trim()) {
+
+        def colName = "${dbURL}.${dbTableName}.${col.colName.trim()}";
+        def colVertex = colMap[colName];
+        def foreignKeyColName = "${dbURL}.${col.foreignKeyName.trim()}";
+        def foreignKeyColVertex = getDbCol(foreignKeyColName);
+
+        g.addE('Has_Link').from(colVertex).to(foreignKeyColVertex);
+
+
+      }
+
+
     }
 
 
   }
-
-  def colMetadata = slurper.parseText(colMetadataStr);
-
-  colMetadata.colMetaData.each{ col ->
-
-    if (col.foreignKeyName?.trim()){
-
-      def colName = "${dbURL}.${dbTableName}.${col.colName.trim()}";
-      def colVertex = colMap[colName];
-      def foreignKeyColName = "${dbURL}.${col.foreignKeyName.trim()}";
-      def foreignKeyColVertex = getDbCol(foreignKeyColName);
-
-      g.addE('Has_Link').from(colVertex).to(foreignKeyColVertex);
-
-
-    }
-
-
-  }
-
 
 }
 
+def addDiscoveryDataFromDB(String dbURL, String dbTableName, String colMetadataStr, String colDiscoveryDataStr) {
+  return Discovery.addDiscoveryDataFromDB(dbURL, dbTableName, colMetadataStr,colDiscoveryDataStr);
+
+}
 
 
 //g.V().drop().iterate()

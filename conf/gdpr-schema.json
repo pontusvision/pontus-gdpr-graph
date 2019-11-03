@@ -1987,6 +1987,11 @@
       "useStatic": false
     },
     {
+      "name": "Object.Metadata_Source",
+      "partition": false,
+      "useStatic": false
+    },
+    {
       "name": "Object.Data_Policy",
       "partition": false,
       "useStatic": false
