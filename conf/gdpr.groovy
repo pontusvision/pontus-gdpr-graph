@@ -4853,7 +4853,7 @@ class Discovery {
         g,
         "${dbURL}.${dbTableName}", 'data source from discovery',
         "DB_TABLE", null, null);
-      g.addE('Has_Table').from(dataSourceVertex).to(dataSrcTableVertex);
+      g.addE('Has_Table').from(dataSourceVertex).to(dataSrcTableVertex).next();
 
       def colMap = [:];
 
@@ -4907,7 +4907,7 @@ class Discovery {
             def foreignKeyColName = "${dbURL}.${col.foreignKeyName.trim()}";
             def foreignKeyColVertex = getDbCol(g, foreignKeyColName);
 
-            g.addE('Has_Link').from(colVertex).to(foreignKeyColVertex);
+            g.addE('Has_Link').from(colVertex).to(foreignKeyColVertex).next();
 
 
           }
