@@ -4826,6 +4826,7 @@ class Discovery {
       .property("Object.Data_Source.Update_Date", new Date())
       .property("Object.Data_Source.Description", description)
       .property("Object.Data_Source.Type", dataSourceType)
+      .property("Object.Data_Source.Domain", domain)
       .next()
 
     return vertexDataSource;
@@ -4833,7 +4834,9 @@ class Discovery {
   }
 
 
-  static addDiscoveryDataFromDB(JanusGraph graph, GraphTraversalSource g, String dbURL, String dbTableName, String colMetadataStr, String colDiscoveryDataStr) {
+  static addDiscoveryDataFromDB(JanusGraph graph, GraphTraversalSource g,
+                                String dbURL, String dbTableName, String colMetadataStr,
+                                String colDiscoveryDataStr, Long dataSourceId) {
 
     def trans = graph.tx()
     try {
@@ -4841,12 +4844,13 @@ class Discovery {
         trans.open();
       }
 
-      def dataSourceVertex = addDataSource(
-        g,
-        "Discovery DB ${dbURL}",
-        "Discovery metadata for db ${dbURL}",
-        "DISCOVERY_DB",
-        colMetadataStr);
+      def dataSourceVertex = g.V(dataSourceId);
+//        addDataSource(
+//        g,
+//        "Discovery DB ${dbURL}",
+//        "Discovery metadata for db ${dbURL}",
+//        "DISCOVERY_DB",
+//        colMetadataStr);
 
 
       def dataSrcTableVertex = addMetadataSource(
