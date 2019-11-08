@@ -4844,7 +4844,7 @@ class Discovery {
         trans.open();
       }
 
-      def dataSourceVertex = g.V(dataSourceId);
+      def dataSourceVertex = g.V(dataSourceId).next();
 //        addDataSource(
 //        g,
 //        "Discovery DB ${dbURL}",
@@ -4930,10 +4930,10 @@ class Discovery {
 
 }
 
-def addDiscoveryDataFromDB(String dbURL, String dbTableName, String colMetadataStr, String colDiscoveryDataStr) {
-  return Discovery.addDiscoveryDataFromDB(graph, g, dbURL, dbTableName, colMetadataStr, colDiscoveryDataStr);
-
-}
+//def addDiscoveryDataFromDB(String dbURL, String dbTableName, String colMetadataStr, String colDiscoveryDataStr) {
+//  return Discovery.addDiscoveryDataFromDB(graph, g, dbURL, dbTableName, colMetadataStr, colDiscoveryDataStr);
+//
+//}
 
 
 //g.V().drop().iterate()
