@@ -4445,6 +4445,19 @@ def calculatePOLECounts() {
     Long numEntries = graph.indexQuery(dataType + ".MixedIdx", var).vertexTotals()
     sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(dataType.replaceAll('[_|\\.]', ' '))}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
   }
+
+  String var = "v.\"Object.Data_Source.Type\": Structured"
+  Long numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
+  sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Structured Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
+  var = "v.\"Object.Data_Source.Type\": Unstructured"
+  numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
+  sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Unstructured Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
+  var = "v.\"Object.Data_Source.Type\": Mixed"
+  numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
+  sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Mixed Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
   sb.append(']')
 
   return sb.toString()

@@ -599,6 +599,17 @@
   "Subject Access Requests": "Solicitação de Acesso",
   "Total Score": "Pontuação Total",
   "GDPR Scores": "Pontuação LGPD",
-
-  "POLE Counts": "Contagem POLE"
+  "POLE Counts": "Contagem POLE",
+  "Has Table": "Tem Tabela",
+  "Has Column": "Tem Coluna",
+  "Has Semantic": "Tem Semântica",
+  "Object Metadata Source Name": "Nome",
+  "Object Metadata Source Create Date": "Data de Criação",
+  "Object Metadata Source Update Date": "Data de Atualização",
+  "Metadata Source Type": "Tipo de Dados",
+  "Metadata Type Object Metadata Source": "Metadados",
+  "Object Metadata Source Description": "Descrição",
+  "Object Metadata Source": "Metadados",
+  "Object Metadata Source Domain": "Domínio",
+  "Object Metadata Source Domain Frequency": "Frequência"
 }

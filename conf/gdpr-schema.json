@@ -537,6 +537,11 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Metadata.Type.Object.Application",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Metadata.Type.Object.Credential",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -761,6 +766,61 @@
       "dataType": "String",
       "cardinality": "SINGLE"
     },
+
+
+
+
+
+    {
+      "name": "Object.Application.Description",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Application.Form_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Application.Form_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Application.Form_Submission_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Application.Form_Submission_Owner_Id",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Application.Start_Date",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Application.Stop_Date",
+      "dataType": "Date",
+      "cardinality": "SINGLE"
+    },
+    {
+      "name": "Object.Application.URL",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
+      "name": "Object.Application.Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+
+
+
     {
       "name": "Object.Awareness_Campaign.Description",
       "dataType": "String",
@@ -1967,6 +2027,11 @@
       "useStatic": false
     },
     {
+      "name": "Object.Application",
+      "partition": false,
+      "useStatic": false
+    },
+    {
       "name": "Object.Awareness_Campaign",
       "partition": false,
       "useStatic": false
@@ -3119,6 +3184,27 @@
         "Object.Privacy_Impact_Assessment.Form_Submission_Owner_Id": {
           "mapping": "STRING"
         }
+      }
+    },
+    {
+      "name": "Object.Application.MixedIdx",
+      "composite": false,
+      "unique": false,
+      "indexOnly": null,
+      "mixedIndex": "search",
+      "propertyKeys": [
+        "Object.Application.Description",
+        "Object.Application.Form_Owner_Id",
+        "Object.Application.Form_Submission_Owner_Id",
+        "Metadata.Type.Object.Application",
+        "Object.Application.Start_Date",
+        "Object.Application.Form_Submission_Id",
+        "Object.Application.Stop_Date",
+        "Object.Application.Form_Id",
+        "Object.Application.URL",
+        "Object.Application.Name"
+      ],
+      "propertyKeysMappings": {
       }
     },
     {
