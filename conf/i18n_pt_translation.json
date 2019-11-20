@@ -612,6 +612,9 @@
   "Object Metadata Source": "Metadados",
   "Object Metadata Source Domain": "Domínio",
   "Object Metadata Source Domain Frequency": "Frequência",
-  "Unstructured Data PII": "Dados Pessoais de Fontes Nao Estruturadas",
-  "Structured Data PII": "Dados Pessoais de Fontes Estruturadas"
+  "Unstructured Data PII": "Dados Pessoais de Fontes de dados Nao Estruturadas",
+  "Structured Data PII": "Dados Pessoais de Fontes de dados Estruturadas",
+  "Sensitive Data Spreadsheet 2": "Planilha de Dados Sensíveis",
+  "Events Per Data Source":"Eventos por Fonte De Dados",
+  "CRM System CSV": "Arquivo CSV do sistema de CRM"
 }
