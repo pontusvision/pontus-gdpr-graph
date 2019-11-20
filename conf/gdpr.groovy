@@ -4460,6 +4460,15 @@ def calculatePOLECounts() {
 
   }
 
+  var = "v.\"Object.Metadata_Source.Type\": DB_TABLE"
+  numEntries = App.graph.indexQuery("Object.Metadata_Source.MixedIdx", var).vertexTotals()
+  sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('DB Tables')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
+  var = "v.\"Object.Metadata_Source.Type\": DB_COLUMN"
+  numEntries = App.graph.indexQuery("Object.Metadata_Source.MixedIdx", var).vertexTotals()
+  sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('DB Columns')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
+
 
   var = "v.\"Object.Data_Source.Type\": Unstructured"
   numEntries = App.graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
