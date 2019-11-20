@@ -11,6 +11,7 @@
 
 // res
 
+import com.pontusvision.gdpr.App
 import com.pontusvision.utils.LocationAddress
 import groovy.json.JsonSlurper
 import org.apache.commons.math3.distribution.EnumeratedDistribution
@@ -4395,6 +4396,8 @@ def getScoresJson() {
 
 def calculatePOLECounts() {
 
+  JanusGraph janusGraph = graph;
+
   List<String> vertexLabels = [
     "Event.Consent"
     , "Event.Data_Breach"
@@ -4442,35 +4445,38 @@ def calculatePOLECounts() {
     String var = "v.\"Metadata.Type.${dataType}\": ${dataType}"
     // sb.append(var)
 
-    Long numEntries = graph.indexQuery(dataType + ".MixedIdx", var).vertexTotals()
+    Long numEntries = App.graph.indexQuery(dataType + ".MixedIdx", var).vertexTotals()
     sb.append(" { \"metricname\": \"${PontusJ2ReportingFunctions.translate(dataType.replaceAll('[_|\\.]', ' '))}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
   }
 
   String var = "v.\"Object.Data_Source.Type\": Structured"
-  Long numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
+  Long numEntries = App.graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Structured Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
 
-  numEntries =   g.V().has('Object.Data_Source.Type', P.eq('Structured')).out().out().in().has('Metadata.Type.Person.Identity',P.eq('Person.Identity')).dedup().count()
+  try{
+  numEntries =   App.g.V().has('Object.Data_Source.Type', P.eq('Structured')).out().out().in().has('Metadata.Type.Person.Identity',P.eq('Person.Identity')).dedup().count().next();
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Structured Data PII')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+  } catch (e){
 
+  }
 
 
   var = "v.\"Object.Data_Source.Type\": Unstructured"
-  numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
+  numEntries = App.graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Unstructured Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
 
 
-  numEntries =   g.V().has('Object.Data_Source.Type', P.eq('Unstructured')).out().out().in().has('Metadata.Type.Person.Identity',P.eq('Person.Identity')).dedup().count()
+  numEntries =   App.g.V().has('Object.Data_Source.Type', P.eq('Unstructured')).out().out().in().has('Metadata.Type.Person.Identity',P.eq('Person.Identity')).dedup().count().next();
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Unstructured Data PII')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
 
 
 
   var = "v.\"Object.Data_Source.Type\": Mixed"
-  numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
+  numEntries = App.graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Mixed Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
 
   var = "v.\"Object.Data_Source.Type\": Unstructured"
-  numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
+  numEntries = App.graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Unstructured Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
 
 
