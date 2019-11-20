@@ -4450,13 +4450,33 @@ def calculatePOLECounts() {
   Long numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Structured Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
 
+  numEntries =   g.V().has('Object.Data_Source.Type', P.eq('Structured')).out().out().in().has('Metadata.Type.Person.Identity',P.eq('Person.Identity')).dedup().count()
+  sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Structured Data PII')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
+
+
   var = "v.\"Object.Data_Source.Type\": Unstructured"
   numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Unstructured Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
 
+
+  numEntries =   g.V().has('Object.Data_Source.Type', P.eq('Unstructured')).out().out().in().has('Metadata.Type.Person.Identity',P.eq('Person.Identity')).dedup().count()
+  sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Unstructured Data PII')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
+
+
   var = "v.\"Object.Data_Source.Type\": Mixed"
   numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Mixed Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
+  var = "v.\"Object.Data_Source.Type\": Unstructured"
+  numEntries = graph.indexQuery("Object.Data_Source.MixedIdx", var).vertexTotals()
+  sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Unstructured Data Sources')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
+
+
+
+
+
 
   sb.append(']')
 

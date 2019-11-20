@@ -611,5 +611,7 @@
   "Object Metadata Source Description": "Descrição",
   "Object Metadata Source": "Metadados",
   "Object Metadata Source Domain": "Domínio",
-  "Object Metadata Source Domain Frequency": "Frequência"
+  "Object Metadata Source Domain Frequency": "Frequência",
+  "Unstructured Data PII": "Dados Pessoais de Fontes Nao Estruturadas",
+  "Structured Data PII": "Dados Pessoais de Fontes Estruturadas"
 }
