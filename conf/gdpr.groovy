@@ -4458,7 +4458,7 @@ def calculatePOLECounts() {
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Structured Data PII')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
   } catch (e){
 
-  }
+  } 
 
   var = "v.\"Object.Metadata_Source.Type\": DB_TABLE"
   numEntries = App.graph.indexQuery("Object.Metadata_Source.MixedIdx", var).vertexTotals()
