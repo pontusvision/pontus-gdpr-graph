@@ -66,6 +66,7 @@
   "Location Address": "Endereço",
   "Location Address City": "Cidade",
   "Location Address Full Address": "Endereço Completo",
+  "Location Address Neighborhood": "Bairro",
   "Location Address parser category": "Parser de Endereços - Categoria",
   "Location Address parser city": "Parser de Enderecos - Cidade",
   "Location Address parser city district": "Parser de Enderecos - Estado",

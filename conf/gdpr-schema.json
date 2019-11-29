@@ -282,6 +282,11 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Location.Address.Neighborhood",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+    {
       "name": "Location.Address.Post_Code",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -3057,7 +3062,8 @@
         "Location.Address.parser.state_district",
         "Location.Address.parser.entrance",
         "Location.Address.parser.house_number",
-        "Location.Address.Full_Address"
+        "Location.Address.Full_Address",
+        "Location.Address.Neighborhood"
       ],
       "propertyKeysMappings": {
         "Metadata.Type.Location.Address": {
@@ -3076,6 +3082,9 @@
           "mapping": "STRING"
         },
         "Location.Address.Full_Address": {
+          "mapping": "STRING"
+        },
+        "Location.Address.Neighborhood": {
           "mapping": "STRING"
         },
         "Location.Address.parser.house": {
