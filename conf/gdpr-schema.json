@@ -1765,6 +1765,12 @@
       "cardinality": "SINGLE"
     },
     {
+      "name": "Person.Identity.First_Name",
+      "dataType": "String",
+      "cardinality": "SINGLE"
+    },
+
+    {
       "name": "Person.Identity.Marital_Status",
       "dataType": "String",
       "cardinality": "SINGLE"
@@ -2808,6 +2814,7 @@
         "Person.Identity.Name_Qualifier",
         "Person.Identity.Marital_Status",
         "Person.Identity.Last_Name",
+        "Person.Identity.First_Name",
         "Person.Identity.Religion"
       ],
       "propertyKeysMappings": {

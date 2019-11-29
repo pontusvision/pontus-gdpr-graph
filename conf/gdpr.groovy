@@ -4458,7 +4458,7 @@ def calculatePOLECounts() {
   sb.append(", { \"metricname\": \"${PontusJ2ReportingFunctions.translate('Structured Data PII')}\", \"metricvalue\": $numEntries, \"metrictype\": \"${PontusJ2ReportingFunctions.translate('POLE Counts')}\" }")
   } catch (e){
 
-  } 
+  }
 
   var = "v.\"Object.Metadata_Source.Type\": DB_TABLE"
   numEntries = App.graph.indexQuery("Object.Metadata_Source.MixedIdx", var).vertexTotals()
@@ -4913,6 +4913,19 @@ class Discovery {
 
       colDiscoveryData?.metadata?.columns?.each { col ->
 
+//  Here is the discovery metadata format:
+//        {
+//          metadata: {
+//            columns: [
+//              {
+//                name: "", domain: "", frequency: 0.0, semanticDomains:
+//                [
+//                  { id:"", frequency: 0.0 }
+//                ]
+//              }
+//            ]
+//          }
+//        }
 
         def colName = "${dbURL}.${dbTableName}.${col.name.trim()}";
 
