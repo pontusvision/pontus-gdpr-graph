@@ -980,8 +980,8 @@ def renderReportInTextPt(long pg_id, String reportType = 'DSAR', GraphTraversalS
     allData.put('context', context);
     allData.put('connected_data', neighbours);
 
-    com.hubspot.jinjava.Jinjava jinJava = new com.hubspot.jinjava.Jinjava();
-    return jinJava.render(new String(template.decodeBase64()), allData).toString();
+
+    return PontusJ2ReportingFunctions.jinJava.render(new String(template.decodeBase64()), allData).toString();
   }
   return "Failed to render data"
 }
@@ -1014,8 +1014,7 @@ def renderReportInText(long pg_id, String reportType = 'SAR Read', GraphTraversa
     allData.put('context', context);
     allData.put('connected_data', neighbours);
 
-    com.hubspot.jinjava.Jinjava jinJava = new com.hubspot.jinjava.Jinjava();
-    return jinJava.render(new String(template.decodeBase64()), allData).toString();
+    return PontusJ2ReportingFunctions.jinJava.render(new String(template.decodeBase64()), allData).toString();
   }
   return "Failed to render data"
 }
@@ -1082,6 +1081,54 @@ public class PontusJ2ReportingFunctions {
   }
 
   public static GraphTraversalSource g;
+  public static Jinjava jinJava;
+
+  static{
+    PontusJ2ReportingFunctions.jinJava = new Jinjava();
+
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getChart",
+      PontusJ2ReportingFunctions.class, "getChart"));
+
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "possibleMatches",
+      PontusJ2ReportingFunctions.class, "possibleMatches", String.class, String.class));
+
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "context",
+      PontusJ2ReportingFunctions.class, "context", String.class));
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "connected_data",
+      PontusJ2ReportingFunctions.class, "neighbours", String.class));
+
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlTableCustomHeader",
+      PontusJ2ReportingFunctions.class, "htmlTableCustomHeader", Map.class, String.class, String.class));
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlRows",
+      PontusJ2ReportingFunctions.class, "htmlRows", Map.class, String.class));
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlTable",
+      PontusJ2ReportingFunctions.class, "htmlTable", Map.class));
+    PontusJ2ReportingFunctions. jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "jsonToHtmlTable",
+      PontusJ2ReportingFunctions.class, "jsonToHtmlTable", String.class));
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "jsonToMap",
+      PontusJ2ReportingFunctions.class, "jsonToMap", String.class));
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "businessRulesTable",
+      PontusJ2ReportingFunctions.class, "businessRulesTable", String.class));
+
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getDataSourcesForLawfulBasis",
+      PontusJ2ReportingFunctions.class, "getDataSourcesForLawfulBasis", String.class));
+
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getDeptForDataSources",
+      PontusJ2ReportingFunctions.class, "getDeptForDataSources", String.class));
+
+
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForLawfulBasis",
+      PontusJ2ReportingFunctions.class, "getNumNaturalPersonForLawfulBasis", String.class));
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForPIA",
+      PontusJ2ReportingFunctions.class, "getNumNaturalPersonForPIA", String.class));
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumSensitiveInfoForPIA",
+      PontusJ2ReportingFunctions.class, "getNumSensitiveInfoForPIA", String.class));
+
+    PontusJ2ReportingFunctions.jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "t",
+      PontusJ2ReportingFunctions.class, "translate", String.class));
+
+
+  }
 
   public static Map<Map<String, String>, Double> possibleMatchesMap(String pg_id, Map<String, Double> weightsPerVertex) {
     def (Map<Long, Double> probs, Map<Long, StringBuffer> labelsForMatch) = getProbabilityOfPossibleMatches(Long.parseLong(pg_id), weightsPerVertex);
@@ -1099,6 +1146,7 @@ public class PontusJ2ReportingFunctions {
   }
 
   public static Map<Map<String, String>, Double> possibleMatches(String pg_id, String weightsPerServer) {
+
 
 
     Map<String, Double> weights =
@@ -1415,7 +1463,6 @@ public class PontusJ2ReportingFunctions {
 
 
 def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraversalSource g = g) {
-  Jinjava jinJava = new Jinjava();
 
   String vertType = g.V(pg_id).label().next();
   def allData = new HashMap<>();
@@ -1436,48 +1483,6 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
 
 
   PontusJ2ReportingFunctions.g = g;
-
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getChart",
-    PontusJ2ReportingFunctions.class, "getChart"));
-
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "possibleMatches",
-    PontusJ2ReportingFunctions.class, "possibleMatches", String.class, String.class));
-
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "context",
-    PontusJ2ReportingFunctions.class, "context", String.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "connected_data",
-    PontusJ2ReportingFunctions.class, "neighbours", String.class));
-
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlTableCustomHeader",
-    PontusJ2ReportingFunctions.class, "htmlTableCustomHeader", Map.class, String.class, String.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlRows",
-    PontusJ2ReportingFunctions.class, "htmlRows", Map.class, String.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "htmlTable",
-    PontusJ2ReportingFunctions.class, "htmlTable", Map.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "jsonToHtmlTable",
-    PontusJ2ReportingFunctions.class, "jsonToHtmlTable", String.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "jsonToMap",
-    PontusJ2ReportingFunctions.class, "jsonToMap", String.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "businessRulesTable",
-    PontusJ2ReportingFunctions.class, "businessRulesTable", String.class));
-
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getDataSourcesForLawfulBasis",
-    PontusJ2ReportingFunctions.class, "getDataSourcesForLawfulBasis", String.class));
-
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getDeptForDataSources",
-    PontusJ2ReportingFunctions.class, "getDeptForDataSources", String.class));
-
-
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForLawfulBasis",
-    PontusJ2ReportingFunctions.class, "getNumNaturalPersonForLawfulBasis", String.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumNaturalPersonForPIA",
-    PontusJ2ReportingFunctions.class, "getNumNaturalPersonForPIA", String.class));
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "getNumSensitiveInfoForPIA",
-    PontusJ2ReportingFunctions.class, "getNumSensitiveInfoForPIA", String.class));
-
-  jinJava.getGlobalContext().registerFunction(new ELFunctionDefinition("pv", "t",
-    PontusJ2ReportingFunctions.class, "translate", String.class));
-
 
   if ('Event.Data_Breach' == vertType) {
     def impactedServers = g.V(pg_id)
@@ -1520,7 +1525,7 @@ def renderReportInBase64(long pg_id, String pg_templateTextInBase64, GraphTraver
   }
 
 
-  return jinJava.render(new String(pg_templateTextInBase64.decodeBase64()), allData).bytes.encodeBase64().toString();
+  return PontusJ2ReportingFunctions.jinJava.render(new String(pg_templateTextInBase64.decodeBase64()), allData).bytes.encodeBase64().toString();
 
 }
 //def getVisJsGraphImmediateNeighbourNodes(long pg_vid, StringBuffer sb, int counter, Set <Long> nodeIds,AtomicInteger depth) {
